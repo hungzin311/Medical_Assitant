@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Assistant</title>
+    <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/chromatography.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --dark-bg: #0a0e1a;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --text-primary: #1a1a2e;
+            --text-secondary: #6c757d;
+            --border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-bg);
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .sidebar {
+            width: 320px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 30px;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-header h3 {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .sidebar-header p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .agent-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .agent-section h6 {
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .agent-section ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .agent-section li {
+            padding: 8px 0;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .agent-section li i {
+            width: 16px;
+            text-align: center;
+            color: #4facfe;
+        }
+
+        .clear-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--secondary-gradient);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .clear-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(245, 87, 108, 0.4);
+        }
+
+        .chat-container {
+            flex: 1;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 25px 30px;
+            background: var(--primary-gradient);
+            color: white;
+            text-align: center;
+        }
+
+        .chat-header h4 {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .chat-header small {
+            opacity: 0.9;
+        }
+
+        .chat-body {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.02), transparent);
+        }
+
+        .message {
+            max-width: 85%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            animation: messageSlide 0.4s ease-out;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-message {
+            align-self: flex-end;
+        }
+
+        .user-message .message-content {
+            background: var(--accent-gradient);
+            color: white;
+            padding: 18px 24px;
+            border-radius: 20px 20px 8px 20px;
+            font-weight: 500;
+        }
+
+        .assistant-message {
+            align-self: flex-start;
+        }
+
+        .assistant-message .message-content {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: var(--text-primary);
+            padding: 18px 24px;
+            border-radius: 20px 20px 20px 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .agent-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--primary-gradient);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            width: fit-content;
+        }
+
+        .chat-footer {
+            padding: 25px 30px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .input-container {
+            display: flex;
+            align-items: end;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .file-upload-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: none;
+            background: var(--secondary-gradient);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-upload-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(245, 87, 108, 0.4);
+        }
+
+        .file-upload-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .message-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            padding: 12px 16px;
+            font-size: 1rem;
+            resize: none;
+            font-family: inherit;
+            color: var(--text-primary);
+        }
+
+        .message-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .send-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: none;
+            background: var(--accent-gradient);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+        }
+
+        .preview-container {
+            display: none;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .preview-image {
+            max-height: 120px;
+            max-width: 120px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+
+        .remove-preview {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .remove-preview:hover {
+            background: rgba(255, 87, 87, 0.8);
+            transform: scale(1.1);
+        }
+
+        .result-image {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 15px;
+            margin-top: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .thinking {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 18px 24px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            align-self: flex-start;
+            max-width: 200px;
+        }
+
+        .thinking-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(0.8); 
+                opacity: 0.5; 
+            }
+            50% { 
+                transform: scale(1.2); 
+                opacity: 1; 
+            }
+        }
+
+        .message table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 15px 0;
+            font-size: 0.9rem;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .message th, .message td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .message th {
+            background: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .message tr:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .capabilities-list {
+            padding-left: 20px;
+        }
+
+        .capabilities-list li {
+            margin: 5px 0;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 1024px) {
+            .main-container {
+                flex-direction: column;
+                padding: 15px;
+            }
+            
+            .sidebar {
+                width: 100%;
+                position: relative;
+                top: 0;
+                margin-bottom: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 10px;
+                gap: 15px;
+            }
+            
+            .sidebar {
+                padding: 20px;
+            }
+            
+            .chat-body {
+                padding: 20px;
+            }
+            
+            .chat-footer {
+                padding: 20px;
+            }
+            
+            .message {
+                max-width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3>
+                    <i class="fas fa-robot"></i>
+                    Medical AI
+                </h3>
+                <p>Advanced Multi-Agent System</p>
+            </div>
+            
+            <div class="agent-section">
+                <h6>
+                    <i class="fas fa-brain"></i>
+                    Available Agents
+                </h6>
+                <ul>
+                    <li><i class="fas fa-comment-medical"></i> Medical Conversation Agent</li>
+                    <li><i class="fas fa-database"></i> Medical RAG Agent</li>
+                    <li><i class="fas fa-search"></i> Web Search Agent</li>
+                </ul>
+            </div>
+            
+            <div class="agent-section">
+                <h6>
+                    <i class="fas fa-eye"></i>
+                    Computer Vision
+                </h6>
+                <ul>
+                    <li><i class="fas fa-allergies"></i> Skin Lesion Segmentation</li>
+                </ul>
+            </div>
+            
+            <div class="agent-section">
+                <h6>
+                    <i class="fas fa-cogs"></i>
+                    RAG Capabilities
+                </h6>
+                <ul>
+                    <li><i class="fas fa-file-alt"></i> Docling PDF parsing</li>
+                    <li><i class="fas fa-vector-square"></i> Advanced embedding</li>
+                    <li><i class="fas fa-cut"></i> Semantic chunking</li>
+                    <li><i class="fas fa-expand-arrows-alt"></i> Query expansion</li>
+                    <li><i class="fas fa-search-plus"></i> Vector similarity search</li>
+                    <li><i class="fas fa-shield-alt"></i> Hallucination prevention</li>
+                </ul>
+            </div>
+            
+            <div class="agent-section">
+                <h6>
+                    <i class="fas fa-project-diagram"></i>
+                    Orchestration
+                </h6>
+                <ul>
+                    <li><i class="fas fa-sync-alt"></i> Coordinated interaction</li>
+                    <li><i class="fas fa-tasks"></i> Dynamic task allocation</li>
+                    <li><i class="fas fa-puzzle-piece"></i> Seamless integration</li>
+                </ul>
+            </div>
+            
+            <button id="clear-chat" class="clear-btn">
+                <i class="fas fa-trash me-2"></i>
+                Clear Conversation
+            </button>
+        </div>
+        
+        <!-- Chat Container -->
+        <div class="chat-container">
+            <div class="chat-header">
+                <h4>
+                    <i class="fas fa-stethoscope me-2"></i>
+                    Multi-Agent Medical Assistant
+                </h4>
+                <small>Upload medical images or ask health-related questions</small>
+            </div>
+            
+            <div id="chat-body" class="chat-body">
+                <div class="message assistant-message">
+                    <div class="agent-tag">
+                        <i class="fas fa-robot"></i>
+                        System
+                    </div>
+                    <div class="message-content">
+                        <p>Hello! I'm your medical assistant. You can ask me health-related questions or upload medical images for analysis.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-footer">
+                <div class="preview-container" id="preview-container">
+                    <div class="d-flex align-items-center gap-3">
+                        <img id="preview-image" class="preview-image" src="">
+                        <button type="button" class="remove-preview" id="remove-image">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <form id="chat-form">
+                    <div class="input-container">
+                        <div class="file-upload-btn">
+                            <i class="fas fa-paperclip"></i>
+                            <input type="file" class="file-upload-input" id="image-upload" accept="image/*">
+                        </div>
+                        
+                        <textarea id="message-input" class="message-input" rows="1" placeholder="Ask a medical question..."></textarea>
+                        
+                        <button type="submit" class="send-btn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.2/marked.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatBody = document.getElementById('chat-body');
+            const chatForm = document.getElementById('chat-form');
+            const messageInput = document.getElementById('message-input');
+            const imageUpload = document.getElementById('image-upload');
+            const previewContainer = document.getElementById('preview-container');
+            const previewImage = document.getElementById('preview-image');
+            const removeImageBtn = document.getElementById('remove-image');
+            const clearChatBtn = document.getElementById('clear-chat');
+
+            // Store messages for display purposes only
+            let displayMessages = [];
+            
+            // Auto-resize textarea
+            messageInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+            
+            // Handle image upload
+            imageUpload.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    const file = e.target.files[0];
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        previewImage.src = e.target.result;
+                        previewContainer.style.display = 'block';
+                    };
+                    
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Remove image preview
+            removeImageBtn.addEventListener('click', function() {
+                imageUpload.value = '';
+                previewContainer.style.display = 'none';
+                previewImage.src = '';
+            });
+            
+            // Clear chat (only visual)
+            clearChatBtn.addEventListener('click', function() {
+                displayMessages = [];
+                chatBody.innerHTML = `
+                    <div class="message assistant-message">
+                        <div class="agent-tag">
+                            <i class="fas fa-robot"></i>
+                            System
+                        </div>
+                        <div class="message-content">
+                            <p>Hello! I'm your medical assistant. You can ask me health-related questions or upload medical images for analysis.</p>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Handle form submission
+            chatForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Get message from input
+                const message = messageInput.value.trim();
+                if (!message && !imageUpload.files.length) return;
+                
+                // Store image data if available
+                let imageDataUrl = null;
+                if (imageUpload.files.length > 0) {
+                    imageDataUrl = previewImage.src;
+                }
+                
+                // Add user message to chat
+                const userMessageElement = document.createElement('div');
+                userMessageElement.className = 'message user-message';
+                
+                // Create message content with image if available
+                let messageContent = `<p>${message}</p>`;
+                if (imageDataUrl) {
+                    messageContent += `
+                        <div class="mt-3">
+                            <img src="${imageDataUrl}" alt="Uploaded image" class="img-fluid rounded-3" style="max-height: 200px;">
+                        </div>
+                    `;
+                }
+                
+                userMessageElement.innerHTML = `<div class="message-content">${messageContent}</div>`;
+                chatBody.appendChild(userMessageElement);
+                
+                // Add thinking indicator
+                const thinkingElement = document.createElement('div');
+                thinkingElement.className = 'thinking';
+                thinkingElement.innerHTML = `
+                    <span style="color: #666; font-size: 0.9rem;">AI is thinking</span>
+                    <div class="thinking-dots">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                `;
+                chatBody.appendChild(thinkingElement);
+                
+                // Scroll to bottom
+                chatBody.scrollTop = chatBody.scrollHeight;
+                
+                // Clear input
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+                
+                try {
+                    let response;
+                    
+                    // Check if there's an image or just text
+                    if (imageUpload.files.length > 0) {
+                        // Create form data for image upload with optional text
+                        const formData = new FormData();
+                        formData.append('text', message);
+                        formData.append('image', imageUpload.files[0]);
+                        
+                        // Send to backend using the /upload endpoint
+                        response = await fetch('/upload', {
+                            method: 'POST',
+                            body: formData,
+                            credentials: 'include' // Important for cookie handling
+                        });
+                    } else {
+                        // Text-only query using the /chat endpoint with JSON
+                        response = await fetch('/chat', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                message: message,
+                                conversation_history: displayMessages.filter(msg => msg.role === 'user' || msg.role === 'assistant')
+                            }),
+                            credentials: 'include' // Important for cookie handling
+                        });
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Remove thinking indicator
+                    chatBody.removeChild(thinkingElement);
+                    
+                    // Add response to chat
+                    const assistantMessageElement = document.createElement('div');
+                    assistantMessageElement.className = 'message assistant-message';
+                    
+                    // Build HTML content for the response
+                    let assistantHtml = `
+                        <div class="agent-tag">
+                            <i class="fas fa-robot"></i>
+                            ${data.agent}
+                        </div>
+                        <div class="message-content">
+                            <div>${marked.parse(data.response)}</div>
+                    `;
+                    
+                    // Add result image if it exists
+                    if (data.result_image) {
+                        assistantHtml += `
+                            <div class="mt-3">
+                                <img src="${data.result_image}" alt="Result image" class="result-image">
+                            </div>
+                        `;
+                    }
+                    
+                    assistantHtml += `</div>`;
+                    assistantMessageElement.innerHTML = assistantHtml;
+                    chatBody.appendChild(assistantMessageElement);
+                    
+                    // Store messages for display purposes only
+                    displayMessages.push({
+                        role: "user",
+                        content: message,
+                        image: imageDataUrl
+                    });
+                    
+                    displayMessages.push({
+                        role: "assistant",
+                        content: data.response,
+                        agent: data.agent,
+                        resultImage: data.result_image
+                    });
+                    
+                    // Clear file upload preview
+                    imageUpload.value = '';
+                    previewContainer.style.display = 'none';
+                    
+                } catch (error) {
+                    console.error("Error:", error);
+                    // Remove thinking indicator
+                    chatBody.removeChild(thinkingElement);
+                    
+                    // Add error message
+                    const errorElement = document.createElement('div');
+                    errorElement.className = 'message assistant-message';
+                    errorElement.innerHTML = `
+                        <div class="agent-tag">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            System
+                        </div>
+                        <div class="message-content">
+                            <p style="color: #dc3545;">Sorry, there was an error processing your request. Please try again.</p>
+                        </div>
+                    `;
+                    chatBody.appendChild(errorElement);
+                }
+                
+                // Scroll to bottom again
+                chatBody.scrollTop = chatBody.scrollHeight;
+            });
+            
+            // Allow sending message with Enter key
+            messageInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    chatForm.dispatchEvent(new Event('submit'));
+                }
+            });
+
+            // Function to send human validated response
+            async function sendValidation(validation, comments) {
+                try {
+                    // Create and display a waiting element
+                    const waitingEl = document.createElement('div');
+                    waitingEl.className = 'message assistant-message';
+                    waitingEl.innerHTML = `
+                        <div class="agent-tag">
+                            <i class="fas fa-clock"></i>
+                            System
+                        </div>
+                        <div class="message-content">
+                            <p style="color: #ffc107;">⏳ Processing validation...</p>
+                        </div>
+                    `;
+                    chatBody.appendChild(waitingEl);
+
+                    const formData = new FormData();
+                    formData.append("validation_result", validation);
+                    formData.append("comments", comments);
+
+                    const response = await fetch("/validate", {
+                        method: "POST",
+                        body: formData,
+                        credentials: 'include'
+                    });
+
+                    const result = await response.json();
+
+                    // Remove waiting indicator
+                    waitingEl.remove();
+
+                    // Build validated message HTML
+                    const validationMsg = document.createElement("div");
+                    validationMsg.className = "message assistant-message";
+                    validationMsg.innerHTML = `
+                        <div class="agent-tag">
+                            <i class="fas fa-check-circle"></i>
+                            HUMAN_VALIDATED
+                        </div>
+                        <div class="message-content">
+                            <div>${marked.parse(result.message)}</div>
+                            <div>${marked.parse(result.response)}</div>
+                        </div>
+                    `;
+                    chatBody.appendChild(validationMsg);
+
+                    // Scroll to bottom
+                    chatBody.scrollTop = chatBody.scrollHeight;
+
+                } catch (error) {
+                    console.error("Validation submission failed:", error);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
