@@ -34,18 +34,42 @@ class QueryExpander:
     def _generate_expansions(self, query: str, chat_history: Optional[List[Dict[str, str]]] = None) -> str:
         """Use LLM to expand query with medical terminology using chat history for context."""
         prompt = f"""
-        Với vai trò là một chuyên gia y tế, hãy mở rộng câu hỏi sau đây với thuật ngữ y tế liên quan, 
-        các từ đồng nghĩa và các khái niệm liên quan sẽ giúp truy xuất thông tin y tế phù hợp:
+        Bạn là chuyên gia y tế giúp tạo ra các QUERY TÌM KIẾM mở rộng để tìm thông tin y tế chính xác.
         
-        {chat_history}Câu hỏi người dùng: {query}
+        Câu hỏi gốc: {query}
+        Lịch sử trò chuyện: {chat_history}
         
-        Chỉ mở rộng câu hỏi nếu bạn cảm thấy cần thiết, nếu không hãy giữ nguyên câu hỏi của người dùng.
-        Hãy cụ thể với lĩnh vực y tế hoặc bất kỳ lĩnh vực nào khác được đề cập trong câu hỏi của người dùng, không thêm các lĩnh vực y tế khác. 
-        Không tự mở rộng câu hỏi với các ý khác mà người dùng không hỏi.
-        Hãy đưa ra kết quả mở rộng ngắn gọn và dễ hiểu. 
-        Chỉ cung cấp câu hỏi mở rộng mà không có giải thích.
+        NHIỆM VỤ: Tạo ra 2-3 câu truy vấn tìm kiếm (search queries) khác nhau để tìm thông tin y tế liên quan.
         
-        Dựa vào lịch sử cuộc trò chuyện và câu hỏi hiện tại, hãy mở rộng câu hỏi để bao gồm các khái niệm y tế liên quan đã được đề cập trong cuộc trò chuyện trước đó.
+        HƯỚNG DẪN CHO MULTILINGUAL E5 EMBEDDING:
+        - Tạo các câu truy vấn hoàn chỉnh, không phải câu hỏi phản hồi
+        - Mỗi query nên tập trung vào một khía cạnh khác nhau của vấn đề
+        - Sử dụng thuật ngữ y tế chính xác và từ đồng nghĩa
+        - Bao gồm cả tiếng Việt và thuật ngữ y tế quốc tế
+        - Tạo query cụ thể để tránh trùng lặp với các bệnh khác
+        - Mỗi query trên một dòng riêng biệt
+        - Nếu người dùng chỉ hỏi về các triệu chứng thì không đưa ra các câu hỏi liên quan đến cách chữa trị
+        
+        VÍ DỤ:
+        Câu hỏi: "Tôi bị nổi mẩn đỏ và ngứa"
+        Query mở rộng:
+        triệu chứng nổi mẩn đỏ ngứa trên da nguyên nhân
+        phát ban da đỏ kèm ngứa có thể là dấu hiệu của viêm da dị ứng dermatitis eczema
+        các bệnh lý da gây nổi mẩn đỏ và ngứa như urticaria mề đay viêm da tiếp xúc
+        
+        Câu hỏi: "Thuốc điều trị cảm cúm"
+        Query mở rộng:
+        các loại thuốc điều trị cảm cúm cảm lạnh hiệu quả
+        thuốc kháng virus antiviral oseltamivir điều trị influenza
+        phương pháp điều trị triệu chứng cảm cúm hạ sốt giảm đau
+        
+        Câu hỏi: "Triệu chứng tiểu đường"
+        Query mở rộng:
+        triệu chứng bệnh tiểu đường type 1 type 2 dấu hiệu nhận biết
+        diabetes mellitus biểu hiện lâm sàng khát nước tiểu nhiều
+        chẩn đoán tiểu đường đái tháo đường xét nghiệm đường huyết
+        
+        Hãy tạo 2-3 query tìm kiếm cho câu hỏi trên (mỗi query một dòng, không đánh số):
         """
         expansion = self.model.invoke(prompt)
         

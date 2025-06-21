@@ -8,7 +8,7 @@ load_dotenv()
 def get_gemini_llm(temperature=0.7):
     """Initialize and return a Gemini Pro LLM instance"""
     return ChatGoogleGenerativeAI(
-        model="gemini-2.0-flash",
+        model="gemini-2.5-flash",
         google_api_key=os.getenv("GOOGLE_API_KEY"),
         temperature=temperature,
         convert_system_message_to_human=True
@@ -17,7 +17,7 @@ def get_gemini_llm(temperature=0.7):
 def get_gemini_vision_llm(temperature=0.2):
     """Initialize and return a Gemini Pro Vision LLM instance for image analysis"""
     return ChatGoogleGenerativeAI(
-        model="gemini-2.0-flash",  # Gemini 2.0 supports multimodal inputs
+        model="gemini-2.5-flash",  # Gemini 2.0 supports multimodal inputs
         google_api_key=os.getenv("GOOGLE_API_KEY"),
         temperature=temperature,
         convert_system_message_to_human=True,

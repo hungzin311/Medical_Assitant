@@ -1,0 +1,18 @@
+{
+    "timestamp": "2025-06-21 10:40:53",
+    "session_id": "5bdfd668-9f75-45ec-8280-ff676f243d33",
+    "validation_result": "No",
+    "comments": "tôi nghĩ đây chỉ có thể là do nóng trong người ",
+    "bot_response": {
+        "role": "assistant",
+        "content": "Để hạn chế phát ban nặng hơn trước khi đến bệnh viện, bạn có thể thực hiện các biện pháp sau:\n\n*   **Vệ sinh da:** Vệ sinh thân thể hàng ngày bằng nước muối ấm để giảm ngứa và ngăn ngừa nhiễm trùng. Tránh kiêng tắm vì có thể làm tình trạng phát ban trầm trọng hơn.\n*   **Dưỡng ẩm:** Sử dụng các sản phẩm dịu nhẹ, an toàn và được bác sĩ khuyên dùng nếu cần thiết.\n*   **Tránh kích ứng:**\n    *   Không nên mặc quần áo quá chật, bó sát để tránh gây khó chịu, ngứa ngáy.\n    *   Hạn chế sử dụng mỹ phẩm, đặc biệt là trên vùng da phát ban, vì có thể gây kích ứng.\n*   **Hạn chế tiếp xúc:** Giảm tiếp xúc với người khác để tránh lây lan bệnh.\n*   **Nghỉ ngơi:** Nghỉ ngơi đầy đủ tại nhà để ổn định sức khỏe.\n*   **Bù nước và điện giải:** Uống đủ nước để tránh mất nước do sốt.\n*   **Hạ sốt:** Nếu sốt cao, có thể dùng thuốc hạ sốt theo chỉ dẫn của bác sĩ.\n\n**Lưu ý quan trọng:**\n\n*   Nếu có bất kỳ dấu hiệu nào sau đây, cần đến bệnh viện ngay lập tức:\n    *   Sốt không hạ sau khi đã dùng thuốc hạ sốt.\n    *   Phát ban không có dấu hiệu cải thiện sau 3 ngày.\n    *   Xuất hiện các triệu chứng biến chứng nguy hiểm.\n*   Đặc biệt đối với trẻ dưới 6 tháng tuổi cần được đưa đến bệnh viện ngay nếu có sốt phát ban.",
+        "agent": "RAG_AGENT, WEB_SEARCH_PROCESSOR_AGENT"
+    },
+    "user_question": {
+        "role": "user",
+        "content": "trước khi tới bệnh viện, tôi cần làm những gì để hạn chế phát ban nặng hơn",
+        "image": null
+    },
+    "image_path": null,
+    "base64_path": null
+}

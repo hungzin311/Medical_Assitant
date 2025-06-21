@@ -114,15 +114,17 @@ class ResponseGenerator:
             else:
                 response_text = str(response)
 
-            # Add sources to response
+            # Add safety disclaimer and sources to response
+            safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
+            
             if hasattr(self, 'include_sources') and self.include_sources and sources:
-                response_with_source = response_text + "\n\n##### Tài liệu nguồn:"
+                response_with_source = response_text + safety_disclaimer + "\n\n##### Tài liệu nguồn:"
                 for current_source in sources:
                     source_path = current_source['path']
                     source_title = current_source['title']
                     response_with_source += f"\n- [{source_title}]({source_path})"
             else:
-                response_with_source = response_text
+                response_with_source = response_text + safety_disclaimer
             
             # Format final response - ensure we always return a string in the response key
             result = {
@@ -137,8 +139,9 @@ class ResponseGenerator:
             self.logger.error(f"Error generating response: {e}")
             import traceback
             self.logger.error(traceback.format_exc())
+            safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
             return {
-                "response": "Tôi xin lỗi, nhưng tôi đã gặp lỗi khi tạo câu trả lời. Vui lòng thử diễn đạt lại câu hỏi của bạn.",
+                "response": "Tôi xin lỗi, nhưng tôi đã gặp lỗi khi tạo câu trả lời. Vui lòng thử diễn đạt lại câu hỏi của bạn." + safety_disclaimer,
                 "sources": [],
                 "confidence": 0.0
             }

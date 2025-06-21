@@ -73,6 +73,71 @@ def process_jsonl_with_payload(file_path):
         logger.error(traceback.format_exc())
         return []
 
+def chunk_large_content(documents, chunk_size=2000, chunk_overlap=100):
+    """
+    Split large documents into smaller chunks with overlap
+    
+    Args:
+        documents: List of documents with metadata
+        chunk_size: Maximum size of each chunk
+        chunk_overlap: Overlap between chunks
+        
+    Returns:
+        List of chunked documents with metadata
+    """
+    chunked_documents = []
+    
+    for doc in documents:
+        content = doc["page_content"]
+        metadata = doc["metadata"].copy()
+        title = metadata.get("title", "")
+        
+        # If content is smaller than chunk size, keep as is
+        if len(content) <= chunk_size:
+            chunked_documents.append(doc)
+            continue
+            
+        # Split into chunks
+        chunks = []
+        start = 0
+        chunk_id = 0
+        
+        while start < len(content):
+            # Calculate end position
+            end = min(start + chunk_size, len(content))
+            
+            # If not the first chunk and we have overlap available
+            if start > 0:
+                start = max(0, start - chunk_overlap)
+                
+            # Extract chunk
+            chunk = content[start:end]
+            
+            # Add title to the first chunk
+            if chunk_id == 0 and title:
+                chunk_content = f"{title}\n\n{chunk}"
+            else:
+                chunk_content = chunk
+                
+            # Create chunk document with updated metadata
+            chunk_metadata = metadata.copy()
+            chunk_metadata["chunk_id"] = chunk_id
+            chunk_metadata["is_chunked"] = True
+            chunk_metadata["original_length"] = len(content)
+            
+            chunked_documents.append({
+                "page_content": chunk_content,
+                "metadata": chunk_metadata
+            })
+            
+            # Move to next chunk
+            start = end
+            chunk_id += 1
+            
+        logger.info(f"Split document '{title[:30]}...' into {chunk_id + 1} chunks")
+        
+    return chunked_documents
+
 def ingest_documents_to_qdrant(documents, config, collection_name=None):
     """
     Ingest documents directly to Qdrant
@@ -94,13 +159,17 @@ def ingest_documents_to_qdrant(documents, config, collection_name=None):
         # Initialize vector store
         vector_store = VectorStoreCloud(config)
         
+        # Chunk large documents
+        chunked_documents = chunk_large_content(documents, chunk_size=2000, chunk_overlap=100)
+        logger.info(f"Processing {len(documents)} documents into {len(chunked_documents)} chunks")
+        
         # Extract content and metadata
-        contents = [doc["page_content"] for doc in documents]
-        metadatas = [doc["metadata"] for doc in documents]
+        contents = [doc["page_content"] for doc in chunked_documents]
+        metadatas = [doc["metadata"] for doc in chunked_documents]
         
         # Create vector store
         start_time = time.time()
-        logger.info(f"Creating vector store with {len(contents)} documents...")
+        logger.info(f"Creating vector store with {len(contents)} document chunks...")
         
         # Use a custom document path identifier
         document_path = f"jsonl_payload_{start_time}"

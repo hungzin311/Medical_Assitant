@@ -55,19 +55,48 @@ class AgentConfig:
     nào phù hợp nhất để xử lý dựa trên nội dung truy vấn, sự hiện diện của hình ảnh và ngữ cảnh cuộc trò chuyện.
 
     Các tác nhân có sẵn:
-    1. CONVERSATION_AGENT - Cho trò chuyện chung, lời chào và câu hỏi không liên quan đến y tế. 
-    2. RAG_AGENT - Cho các câu hỏi kiến thức y tế cụ thể có thể được trả lời từ tài liệu y khoa đã được thiết lập. Kiến thức y tế hiện đã được thu thập bao gồm: giải phẫu và chức năng các bộ phận cơ thể, các loại bệnh và phương pháp điều trị, thông tin về thuốc, quy trình và hướng dẫn y học lâm sàng.
+    1. CONVERSATION_AGENT - Cho trò chuyện chung, lời chào và XỬ LÝ CÁC CÂU HỎI Y TẾ CHƯA RÕ RÀNG cần thu thập thêm thông tin từ bệnh nhân.
+    2. RAG_AGENT - CHỈ cho câu hỏi y tế CỤ THỂ và ĐẦY ĐỦ THÔNG TIN, bao gồm: triệu chứng chi tiết, câu hỏi về bệnh tật cụ thể, điều trị, thuốc men, giải phẫu, sinh lý học.
     3. WEB_SEARCH_PROCESSOR_AGENT - Cho câu hỏi về phát triển y tế gần đây, dịch bệnh hiện tại hoặc thông tin y tế nhạy cảm theo thời gian.
-    4. SKIN_LESION_AGENT - Để phân tích hình ảnh mà người dùng cần phân vùng tổn thương da.
-    5. GENERAL_MEDICAL_IMAGE_AGENT - Để phân tích và chẩn đoán các loại hình ảnh y tế khác không thuộc các danh mục trên.
+    4. SKIN_LESION_AGENT - CHỈ khi người dùng YÊU CẦU PHÂN VÙNG (segmentation) tổn thương da cụ thể. Từ khóa: "phân vùng", "segmentation", "vùng tổn thương", "ranh giới", "phân đoạn".
+    5. GENERAL_MEDICAL_IMAGE_AGENT - Cho TẤT CẢ hình ảnh y tế khác để CHẨN ĐOÁN và PHÂN TÍCH chung (không phân vùng).
 
-    Đưa ra quyết định của bạn dựa trên những hướng dẫn sau:
-    - Nếu người dùng không tải lên bất kỳ hình ảnh nào, luôn chuyển đến tác nhân hội thoại.
-    - Nếu người dùng tải lên hình ảnh y tế, quyết định tác nhân thị giác y tế nào phù hợp dựa trên loại hình ảnh và truy vấn của người dùng. Nếu hình ảnh được tải lên mà không có truy vấn, luôn chuyển đến tác nhân thị giác y tế chính xác dựa trên loại hình ảnh.
-    - Nếu hình ảnh được phân loại là "OTHER" hoặc "GENERAL MEDICAL IMAGE", sử dụng tác nhân GENERAL_MEDICAL_IMAGE_AGENT.
-    - Nếu người dùng hỏi về phát triển y tế gần đây hoặc tình hình sức khỏe hiện tại, sử dụng tác nhân xử lý tìm kiếm web.
-    - Nếu người dùng hỏi các câu hỏi kiến thức y tế cụ thể, sử dụng tác nhân RAG.
-    - Đối với cuộc trò chuyện chung, lời chào hoặc câu hỏi **không liên quan** đến y tế, sử dụng tác nhân hội thoại. Nhưng nếu hình ảnh được tải lên, luôn ưu tiên các tác nhân thị giác y tế trước.
+    HƯỚNG DẪN QUAN TRỌNG CHO PHÂN LOẠI Y TẾ:
+
+    **CONVERSATION_AGENT được sử dụng khi:**
+    - Lời chào, trò chuyện chung không liên quan y tế
+    - Câu hỏi y tế QUÁ MƠ HỒ, không có triệu chứng cụ thể:
+      * "Tôi cảm thấy không khỏe" (chưa rõ triệu chứng gì)
+      * "Bạn có thể giúp tôi phân tích triệu chứng không" (chưa nêu triệu chứng)
+      * "Tôi bị đau" (chưa rõ đau ở đâu)
+      * "Con tôi có vấn đề" (chưa rõ vấn đề gì)
+
+    **RAG_AGENT được sử dụng khi:**
+    - Câu hỏi y tế có ÍT NHẤT MỘT TRIỆU CHỨNG CỤ THỂ hoặc câu hỏi y tế rõ ràng:
+      * "Tôi bị ngứa da, nổi mẩn đỏ" (có triệu chứng cụ thể)
+      * "Con tôi bị sốt" (có triệu chứng cụ thể)
+      * "Tôi bị đau đầu" (có triệu chứng cụ thể)
+      * "Triệu chứng của viêm phổi là gì?" (câu hỏi y tế cụ thể)
+      * "Thuốc paracetamol có tác dụng phụ gì?" (câu hỏi về thuốc)
+      * "Cách điều trị cao huyết áp" (câu hỏi về điều trị)
+
+    HƯỚNG DẪN QUAN TRỌNG CHO HÌNH ẢNH Y TẾ:
+    
+    **Khi có hình ảnh được tải lên:**
+    - Nếu người dùng YÊU CẦU PHÂN VÙNG/SEGMENTATION cụ thể (có từ khóa "phân vùng", "segmentation", "ranh giới") → SKIN_LESION_AGENT
+    - Nếu người dùng chỉ muốn CHẨN ĐOÁN, nhận biết, phân tích → GENERAL_MEDICAL_IMAGE_AGENT
+    - Nếu KHÔNG có text hoặc text trống → MẶC ĐỊNH GENERAL_MEDICAL_IMAGE_AGENT (để chẩn đoán)
+    - Nếu không có yêu cầu rõ ràng → MẶC ĐỊNH GENERAL_MEDICAL_IMAGE_AGENT
+
+    VÍ DỤ PHÂN LOẠI:
+    - "Xin chào, bạn có thể giúp tôi phân tích triệu chứng không?" → CONVERSATION_AGENT (chưa nêu triệu chứng cụ thể)
+    - "Tôi cảm thấy không khỏe" → CONVERSATION_AGENT (quá mơ hồ, không có triệu chứng cụ thể)
+    - "Tôi bị đau" → CONVERSATION_AGENT (chưa rõ đau ở đâu)
+    - "Tôi bị ngứa da, nổi mẩn đỏ" → RAG_AGENT (có triệu chứng cụ thể)
+    - "Con tôi bị sốt" → RAG_AGENT (có triệu chứng cụ thể)
+    - "Tôi bị đau đầu" → RAG_AGENT (có triệu chứng cụ thể)
+    - "Triệu chứng của cảm cúm là gì?" → RAG_AGENT (câu hỏi y tế cụ thể)
+    - "Xin chào, bạn khỏe không?" → CONVERSATION_AGENT (lời chào)
 
     Bạn phải cung cấp câu trả lời của mình ở định dạng JSON với cấu trúc sau:
     {{
@@ -275,54 +304,56 @@ def create_agent_graph():
 
         Ngữ cảnh cuộc trò chuyện gần đây: {recent_context}
 
-        Bạn là một Trợ lý Hội thoại Y tế được hỗ trợ bởi AI. Mục tiêu của bạn là tạo điều kiện cho các cuộc trò chuyện suôn sẻ và nhiều thông tin với người dùng, xử lý cả các truy vấn thông thường và liên quan đến y tế. Bạn phải trả lời một cách tự nhiên đồng thời đảm bảo độ chính xác và rõ ràng về mặt y tế.
+        Bạn là một Trợ lý Y tế AI thân thiện và chuyên nghiệp. Bạn có hai vai trò chính:
 
-        ### Vai trò & Khả năng
-        - Tham gia vào **cuộc trò chuyện chung** trong khi duy trì tính chuyên nghiệp.
-        - Trả lời **câu hỏi y tế** sử dụng kiến thức đã được xác minh.
-        - Chuyển hướng **truy vấn phức tạp** đến RAG (tạo sinh tăng cường truy xuất) hoặc tìm kiếm web nếu cần.
-        - Xử lý **câu hỏi theo dõi** trong khi theo dõi ngữ cảnh cuộc trò chuyện.
-        - Chuyển hướng **hình ảnh y tế** đến tác nhân phân tích AI thích hợp.
+        ### VAI TRÒ CỦA BẠN:
+        1. **Thu thập thông tin y tế chi tiết** - Khi người dùng có vấn đề sức khỏe nhưng mô tả chưa rõ ràng
+        2. **Trò chuyện thân thiện** - Cho lời chào và câu hỏi không liên quan y tế
 
-        ### Hướng dẫn trả lời:
-        1. **Cuộc trò chuyện chung:**
-        - Nếu người dùng tham gia trò chuyện thông thường (ví dụ: lời chào, trò chuyện nhỏ), hãy trả lời một cách thân thiện, hấp dẫn.
-        - Giữ câu trả lời **ngắn gọn và hấp dẫn**, trừ khi cần câu trả lời chi tiết.
+        ### CÁCH XỬ LÝ CÁC TÌNH HUỐNG:
 
-        2. **Câu hỏi y tế:**
-        - Nếu bạn có **độ tin cậy cao** trong việc trả lời, hãy cung cấp câu trả lời chính xác về mặt y tế.
-        - Đảm bảo câu trả lời **rõ ràng, ngắn gọn và dựa trên sự thật**.
+        **1. TÌNH HUỐNG CẦN THU THẬP THÔNG TIN Y TẾ:**
+        Khi người dùng nói về triệu chứng/vấn đề sức khỏe nhưng CHƯA ĐỦ CHI TIẾT, hãy hỏi thêm:
 
-        3. **Theo dõi & Làm rõ:**
-        - Duy trì lịch sử cuộc trò chuyện để có câu trả lời tốt hơn.
-        - Nếu truy vấn không rõ ràng, hãy đặt **câu hỏi theo dõi** trước khi trả lời.
+        **Các câu hỏi quan trọng cần hỏi:**
+        - **Triệu chứng cụ thể**: "Bạn có thể mô tả chi tiết hơn về triệu chứng không?"
+        - **Thời gian**: "Triệu chứng này xuất hiện bao lâu rồi?"
+        - **Mức độ**: "Mức độ nghiêm trọng từ 1-10 là bao nhiêu?"
+        - **Vị trí**: "Triệu chứng ở vị trí nào trên cơ thể?"
+        - **Yếu tố kích thích**: "Có điều gì làm triệu chứng tăng/giảm không?"
+        - **Triệu chứng kèm theo**: "Có triệu chứng nào khác không?"
+        - **Tiền sử**: "Bạn có bệnh lý gì trước đây không?"
+        - **Thuốc đang dùng**: "Bạn có đang dùng thuốc gì không?"
 
-        4. **Xử lý phân tích hình ảnh y tế:**
-        - **Không** cố gắng tự phân tích hình ảnh.
-        - Nếu người dùng nói về việc phân tích hoặc xử lý hoặc phát hiện hoặc phân đoạn hoặc phân loại bất kỳ bệnh nào từ bất kỳ hình ảnh nào, hãy yêu cầu người dùng tải lên hình ảnh để trong lượt tiếp theo nó được chuyển đến các tác nhân thị giác y tế thích hợp.
-        - Nếu hình ảnh đã được tải lên, nó sẽ được chuyển đến các tác nhân thị giác máy tính y tế. Đọc lịch sử để biết về kết quả chẩn đoán và tiếp tục cuộc trò chuyện nếu người dùng hỏi bất cứ điều gì liên quan đến chẩn đoán.
-        - Sau khi xử lý, **giúp người dùng hiểu kết quả**.
+        **2. TÌNH HUỐNG TRỞ CHUYỆN THÂN THIỆN:**
+        Cho lời chào, câu hỏi về thời tiết, thể thao, giải trí...
 
-        5. **Không chắc chắn & Cân nhắc đạo đức:**
-        - Nếu không chắc chắn, **không bao giờ giả định** các sự kiện y tế.
-        - Khuyến nghị tham khảo ý kiến **chuyên gia y tế có giấy phép** đối với các vấn đề y tế nghiêm trọng.
-        - Tránh đưa ra **chẩn đoán y tế** hoặc **đơn thuốc**—chỉ nên đề cập đến kiến thức chung.
+        ### VÍ DỤ PHONG CÁCH TRẢ LỜI:
 
-        ### Định dạng trả lời:
-        - Duy trì **giọng điệu trò chuyện nhưng chuyên nghiệp**.
-        - Sử dụng **điểm đánh dấu hoặc danh sách đánh số** để làm rõ khi cần thiết.
-        - Nếu lấy thông tin từ nguồn bên ngoài (RAG/Tìm kiếm Web), hãy đề cập **thông tin đến từ đâu** (ví dụ: "Theo Mayo Clinic...").
-        - Nếu người dùng yêu cầu chẩn đoán, hãy nhắc họ **tìm kiếm tư vấn y tế**.
+        **Người dùng:** "Xin chào, bạn có thể giúp tôi phân tích triệu chứng không?"
+        **Bạn:** "Xin chào! Tôi rất vui được hỗ trợ bạn về vấn đề sức khỏe. Để có thể tư vấn chính xác nhất, bạn có thể chia sẻ với tôi:
+        - Bạn đang gặp triệu chứng gì cụ thể?
+        - Triệu chứng này xuất hiện bao lâu rồi?
+        - Mức độ khó chịu từ 1-10 là bao nhiêu?"
 
-        ### Ví dụ về truy vấn & câu trả lời của người dùng:
+        **Người dùng:** "Tôi cảm thấy không khỏe"
+        **Bạn:** "Tôi hiểu bạn đang không cảm thấy thoải mái. Để tôi có thể hỗ trợ bạn tốt hơn, bạn có thể cho tôi biết:
+        - Bạn có những triệu chứng cụ thể nào? (ví dụ: đau đầu, sốt, buồn nôn...)
+        - Bạn cảm thấy như vậy từ khi nào?
+        - Có điều gì đặc biệt xảy ra trước khi bạn cảm thấy không khỏe không?"
 
-        **Người dùng:** "Này, ngày của bạn thế nào?"
-        **Bạn:** "Tôi đang ở đây và sẵn sàng giúp đỡ! Tôi có thể hỗ trợ bạn như thế nào hôm nay?"
+        **Người dùng:** "Con tôi bị sốt"
+        **Bạn:** "Tôi hiểu sự lo lắng của bạn khi con bị sốt. Để tư vấn chính xác, bạn có thể cho tôi biết:
+        - Con bạn bao nhiêu tuổi?
+        - Nhiệt độ cụ thể là bao nhiêu?
+        - Sốt từ khi nào?
+        - Có triệu chứng kèm theo nào khác không? (ho, đau họng, nôn...)
+        - Con có uống thuốc hạ sốt chưa?"
 
-        **Người dùng:** "Tôi bị đau đầu và sốt. Tôi nên làm gì?"
-        **Bạn:** "Tôi không phải là bác sĩ, nhưng đau đầu và sốt có thể có nhiều nguyên nhân, từ nhiễm trùng đến mất nước. Nếu các triệu chứng của bạn kéo dài, bạn nên gặp chuyên gia y tế."
+        **Người dùng:** "Xin chào!"
+        **Bạn:** "Xin chào! Tôi là trợ lý y tế AI của bạn. Tôi rất vui được hỗ trợ bạn hôm nay! Bạn có cần tư vấn gì về sức khỏe không?"
 
-        Câu trả lời của LLM hội thoại:"""
+        Hãy trả lời theo phong cách trên - thân thiện, chuyên nghiệp và hỏi thông tin chi tiết khi cần:"""
 
         response = config.conversation.llm.invoke(conversation_prompt)
 
@@ -408,9 +439,10 @@ def create_agent_graph():
             print(f"Error in RAG agent: {e}")
             print(traceback.format_exc())
             
+            safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
             return {
                 **state,
-                "output": AIMessage(content="I apologize, but I encountered an error while processing your query. Please try again or rephrase your question."),
+                "output": AIMessage(content="Tôi xin lỗi, nhưng tôi đã gặp lỗi khi xử lý truy vấn của bạn. Vui lòng thử lại hoặc diễn đạt lại câu hỏi của bạn." + safety_disclaimer),
                 "needs_human_validation": True,
                 "retrieval_confidence": 0.0,
                 "agent_name": "RAG_AGENT",
@@ -447,11 +479,17 @@ def create_agent_graph():
         else:
             involved_agents = "WEB_SEARCH_PROCESSOR_AGENT"
 
+        # Ensure response is an AIMessage
+        if isinstance(processed_response, str):
+            output_message = AIMessage(content=processed_response)
+        else:
+            output_message = processed_response
+
         # Overwrite any previous output with the processed Web Search response
         return {
             **state,
             # "output": "This would be handled by the web search agent, finding the latest information.",
-            "output": processed_response,
+            "output": output_message,
             "agent_name": involved_agents
         }
 
@@ -488,7 +526,8 @@ def create_agent_graph():
             else:
                 response = AIMessage(content=diagnosis_result["diagnosis"])
         else:
-            response = AIMessage(content="I encountered an error while analyzing this medical image. Please try again or consult a healthcare professional.")
+            safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
+            response = AIMessage(content="Tôi đã gặp lỗi khi phân tích hình ảnh y tế này. Vui lòng thử lại hoặc tham khảo ý kiến bác sĩ chuyên khoa." + safety_disclaimer)
 
         return {
             **state,
@@ -550,7 +589,8 @@ def create_agent_graph():
             else:
                 response = AIMessage(content="Dưới đây là ảnh phân vùng vết thương trên da dựa trên ảnh đã được cung cấp:")
         else:
-            response = AIMessage(content="The uploaded image is not clear enough to make a diagnosis / the image is not a medical image.")
+            safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
+            response = AIMessage(content="Hình ảnh được tải lên không đủ rõ nét để có thể chẩn đoán hoặc hình ảnh này không phải là hình ảnh y tế." + safety_disclaimer)
 
         return {
             **state,
@@ -570,7 +610,12 @@ def create_agent_graph():
         print(f"Selected agent: HUMAN_VALIDATION")
 
         # Append validation request to the existing output
-        validation_prompt = f"{state['output'].content}\n\n**Human Validation Required:**\n- Nếu bạn là chuyên gia, hãy đánh giá lại kết quả. Chọn **Yes** or **No**. Nếu No, cung cấp nhận xét.\n- Nếu bạn là bệnh nhân: Chỉ cần chọn Yes để xác nhận."
+        validation_prompt = f"""{state['output'].content}
+
+**Human Validation Required:**
+- Nếu bạn là chuyên gia, hãy đánh giá lại kết quả. Chọn **Yes** hoặc **No**. Nếu No, cung cấp nhận xét.
+- Nếu bạn là bệnh nhân: Chỉ cần chọn Yes để xác nhận.
+"""
 
         # Create an AI message with the validation prompt
         validation_message = AIMessage(content=validation_prompt)
@@ -604,21 +649,16 @@ def create_agent_graph():
             
             # If validation input exists
             if validation_input.lower().startswith(('yes', 'no')):
-                # Add the validation result to the conversation history
-                validation_response = HumanMessage(content=f"Validation Result: {validation_input}")
-                
-                # If validation is 'No', modify the output
-                if validation_input.lower().startswith('no'):
-                    fallback_message = AIMessage(content="The previous medical analysis requires further review. A healthcare professional has flagged potential inaccuracies.")
-                    return {
-                        **state,
-                        "messages": [validation_response, fallback_message],
-                        "output": fallback_message
-                    }
+                # Create appropriate thank you message based on response
+                if validation_input.lower().startswith('yes'):
+                    thank_you_message = AIMessage(content="Cảm ơn bạn đã xác nhận! Tôi rất vui khi thông tin đã hữu ích cho bạn. Nếu bạn có thêm câu hỏi nào khác về sức khỏe, tôi luôn sẵn sàng hỗ trợ.")
+                else:  # starts with 'no'
+                    thank_you_message = AIMessage(content="Cảm ơn bạn đã đưa ra nhận xét! Ý kiến của bạn rất quan trọng giúp chúng tôi cải thiện chất lượng dịch vụ. Tôi khuyến khích bạn tham khảo ý kiến bác sĩ chuyên khoa để có chẩn đoán chính xác nhất.")
                 
                 return {
                     **state,
-                    "messages": validation_response
+                    "output": thank_you_message,
+                    "messages": thank_you_message
                 }
         
         # Get the original input text
@@ -687,7 +727,6 @@ def create_agent_graph():
     # workflow.add_edge("RAG_AGENT", "check_validation")
     workflow.add_edge("WEB_SEARCH_PROCESSOR_AGENT", "check_validation")
     workflow.add_conditional_edges("RAG_AGENT", confidence_based_routing)
-    # workflow.add_edge("BRAIN_TUMOR_AGENT", "check_validation")    
     workflow.add_edge("SKIN_LESION_AGENT", "check_validation")
     workflow.add_edge("GENERAL_MEDICAL_IMAGE_AGENT", "check_validation")
     workflow.add_edge("human_validation", "apply_guardrails")

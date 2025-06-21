@@ -100,8 +100,9 @@ class MedicalImageSummarizer:
             # Invoke LLM for summarization
             response = self.llm.invoke(summarizer_prompt)
             
-            # Add image_id to the response content for tracking
-            summary_with_id = f"{response.content}\n\n[Image_ID: {image_id}]"
+            # Add safety disclaimer and image_id to the response content for tracking
+            safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
+            summary_with_id = f"{response.content}{safety_disclaimer}\n\n[Image_ID: {image_id}]"
             
             # Store the summarized result along with the original diagnosis
             summarized_result = {
@@ -114,10 +115,11 @@ class MedicalImageSummarizer:
             return summarized_result
         except Exception as e:
             self.logger.error(f"Error summarizing diagnosis: {e}")
+            safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
             return {
                 "image_id": image_id,
                 "original_diagnosis": diagnosis,
-                "summary": f"I encountered an error while summarizing this diagnosis. Please review the original diagnosis or consult a healthcare professional.\n\n[Image_ID: {image_id}]",
+                "summary": f"Tôi đã gặp lỗi khi tóm tắt chẩn đoán này. Vui lòng xem lại chẩn đoán gốc hoặc tham khảo ý kiến bác sĩ chuyên khoa.{safety_disclaimer}\n\n[Image_ID: {image_id}]",
                 "success": False,
                 "error": str(e)
             }
@@ -161,8 +163,10 @@ class MedicalImageSummarizer:
         try:
             # Invoke LLM for follow-up response
             response = self.llm.invoke(followup_prompt)
-            # Include the image_id in the response for continued tracking
-            return f"{response.content}\n\n[Image_ID: {image_id}]"
+            # Add safety disclaimer and include the image_id in the response for continued tracking
+            safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
+            return f"{response.content}{safety_disclaimer}\n\n[Image_ID: {image_id}]"
         except Exception as e:
             self.logger.error(f"Error generating follow-up response: {e}")
-            return f"I'm sorry, I encountered an error while processing your follow-up question. Please try rephrasing your question or consult a healthcare professional for accurate information.\n\n[Image_ID: {image_id}]" 
+            safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
+            return f"Tôi xin lỗi, tôi đã gặp lỗi khi xử lý câu hỏi tiếp theo của bạn. Vui lòng thử diễn đạt lại câu hỏi của bạn hoặc tham khảo ý kiến bác sĩ chuyên khoa để được thông tin chính xác.{safety_disclaimer}\n\n[Image_ID: {image_id}]" 

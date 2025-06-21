@@ -71,4 +71,13 @@ class WebSearchProcessor:
         # Invoke the LLM to process the results
         response = self.llm.invoke(llm_prompt)
         
-        return response
+        # Add safety disclaimer to web search response
+        safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
+        
+        # Get response content and add disclaimer
+        if hasattr(response, 'content'):
+            response_text = response.content + safety_disclaimer
+        else:
+            response_text = str(response) + safety_disclaimer
+        
+        return response_text

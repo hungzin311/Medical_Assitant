@@ -231,6 +231,59 @@
             letter-spacing: 0.5px;
             margin-bottom: 8px;
             width: fit-content;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .agent-tag i.fa-arrow-right {
+            animation: pulse 2s infinite;
+            color: #ffd700;
+        }
+
+        .transition-indicator {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: 8px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .agent-flow-info {
+            background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            color: #1976d2;
+            margin-bottom: 12px;
+            border-left: 4px solid #2196f3;
+            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.1);
+        }
+
+        .thinking-progress {
+            width: 100%;
+            height: 3px;
+            background: rgba(79, 172, 254, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .thinking-progress-bar {
+            height: 100%;
+            background: var(--accent-gradient);
+            border-radius: 2px;
+            animation: progressSlide 3s ease-in-out infinite;
+        }
+
+        @keyframes progressSlide {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
         }
 
         .chat-footer {
@@ -360,15 +413,17 @@
 
         .thinking {
             display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 8px;
-            padding: 18px 24px;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
+            padding: 20px 24px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.3);
             align-self: flex-start;
-            max-width: 200px;
+            max-width: 400px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.4s ease-out;
         }
 
         .thinking-dots {
@@ -400,6 +455,28 @@
             50% { 
                 transform: scale(1.2); 
                 opacity: 1; 
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
             }
         }
 
@@ -473,6 +550,65 @@
             .message {
                 max-width: 95%;
             }
+        }
+
+        .validation-buttons button {
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .validation-buttons .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: none;
+            color: white;
+        }
+        
+        .validation-buttons .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #fd7e14);
+            border: none;
+            color: white;
+        }
+        
+        .validation-buttons .btn-primary {
+            background: var(--accent-gradient);
+            border: none;
+            color: white;
+        }
+        
+        #validation-comments textarea {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 12px;
+            resize: vertical;
+        }
+        
+        .validation-buttons button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Validation styles */
+        .validation-section {
+            margin-top: 16px;
+            padding: 15px;
+            background: rgba(248, 249, 250, 0.95);
+            border-radius: 12px;
+            border-left: 4px solid #0dcaf0;
+        }
+        
+        .validation-section h5 {
+            color: #0dcaf0;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        #validation-comments textarea:focus {
+            box-shadow: 0 0 0 0.25rem rgba(13, 202, 240, 0.25);
+            border-color: #0dcaf0;
         }
     </style>
 </head>
@@ -596,8 +732,288 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.2/marked.min.js"></script>
     <script>
+        // Khai báo biến global để có thể truy cập từ các hàm
+        let chatBody;
+        let displayMessages = [];
+        let currentThinkingElement = null; // Track current thinking element
+        let currentAgent = null; // Track current agent
+        let agentTransitionTimer = null; // Timer for agent transitions
+
+        // Function to simulate agent transition tracking
+        function trackAgentTransition(initialAgent, finalAgent) {
+            if (initialAgent !== finalAgent && currentThinkingElement) {
+                // Show transition after a delay to simulate RAG processing first
+                setTimeout(() => {
+                    if (currentThinkingElement) {
+                        updateThinkingIndicator(finalAgent, getAgentMessage(finalAgent), true);
+                    }
+                }, 2000); // 2 second delay to show RAG processing first
+            }
+        }
+
+        // Function to get agent-specific messages
+        function getAgentMessage(agentName) {
+            const messages = {
+                "RAG_AGENT": "Searching medical knowledge database...",
+                "WEB_SEARCH_PROCESSOR_AGENT": "Searching the web for latest medical information...",
+                "CONVERSATION_AGENT": "Processing your conversation request...",
+                "SKIN_LESION_AGENT": "Analyzing skin lesion image...",
+                "GENERAL_MEDICAL_IMAGE_AGENT": "Analyzing medical image...",
+                "Medical Assistant": "Processing your medical query...",
+                "Image Analysis Agent": "Processing uploaded image..."
+            };
+            return messages[agentName] || "Processing your request...";
+        }
+
+        // Function to update thinking indicator with agent information
+        function updateThinkingIndicator(agentName, message, showTransition = false) {
+            if (currentThinkingElement) {
+                const displayName = getAgentDisplayName(agentName);
+                
+                // Add transition indicator if switching agents
+                let transitionHtml = '';
+                if (showTransition) {
+                    transitionHtml = `
+                        <div style="color: #ff9800; font-size: 0.75rem; margin-bottom: 5px; animation: fadeIn 0.5s;">
+                            <i class="fas fa-exchange-alt me-1"></i>
+                            Switching to ${displayName}...
+                        </div>
+                    `;
+                }
+                
+                currentThinkingElement.innerHTML = `
+                    ${transitionHtml}
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-cog fa-spin" style="color: #4facfe;"></i>
+                            <span style="color: #333; font-size: 0.95rem; font-weight: 500;">
+                                ${displayName}
+                            </span>
+                        </div>
+                        <div class="thinking-dots">
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                    </div>
+                    <div style="color: #666; font-size: 0.85rem; margin-top: 8px; padding-left: 26px;">
+                        ${message}
+                    </div>
+                    <div class="thinking-progress">
+                        <div class="thinking-progress-bar"></div>
+                    </div>
+                `;
+            }
+        }
+
+        // Helper function to get agent display name
+        function getAgentDisplayName(agentName) {
+            const agentDisplayNames = {
+                "CONVERSATION_AGENT": "Conversation Agent",
+                "RAG_AGENT": "RAG Agent",
+                "WEB_SEARCH_PROCESSOR_AGENT": "Web Search Agent",
+                "SKIN_LESION_AGENT": "Skin Lesion Analysis Agent",
+                "GENERAL_MEDICAL_IMAGE_AGENT": "General Medical Image Agent",
+                "HUMAN_VALIDATION": "Human Validation",
+                "Analyzing...": "AI Assistant",
+            };
+            return agentDisplayNames[agentName] || agentName;
+        }
+
+        // Function to reset agent tracking state
+        function resetAgentTracking() {
+            currentAgent = null;
+            if (agentTransitionTimer) {
+                clearTimeout(agentTransitionTimer);
+                agentTransitionTimer = null;
+            }
+        }
+
+        // Function to send human validated response
+        async function sendValidation(validation, comments) {
+            try {
+                // Create and display a waiting element
+                const waitingEl = document.createElement('div');
+                waitingEl.className = 'message assistant-message';
+                waitingEl.innerHTML = `
+                    <div class="agent-tag">
+                        <i class="fas fa-clock"></i>
+                        System
+                    </div>
+                    <div class="message-content">
+                        <p style="color: #ffc107;">⏳ Processing validation...</p>
+                    </div>
+                `;
+                chatBody.appendChild(waitingEl);
+                
+                // Add user validation input to chat
+                const userValidationText = validation === 'Yes' ? 
+                    'Yes, I confirm this analysis.' : 
+                    `No, this needs review. ${comments}`;
+                
+                const userValidationElement = document.createElement('div');
+                userValidationElement.className = 'message user-message';
+                userValidationElement.innerHTML = `
+                    <div class="message-content">
+                        <p>${userValidationText}</p>
+                    </div>
+                `;
+                chatBody.appendChild(userValidationElement);
+                
+                // Store validation in display messages
+                displayMessages.push({
+                    role: "user",
+                    content: userValidationText
+                });
+
+                const formData = new FormData();
+                formData.append("validation_result", validation);
+                formData.append("comments", comments);
+                
+                // If this is a review (No validation), collect and log data
+                if (validation.toLowerCase() === 'no') {
+                    try {
+                        // Get the last assistant and user messages
+                        const lastAssistantMsg = displayMessages.filter(msg => msg.role === 'assistant').pop();
+                        const lastUserMsg = displayMessages.filter(msg => 
+                            msg.role === 'user' && msg.content !== userValidationText
+                        ).pop();
+                        
+                        console.log("Found messages to log:", { 
+                            hasAssistantMsg: !!lastAssistantMsg,
+                            hasUserMsg: !!lastUserMsg,
+                            userMsgHasImage: lastUserMsg && !!lastUserMsg.image
+                        });
+                        
+                        // Create copies without the image data for JSON storage
+                        let assistantMsgForLog = lastAssistantMsg ? {...lastAssistantMsg} : null;
+                        let userMsgForLog = lastUserMsg ? {...lastUserMsg} : null;
+                        
+                        // Remove image from the JSON to avoid double-sending
+                        if (userMsgForLog && userMsgForLog.image) {
+                            delete userMsgForLog.image;
+                        }
+                        
+                        // Add more data to the form to log
+                        formData.append("bot_response", assistantMsgForLog ? JSON.stringify(assistantMsgForLog) : "");
+                        formData.append("user_question", userMsgForLog ? JSON.stringify(userMsgForLog) : "");
+                        
+                        // Save image data if it exists in the last user message
+                        if (lastUserMsg && lastUserMsg.image) {
+                            console.log(`Found image in last user message, length: ${lastUserMsg.image.length}`);
+                            
+                            // Add the image data directly
+                            formData.append("image_data", lastUserMsg.image);
+                            console.log("Image data added to form");
+                        }
+                        
+                        // Log to console for debugging
+                        console.log("Review being sent:", {
+                            validation: validation,
+                            comments: comments,
+                            has_image: lastUserMsg && lastUserMsg.image ? true : false,
+                            image_length: lastUserMsg && lastUserMsg.image ? lastUserMsg.image.length : 0,
+                            form_data_entries: Array.from(formData.entries()).map(e => e[0])
+                        });
+                    } catch (error) {
+                        console.error("Error preparing validation data:", error);
+                    }
+                }
+
+                const response = await fetch("/validate", {
+                    method: "POST",
+                    body: formData,
+                    credentials: 'include'
+                });
+
+                const result = await response.json();
+
+                // Remove waiting indicator
+                waitingEl.remove();
+
+                // Build validated message HTML
+                const validationMsg = document.createElement("div");
+                validationMsg.className = "message assistant-message";
+                
+                // For yes confirmation, show a thank you message
+                if (validation.toLowerCase() === 'yes') {
+                    validationMsg.innerHTML = `
+                        <div class="agent-tag">
+                            <i class="fas fa-check-circle"></i>
+                            HUMAN_VALIDATED
+                        </div>
+                        <div class="message-content">
+                            <div style="color: #28a745;">
+                                <i class="fas fa-check-circle me-1"></i> <strong>Cảm ơn bạn đã phản hồi!</strong> Phản hồi của bạn giúp chúng tôi cải thiện dịch vụ.
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Parse markdown with HTML preserved
+                    const parsedMessage = marked.parse(result.message, {
+                        sanitize: false,
+                        breaks: true
+                    });
+                    
+                    const parsedResponse = marked.parse(result.response, {
+                        sanitize: false,
+                        breaks: true
+                    });
+                    
+                    validationMsg.innerHTML = `
+                        <div class="agent-tag">
+                            <i class="fas fa-exclamation-circle"></i>
+                            REVIEW_SUBMITTED
+                        </div>
+                        <div class="message-content">
+                            <div>${parsedMessage}</div>
+                            <div>${parsedResponse}</div>
+                            <div class="mt-2" style="color: #dc3545;">
+                                <i class="fas fa-info-circle me-1"></i> <strong>Đã ghi nhận ý kiến đánh giá của bạn.</strong> Chúng tôi sẽ xem xét và cải thiện hệ thống.
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                chatBody.appendChild(validationMsg);
+                
+                // Store validation response in display messages
+                displayMessages.push({
+                    role: "assistant",
+                    content: validation.toLowerCase() === 'yes' ? 
+                        "Cảm ơn bạn đã phản hồi! Phản hồi của bạn giúp chúng tôi cải thiện dịch vụ." : 
+                        result.response,
+                    agent: validation.toLowerCase() === 'yes' ? "HUMAN_VALIDATED" : "REVIEW_SUBMITTED",
+                });
+
+                // Scroll to bottom
+                chatBody.scrollTop = chatBody.scrollHeight;
+
+            } catch (error) {
+                console.error("Validation submission failed:", error);
+                
+                // Add error message
+                const errorElement = document.createElement('div');
+                errorElement.className = 'message assistant-message';
+                errorElement.innerHTML = `
+                    <div class="agent-tag">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        System
+                    </div>
+                    <div class="message-content">
+                        <p style="color: #dc3545;">Sorry, there was an error processing your validation. Please try again.</p>
+                    </div>
+                `;
+                chatBody.appendChild(errorElement);
+                
+                // Scroll to bottom
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
-            const chatBody = document.getElementById('chat-body');
+            // Initialize global references
+            chatBody = document.getElementById('chat-body');
             const chatForm = document.getElementById('chat-form');
             const messageInput = document.getElementById('message-input');
             const imageUpload = document.getElementById('image-upload');
@@ -607,7 +1023,7 @@
             const clearChatBtn = document.getElementById('clear-chat');
 
             // Store messages for display purposes only
-            let displayMessages = [];
+            displayMessages = [];
             
             // Auto-resize textarea
             messageInput.addEventListener('input', function() {
@@ -688,14 +1104,21 @@
                 const thinkingElement = document.createElement('div');
                 thinkingElement.className = 'thinking';
                 thinkingElement.innerHTML = `
-                    <span style="color: #666; font-size: 0.9rem;">AI is thinking</span>
+                    <span style="color: #666; font-size: 0.9rem;">
+                        <i class="fas fa-cog fa-spin me-2"></i>
+                        AI is analyzing your request...
+                    </span>
                     <div class="thinking-dots">
                         <div class="dot"></div>
                         <div class="dot"></div>
                         <div class="dot"></div>
                     </div>
+                    <div style="color: #888; font-size: 0.8rem; margin-top: 5px;">
+                        Determining the best agent for your query...
+                    </div>
                 `;
                 chatBody.appendChild(thinkingElement);
+                currentThinkingElement = thinkingElement; // Store the thinking element
                 
                 // Scroll to bottom
                 chatBody.scrollTop = chatBody.scrollHeight;
@@ -706,9 +1129,38 @@
                 
                 try {
                     let response;
+                    let data;
+                    
+                    // First, get agent status for better UX
+                    let initialAgent = null;
+                    try {
+                        const agentStatusResponse = await fetch('/get-agent-status', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                message: message,
+                                conversation_history: displayMessages.filter(msg => msg.role === 'user' || msg.role === 'assistant')
+                            }),
+                            credentials: 'include'
+                        });
+                        
+                        if (agentStatusResponse.ok) {
+                            const agentStatusData = await agentStatusResponse.json();
+                            initialAgent = agentStatusData.agent;
+                            currentAgent = initialAgent;
+                            updateThinkingIndicator(agentStatusData.agent, agentStatusData.message);
+                        }
+                    } catch (agentError) {
+                        console.log("Agent status check failed, continuing with normal flow:", agentError);
+                    }
                     
                     // Check if there's an image or just text
                     if (imageUpload.files.length > 0) {
+                        // Update thinking indicator for image processing
+                        updateThinkingIndicator("Image Analysis Agent", "Processing uploaded image...");
+                        
                         // Create form data for image upload with optional text
                         const formData = new FormData();
                         formData.append('text', message);
@@ -720,7 +1172,24 @@
                             body: formData,
                             credentials: 'include' // Important for cookie handling
                         });
+                        data = await response.json();
                     } else {
+                        // For text queries, we might have RAG -> Web Search transition
+                        // Set up transition tracking if we expect it might happen
+                        if (initialAgent === "RAG_AGENT") {
+                            // Set up a timer to check for potential transition to Web Search
+                            setTimeout(() => {
+                                if (currentThinkingElement) {
+                                    updateThinkingIndicator("WEB_SEARCH_PROCESSOR_AGENT", 
+                                        "RAG confidence low, switching to web search for latest information...", 
+                                        true);
+                                }
+                            }, 3000); // Show transition after 3 seconds
+                        }
+                        
+                        // Update thinking indicator for text processing
+                        updateThinkingIndicator("Medical Assistant", "Processing your medical query...");
+                        
                         // Text-only query using the /chat endpoint with JSON
                         response = await fetch('/chat', {
                             method: 'POST',
@@ -733,12 +1202,13 @@
                             }),
                             credentials: 'include' // Important for cookie handling
                         });
+                        data = await response.json();
                     }
-                    
-                    const data = await response.json();
                     
                     // Remove thinking indicator
                     chatBody.removeChild(thinkingElement);
+                    currentThinkingElement = null; // Reset current thinking element
+                    resetAgentTracking(); // Reset agent tracking state
                     
                     // Add response to chat
                     const assistantMessageElement = document.createElement('div');
@@ -748,11 +1218,31 @@
                     let assistantHtml = `
                         <div class="agent-tag">
                             <i class="fas fa-robot"></i>
-                            ${data.agent}
+                            ${getAgentDisplayName(data.agent)}
+                            ${data.agent.includes(',') ? '<i class="fas fa-arrow-right ms-1" title="Agent transition occurred"></i>' : ''}
                         </div>
                         <div class="message-content">
-                            <div>${marked.parse(data.response)}</div>
                     `;
+                    
+                    // Add transition info if multiple agents were involved
+                    if (data.agent && data.agent.includes(',')) {
+                        const agents = data.agent.split(',').map(a => a.trim());
+                        const agentNames = agents.map(a => getAgentDisplayName(a)).join(' → ');
+                        assistantHtml += `
+                            <div class="agent-flow-info">
+                                <i class="fas fa-route me-1"></i>
+                                <strong>Agent Flow:</strong> ${agentNames}
+                            </div>
+                        `;
+                    }
+                    
+                    // Parse markdown but preserve HTML elements
+                    const parsedResponse = marked.parse(data.response, {
+                        sanitize: false,  // Don't sanitize HTML
+                        breaks: true      // Convert line breaks to <br>
+                    });
+                    
+                    assistantHtml += `<div>${parsedResponse}</div>`;
                     
                     // Add result image if it exists
                     if (data.result_image) {
@@ -761,6 +1251,56 @@
                                 <img src="${data.result_image}" alt="Result image" class="result-image">
                             </div>
                         `;
+                    }
+                    
+                    // Add validation buttons if the agent name contains HUMAN_VALIDATION
+                    if (data.agent && data.agent.includes('HUMAN_VALIDATION')) {
+                        const validationId = `validation-${Date.now()}`;
+                        const commentsId = `comments-${Date.now()}`;
+                        const submitBtnId = `submit-${Date.now()}`;
+                        
+                        assistantHtml += `
+                            <div class="validation-section">
+                                <h5><i class="fas fa-user-md me-2"></i> Human Validation Required</h5>
+                                <p>
+                                    - Nếu bạn là chuyên gia, hãy đánh giá lại kết quả. Chọn <strong>Yes</strong> hoặc <strong>No</strong>. Nếu No, cung cấp nhận xét.<br/>
+                                    - Nếu bạn là bệnh nhân: Chỉ cần chọn Yes để xác nhận.
+                                </p>
+                                <div class="validation-buttons mt-3">
+                                    <button id="yes-${validationId}" class="btn btn-success me-2">
+                                        <i class="fas fa-check-circle me-1"></i> Yes - Confirm
+                                    </button>
+                                    <button id="no-${validationId}" class="btn btn-danger">
+                                        <i class="fas fa-times-circle me-1"></i> No - Needs Review
+                                    </button>
+                                </div>
+                                <div id="${commentsId}" style="display:none;" class="mt-3">
+                                    <textarea id="${commentsId}-input" class="form-control mb-2" rows="2" placeholder="Please provide your comments or concerns..."></textarea>
+                                    <button id="${submitBtnId}" class="btn btn-primary">
+                                        <i class="fas fa-paper-plane me-1"></i> Submit Comments
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        
+                        // Need to add event listeners after the HTML is added to the DOM
+                        setTimeout(() => {
+                            // Yes button
+                            document.getElementById(`yes-${validationId}`).addEventListener('click', function() {
+                                sendValidation('Yes', '');
+                            });
+                            
+                            // No button - shows comments section
+                            document.getElementById(`no-${validationId}`).addEventListener('click', function() {
+                                document.getElementById(commentsId).style.display = 'block';
+                            });
+                            
+                            // Submit button
+                            document.getElementById(submitBtnId).addEventListener('click', function() {
+                                const comments = document.getElementById(`${commentsId}-input`).value;
+                                sendValidation('No', comments);
+                            });
+                        }, 100); // Short delay to ensure DOM is updated
                     }
                     
                     assistantHtml += `</div>`;
@@ -789,6 +1329,8 @@
                     console.error("Error:", error);
                     // Remove thinking indicator
                     chatBody.removeChild(thinkingElement);
+                    currentThinkingElement = null; // Reset current thinking element
+                    resetAgentTracking(); // Reset agent tracking state
                     
                     // Add error message
                     const errorElement = document.createElement('div');
@@ -816,61 +1358,6 @@
                     chatForm.dispatchEvent(new Event('submit'));
                 }
             });
-
-            // Function to send human validated response
-            async function sendValidation(validation, comments) {
-                try {
-                    // Create and display a waiting element
-                    const waitingEl = document.createElement('div');
-                    waitingEl.className = 'message assistant-message';
-                    waitingEl.innerHTML = `
-                        <div class="agent-tag">
-                            <i class="fas fa-clock"></i>
-                            System
-                        </div>
-                        <div class="message-content">
-                            <p style="color: #ffc107;">⏳ Processing validation...</p>
-                        </div>
-                    `;
-                    chatBody.appendChild(waitingEl);
-
-                    const formData = new FormData();
-                    formData.append("validation_result", validation);
-                    formData.append("comments", comments);
-
-                    const response = await fetch("/validate", {
-                        method: "POST",
-                        body: formData,
-                        credentials: 'include'
-                    });
-
-                    const result = await response.json();
-
-                    // Remove waiting indicator
-                    waitingEl.remove();
-
-                    // Build validated message HTML
-                    const validationMsg = document.createElement("div");
-                    validationMsg.className = "message assistant-message";
-                    validationMsg.innerHTML = `
-                        <div class="agent-tag">
-                            <i class="fas fa-check-circle"></i>
-                            HUMAN_VALIDATED
-                        </div>
-                        <div class="message-content">
-                            <div>${marked.parse(result.message)}</div>
-                            <div>${marked.parse(result.response)}</div>
-                        </div>
-                    `;
-                    chatBody.appendChild(validationMsg);
-
-                    // Scroll to bottom
-                    chatBody.scrollTop = chatBody.scrollHeight;
-
-                } catch (error) {
-                    console.error("Validation submission failed:", error);
-                }
-            }
         });
     </script>
 </body>

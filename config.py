@@ -47,17 +47,17 @@ class RAGConfig:
         self.chunk_size = 512
         self.chunk_overlap = 50
         self.embedding_model = get_together_embeddings()
-        self.llm = get_gemini_llm(temperature=0.2)  # Slightly creative but factual
-        self.summarizer_model = get_gemini_llm(temperature=0.5)  # Slightly creative but factual
+        self.llm = get_gemini_llm(temperature=0.1)  # Slightly creative but factual
+        self.summarizer_model = get_gemini_llm(temperature=0.2)  # Slightly creative but factual
         self.chunker_model = get_gemini_llm(temperature=0.0)  # factual
-        self.response_generator_model = get_gemini_llm(temperature=0.3)  # Slightly creative but factual
-        self.top_k = 5
+        self.response_generator_model = get_gemini_llm(temperature=0.2)  # Slightly creative but factual
+        self.top_k = 10
         self.vector_search_type = 'similarity'  # or 'mmr'
 
         self.huggingface_token = os.getenv("HUGGINGFACE_TOKEN")
 
         self.reranker_model = "cross-encoder/ms-marco-TinyBERT-L-6"
-        self.reranker_top_k = 3
+        self.reranker_top_k = 5
 
         self.max_context_length = 8192
 
