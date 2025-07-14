@@ -1,0 +1,17 @@
+{
+    "timestamp": "2025-06-22 01:08:37",
+    "session_id": "4e83cbde-3634-4119-bb7c-1c335565b81f",
+    "validation_result": "No",
+    "comments": "Có thể bệnh khác",
+    "bot_response": {
+        "role": "assistant",
+        "content": "Cảm ơn bạn đã phản hồi! Phản hồi của bạn giúp chúng tôi cải thiện dịch vụ.",
+        "agent": "HUMAN_VALIDATED"
+    },
+    "user_question": {
+        "role": "user",
+        "content": "Yes, I confirm this analysis."
+    },
+    "image_path": null,
+    "base64_path": null
+}
