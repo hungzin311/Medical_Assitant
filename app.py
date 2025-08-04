@@ -21,9 +21,12 @@ from werkzeug.utils import secure_filename
 
 from config import Config
 from agents.agent_decision import process_query
-
+from proxy_setting import *
 # Load configuration
 config = Config()
+
+#Set proxy 
+set_proxy()
 
 # Initialize FastAPI app with increased limits for large form data
 app = FastAPI(
@@ -151,16 +154,16 @@ async def get_agent_status(request: QueryRequest):
         
         # Get the graph to access the decision chain
         graph = create_agent_graph()
-        
+        print('create successfully')
         # Run just the analyze_input and route_to_agent nodes to get the agent decision
         # without running the full agent processing
         try:
             # First run analyze_input
             state = graph.get_node("analyze_input").invoke(state)
-            
+            print('analyze_input successfully')
             # Then run route_to_agent to get the decision
             routing_result = graph.get_node("route_to_agent").invoke(state)
-            
+            print(routing_result)            
             # Extract the agent name from the routing result
             if isinstance(routing_result, dict) and "agent_state" in routing_result:
                 agent_name = routing_result["agent_state"].get("agent_name", "Analyzing...")

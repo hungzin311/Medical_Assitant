@@ -18,11 +18,14 @@ from agents.rag_agent import MedicalRAG
 from agents.web_search_processor_agent import WebSearchProcessorAgent
 from agents.image_analysis_agent import ImageAnalysisAgent
 from langgraph.checkpoint.memory import MemorySaver
-
+from proxy_setting import *
 import cv2
 import numpy as np
 
 from config import Config
+
+#Set proxy  
+set_proxy()
 
 load_dotenv()
 
@@ -796,8 +799,9 @@ def process_query(query: Union[str, Dict], conversation_history: List[BaseMessag
         state["messages"] = [HumanMessage(content=query)]
 
     # Run the graph
+    print('start running state graph')
     result = graph.invoke(state, thread_config)
-
+    print('get the result')
     # Keep history to reasonable size
     if len(result["messages"]) > config.max_conversation_history:
         result["messages"] = result["messages"][-config.max_conversation_history:]
