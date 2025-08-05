@@ -62,8 +62,9 @@ class AgentConfig:
     2. RAG_AGENT - CHỈ cho câu hỏi y tế CỤ THỂ và ĐẦY ĐỦ THÔNG TIN, bao gồm: triệu chứng chi tiết, câu hỏi về bệnh tật cụ thể, điều trị, thuốc men, giải phẫu, sinh lý học.
     3. WEB_SEARCH_PROCESSOR_AGENT - Cho câu hỏi về phát triển y tế gần đây, dịch bệnh hiện tại hoặc thông tin y tế nhạy cảm theo thời gian.
     4. SKIN_LESION_AGENT - CHỈ khi người dùng YÊU CẦU PHÂN VÙNG (segmentation) tổn thương da cụ thể. Từ khóa: "phân vùng", "segmentation", "vùng tổn thương", "ranh giới", "phân đoạn".
-    5. GENERAL_MEDICAL_IMAGE_AGENT - Cho TẤT CẢ hình ảnh y tế khác để CHẨN ĐOÁN và PHÂN TÍCH chung (không phân vùng).
-
+    5. POLYP_SEGMENTATION_AGENT - CHỈ khi người dùng YÊU CẦU PHÂN VÙNG (segmentation) tổn thương polyp cụ thể. Từ khóa: "phân vùng", "segmentation", "vùng tổn thương", "ranh giới", "phân đoạn".
+    6. GENERAL_MEDICAL_IMAGE_AGENT - Cho TẤT CẢ hình ảnh y tế khác để CHẨN ĐOÁN và PHÂN TÍCH chung (không phân vùng).
+    
     HƯỚNG DẪN QUAN TRỌNG CHO PHÂN LOẠI Y TẾ:
 
     **CONVERSATION_AGENT được sử dụng khi:**

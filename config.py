@@ -75,6 +75,8 @@ class MedicalCVConfig:
         self.skin_lesion_segmentation_output_path = "./uploads/skin_lesion_output/segmentation_plot.png"
         self.llm = get_gemini_vision_llm(temperature=0.1)  # Use vision-specific model for medical image analysis
         self.summarizer_llm = get_gemini_llm(temperature=0.3)  # Slightly creative for summarization
+        self.polyp_seg_model_path = "./agents/image_analysis_agent/polyp_seg_tool/models/deeplabv3_resnet50.pth"
+        self.polyp_seg_output_path = "./uploads/polyp_seg_output/polyp_seg_image_output.jpg"
 
 class ValidationConfig:
     def __init__(self):
