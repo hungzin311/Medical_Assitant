@@ -52,6 +52,7 @@ app.add_middleware(LargeRequestMiddleware)
 UPLOAD_FOLDER = "uploads/backend"
 FRONTEND_UPLOAD_FOLDER = "uploads/frontend"
 SKIN_LESION_OUTPUT = "uploads/skin_lesion_output"
+POLYP_SEGMENTATION_OUTPUT = "uploads/polyp_seg_output"
 LOGS_DIR = "logs"
 LOGS_IMAGES_DIR = "logs/images"
 LOGS_REVIEWS_DIR = "logs/reviews"
@@ -134,119 +135,6 @@ async def chat(request: QueryRequest):
             }
         )
 
-@app.post("/get-agent-status")
-async def get_agent_status(request: QueryRequest):
-    """Get the current agent that would process this query"""
-    try:
-        print('Getting agent status for query')
-        # Get the message from the request
-        message = request.message
-        
-        # Import the decision chain to get agent info without full processing
-        from agents.agent_decision import AgentConfig, create_agent_graph
-        from langchain_core.messages import HumanMessage
-        from agents.agent_decision import init_agent_state
-        
-        # Initialize minimal state
-        state = init_agent_state()
-        state["current_input"] = message
-        state["messages"] = [HumanMessage(content=message)]
-        
-        # Get the graph to access the decision chain
-        graph = create_agent_graph()
-        print('create successfully')
-        # Run just the analyze_input and route_to_agent nodes to get the agent decision
-        # without running the full agent processing
-        try:
-            # First run analyze_input
-            state = graph.get_node("analyze_input").invoke(state)
-            print('analyze_input successfully')
-            # Then run route_to_agent to get the decision
-            routing_result = graph.get_node("route_to_agent").invoke(state)
-            print(routing_result)            
-            # Extract the agent name from the routing result
-            if isinstance(routing_result, dict) and "agent_state" in routing_result:
-                agent_name = routing_result["agent_state"].get("agent_name", "Analyzing...")
-                next_step = routing_result.get("next", "processing")
-                
-                # Map agent names to user-friendly messages
-                agent_messages = {
-                    "CONVERSATION_AGENT": "Processing your conversation request...",
-                    "RAG_AGENT": "Searching medical knowledge database...",
-                    "WEB_SEARCH_PROCESSOR_AGENT": "Searching the web for latest medical information...",
-                    "SKIN_LESION_AGENT": "Analyzing skin lesion image...",
-                    "GENERAL_MEDICAL_IMAGE_AGENT": "Analyzing medical image...",
-                    "needs_validation": "Preparing response for validation..."
-                }
-                
-                message = agent_messages.get(agent_name, f"Processing with {agent_name}...")
-                
-                return {
-                    "status": "success",
-                    "agent": agent_name,
-                    "message": message
-                }
-            else:
-                return {
-                    "status": "success",
-                    "agent": "Analyzing...",
-                    "message": "Determining the best agent for your query..."
-                }
-                
-        except Exception as decision_error:
-            print(f"Error in decision logic: {decision_error}")
-            # Fallback to basic analysis
-            if "image" in message.lower() or "photo" in message.lower() or "picture" in message.lower():
-                return {
-                    "status": "success",
-                    "agent": "Image Analysis Agent",
-                    "message": "Preparing to analyze medical image..."
-                }
-            elif any(word in message.lower() for word in ["disease", "symptom", "treatment", "medicine", "drug"]):
-                return {
-                    "status": "success",
-                    "agent": "Medical RAG Agent",
-                    "message": "Searching medical knowledge database..."
-                }
-            else:
-                return {
-                    "status": "success",
-                    "agent": "Conversation Agent",
-                    "message": "Processing your conversation request..."
-                }
-        
-    except Exception as e:
-        print(f"Error getting agent status: {str(e)}")
-        return JSONResponse(
-            status_code=500,
-            content={
-                "status": "error",
-                "agent": "System",
-                "message": "Error determining agent status"
-            }
-        )
-
-@app.post("/get-processing-status")
-async def get_processing_status(request: QueryRequest):
-    """Get real-time processing status including agent transitions"""
-    try:
-        # This endpoint will be used to track agent transitions
-        # For now, return a basic status that can be enhanced later
-        return {
-            "status": "processing",
-            "current_agent": "Determining...",
-            "message": "Processing your request...",
-            "progress": 0
-        }
-    except Exception as e:
-        return JSONResponse(
-            status_code=500,
-            content={
-                "status": "error",
-                "message": "Error getting processing status"
-            }
-        )
-
 @app.post("/upload")
 async def upload_image(
     response: Response,
@@ -273,8 +161,7 @@ async def upload_image(
     
     # Save file securely
     filename = secure_filename(f"{uuid.uuid4()}_{image.filename}")
-    # file_path = os.path.join(UPLOAD_FOLDER, filename)
-    file_path = f"./uploads/backend/{filename}"
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
     with open(file_path, "wb") as f:
         f.write(file_content)
         print(f"File saved to {file_path}")
@@ -301,13 +188,13 @@ async def upload_image(
                 result["result_image"] = f"/uploads/skin_lesion_output/segmentation_plot.png"
             else:
                 print("Skin Lesion Output path does not exist.")
-        
-        # Remove temporary file after sending
-        try:
-            os.remove(file_path)
-        except Exception as e:
-            print(f"Failed to remove temporary file: {str(e)}")
-        
+        if response_data["agent_name"] == "POLYP_SEGMENTATION_AGENT, HUMAN_VALIDATION":
+            segmentation_path = os.path.join(POLYP_SEGMENTATION_OUTPUT, "polyp_seg_image_output.jpg")
+            if os.path.exists(segmentation_path):
+                result["result_image"] = f"/uploads/polyp_seg_output/polyp_seg_image_output.jpg"
+            else:
+                print("Polyp Segmentation Output path does not exist.")
+                
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

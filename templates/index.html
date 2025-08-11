@@ -739,18 +739,6 @@
         let currentAgent = null; // Track current agent
         let agentTransitionTimer = null; // Timer for agent transitions
 
-        // Function to simulate agent transition tracking
-        function trackAgentTransition(initialAgent, finalAgent) {
-            if (initialAgent !== finalAgent && currentThinkingElement) {
-                // Show transition after a delay to simulate RAG processing first
-                setTimeout(() => {
-                    if (currentThinkingElement) {
-                        updateThinkingIndicator(finalAgent, getAgentMessage(finalAgent), true);
-                    }
-                }, 2000); // 2 second delay to show RAG processing first
-            }
-        }
-
         // Function to get agent-specific messages
         function getAgentMessage(agentName) {
             const messages = {
@@ -1133,28 +1121,6 @@
                     
                     // First, get agent status for better UX
                     let initialAgent = null;
-                    try {
-                        const agentStatusResponse = await fetch('/get-agent-status', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                message: message,
-                                conversation_history: displayMessages.filter(msg => msg.role === 'user' || msg.role === 'assistant')
-                            }),
-                            credentials: 'include'
-                        });
-                        
-                        if (agentStatusResponse.ok) {
-                            const agentStatusData = await agentStatusResponse.json();
-                            initialAgent = agentStatusData.agent;
-                            currentAgent = initialAgent;
-                            updateThinkingIndicator(agentStatusData.agent, agentStatusData.message);
-                        }
-                    } catch (agentError) {
-                        console.log("Agent status check failed, continuing with normal flow:", agentError);
-                    }
                     
                     // Check if there's an image or just text
                     if (imageUpload.files.length > 0) {
@@ -1174,19 +1140,7 @@
                         });
                         data = await response.json();
                     } else {
-                        // For text queries, we might have RAG -> Web Search transition
-                        // Set up transition tracking if we expect it might happen
-                        if (initialAgent === "RAG_AGENT") {
-                            // Set up a timer to check for potential transition to Web Search
-                            setTimeout(() => {
-                                if (currentThinkingElement) {
-                                    updateThinkingIndicator("WEB_SEARCH_PROCESSOR_AGENT", 
-                                        "RAG confidence low, switching to web search for latest information...", 
-                                        true);
-                                }
-                            }, 3000); // Show transition after 3 seconds
-                        }
-                        
+        
                         // Update thinking indicator for text processing
                         updateThinkingIndicator("Medical Assistant", "Processing your medical query...");
                         
