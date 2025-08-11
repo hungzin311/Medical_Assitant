@@ -183,3 +183,7 @@ cython_debug/
 uploads/skin_lesion_output/segmentation_plot.png
 /data/docs_vietnamese_db
 agents/image_analysis_agent/polyp_seg_tool/models/deeplabv3_resnet50.pth
+image_output.png
+uploads/
+image2.jpeg
+image3.jpeg

@@ -101,7 +101,6 @@ class SkinLesionSegmentation:
             ax.axis("off")
             ax.imshow(img)
             ax.imshow(mask_stacked, alpha=0.4)
-            # plt.savefig("overlayed_plot.png", bbox_inches="tight")
             plt.savefig(output_path, bbox_inches="tight")
             logger.info("Overlayed segmentation mask saved as 'overlayed_plot.png'")
             # return "overlayed_plot.png"

@@ -29,7 +29,7 @@ class MedicalImageSummarizer:
             diagnosis_data: Diagnosis information to store
         """
         self.memory[image_id] = diagnosis_data
-        self.logger.info(f"Stored diagnosis for image {image_id}")
+        # self.logger.info(f"Stored diagnosis for image {image_id}")
     
     def get_stored_diagnosis(self, image_id: str) -> Optional[Dict[str, Any]]:
         """
@@ -62,6 +62,7 @@ class MedicalImageSummarizer:
         # Extract diagnosis from the result
         diagnosis = diagnosis_result.get("diagnosis", "")
         image_path = diagnosis_result.get("image_path", "")
+        analysis_type = diagnosis_result.get("analysis_type", "general_diagnosis")
         
         # Generate a unique image ID (using the image path for simplicity)
         image_id = str(hash(image_path))
@@ -78,23 +79,69 @@ class MedicalImageSummarizer:
                 elif isinstance(message, AIMessage):
                     history_context += f"Assistant: {message.content}\n"
         
-        # Prepare the prompt for the summarizer
-        summarizer_prompt = f"""
-        Bạn là một trợ lý y tế tóm tắt kết quả phân tích hình ảnh và đưa ra các khuyến nghị hữu ích tiếp theo.
-        THÔNG TIN CHẨN ĐOÁN:
-        {diagnosis}
-        {f'CÂU HỎI CỦA NGƯỜI DÙNG: {user_query}' if user_query else ''}
-        {f'BỐI CẢNH CUỘC TRÒ CHUYỆN GẦN ĐÂY: {history_context}' if history_context else ''}
-        Vui lòng cung cấp:
+        # Prepare the prompt for the summarizer based on analysis type
+        if analysis_type == "polyp_segmentation":
+            summarizer_prompt = f"""
+            Bạn là một trợ lý y tế chuyên về nội soi đại tràng và phân tích polyp. Hãy tóm tắt kết quả phân vùng polyp và đưa ra khuyến nghị.
+            
+            LOẠI PHÂN TÍCH: Phân vùng Polyp từ hình ảnh nội soi đại tràng
+            THÔNG TIN CHẨN ĐOÁN:
+            {diagnosis}
+            {f'CÂU HỎI CỦA NGƯỜI DÙNG: {user_query}' if user_query else ''}
+            {f'BỐI CẢNH CUỘC TRÒ CHUYỆN GẦN ĐÂY: {history_context}' if history_context else ''}
+            
+            Vui lòng cung cấp:
+            
+            1. **Tóm tắt kết quả phân vùng**: Giải thích ý nghĩa của các vùng màu đã được phân loại
+            2. **Phân loại polyp**: Làm rõ sự khác biệt giữa polyp tân sinh (màu đỏ) và không tân sinh (màu xanh)
+            3. **Ý nghĩa lâm sàng**: Nguy cơ và tiên lượng của từng loại polyp
+            4. **Khuyến nghị theo dõi**: Lịch nội soi tái khám và các biện pháp theo dõi
+            5. **Câu hỏi thường gặp**: Trả lời các thắc mắc phổ biến về polyp đại tràng
+            
+            Kết thúc bằng câu hỏi về việc cần thêm thông tin về polyp, lịch theo dõi, hoặc chế độ dinh dưỡng phòng ngừa.
+            
+            Duy trì giọng điệu chuyên nghiệp, thông cảm và nhấn mạnh tầm quan trọng của việc tham khảo bác sĩ chuyên khoa tiêu hóa.
+            """
+        elif analysis_type == "skin_lesion_segmentation":
+            summarizer_prompt = f"""
+            Bạn là một trợ lý y tế chuyên về da liễu và phân tích tổn thương da. Hãy tóm tắt kết quả phân vùng tổn thương da.
+            
+            LOẠI PHÂN TÍCH: Phân vùng tổn thương da
+            THÔNG TIN CHẨN ĐOÁN:
+            {diagnosis}
+            {f'CÂU HỎI CỦA NGƯỜI DÙNG: {user_query}' if user_query else ''}
+            {f'BỐI CẢNH CUỘC TRÒ CHUYỆN GẦN ĐÂY: {history_context}' if history_context else ''}
+            
+            Vui lòng cung cấp:
+            
+            1. **Tóm tắt kết quả phân vùng**: Mô tả ranh giới và đặc điểm của tổn thương
+            2. **Đánh giá hình thái**: Phân tích hình dạng, kích thước và đặc điểm bề mặt
+            3. **Khuyến nghị tiếp theo**: Cần thăm khám bác sĩ da liễu và các xét nghiệm bổ sung
+            4. **Dấu hiệu cảnh báo**: Các triệu chứng cần theo dõi
+            5. **Chăm sóc da**: Hướng dẫn bảo vệ và chăm sóc vùng da tổn thương
+            
+            Kết thúc bằng câu hỏi về việc cần thêm thông tin về chăm sóc da, lịch tái khám, hoặc biện pháp phòng ngừa.
+            
+            Duy trì giọng điệu chuyên nghiệp, thông cảm và nhấn mạnh tầm quan trọng của việc thăm khám bác sĩ da liễu.
+            """
+        else:
+            # Default general diagnosis prompt
+            summarizer_prompt = f"""
+            Bạn là một trợ lý y tế tóm tắt kết quả phân tích hình ảnh và đưa ra các khuyến nghị hữu ích tiếp theo.
+            THÔNG TIN CHẨN ĐOÁN:
+            {diagnosis}
+            {f'CÂU HỎI CỦA NGƯỜI DÙNG: {user_query}' if user_query else ''}
+            {f'BỐI CẢNH CUỘC TRÒ CHUYỆN GẦN ĐÂY: {history_context}' if history_context else ''}
+            Vui lòng cung cấp:
 
-        Tóm tắt rõ ràng, súc tích về chẩn đoán bằng ngôn ngữ đơn giản
-        Các điểm chính mà bệnh nhân cần biết
-        Các bước tiếp theo được khuyến nghị hoặc xét nghiệm bổ sung nếu có
-        Các câu hỏi tiềm ẩn mà bệnh nhân có thể có và câu trả lời cho chúng
-        Kết thúc bằng một câu hỏi về việc họ có cần thêm thông tin, khuyến nghị về thuốc, hoặc hỗ trợ khác không
+            Tóm tắt rõ ràng, súc tích về chẩn đoán bằng ngôn ngữ đơn giản
+            Các điểm chính mà bệnh nhân cần biết
+            Các bước tiếp theo được khuyến nghị hoặc xét nghiệm bổ sung nếu có
+            Các câu hỏi tiềm ẩn mà bệnh nhân có thể có và câu trả lời cho chúng
+            Kết thúc bằng một câu hỏi về việc họ có cần thêm thông tin, khuyến nghị về thuốc, hoặc hỗ trợ khác không
 
-        Hãy nhớ duy trì giọng điệu thông cảm, chuyên nghiệp và nhấn mạnh rằng đây là phân tích hỗ trợ bởi AI, không thay thế cho lời khuyên y tế chuyên nghiệp.
-        """
+            Hãy nhớ duy trì giọng điệu thông cảm, chuyên nghiệp và nhấn mạnh rằng đây là phân tích hỗ trợ bởi AI, không thay thế cho lời khuyên y tế chuyên nghiệp.
+            """
         
         try:
             # Invoke LLM for summarization

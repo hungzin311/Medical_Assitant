@@ -41,19 +41,32 @@ class ImageClassifier:
             {"role": "system", "content": "You are an expert in medical imaging. Analyze the uploaded image."},
             {"role": "user", "content": [
                 {"type": "text", "text": (
-                    """
+                    f"""
                     {f'CÂU HỎI CỦA NGƯỜI DÙNG: {user_query}' if user_query else ''}
-                    Determine if this is a medical image. If it is, classify it as:
-                    'SKIN LESION SEGMENTATION', 'GENERAL MEDICAL IMAGE', or 'OTHER'. If it's not a medical image, return 'NON-MEDICAL'.
-                    You must provide your answer in JSON format with the following structure:
+                    
+                    Phân tích hình ảnh này và xác định loại:
+                    
+                    **Các loại hình ảnh y tế:**
+                    - 'POLYP SEGMENTATION': Hình ảnh nội soi đại tràng có polyp (colonoscopy images with polyps)
+                    - 'SKIN LESION SEGMENTATION': Hình ảnh tổn thương da (skin lesion images)  
+                    - 'GENERAL MEDICAL IMAGE': Hình ảnh y tế khác (X-ray, CT, MRI, etc.)
+                    - 'NON-MEDICAL': Không phải hình ảnh y tế
+                    
+                    **Hướng dẫn phân loại:**
+                    - Nếu là ảnh nội soi đại tràng (màu hồng/đỏ, có cấu trúc ruột, có thể có polyp) → 'POLYP SEGMENTATION'
+                    - Nếu là ảnh da với tổn thương/nốt ruồi/vết bất thường → 'SKIN LESION SEGMENTATION'
+                    - Nếu là ảnh y tế khác (X-ray, siêu âm, CT, MRI, etc.) → 'GENERAL MEDICAL IMAGE'
+                    - Nếu không phải ảnh y tế → 'NON-MEDICAL'
+                    
+                    Trả lời theo định dạng JSON:
                     {{
-                    "image_type": "IMAGE TYPE",
-                    "reasoning": "Your step-by-step reasoning for selecting this agent",
-                    "confidence": 0.95  // Value between 0.0 and 1.0 indicating your confidence in this classification task
+                    "image_type": "LOẠI HÌNH ẢNH",
+                    "reasoning": "Lý do phân loại từng bước",
+                    "confidence": 0.95
                     }}
                     """
                 )},
-                {"type": "image_url", "image_url": {"url": self.local_image_to_data_url(image_path)}}  # Correct format
+                {"type": "image_url", "image_url": {"url": self.local_image_to_data_url(image_path)}}
             ]}
         ]
         

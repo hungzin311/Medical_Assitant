@@ -1,5 +1,5 @@
 from collections import OrderedDict
-import os 
+import logging
 import cv2 
 import segmentation_models_pytorch as smp
 from torchgeometry.losses import one_hot
@@ -44,6 +44,7 @@ class PolypSegmentation:
         model.to(self.device)
         model.eval()
         
+        logging.info("Model loaded successfully DeeplabV3Plus Segmentation")
         return model 
 
     def transform_image(self, image_path):
@@ -52,7 +53,7 @@ class PolypSegmentation:
                                 transforms.ToTensor(),
                                 transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
         
-        image = Image.open(image_path)
+        image = Image.open(image_path).convert('RGB')
         image = transform(image) 
         return image
     
@@ -62,13 +63,11 @@ class PolypSegmentation:
         
         img_tensor = torch.Tensor(image).unsqueeze(0).to(self.device)
 
-
         with torch.no_grad():
             generated_mask = self.model(img_tensor)
             generated_mask = F.one_hot(torch.argmax(generated_mask[0], 0), num_classes = 3).cpu().float()
         #save mask
         self.save_image(generated_mask, output_path)
-
         #post processing mask 
         self.process_regions(output_path)
 
@@ -86,14 +85,23 @@ class PolypSegmentation:
         image_np = np.array(image).astype(np.uint8)
         mask_np = np.array(mask).astype(np.uint8)
 
+
+        blue_threshold = 10  # tolerance for blue matching
+        blue_like = (
+            (mask_np[:, :, 0] <= blue_threshold) &  # R close to 0
+            (mask_np[:, :, 1] <= blue_threshold) &  # G close to 0
+            (mask_np[:, :, 2] >= 255 - blue_threshold)  # B close to 255
+        )
+        mask_np[blue_like] = [0, 0, 255]
+
         # Create a boolean mask: True where the mask is NOT blue
-        not_blue_mask = ~(np.all(mask_np == [0, 0, 255], axis=-1))
+        not_blue_mask = ~(np.all(mask_np == ([0, 0, 255]), axis=-1))
         
         # Make a copy of the original image
         overlaid = image_np.copy()
 
         # Blend only non-blue pixels (e.g., red region) with original image
-        alpha = 0.8
+        alpha = 0.5
         overlaid[not_blue_mask] = (
             alpha * image_np[not_blue_mask] + (1 - alpha) * mask_np[not_blue_mask]
         ).astype(np.uint8)
@@ -108,6 +116,7 @@ class PolypSegmentation:
             image = image.numpy() if isinstance(image, Tensor) else image
             image = (image * 255).clip(0, 255).astype(np.uint8)
         imageio.imwrite(output_path, image)
+        logging.info(f"save image success: {output_path}")
 
     def process_regions(self, mask_path):
         image = cv2.imread(mask_path)
@@ -140,7 +149,7 @@ class PolypSegmentation:
         
         # Create result image
         result = np.zeros_like(image)
-        result[blue_mask > 0] = [255, 0, 0]  # Set blue background
+        result[blue_mask > 0] = ([255, 0, 0])  # Set blue background
         
         # Process each labeled region
         for label in range(1, num_labels + 1):
@@ -167,5 +176,4 @@ class PolypSegmentation:
 
 # if __name__ == "__main__":
 #     polyp_segmentation = PolypSegmentation(model_path = "agents/image_analysis_agent/polyp_seg_tool/models/deeplabv3_resnet50.pth")
-#     polyp_segmentation.predict(image_path = "agents/image_analysis_agent/polyp_seg_tool/images/00f9b6c911c4aa179344271fa54aa1b2.jpeg", output_path = "agents/image_analysis_agent/polyp_seg_tool/images/polyp_seg_image_output.jpg")
-#     polyp_segmentation.overlay_mask(image_path = "agents/image_analysis_agent/polyp_seg_tool/images/00f9b6c911c4aa179344271fa54aa1b2.jpeg", mask_path = "agents/image_analysis_agent/polyp_seg_tool/images/polyp_seg_image_output.jpg", output_path = "agents/image_analysis_agent/polyp_seg_tool/images/polyp_seg_image_overlay.jpg")
+#     polyp_segmentation.predict(image_path = "image2.jpeg", output_path = "image_output.png")

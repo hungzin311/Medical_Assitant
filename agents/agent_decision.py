@@ -61,8 +61,8 @@ class AgentConfig:
     1. CONVERSATION_AGENT - Cho trò chuyện chung, lời chào và XỬ LÝ CÁC CÂU HỎI Y TẾ CHƯA RÕ RÀNG cần thu thập thêm thông tin từ bệnh nhân.
     2. RAG_AGENT - CHỈ cho câu hỏi y tế CỤ THỂ và ĐẦY ĐỦ THÔNG TIN, bao gồm: triệu chứng chi tiết, câu hỏi về bệnh tật cụ thể, điều trị, thuốc men, giải phẫu, sinh lý học.
     3. WEB_SEARCH_PROCESSOR_AGENT - Cho câu hỏi về phát triển y tế gần đây, dịch bệnh hiện tại hoặc thông tin y tế nhạy cảm theo thời gian.
-    4. SKIN_LESION_AGENT - CHỈ khi người dùng YÊU CẦU PHÂN VÙNG (segmentation) tổn thương da cụ thể. Từ khóa: "phân vùng", "segmentation", "vùng tổn thương", "ranh giới", "phân đoạn".
-    5. POLYP_SEGMENTATION_AGENT - CHỈ khi người dùng YÊU CẦU PHÂN VÙNG (segmentation) tổn thương polyp cụ thể. Từ khóa: "phân vùng", "segmentation", "vùng tổn thương", "ranh giới", "phân đoạn".
+    4. SKIN_LESION_AGENT - CHỈ khi người dùng YÊU CẦU PHÂN VÙNG (segmentation) tổn thương DA cụ thể. Từ khóa: "phân vùng da", "segmentation da", "vùng tổn thương da", "ranh giới da", "phân đoạn da", "tổn thương da".
+    5. POLYP_SEGMENTATION_AGENT - CHỈ khi người dùng YÊU CẦU PHÂN VÙNG (segmentation) POLYP/NỘI SOI ĐẠI TRÀNG cụ thể. Từ khóa: "phân vùng polyp", "segmentation polyp", "polyp", "nội soi đại tràng", "đại tràng", "ruột già", "colonoscopy".
     6. GENERAL_MEDICAL_IMAGE_AGENT - Cho TẤT CẢ hình ảnh y tế khác để CHẨN ĐOÁN và PHÂN TÍCH chung (không phân vùng).
     
     HƯỚNG DẪN QUAN TRỌNG CHO PHÂN LOẠI Y TẾ:
@@ -87,10 +87,15 @@ class AgentConfig:
     HƯỚNG DẪN QUAN TRỌNG CHO HÌNH ẢNH Y TẾ:
     
     **Khi có hình ảnh được tải lên:**
-    - Nếu người dùng YÊU CẦU PHÂN VÙNG/SEGMENTATION cụ thể (có từ khóa "phân vùng", "segmentation", "ranh giới") → SKIN_LESION_AGENT
-    - Nếu người dùng chỉ muốn CHẨN ĐOÁN, nhận biết, phân tích → GENERAL_MEDICAL_IMAGE_AGENT
+    - Nếu người dùng YÊU CẦU PHÂN VÙNG POLYP/NỘI SOI ĐẠI TRÀNG (từ khóa: "polyp", "nội soi đại tràng", "đại tràng", "phân vùng polyp") → POLYP_SEGMENTATION_AGENT
+    - Nếu người dùng YÊU CẦU PHÂN VÙNG TỔN THƯƠNG DA (từ khóa: "tổn thương da", "phân vùng da", "da", "dermatology") → SKIN_LESION_AGENT  
+    - Nếu người dùng chỉ muốn CHẨN ĐOÁN, nhận biết, phân tích chung → GENERAL_MEDICAL_IMAGE_AGENT
     - Nếu KHÔNG có text hoặc text trống → MẶC ĐỊNH GENERAL_MEDICAL_IMAGE_AGENT (để chẩn đoán)
     - Nếu không có yêu cầu rõ ràng → MẶC ĐỊNH GENERAL_MEDICAL_IMAGE_AGENT
+
+    **Phân biệt giữa các loại segmentation:**
+    - POLYP_SEGMENTATION_AGENT: Dành cho ảnh nội soi đại tràng, phân vùng polyp (màu đỏ = neoplastic, màu xanh = non-neoplastic)
+    - SKIN_LESION_AGENT: Dành cho ảnh tổn thương da, phân vùng ranh giới tổn thương da
 
     VÍ DỤ PHÂN LOẠI:
     - "Xin chào, bạn có thể giúp tôi phân tích triệu chứng không?" → CONVERSATION_AGENT (chưa nêu triệu chứng cụ thể)
@@ -201,7 +206,7 @@ def create_agent_graph():
         
         # Create context from recent conversation history (last 3 messages)
         recent_context = ""
-        for msg in messages[-6:]:  # Get last 3 exchanges (6 messages)  # Not provided control from config
+        for msg in messages[-6:]:  # Get last 3 exchanges (6 messages)
             if isinstance(msg, HumanMessage):
                 recent_context += f"User: {msg.content}\n"
             elif isinstance(msg, AIMessage):
@@ -575,9 +580,10 @@ def create_agent_graph():
         if predicted_mask:
             # Create a basic diagnosis result for the skin lesion
             diagnosis_result = {
-                "diagnosis": "The image shows a skin lesion that has been segmented for analysis. The segmentation highlights the boundaries of the lesion, which is an important step in determining whether it may be benign or malignant. Further analysis by a dermatologist is recommended for a definitive diagnosis.",
+                "diagnosis": "Hình ảnh cho thấy một tổn thương da đã được phân vùng để phân tích. Việc phân vùng làm nổi bật ranh giới của tổn thương, đây là một bước quan trọng trong việc xác định liệu nó có thể là lành tính hay ác tính. Cần tham khảo ý kiến bác sĩ da liễu để có chẩn đoán chính xác.",
                 "success": True,
-                "image_path": image_path
+                "image_path": image_path,
+                "analysis_type": "skin_lesion_segmentation"
             }
             
             # Summarize the diagnosis with the summarizer agent
@@ -589,9 +595,9 @@ def create_agent_graph():
             
             # Use the summarized content as the response
             if summarized_result["success"]:
-                response = AIMessage(content=f"Dưới đây là ảnh phân vùng vết thương trên da dựa trên ảnh đã được cung cấp:\n\n{summarized_result['summary']}")
+                response = AIMessage(content=f"Dưới đây là kết quả phân vùng tổn thương da dựa trên ảnh đã được cung cấp:\n\n{summarized_result['summary']}")
             else:
-                response = AIMessage(content="Dưới đây là ảnh phân vùng vết thương trên da dựa trên ảnh đã được cung cấp:")
+                response = AIMessage(content="Dưới đây là kết quả phân vùng tổn thương da dựa trên ảnh đã được cung cấp:")
         else:
             safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
             response = AIMessage(content="Hình ảnh được tải lên không đủ rõ nét để có thể chẩn đoán hoặc hình ảnh này không phải là hình ảnh y tế." + safety_disclaimer)
@@ -601,6 +607,63 @@ def create_agent_graph():
             "output": response,
             "needs_human_validation": True,  # Medical diagnosis always needs validation
             "agent_name": "SKIN_LESION_AGENT"
+        }
+
+    def run_polyp_segmentation_agent(state: AgentState) -> AgentState:
+        """Handle polyp segmentation image analysis."""
+
+        current_input = state["current_input"]
+        image_path = current_input.get("image", None)
+        messages = state["messages"]
+        
+        # Get user query if available
+        user_query = ""
+        if isinstance(current_input, dict) and "text" in current_input:
+            user_query = current_input.get("text", "")
+
+        print(f"Selected agent: POLYP_SEGMENTATION_AGENT")
+
+        # Segment the polyp
+        try:
+            AgentConfig.image_analyzer.segment_polyp(image_path)
+            segmentation_success = True
+        except Exception as e:
+            print(f"Error in polyp segmentation: {e}")
+            segmentation_success = False
+
+        if segmentation_success:
+            # Create a diagnosis result for the polyp segmentation
+            diagnosis_result = {
+                "diagnosis": "Hình ảnh nội soi đại tràng đã được phân vùng để phân tích polyp. Kết quả phân vùng:\n\n" +
+                           "🔴 **Vùng màu đỏ**: Polyp tân sinh (neoplastic) - có khả năng tiến triển thành ung thư, cần theo dõi chặt chẽ và có thể cần can thiệp\n" +
+                           "🟢 **Vùng màu xanh**: Polyp không tân sinh (non-neoplastic) - thường lành tính, ít nguy cơ ung thư hóa\n\n" +
+                           "Ảnh kết quả đã được overlay mask lên hình gốc để dễ quan sát. Việc phân loại này giúp bác sĩ đưa ra quyết định điều trị phù hợp.",
+                "success": True,
+                "image_path": image_path,
+                "analysis_type": "polyp_segmentation"
+            }
+            
+            # Summarize the diagnosis with the summarizer agent
+            summarized_result = AgentConfig.image_analyzer.summarize_diagnosis(
+                diagnosis_result=diagnosis_result,
+                chat_history=messages[-10:] if len(messages) > 0 else None,
+                user_query=user_query
+            )
+            
+            # Use the summarized content as the response
+            if summarized_result["success"]:
+                response = AIMessage(content=f"Dưới đây là kết quả phân vùng polyp từ hình ảnh nội soi đại tràng:\n\n{summarized_result['summary']}")
+            else:
+                response = AIMessage(content=f"Dưới đây là kết quả phân vùng polyp từ hình ảnh nội soi đại tràng:\n\n{diagnosis_result['diagnosis']}")
+        else:
+            safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
+            response = AIMessage(content="Không thể thực hiện phân vùng polyp trên hình ảnh này. Hình ảnh có thể không đủ rõ nét hoặc không phải là hình ảnh nội soi đại tràng phù hợp." + safety_disclaimer)
+
+        return {
+            **state,
+            "output": response,
+            "needs_human_validation": True,  # Medical diagnosis always needs validation
+            "agent_name": "POLYP_SEGMENTATION_AGENT"
         }
     
     def handle_human_validation(state: AgentState) -> Dict:
@@ -694,6 +757,7 @@ def create_agent_graph():
     workflow.add_node("RAG_AGENT", run_rag_agent)
     workflow.add_node("WEB_SEARCH_PROCESSOR_AGENT", run_web_search_processor_agent)
     workflow.add_node("SKIN_LESION_AGENT", run_skin_lesion_agent)
+    workflow.add_node("POLYP_SEGMENTATION_AGENT", run_polyp_segmentation_agent)
     workflow.add_node("GENERAL_MEDICAL_IMAGE_AGENT", run_general_medical_image_agent)
     workflow.add_node("check_validation", handle_human_validation)
     workflow.add_node("human_validation", perform_human_validation)
@@ -721,6 +785,7 @@ def create_agent_graph():
             "RAG_AGENT": "RAG_AGENT",
             "WEB_SEARCH_PROCESSOR_AGENT": "WEB_SEARCH_PROCESSOR_AGENT",
             "SKIN_LESION_AGENT": "SKIN_LESION_AGENT",
+            "POLYP_SEGMENTATION_AGENT": "POLYP_SEGMENTATION_AGENT",
             "GENERAL_MEDICAL_IMAGE_AGENT": "GENERAL_MEDICAL_IMAGE_AGENT",
             "needs_validation": "RAG_AGENT"  # Default to RAG if confidence is low
         }
@@ -732,6 +797,7 @@ def create_agent_graph():
     workflow.add_edge("WEB_SEARCH_PROCESSOR_AGENT", "check_validation")
     workflow.add_conditional_edges("RAG_AGENT", confidence_based_routing)
     workflow.add_edge("SKIN_LESION_AGENT", "check_validation")
+    workflow.add_edge("POLYP_SEGMENTATION_AGENT", "check_validation")
     workflow.add_edge("GENERAL_MEDICAL_IMAGE_AGENT", "check_validation")
     workflow.add_edge("human_validation", "apply_guardrails")
     workflow.add_edge("apply_guardrails", END)
@@ -800,9 +866,9 @@ def process_query(query: Union[str, Dict], conversation_history: List[BaseMessag
         state["messages"] = [HumanMessage(content=query)]
 
     # Run the graph
-    print('start running state graph')
+    # print('start running state graph')
     result = graph.invoke(state, thread_config)
-    print('get the result')
+    # print('get the result')
     # Keep history to reasonable size
     if len(result["messages"]) > config.max_conversation_history:
         result["messages"] = result["messages"][-config.max_conversation_history:]

@@ -16,6 +16,7 @@ class ImageAnalysisAgent:
         self.general_diagnosis_agent = GeneralMedicalDiagnosisAgent(vision_model=config.medical_cv.llm)
         self.summarizer = MedicalImageSummarizer(llm=config.medical_cv.summarizer_llm)
         self.polyp_seg_agent = PolypSegmentation(model_path=config.medical_cv.polyp_seg_model_path)
+        self.polyp_seg_output_path = config.medical_cv.polyp_seg_output_path
     
     # classify image
     def analyze_image(self, image_path: str, user_query: str = None) -> str:
@@ -26,7 +27,7 @@ class ImageAnalysisAgent:
         return self.skin_lesion_agent.predict(image_path, self.skin_lesion_segmentation_output_path)
     #polyp segmentation
     def segment_polyp(self, image_path: str) -> str:
-        return self.polyp_seg_agent.predict(image_path, self.polyp_seg_overlay_path)
+        return self.polyp_seg_agent.predict(image_path, self.polyp_seg_output_path)
     # general diagnosis
     def diagnose_general_medical_image(self, image_path: str, user_query: str = None) -> dict:
         """Diagnoses general medical images using MLLM."""

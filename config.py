@@ -85,6 +85,7 @@ class ValidationConfig:
             "RAG_AGENT": False,
             "WEB_SEARCH_AGENT": False,
             "SKIN_LESION_AGENT": True,
+            "POLYP_SEGMENTATION_AGENT": True,
             "GENERAL_MEDICAL_IMAGE_AGENT": True
         }
         self.validation_timeout = 300
