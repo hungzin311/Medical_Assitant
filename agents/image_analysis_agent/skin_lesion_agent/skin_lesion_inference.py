@@ -81,7 +81,7 @@ class SkinLesionSegmentation:
             # with safe_globals([UNet]):
             #     model = torch.load(self.model_path, weights_only=False, map_location=self.device)
             # Call this before using the model
-            download_model_checkpoint('1rvn4ucOH6UBoNk-GB9bUWuGTLkNIVUf0', self.model_path)
+            # download_model_checkpoint('1rvn4ucOH6UBoNk-GB9bUWuGTLkNIVUf0', self.model_path)
             model = UNet(n_channels=3, n_classes=1).to(self.device)  # Explicitly initialize UNet
             # model.load_state_dict(torch.load(self.model_path, weights_only=False, map_location=self.device), strict=False)
             model.load_state_dict(torch.load(self.model_path, map_location=torch.device(self.device))['state_dict'])

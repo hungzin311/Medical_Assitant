@@ -7,7 +7,8 @@ from pathlib import Path
 from typing import List, Dict, Any, Tuple, Optional
 
 from langchain_core.documents import Document
-from langchain.storage import InMemoryStore, LocalFileStore
+from langchain.storage import InMemoryStore
+from .cloud_docstore import CloudDocStore
 from langchain_qdrant import QdrantVectorStore, RetrievalMode
 from qdrant_client import QdrantClient, models
 from qdrant_client.http.models import Distance, SparseVectorParams, VectorParams, OptimizersConfigDiff
@@ -103,7 +104,7 @@ class VectorStoreCloud:
             self.logger.error(f"Error creating cloud collection: {e}")
             raise e
             
-    def load_vectorstore(self) -> Tuple[QdrantVectorStore, LocalFileStore]:
+    def load_vectorstore(self) -> Tuple[QdrantVectorStore, CloudDocStore]:
         """
         Load existing cloud vectorstore and local docstore for retrieval operations without ingesting new documents.
         
@@ -125,8 +126,12 @@ class VectorStoreCloud:
             vector_name="dense",
         )
         
-        # Document storage (still local)
-        docstore = LocalFileStore(self.docstore_local_path)
+        # Document storage (now cloud-based)
+        docstore = CloudDocStore(
+            qdrant_url=self.qdrant_url,
+            qdrant_api_key=self.qdrant_api_key,
+            collection_name=f"{self.collection_name}_docstore"
+        )
         
         self.logger.info(f"Successfully loaded existing cloud vectorstore and local docstore")
         return qdrant_vectorstore, docstore
@@ -135,7 +140,7 @@ class VectorStoreCloud:
             self,
             document_chunks: List[str],
             document_path: str,
-        ) -> Tuple[QdrantVectorStore, LocalFileStore, List[str]]:
+        ) -> Tuple[QdrantVectorStore, CloudDocStore, List[str]]:
         """
         Create a vector store in cloud from document chunks or upsert documents to existing store.
         
@@ -215,7 +220,7 @@ class VectorStoreCloud:
                             self.logger.error(f"Error adding document {i+j+1}: {doc_error}")
                             continue
                     
-                    # Encode string chunks to bytes before storing locally (only successful ones)
+                    # Encode string chunks to bytes before storing in cloud (only successful ones)
                     if successful_docs:
                         encoded_chunks = []
                         for doc in successful_docs:
@@ -243,7 +248,7 @@ class VectorStoreCloud:
             self,
             query: str,
             vectorstore: QdrantVectorStore,
-            docstore: LocalFileStore,
+            docstore: CloudDocStore,
         ) -> Tuple[List[Dict[str, Any]], List[str]]:
         """
         Retrieve relevant chunks based on a query from cloud vector store.
@@ -306,7 +311,7 @@ class VectorStoreCloud:
             document_chunks: List[str],
             metadatas: List[Dict[str, Any]],
             document_path: str,
-        ) -> Tuple[QdrantVectorStore, LocalFileStore, List[str]]:
+        ) -> Tuple[QdrantVectorStore, CloudDocStore, List[str]]:
         """
         Create a vector store in cloud from document chunks with metadata
         
@@ -391,7 +396,7 @@ class VectorStoreCloud:
                             self.logger.error(f"Error adding document {i+j+1}: {doc_error}")
                             continue
                     
-                    # Encode string chunks to bytes before storing locally (only successful ones)
+                    # Encode string chunks to bytes before storing in cloud (only successful ones)
                     if successful_docs:
                         encoded_chunks = []
                         for doc in successful_docs:

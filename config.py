@@ -67,10 +67,34 @@ class RAGConfig:
 
         self.context_limit = 20     # include last 20 messsages (10 Q&A pairs) in history
 
+
+class PatientDBConfig:
+    def __init__(self):
+        self.vector_db_type = "qdrant"
+        self.embedding_dim = 1024  # Together AI m2-bert embedding dimension
+        self.distance_metric = "Cosine"
+        # Patient database uses cloud Qdrant
+        self.use_local = False
+        # Make sure these environment variables are set in your .env file
+        self.url = os.getenv("QDRANT_URL")
+        self.api_key = os.getenv("QDRANT_API_KEY")
+        self.collection_name = "medical_records"  # Patient database collection
+        self.embedding_model = get_together_embeddings()
+        self.top_k = 50  # Higher default for patient searches
+        
+        # Patient-specific settings
+        self.max_age_range_default = 10  # ±10 years for treatment optimization
+        self.min_cases_for_confidence = 5  # Minimum cases for high confidence recommendations
+        self.outbreak_threshold = 5  # Minimum cases to trigger outbreak alert
+        self.risk_score_threshold = 0.7  # Threshold for high-risk classification
+        
+        # Population monitoring settings
+        self.monitoring_time_windows = ["7d", "30d", "90d"]
+        self.alert_confidence_threshold = 0.6
+        self.max_population_results = 1000
+
 class MedicalCVConfig:
     def __init__(self):
-        self.brain_tumor_model_path = "./agents/image_analysis_agent/brain_tumor_agent/models/brain_tumor_segmentation.pth"
-        self.chest_xray_model_path = "./agents/image_analysis_agent/chest_xray_agent/models/covid_chest_xray_model.pth"
         self.skin_lesion_model_path = "./agents/image_analysis_agent/skin_lesion_agent/models/checkpointN25_.pth.tar"
         self.skin_lesion_segmentation_output_path = "./uploads/skin_lesion_output/segmentation_plot.png"
         self.llm = get_gemini_vision_llm(temperature=0.1)  # Use vision-specific model for medical image analysis
@@ -110,6 +134,7 @@ class Config:
         self.agent_decision = AgentDecisoinConfig()
         self.conversation = ConversationConfig()
         self.rag = RAGConfig()
+        self.patient_db = PatientDBConfig()  # Add patient database configuration
         self.medical_cv = MedicalCVConfig()
         self.web_search = WebSearchConfig()
         self.api = APIConfig()

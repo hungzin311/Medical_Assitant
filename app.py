@@ -285,12 +285,6 @@ async def validate_medical_output(
                     # Create the filename with correct extension
                     image_filename = f"{LOGS_IMAGES_DIR}/review_image_{timestamp}_{file_id}.{format_type}"
                     
-                    # # Save raw base64 data as text first (as a backup)
-                    # raw_backup_filename = f"{LOGS_IMAGES_DIR}/raw_base64_{timestamp}_{file_id}.txt"
-                    # with open(raw_backup_filename, "w", encoding="utf-8") as f:
-                    #     f.write(image_data)
-                    # print(f"Saved raw base64 data as backup to {raw_backup_filename}")
-                    
                     # Direct approach to save the image
                     success = False
                     
