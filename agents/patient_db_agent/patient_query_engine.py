@@ -9,11 +9,13 @@ This module provides high-level query interfaces for the three core problems:
 
 import logging
 from typing import List, Dict, Any, Optional, Tuple
-from datetime import datetime, timedelta
+from datetime import datetime
 import numpy as np
 from dataclasses import dataclass
 
 from .patient_vectorstore import PatientVectorStore
+from .find_treatment import TreatmentFinder
+from .evaluate_disease import DiseaseEvaluator
 
 
 @dataclass
@@ -54,6 +56,8 @@ class PatientQueryEngine:
     def __init__(self, config):
         self.logger = logging.getLogger(__name__)
         self.patient_store = PatientVectorStore(config)
+        self.treatment_finder = TreatmentFinder(self.patient_store)
+        self.disease_evaluator = DiseaseEvaluator(self.patient_store)
         self.config = config
         
     # Problem 1: Patient Record Retrieval Methods
@@ -84,8 +88,6 @@ class PatientQueryEngine:
         start_time = datetime.now()
         
         try:
-            # Create query vector
-            query_vector = self.patient_store.embedding_model.embed_query(query_text)
             
             # Build filters
             demographic_filters = {}
@@ -100,8 +102,8 @@ class PatientQueryEngine:
            
             
             # Retrieve records
-            records = self.patient_store.retrieve_patient_records(
-                query_vector=query_vector,
+            records = self.treatment_finder.retrieve_patient_records(
+                query=query_text,
                 patient_id=patient_id,
                 demographic_filters=demographic_filters if demographic_filters else None,
                 clinical_filters=clinical_filters if clinical_filters else None,
@@ -158,8 +160,6 @@ class PatientQueryEngine:
             List of treatment recommendations with confidence scores
         """
         try:
-            # Create query vector
-            query_vector = self.patient_store.embedding_model.embed_query(patient_description)
             
             # Define age range for similar patients (±10 years)
             age_range = None
@@ -167,8 +167,8 @@ class PatientQueryEngine:
                 age_range = (max(0, patient_age - 10), min(120, patient_age + 10))
             
             # Find similar treatment cases
-            treatment_cases = self.patient_store.find_treatment_cases(
-                query_vector=query_vector,
+            treatment_cases = self.treatment_finder.find_treatment_cases(
+                query=patient_description,
                 candidate_treatments=candidate_treatments,
                 age_range=age_range,
                 comorbidities=comorbidities,
@@ -206,86 +206,6 @@ class PatientQueryEngine:
             self.logger.error(f"Error generating treatment recommendations: {e}")
             return []
     
-    def _analyze_treatment_outcomes(
-        self, 
-        treatment_cases: List[Dict[str, Any]], 
-        candidate_treatments: List[str]
-    ) -> Dict[str, Dict[str, Any]]:
-        """
-        Analyze treatment outcomes from similar cases.
-        
-        Args:
-            treatment_cases: List of similar patient cases
-            candidate_treatments: List of treatments to analyze
-            
-        Returns:
-            Dictionary with treatment analysis results
-        """
-        treatment_analysis = {}
-        
-        for treatment in candidate_treatments:
-            relevant_cases = []
-            outcomes = []
-            distances = []
-            
-            # Find cases that used this treatment
-            for case in treatment_cases:
-                treatments_tried = case.get('treatments_tried', [])
-                
-                # Check if treatment was used
-                for treatment_record in treatments_tried:
-                    if isinstance(treatment_record, dict):
-                        treatment_name = treatment_record.get('name', '')
-                    else:
-                        treatment_name = str(treatment_record)
-                    
-                    if treatment_name.lower() == treatment.lower():
-                        relevant_cases.append(case)
-                        
-                        # Get outcome
-                        if isinstance(treatment_record, dict):
-                            outcome = treatment_record.get('outcome', case.get('primary_outcome', 0.5))
-                        else:
-                            outcome = case.get('primary_outcome', 0.5)
-                        
-                        outcomes.append(outcome)
-                        distances.append(case.get('distance', 0.5))
-                        break
-            
-            if outcomes:
-                # Calculate distance-weighted outcome
-                weights = np.exp(-np.array(distances))  # Closer cases get higher weights
-                weighted_outcome = np.average(outcomes, weights=weights)
-                
-                # Calculate confidence based on number of cases and consistency
-                confidence = min(len(outcomes) / 10.0, 1.0)  # More cases = higher confidence
-                outcome_std = np.std(outcomes) if len(outcomes) > 1 else 0.5
-                confidence *= (1.0 - outcome_std)  # Lower variance = higher confidence
-                confidence = max(0.1, confidence)  # Minimum confidence
-                
-                treatment_analysis[treatment] = {
-                    'weighted_outcome': weighted_outcome,
-                    'confidence': confidence,
-                    'num_cases': len(outcomes),
-                    'outcome_mean': np.mean(outcomes),
-                    'outcome_std': outcome_std,
-                    'cases': relevant_cases
-                }
-            else:
-                # No cases found - use prior
-                treatment_analysis[treatment] = {
-                    'weighted_outcome': 0.5,  # Neutral prior
-                    'confidence': 0.1,  # Low confidence
-                    'num_cases': 0,
-                    'outcome_mean': 0.5,
-                    'outcome_std': 0.0,
-                    'cases': []
-                }
-        
-        return treatment_analysis
-    
-    
-    
     # Problem 3: Early Warning System Methods
     
     def monitor_outbreak_risk(
@@ -319,7 +239,7 @@ class PatientQueryEngine:
             ]
             
             for risk_flag, alert_type in risk_patterns:
-                flagged_cases = self.patient_store.monitor_population_patterns(
+                flagged_cases = self.disease_evaluator.monitor_population_patterns(
                     time_window=time_window,
                     geographic_region=geographic_region,
                     facility_id=facility_id,

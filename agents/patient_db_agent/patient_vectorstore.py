@@ -6,7 +6,7 @@ from uuid import uuid4
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Dict, Any, Tuple, Optional, Union
-
+from agents.rag_agent.cloud_docstore import CloudDocStore
 from langchain_core.documents import Document
 from langchain_qdrant import QdrantVectorStore, RetrievalMode
 from qdrant_client import QdrantClient, models
@@ -15,10 +15,14 @@ from qdrant_client.http.models import Distance, VectorParams, OptimizersConfigDi
 
 class PatientVectorStore:
     """
-    Specialized vector store for patient medical records supporting:
-    - Problem 1: Multi-dimensional patient record retrieval
-    - Problem 2: Treatment optimization with outcome tracking
-    - Problem 3: Early warning system and population health monitoring
+    Core vector store operations for patient medical records including:
+    - Patient record ingestion and storage
+    - Vector embedding and indexing
+    - Collection management and optimization
+    
+    Note: Specialized operations have been moved to dedicated classes:
+    - TreatmentFinder: Patient record retrieval and treatment case finding
+    - DiseaseEvaluator: Population monitoring and risk assessment
     """
     
     def __init__(self, config):
@@ -42,6 +46,29 @@ class PatientVectorStore:
             url=self.qdrant_url,
             api_key=self.qdrant_api_key
         )
+        self.vector_store = None
+        
+    def load_vectorstore(self) -> Tuple[QdrantVectorStore]:
+        """
+        Load existing vectorstore and docstore for retrieval operations without ingesting new documents.
+        
+        Returns:
+            Tuple containing (vectorstore)
+        """
+
+        if not self._does_collection_exist():
+            self._create_patient_collection()
+            logging.info(f"Created new patient collection: {self.collection_name}")
+
+        self.vector_store = QdrantVectorStore(
+            client=self.client,
+            collection_name=self.collection_name,
+            embedding= self.embedding_model,
+            retrieval_mode=RetrievalMode.DENSE,
+            vector_name="dense",
+        )
+
+        return self.vector_store        
 
     def _does_collection_exist(self) -> bool:
         """Check if the patient collection already exists in Qdrant cloud."""
@@ -320,331 +347,6 @@ class PatientVectorStore:
         else:
             return "poor"
 
-    # Problem 1: Patient Record Retrieval Methods
-    def retrieve_patient_records(
-        self, 
-        query_vector: List[float], 
-        patient_id: Optional[str] = None,
-        demographic_filters: Optional[Dict[str, Any]] = None,
-        clinical_filters: Optional[Dict[str, Any]] = None,
-        limit: int = 50
-    ) -> List[Dict[str, Any]]:
-        """
-        Multi-stage patient record retrieval (Problem 1).
-        
-        Args:
-            query_vector: Query embedding vector
-            patient_id: Optional patient ID for same-patient history
-            demographic_filters: Age, sex, BMI filters
-            clinical_filters: Comorbidities, severity, diagnosis filters
-            limit: Maximum number of results
-            
-        Returns:
-            List of retrieved patient records with scores
-        """
-        must_conditions = []
-        should_conditions = []
-        
-        # Stage 1: Same patient history (highest priority)
-        if patient_id:
-            should_conditions.append(
-                FieldCondition(key="patient_id", match=MatchValue(value=patient_id))
-            )
-        
-        # Stage 2: Demographic filters
-        if demographic_filters:
-            if "age_range" in demographic_filters:
-                min_age, max_age = demographic_filters["age_range"]
-                must_conditions.append(
-                    FieldCondition(key="age", range=Range(gte=min_age, lte=max_age))
-                )
-            if "sex" in demographic_filters:
-                should_conditions.append(
-                    FieldCondition(key="sex", match=MatchValue(value=demographic_filters["sex"]))
-                )
-            if "bmi_category" in demographic_filters:
-                should_conditions.append(
-                    FieldCondition(key="bmi_category", match=MatchValue(value=demographic_filters["bmi_category"]))
-                )
-        
-        # Stage 3: Clinical filters
-        if clinical_filters:
-            if "comorbidities" in clinical_filters:
-                for comorbidity in clinical_filters["comorbidities"]:
-                    should_conditions.append(
-                        FieldCondition(key="comorbidities", match=MatchValue(value=comorbidity))
-                    )
-            if "severity_category" in clinical_filters:
-                must_conditions.append(
-                    FieldCondition(key="severity_category", match=MatchValue(value=clinical_filters["severity_category"]))
-                )
-        
-        # Build filter
-        query_filter = None
-        if must_conditions or should_conditions:
-            query_filter = Filter(
-                must=must_conditions if must_conditions else None,
-                should=should_conditions if should_conditions else None
-            )
-        
-        # Execute search
-        try:
-            results = self.client.search(
-                collection_name=self.collection_name,
-                query_vector=("dense", query_vector),
-                query_filter=query_filter,
-                limit=limit,
-                with_payload=True,
-                with_vectors=False
-            )
-
-            result2 = self.client.search( 
-                collection_name=self.collection_name, 
-                query_filter = Filter(
-                    must = [
-                        FieldCondition(key="patient_id", match=MatchValue(value=patient_id))
-                    ]
-                ), 
-                limit = limit, 
-                with_payload= True
-            )
-            
-            # Format results
-            retrieved_records = []
-            for result in results:
-                record = {
-                    "id": result.id,
-                    "score": result.score,
-                    "payload": result.payload
-                }
-                if record['id'] != patient_id:
-                    retrieved_records.append(record)
-            
-            for result in result2: 
-                record = {
-                    "id": result.id,
-                    "score": result.score,
-                    "payload": result.payload
-                }
-                retrieved_records.append(record)
-                
-            self.logger.info(f"Retrieved {len(retrieved_records)} patient records")
-            return retrieved_records
-            
-        except Exception as e:
-            self.logger.error(f"Error retrieving patient records: {e}")
-            return []
-
-    # Problem 2: Treatment Optimization Methods
-    def find_treatment_cases(
-        self, 
-        query_vector: List[float], 
-        candidate_treatments: List[str],
-        age_range: Optional[Tuple[int, int]] = None,
-        comorbidities: Optional[List[str]] = None,
-        limit: int = 30
-    ) -> List[Dict[str, Any]]:
-        """
-        Find similar cases for treatment optimization (Problem 2).
-        
-        Args:
-            query_vector: Patient embedding vector
-            candidate_treatments: List of candidate treatments
-            age_range: Optional age range filter
-            comorbidities: Optional comorbidity filters
-            limit: Maximum number of results
-            
-        Returns:
-            List of similar cases with treatment outcomes
-        """
-        must_conditions = [
-            # Must have outcome data
-            FieldCondition(key="primary_outcome", range=Range(gte=0.0))
-        ]
-        
-        should_conditions = []
-        
-        # Treatment filters
-        for treatment in candidate_treatments:
-            should_conditions.append(
-                FieldCondition(key="candidate_treatments", match=MatchValue(value=treatment))
-            )
-        
-        # Age range filter
-        if age_range:
-            min_age, max_age = age_range
-            must_conditions.append(
-                FieldCondition(key="age", range=Range(gte=min_age, lte=max_age))
-            )
-        
-        # Comorbidity filters
-        if comorbidities:
-            for comorbidity in comorbidities:
-                should_conditions.append(
-                    FieldCondition(key="comorbidities", match=MatchValue(value=comorbidity))
-                )
-        
-        query_filter = Filter(must=must_conditions, should=should_conditions)
-        
-        try:
-            results = self.client.search(
-                collection_name=self.collection_name,
-                query_vector=("dense", query_vector),
-                query_filter=query_filter,
-                limit=limit,
-                with_payload=["treatments_tried", "primary_outcome", "comorbidities", 
-                            "age", "sex", "severity_score", "contraindications"],
-                with_vectors=False
-            )
-            
-            treatment_cases = []
-            for result in results:
-                case = {
-                    "id": result.id,
-                    "distance": 1 - result.score,  # Convert similarity to distance
-                    "treatments_tried": result.payload.get("treatments_tried", []),
-                    "primary_outcome": result.payload.get("primary_outcome", 0.0),
-                    "age": result.payload.get("age", 0),
-                    "sex": result.payload.get("sex", ""),
-                    "comorbidities": result.payload.get("comorbidities", []),
-                    "severity_score": result.payload.get("severity_score", 0.0),
-                    "contraindications": result.payload.get("contraindications", [])
-                }
-                treatment_cases.append(case)
-                
-            self.logger.info(f"Found {len(treatment_cases)} treatment cases")
-            return treatment_cases
-            
-        except Exception as e:
-            self.logger.error(f"Error finding treatment cases: {e}")
-            return []
-
-    # Problem 3: Early Warning System Methods
-    def monitor_population_patterns(
-        self, 
-        time_window: str = "7d",
-        geographic_region: Optional[str] = None,
-        facility_id: Optional[str] = None,
-        risk_flags: Optional[List[str]] = None,
-        limit: int = 100
-    ) -> List[Dict[str, Any]]:
-        """
-        Monitor population patterns for early warning (Problem 3).
-        
-        Args:
-            time_window: Time window (e.g., "7d", "30d")
-            geographic_region: Optional geographic filter
-            facility_id: Optional facility filter
-            risk_flags: List of risk flags to monitor
-            limit: Maximum number of results
-            
-        Returns:
-            List of flagged cases
-        """
-        must_conditions = []
-        should_conditions = []
-        
-        # Time filter - for simplicity, using is_recent flag
-        if time_window in ["7d", "30d", "90d"]:
-            must_conditions.append(
-                FieldCondition(key="is_recent", match=MatchValue(value=True))
-            )
-        
-        # Geographic filter
-        if geographic_region:
-            must_conditions.append(
-                FieldCondition(key="geographic_region", match=MatchValue(value=geographic_region))
-            )
-        
-        # Facility filter
-        if facility_id:
-            must_conditions.append(
-                FieldCondition(key="facility_id", match=MatchValue(value=facility_id))
-            )
-        
-        # Risk flags
-        risk_flag_mapping = {
-            "outbreak": "outbreak_risk",
-            "unusual": "unusual_presentation",
-            "resistance": "treatment_resistance",
-            "quality": "quality_alert",
-            "high_risk": "high_risk_patient"
-        }
-        
-        if risk_flags:
-            for flag in risk_flags:
-                if flag in risk_flag_mapping:
-                    should_conditions.append(
-                        FieldCondition(key=risk_flag_mapping[flag], match=MatchValue(value=True))
-                    )
-        else:
-            # Default: monitor all risk flags
-            for flag_field in risk_flag_mapping.values():
-                should_conditions.append(
-                    FieldCondition(key=flag_field, match=MatchValue(value=True))
-                )
-        
-        query_filter = Filter(
-            must=must_conditions if must_conditions else None,
-            should=should_conditions if should_conditions else None
-        )
-        
-        try:
-            # Use scroll for large result sets
-            results = self.client.scroll(
-                collection_name=self.collection_name,
-                scroll_filter=query_filter,
-                limit=limit,
-                with_payload=True,
-                with_vectors=False
-            )
-            
-            flagged_cases = []
-            for result in results[0]:  # results is tuple (points, next_page_offset)
-                case = {
-                    "id": result.id,
-                    "payload": result.payload,
-                    "risk_score": self._calculate_risk_score(result.payload)
-                }
-                flagged_cases.append(case)
-            
-            # Sort by risk score
-            flagged_cases.sort(key=lambda x: x["risk_score"], reverse=True)
-            
-            self.logger.info(f"Found {len(flagged_cases)} flagged cases for monitoring")
-            return flagged_cases
-            
-        except Exception as e:
-            self.logger.error(f"Error monitoring population patterns: {e}")
-            return []
-
-    def _calculate_risk_score(self, payload: Dict[str, Any]) -> float:
-        """Calculate composite risk score for population monitoring."""
-        risk_score = 0.0
-        
-        # Risk flags
-        if payload.get("outbreak_risk", False):
-            risk_score += 0.3
-        if payload.get("unusual_presentation", False):
-            risk_score += 0.25
-        if payload.get("treatment_resistance", False):
-            risk_score += 0.2
-        if payload.get("quality_alert", False):
-            risk_score += 0.15
-        if payload.get("high_risk_patient", False):
-            risk_score += 0.1
-        
-        # Severity contribution
-        severity_score = payload.get("severity_score", 0.0)
-        risk_score += severity_score * 0.2
-        
-        # Comorbidity contribution
-        comorbidity_count = payload.get("comorbidity_count", 0)
-        risk_score += min(comorbidity_count * 0.05, 0.2)
-        
-        return min(risk_score, 1.0)
-
-
     def batch_ingest_patients(self, patient_records: List[Dict[str, Any]]) -> List[str]:
         """
         Batch ingest multiple patient records.
@@ -664,7 +366,7 @@ class PatientVectorStore:
         
         for patient_data in patient_records:
             # Generate record ID
-            record_id = f"{patient_data['patient_id']}_{patient_data['visit_date']}_{uuid4().hex[:6]}"
+            record_id = str(uuid4())  # Use UUID format for Qdrant compatibility
             record_ids.append(record_id)
             
             # Create embedding
