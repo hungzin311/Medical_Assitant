@@ -1,7 +1,7 @@
 import logging
 from typing import List, Dict, Any, Tuple, Optional
 from qdrant_client.http.models import Filter, FieldCondition, MatchValue, Range
-
+import json
 
 class TreatmentFinder:
     """
@@ -19,8 +19,8 @@ class TreatmentFinder:
         """
         self.logger = logging.getLogger(__name__)
         self.client = patient_vector_store.client 
-        self.vector_store = patient_vector_store.load_vectorstore()
         self.collection_name = patient_vector_store.collection_name
+        self.embeddings = patient_vector_store.embedding_model
         
     def retrieve_patient_records(
         self, 
@@ -88,22 +88,26 @@ class TreatmentFinder:
                 should=should_conditions if should_conditions else None
             )
         
+        query = self.embeddings.embed_query(query)
         # Execute search
         try:
             # Use similarity_search_with_score for vector-based search
-            results_with_scores = self.vector_store.similarity_search_with_score(
-                query=query,
-                k=limit,
-                filter=query_filter
+            results_with_scores = self.client.query_points(
+                query = query,
+                collection_name=self.collection_name,
+                query_filter=query_filter, 
+                limit=limit,
+                with_payload = True,
+                using="dense"
             )
             
-            # Convert to expected format
+            # The response is a QueryResponse object with a .points attribute
             results = []
-            for doc, score in results_with_scores:
+            for point in results_with_scores.points:
                 result_obj = type('SearchResult', (), {
-                    'id': doc.metadata.get('id', ''),
-                    'score': score,
-                    'payload': doc.metadata
+                    'id': point.id,
+                    'score': point.score,
+                    'payload': point.payload
                 })()
                 results.append(result_obj)
 
@@ -120,7 +124,8 @@ class TreatmentFinder:
                         ]
                     ), 
                     limit = limit, 
-                    with_payload= True
+                    with_payload= True,
+                    using="dense"
                 )
                 result2 = result2.points
                 #Format results
@@ -198,22 +203,25 @@ class TreatmentFinder:
                 )
         
         query_filter = Filter(must=must_conditions, should=should_conditions)
-        
+        query = self.embeddings.embed_query(query)
         try:
             # Use similarity_search_with_score for vector-based search
-            results_with_scores = self.vector_store.similarity_search_with_score(
+            results_with_scores = self.client.query_points(
                 query=query,
-                k=limit,
-                filter=query_filter
+                collection_name=self.collection_name,
+                query_filter=query_filter,
+                limit=limit,
+                with_payload=True,
+                using="dense"
             )
             
-            # Convert to expected format
+            # Convert to expected format - QueryResponse has .points attribute
             results = []
-            for doc, score in results_with_scores:
+            for point in results_with_scores.points:
                 result_obj = type('SearchResult', (), {
-                    'id': doc.metadata.get('id', ''),
-                    'score': score,
-                    'payload': doc.metadata
+                    'id': point.id,
+                    'score': point.score,
+                    'payload': point.payload
                 })()
                 results.append(result_obj)
             

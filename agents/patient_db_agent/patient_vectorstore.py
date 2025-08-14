@@ -46,29 +46,10 @@ class PatientVectorStore:
             url=self.qdrant_url,
             api_key=self.qdrant_api_key
         )
-        self.vector_store = None
-        
-    def load_vectorstore(self) -> Tuple[QdrantVectorStore]:
-        """
-        Load existing vectorstore and docstore for retrieval operations without ingesting new documents.
-        
-        Returns:
-            Tuple containing (vectorstore)
-        """
 
         if not self._does_collection_exist():
             self._create_patient_collection()
-            logging.info(f"Created new patient collection: {self.collection_name}")
-
-        self.vector_store = QdrantVectorStore(
-            client=self.client,
-            collection_name=self.collection_name,
-            embedding= self.embedding_model,
-            retrieval_mode=RetrievalMode.DENSE,
-            vector_name="dense",
-        )
-
-        return self.vector_store        
+            logging.info(f"Created new patient collection: {self.collection_name}")     
 
     def _does_collection_exist(self) -> bool:
         """Check if the patient collection already exists in Qdrant cloud."""

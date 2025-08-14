@@ -20,8 +20,8 @@ class DiseaseEvaluator:
         """
         self.logger = logging.getLogger(__name__)
         self.client = patient_vector_store.client
-        self.vector_store = patient_vector_store.load_vectorstore()
         self.collection_name = patient_vector_store.collection_name
+        self.embeddings = patient_vector_store.embedding_model
         
     def monitor_population_patterns(
         self, 
