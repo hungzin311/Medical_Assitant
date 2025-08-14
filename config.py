@@ -81,7 +81,7 @@ class PatientDBConfig:
         self.collection_name = "medical_records"  # Patient database collection
         self.embedding_model = get_together_embeddings()
         self.top_k = 50  # Higher default for patient searches
-        
+        self.llm = get_gemini_llm(temperature=0.1)  # Slightly creative but factual
         # Patient-specific settings
         self.max_age_range_default = 10  # ±10 years for treatment optimization
         self.min_cases_for_confidence = 5  # Minimum cases for high confidence recommendations

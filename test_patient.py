@@ -14,23 +14,11 @@ from config import Config
 # Add project root to path
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
-
+from proxy_setting import set_proxy
 from config import Config
 import json
 from agents.patient_db_agent.patient_vectorstore import PatientVectorStore
 from agents.patient_db_agent.find_treatment import TreatmentFinder
-from agents.patient_db_agent.evaluate_disease import DiseaseEvaluator
-
-
-def setup_logging():
-    """Setup logging configuration."""
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
-
-    
-
 
 def demonstrate_refactored_usage():
     """Demonstrate usage of refactored classes."""
@@ -43,8 +31,6 @@ def demonstrate_refactored_usage():
     patient_store = PatientVectorStore(config)
     treatment_finder = TreatmentFinder(patient_store)
 
-    points = patient_store.client.query_points
-
     llm = config.rag.response_generator_model
     # Example 2: Treatment Finding Operations
     print(f"\n{'='*50}")
@@ -54,32 +40,16 @@ def demonstrate_refactored_usage():
     try:
         # Search for patient records
         print("Searching for similar patient records...")
-        records = treatment_finder.retrieve_patient_records(
+        patient_records, reference_records = treatment_finder.retrieve_patient_records(
             query="male presenting with unusual respiratory illness. High fever",
             demographic_filters={"age_range": (30, 50), "sex": "F"},
             clinical_filters={"comorbidities": ["hypertension"]},
             limit=5
         )
+        response = llm.invoke(f"Here is the patient record: {json.dumps(patient_records)}")
+        print(response.content)
 
-        with open('abc.json', 'w') as f:
-            for record in records:
-                json.dump(record, f)
-                f.write(',\n')
-
-        print(f"Found {len(records)} similar patient records")
-        
-        # Find treatment cases
-        print("Finding similar treatment cases...")
-        treatment_cases = treatment_finder.find_treatment_cases(
-            query="chest pain cardiovascular symptoms",
-            candidate_treatments=["aspirin", "beta-blocker", "ACE inhibitor"],
-            age_range=(40, 50),
-            comorbidities=["hypertension"],
-            limit=5
-        )
-
-        
-        print(f"Found {len(treatment_cases)} similar treatment cases")
+        print(f"Found {len(patient_records)} similar patient records")
         
     except Exception as e:
         print(f"❌ Error with treatment finder: {e}")
@@ -87,8 +57,7 @@ def demonstrate_refactored_usage():
     
 def main():
     """Main function to run the demonstration."""
-    setup_logging()
-    
+    set_proxy()
     try:
         demonstrate_refactored_usage()
     except Exception as e:

@@ -154,21 +154,16 @@ class PatientDataIngestion:
             return None
 
 def main():
-    """Example usage of the patient data ingestion pipeline."""
-    logging.basicConfig(level=logging.INFO)
-    
     # Initialize ingestion pipeline
     ingestion = PatientDataIngestion()
     
     # Ingest sample patient data
     sample_file_path = "ingest_data/patient_db/sample_patient_data.json"
-    print("Ingesting sample patient data...")
     record_ids = ingestion.ingest_from_json(sample_file_path)
     print(f"Ingested {len(record_ids)} sample patient records")
     
     # Ingest risk patient data
     risk_file_path = "ingest_data/patient_db/risk_patient_data.json"
-    print("Ingesting risk patient data...")
     risk_record_ids = ingestion.ingest_from_json(risk_file_path)
     print(f"Ingested {len(risk_record_ids)} risk patient records")
     
