@@ -107,6 +107,8 @@ class PolypSegmentation:
         ).astype(np.uint8)
 
         self.save_image(overlaid, output_path)
+        logging.info(f"save image success: {output_path}")
+
         return True
 
     
@@ -116,7 +118,6 @@ class PolypSegmentation:
             image = image.numpy() if isinstance(image, Tensor) else image
             image = (image * 255).clip(0, 255).astype(np.uint8)
         imageio.imwrite(output_path, image)
-        logging.info(f"save image success: {output_path}")
 
     def process_regions(self, mask_path):
         image = cv2.imread(mask_path)

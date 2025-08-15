@@ -149,7 +149,7 @@ class MedicalImageSummarizer:
             
             # Add safety disclaimer and image_id to the response content for tracking
             safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
-            summary_with_id = f"{response.content}{safety_disclaimer}\n\n[Image_ID: {image_id}]"
+            summary_with_id = f"{response.content}{safety_disclaimer}"
             
             # Store the summarized result along with the original diagnosis
             summarized_result = {
@@ -212,7 +212,7 @@ class MedicalImageSummarizer:
             response = self.llm.invoke(followup_prompt)
             # Add safety disclaimer and include the image_id in the response for continued tracking
             safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
-            return f"{response.content}{safety_disclaimer}\n\n[Image_ID: {image_id}]"
+            return f"{response.content}{safety_disclaimer}"
         except Exception as e:
             self.logger.error(f"Error generating follow-up response: {e}")
             safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."

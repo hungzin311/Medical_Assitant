@@ -271,19 +271,10 @@ def create_agent_graph():
             # Look for the most recent image ID in the conversation history
             image_id = None
             for i in range(len(messages)-1, -1, -1):
-                if isinstance(messages[i], AIMessage):
-                    content = messages[i].content
-                    # Look for the image_id pattern in the content
-                    if "[image_id:" in content.lower():
-                        start_idx = content.lower().find("[image_id:") + 10
-                        end_idx = content.lower().find("]", start_idx)
-                        image_id = content[start_idx:end_idx].strip()
-                        break
-                    # Alternative format
-                    elif "image_id:" in content.lower():
-                        start_idx = content.lower().find("image_id:") + 9
-                        end_idx = content.find("\n", start_idx) if "\n" in content[start_idx:] else len(content)
-                        image_id = content[start_idx:end_idx].strip()
+                if isinstance(messages[i], AIMessage): 
+                    if "image_id" in getattr(messages[i], "metadata", {}): 
+                        image_id = getattr(messages[i], "meatadata", {}).get("image_id", None)
+                        print(f"Found image_id: {image_id}")
                         break
             
             # If we found an image ID, try to generate a follow-up response
@@ -531,7 +522,7 @@ def create_agent_graph():
             
             # Use the summarized content as the response
             if summarized_result["success"]:
-                response = AIMessage(content=summarized_result["summary"])
+                response = AIMessage(content=summarized_result["summary"], metadata={"image_id":summarized_result['image_id']})
             else:
                 response = AIMessage(content=diagnosis_result["diagnosis"])
         else:
@@ -595,7 +586,7 @@ def create_agent_graph():
             
             # Use the summarized content as the response
             if summarized_result["success"]:
-                response = AIMessage(content=f"Dưới đây là kết quả phân vùng tổn thương da dựa trên ảnh đã được cung cấp:\n\n{summarized_result['summary']}")
+                response = AIMessage(content=f"Dưới đây là kết quả phân vùng tổn thương da dựa trên ảnh đã được cung cấp:\n\n{summarized_result['summary']}", metadata={"image_id":summarized_result['image_id']})
             else:
                 response = AIMessage(content="Dưới đây là kết quả phân vùng tổn thương da dựa trên ảnh đã được cung cấp:")
         else:
@@ -652,7 +643,7 @@ def create_agent_graph():
             
             # Use the summarized content as the response
             if summarized_result["success"]:
-                response = AIMessage(content=f"Dưới đây là kết quả phân vùng polyp từ hình ảnh nội soi đại tràng:\n\n{summarized_result['summary']}")
+                response = AIMessage(content=f"Dưới đây là kết quả phân vùng polyp từ hình ảnh nội soi đại tràng:\n\n{summarized_result['summary']}", metadata={"image_id":summarized_result['image_id']})
             else:
                 response = AIMessage(content=f"Dưới đây là kết quả phân vùng polyp từ hình ảnh nội soi đại tràng:\n\n{diagnosis_result['diagnosis']}")
         else:
