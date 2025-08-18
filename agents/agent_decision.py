@@ -2,7 +2,8 @@ from typing import Dict, List, Optional, TypedDict, Union
 from langchain_core.messages import HumanMessage, AIMessage, BaseMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
-from langgraph.graph import MessagesState, StateGraph, END
+from langgraph.graph import MessagesState, StateGraph
+from langgraph.constants import END
 from dotenv import load_dotenv
 from agents.rag_agent import MedicalRAG
 from agents.web_search_processor_agent import WebSearchProcessorAgent
@@ -32,10 +33,10 @@ class AgentConfig:
     """Configuration settings for the agent decision system."""
     
     # Decision model
-    DECISION_MODEL = "gemini-2.0-flash"  # or whichever model you prefer
+    DECISION_MODEL = "gemini-2.5-flash"  # or whichever model you prefer
     
     # Vision model for image analysis
-    VISION_MODEL = "gemini-2.0-flash"
+    VISION_MODEL = "gemini-2.5-flash"
     
     # Confidence threshold for responses
     CONFIDENCE_THRESHOLD = 0.85
@@ -140,6 +141,16 @@ def create_agent_graph():
         Based on this information, which agent should handle this query?
         """
         
+        # Check for NON-MEDICAL images and reject them
+        if image_type == "NON-MEDICAL":
+            updated_state = {
+                **state,
+                "output": AIMessage(content="Tôi rất xin lỗi, nhưng hình ảnh bạn tải lên không phải là hình ảnh y tế. Tôi chỉ có thể phân tích các hình ảnh y tế như X-quang, CT, MRI, ảnh da, nội soi, v.v. Vui lòng tải lên hình ảnh y tế để tôi có thể hỗ trợ bạn."),
+                "agent_name": "NON_MEDICAL_FILTER"
+            }
+            return {"agent_state": updated_state, "next": "apply_guardrails"}
+
+
         # Make the decision
         decision = decision_chain.invoke({"input": decision_input})
 
@@ -221,8 +232,7 @@ def create_agent_graph():
                     }
                 except Exception as e:
                     print(f"Error generating follow-up response: {e}")
-                    # Fall back to regular conversation if there's an error
-        
+
         # Create context from recent conversation history
         recent_context = ""
         for msg in messages:  # currently considering complete history - limit control from config
@@ -230,8 +240,7 @@ def create_agent_graph():
                 recent_context += f"User: {msg.content}\n"
             elif isinstance(msg, AIMessage):
                 recent_context += f"Assistant: {msg.content}\n"
-        
-        print("######### DEBUG 3:", recent_context)
+                
         # Combine everything for the decision input
         conversation_prompt = f"""Câu hỏi người dùng: {input_text}
 
@@ -645,6 +654,7 @@ def create_agent_graph():
             "SKIN_LESION_AGENT": "SKIN_LESION_AGENT",
             "POLYP_SEGMENTATION_AGENT": "POLYP_SEGMENTATION_AGENT",
             "GENERAL_MEDICAL_IMAGE_AGENT": "GENERAL_MEDICAL_IMAGE_AGENT",
+            "apply_guardrails": "apply_guardrails",  # For NON-MEDICAL images
             "needs_validation": "RAG_AGENT"  # Default to RAG if confidence is low
         }
     )

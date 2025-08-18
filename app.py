@@ -71,10 +71,15 @@ class QueryRequest(BaseModel):
 
 @app.get("/")
 async def root(request: Request):
-    """Render the chat interface"""
+    """Render the dashboard interface"""
+    return templates.TemplateResponse("dashboard.html", {"request": request})
+
+@app.get("/chat")
+async def chat_interface(request: Request):
+    """Render the AI chat interface"""
     return templates.TemplateResponse("index.html", {"request": request})
 
-@app.post("/chat")
+@app.post("/api/chat")
 async def chat(request: QueryRequest):
     """Process a chat message"""
     try:
