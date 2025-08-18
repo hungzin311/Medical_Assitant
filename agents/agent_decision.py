@@ -74,9 +74,8 @@ def create_agent_graph():
     
     # Create the decision prompt
     decision_prompt = ChatPromptTemplate.from_messages([
-        ("system", decision_agent_prompt),
-        ("human", "{input}")
-    ])
+    ("human", f"System: {decision_agent_prompt}\n\nUser: {{input}}")])
+
     
     # Create the decision chain
     decision_chain = decision_prompt | decision_model | json_parser
@@ -232,6 +231,7 @@ def create_agent_graph():
             elif isinstance(msg, AIMessage):
                 recent_context += f"Assistant: {msg.content}\n"
         
+        print("######### DEBUG 3:", recent_context)
         # Combine everything for the decision input
         conversation_prompt = f"""Câu hỏi người dùng: {input_text}
 
@@ -547,12 +547,7 @@ def create_agent_graph():
         print(f"Selected agent: HUMAN_VALIDATION")
 
         # Append validation request to the existing output
-        validation_prompt = f"""{state['output'].content}
-
-        **Human Validation Required:**
-        - Nếu bạn là chuyên gia, hãy đánh giá lại kết quả. Chọn **Yes** hoặc **No**. Nếu No, cung cấp nhận xét.
-        - Nếu bạn là bệnh nhân: Chỉ cần chọn Yes để xác nhận.
-        """
+        validation_prompt = f"""{state['output'].content}"""
 
         # Create an AI message with the validation prompt
         validation_message = AIMessage(content=validation_prompt)
@@ -656,7 +651,6 @@ def create_agent_graph():
     
     # Connect agent outputs to validation check
     workflow.add_edge("CONVERSATION_AGENT", "check_validation")
-    # workflow.add_edge("RAG_AGENT", "check_validation")
     workflow.add_edge("WEB_SEARCH_PROCESSOR_AGENT", "check_validation")
     workflow.add_conditional_edges("RAG_AGENT", confidence_based_routing)
     workflow.add_edge("SKIN_LESION_AGENT", "check_validation")
@@ -673,8 +667,6 @@ def create_agent_graph():
             END: "apply_guardrails"  # Route to guardrails instead of END
         }
     )
-    
-    # workflow.add_edge("human_validation", END)
     
     # Compile the graph
     return workflow.compile(checkpointer=memory)

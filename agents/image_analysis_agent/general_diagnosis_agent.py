@@ -80,9 +80,8 @@ class GeneralMedicalDiagnosisAgent:
         
         # Create vision prompt
         vision_prompt = [
-            {"role": "system", "content": "You are a medical imaging expert. Analyze the uploaded medical image carefully and provide detailed insights."},
             {"role": "user", "content": [
-                {"type": "text", "text": prompt_text},
+                {"type": "text", "text": f"System: You are a medical imaging expert. Analyze the uploaded medical image carefully and provide detailed insights.\n\n{prompt_text}"},
                 {"type": "image_url", "image_url": {"url": self.local_image_to_data_url(image_path)}}
             ]}
         ]

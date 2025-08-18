@@ -11,7 +11,7 @@ def get_gemini_llm(temperature=0.7):
         model="gemini-2.5-flash",
         google_api_key=os.getenv("GOOGLE_API_KEY"),
         temperature=temperature,
-        convert_system_message_to_human=True
+        convert_system_message_to_human=False
     )
 
 def get_gemini_vision_llm(temperature=0.2):
@@ -20,7 +20,7 @@ def get_gemini_vision_llm(temperature=0.2):
         model="gemini-2.5-flash",  # Gemini 2.0 supports multimodal inputs
         google_api_key=os.getenv("GOOGLE_API_KEY"),
         temperature=temperature,
-        convert_system_message_to_human=True,
+        convert_system_message_to_human=False,
         max_output_tokens=4096  # Increase token limit for detailed image analysis
     )
 

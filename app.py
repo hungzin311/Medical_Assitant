@@ -1,24 +1,17 @@
 import os
 import uuid
-import tempfile
 from typing import Dict, Union, Optional, List
-import glob
-import threading
 import time
-from io import BytesIO
 import json
 import base64
-
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends, Request, Response, Cookie
 from fastapi.responses import JSONResponse, FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
-
 import uvicorn
 import requests
 from werkzeug.utils import secure_filename
-
 from config import Config
 from agents.agent_decision import process_query, create_agent_graph
 from proxy_setting import *
@@ -302,7 +295,7 @@ async def validate_medical_output(
                             
                             # Try to extract the base64 part
                             try:
-                                header, encoded = image_data.split(",", 1)
+                                _, encoded = image_data.split(",", 1)
                             except:
                                 encoded = image_data
                                 

@@ -38,10 +38,11 @@ class ImageClassifier:
         print(f"[ImageAnalyzer] Analyzing image: {image_path}")
 
         vision_prompt = [
-            {"role": "system", "content": "You are an expert in medical imaging. Analyze the uploaded image."},
             {"role": "user", "content": [
                 {"type": "text", "text": (
                     f"""
+                    System: You are an expert in medical imaging. Analyze the uploaded image.
+                    
                     {f'CÂU HỎI CỦA NGƯỜI DÙNG: {user_query}' if user_query else ''}
                     
                     Phân tích hình ảnh này và xác định loại:
