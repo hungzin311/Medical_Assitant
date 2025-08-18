@@ -20,13 +20,15 @@ import requests
 from werkzeug.utils import secure_filename
 
 from config import Config
-from agents.agent_decision import process_query
+from agents.agent_decision import process_query, create_agent_graph
 from proxy_setting import *
 # Load configuration
 config = Config()
 
 #Set proxy 
 set_proxy()
+
+graph = create_agent_graph()
 
 # Initialize FastAPI app with increased limits for large form data
 app = FastAPI(
@@ -79,21 +81,15 @@ async def root(request: Request):
     """Render the chat interface"""
     return templates.TemplateResponse("index.html", {"request": request})
 
-@app.get("/health")
-def health_check():
-    """Health check endpoint for Docker health checks"""
-    return {"status": "healthy"}
-
 @app.post("/chat")
 async def chat(request: QueryRequest):
     """Process a chat message"""
     try:
-        print('Processing chat request')
         # Get the message from the request
         message = request.message
         
         # Process the query
-        response_data = process_query(message)
+        response_data = process_query(message, graph=graph)
         
         # Extract the response from the last AI message
         response_text = ""
@@ -168,7 +164,7 @@ async def upload_image(
     
     try:
         query = {"text": text, "image": file_path}
-        response_data = process_query(query)
+        response_data = process_query(query, graph=graph)
         response_text = response_data['messages'][-1].content
 
         # Set session cookie
@@ -219,10 +215,6 @@ async def validate_medical_output(
         # Set session cookie
         response.set_cookie(key="session_id", value=session_id)
         
-        # Debug: Print received form data size
-        form_data = await request.form()
-        print(f"Received validation form data with {len(form_data)} fields")
-        
         # Log reviews for further analysis
         if validation_result.lower() not in ['yes', 'true', '1', 'confirm']:
             # Safely parse JSON data
@@ -231,9 +223,7 @@ async def validate_medical_output(
             
             try:
                 if bot_response:
-                    print(f"Bot response length: {len(bot_response)}")
                     parsed_bot_response = json.loads(bot_response)
-                    print("Successfully parsed bot_response JSON")
             except Exception as e:
                 print(f"Error parsing bot_response JSON: {str(e)}")
                 try:
@@ -247,9 +237,7 @@ async def validate_medical_output(
                 
             try:
                 if user_question:
-                    print(f"User question length: {len(user_question)}")
                     parsed_user_question = json.loads(user_question)
-                    print("Successfully parsed user_question JSON")
             except Exception as e:
                 print(f"Error parsing user_question JSON: {str(e)}")
                 try:
@@ -267,8 +255,6 @@ async def validate_medical_output(
             if image_data and image_data.startswith('data:image'):
                 # Extract image data from base64 string
                 try:
-                    print("Attempting to save image from validation data...")
-                    
                     # Generate a timestamp for the filename
                     timestamp = time.strftime("%Y%m%d_%H%M%S")
                     file_id = uuid.uuid4().hex[:6]
@@ -279,8 +265,7 @@ async def validate_medical_output(
                         format_type = "jpg"
                     elif "data:image/png" in image_data:
                         format_type = "png"
-                    elif "data:image/gif" in image_data:
-                        format_type = "gif"
+                    
                     
                     # Create the filename with correct extension
                     image_filename = f"{LOGS_IMAGES_DIR}/review_image_{timestamp}_{file_id}.{format_type}"
@@ -288,56 +273,29 @@ async def validate_medical_output(
                     # Direct approach to save the image
                     success = False
                     
-                    # Method 1: Using regex and standard base64 decode
+                    # Method 1: Using regex and standard base64 decode (with padding if needed)
                     try:
                         import re
-                        header_pattern = r'^data:image/[^;]+;base64,'
-                        image_data_cleaned = re.sub(header_pattern, '', image_data)
+                        image_data_cleaned = re.sub(r'^data:image/[^;]+;base64,', '', image_data)
                         
-                        # Debug info
-                        print(f"Image data length after cleaning: {len(image_data_cleaned)}")
-                        
-                        # Decode base64 data
+                        # Add padding if needed
+                        padding_needed = 4 - len(image_data_cleaned) % 4
+                        if padding_needed < 4:
+                            image_data_cleaned += "=" * padding_needed
+                            
                         image_binary = base64.b64decode(image_data_cleaned)
-                        print(f"Successfully decoded base64 data, length: {len(image_binary)}")
                         
                         # Write to file
                         with open(image_filename, "wb") as f:
                             f.write(image_binary)
                             
-                        print(f"Successfully saved image to {image_filename}")
                         success = True
                     except Exception as method1_error:
                         print(f"Method 1 failed: {str(method1_error)}")
-                        
-                    # Method 2: Alternative approach with padding
-                    if not success:
-                        try:
-                            print("Trying alternative method with padding...")
-                            import re
-                            image_data_cleaned = re.sub(r'^data:image/[^;]+;base64,', '', image_data)
-                            
-                            # Add padding if needed
-                            padding_needed = 4 - len(image_data_cleaned) % 4
-                            if padding_needed < 4:
-                                image_data_cleaned += "=" * padding_needed
-                                print(f"Added {padding_needed} padding characters")
-                                
-                            image_binary = base64.b64decode(image_data_cleaned)
-                            
-                            # Write to file
-                            with open(image_filename, "wb") as f:
-                                f.write(image_binary)
-                                
-                            print(f"Method 2: Successfully saved image to {image_filename}")
-                            success = True
-                        except Exception as method2_error:
-                            print(f"Method 2 failed: {str(method2_error)}")
                     
-                    # Method 3: Use a third-party library or direct file download
+                    # Method 2: Use a third-party library or direct file download
                     if not success:
                         try:
-                            print("Trying method 3: Direct file save...")
                             # For this method, we'll use PIL if available
                             from PIL import Image
                             import io
@@ -356,17 +314,12 @@ async def validate_medical_output(
                             
                             # Save the image
                             image.save(image_filename)
-                            print(f"Method 3: Successfully saved image using PIL to {image_filename}")
                             success = True
-                        except Exception as method3_error:
-                            print(f"Method 3 failed: {str(method3_error)}")
+                        except Exception as method2_error:
+                            print(f"Method 2 failed: {str(method2_error)}")
                     
-                    # Method 4: Last resort - just save the base64 string
+                    # Method 3: Last resort - just save the base64 string
                     if not success:
-                        # The original base64 is already saved, so we'll use that as our path
-                        # image_filename = raw_backup_filename
-                        # print(f"All decode methods failed. Using raw base64 file as image path: {image_filename}")
-                        # success = True
                         pass
                     # Make the image path relative for storage in JSON
                     image_path = image_filename
@@ -374,12 +327,9 @@ async def validate_medical_output(
                     if relative_image_path.startswith("./"):
                         relative_image_path = relative_image_path[2:]
                     
-                    print(f"Final image path: {image_path}")
-                    
                     # Update the user_question with the image path if it's a parsed object
                     if parsed_user_question and isinstance(parsed_user_question, dict):
                         parsed_user_question["saved_image_path"] = relative_image_path
-                        print(f"Added image path to user_question JSON: {relative_image_path}")
                     
                 except Exception as e:
                     print(f"Failed to save image: {str(e)}")
@@ -397,7 +347,6 @@ async def validate_medical_output(
                 "bot_response": parsed_bot_response,
                 "user_question": parsed_user_question,
                 "image_path": image_path,
-                "base64_path": base64_path
             }
             
             # Generate a unique log filename
@@ -407,14 +356,12 @@ async def validate_medical_output(
             with open(log_filename, "w", encoding="utf-8") as f:
                 json.dump(log_entry, f, ensure_ascii=False, indent=4)
             
-            print(f"Review logged to {log_filename}")
-        
         # Re-run the agent decision system with the validation input
         validation_query = f"Validation result: {validation_result}"
         if comments:
             validation_query += f" Comments: {comments}"
         
-        response_data = process_query(validation_query)
+        response_data = process_query(validation_query, graph=graph)
         
         # Get response from output or messages
         response_text = ""

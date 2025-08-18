@@ -1,7 +1,8 @@
 import os
 import logging
 from typing import Dict, Any, Optional
-
+import base64
+from mimetypes import guess_type
 class GeneralMedicalDiagnosisAgent:
     """
     Agent responsible for diagnosing general medical images using MLLM.
@@ -29,8 +30,7 @@ class GeneralMedicalDiagnosisAgent:
         Returns:
             Data URL of the image
         """
-        import base64
-        from mimetypes import guess_type
+        
         
         mime_type, _ = guess_type(image_path)
         if mime_type is None:
