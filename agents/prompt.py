@@ -38,6 +38,10 @@ decision_agent_prompt = """Bạn là một hệ thống phân loại y tế thô
     - Nếu KHÔNG có text hoặc text trống → MẶC ĐỊNH GENERAL_MEDICAL_IMAGE_AGENT (để chẩn đoán)
     - Nếu không có yêu cầu rõ ràng → MẶC ĐỊNH GENERAL_MEDICAL_IMAGE_AGENT
 
+    - Nếu Image type = "SKIN LESION" → chọn SKIN_LESION_AGENT
+    - Nếu Image type = "POLYP SEGMENTATION" → chọn POLYP_SEGMENTATION_AGENT  
+    - Nếu Image type = "GENERAL MEDICAL IMAGE" → chọn GENERAL_MEDICAL_IMAGE_AGENT
+
     **Phân biệt giữa các loại segmentation:**
     - POLYP_SEGMENTATION_AGENT: Dành cho ảnh nội soi đại tràng, phân vùng polyp (màu đỏ = neoplastic, màu xanh = non-neoplastic)
     - SKIN_LESION_AGENT: Dành cho ảnh tổn thương da, phân vùng ranh giới tổn thương da
