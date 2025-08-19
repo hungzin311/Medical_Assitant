@@ -146,9 +146,11 @@ def create_agent_graph():
             updated_state = {
                 **state,
                 "output": AIMessage(content="Tôi rất xin lỗi, nhưng hình ảnh bạn tải lên không phải là hình ảnh y tế. Tôi chỉ có thể phân tích các hình ảnh y tế như X-quang, CT, MRI, ảnh da, nội soi, v.v. Vui lòng tải lên hình ảnh y tế để tôi có thể hỗ trợ bạn."),
-                "agent_name": "NON_MEDICAL_FILTER"
             }
-            return {"agent_state": updated_state, "next": "apply_guardrails"}
+            # print("Updated state: ", updated_state['output'])
+            return {**updated_state,
+                    "agent_name": "NON_MEDICAL_FILTER",
+                    "next": "apply_guardrails"}
 
 
         # Make the decision
@@ -570,6 +572,8 @@ def create_agent_graph():
     # Check output through guardrails
     def apply_output_guardrails(state: AgentState) -> AgentState:
         """Apply output guardrails to the generated response."""
+        print("Choosing Apply Output Guardrails")
+        
         output = state["output"]
         current_input = state["current_input"]
 
@@ -578,7 +582,7 @@ def create_agent_graph():
             return state
 
         output_text = output if isinstance(output, str) else output.content
-        
+      
         # If the last message was a human validation message
         if "Human Validation Required" in output_text:
             # Check if the current input is a human validation response
@@ -729,8 +733,17 @@ def process_query(query: Union[str, Dict], conversation_history: List[BaseMessag
 
     # Run the graph
     result = graph.invoke(state, thread_config)
+
+    ### Tracking agent name
     
-    # Keep history to reasonable size
+    # to_replay = None
+    # for state in graph.get_state_history(thread_config):
+    #     print("Num Messages: ", len(state.values["messages"]), "Next: ", state.next)
+    #     print("-" * 80)
+    #     if len(state.values["messages"]) == 6:
+    #         # We are somewhat arbitrarily selecting a specific state based on the number of chat messages in the state.
+    #         to_replay = state
+
     if len(result["messages"]) > config.max_conversation_history:
         result["messages"] = result["messages"][-config.max_conversation_history:]
 
