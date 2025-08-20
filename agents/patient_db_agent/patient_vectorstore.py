@@ -1,16 +1,10 @@
 import os
-import re
 import logging
-import json
 from uuid import uuid4
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import List, Dict, Any, Tuple, Optional, Union
-from agents.rag_agent.cloud_docstore import CloudDocStore
-from langchain_core.documents import Document
-from langchain_qdrant import QdrantVectorStore, RetrievalMode
-from qdrant_client import QdrantClient, models
-from qdrant_client.http.models import Distance, VectorParams, OptimizersConfigDiff, Filter, FieldCondition, MatchValue, Range
+from datetime import datetime
+from typing import List, Dict, Any
+from qdrant_client import QdrantClient
+from qdrant_client.http.models import Distance, VectorParams, OptimizersConfigDiff
 
 
 class PatientVectorStore:
@@ -35,6 +29,7 @@ class PatientVectorStore:
         # Cloud configuration
         self.qdrant_url = config.rag.url
         self.qdrant_api_key = config.rag.api_key
+        self.llm = config.patient_db.llm
         
         # Initialize cloud client
         if not self.qdrant_url or not self.qdrant_api_key:

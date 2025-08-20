@@ -1,7 +1,7 @@
 import logging
 from typing import List, Dict, Any, Tuple, Optional
 from qdrant_client.http.models import Filter, FieldCondition, MatchValue, Range
-import json
+
 
 class TreatmentFinder:
     """
@@ -21,17 +21,18 @@ class TreatmentFinder:
         self.client = patient_vector_store.client 
         self.collection_name = patient_vector_store.collection_name
         self.embeddings = patient_vector_store.embedding_model
-        
+        self.llm = patient_vector_store.llm
     def find_treatment_cases(
         self, 
         query: str, 
-        candidate_treatments: List[str],
+        patient_id: str,
+        candidate_treatments: List[str] = None,
         age_range: Optional[Tuple[int, int]] = None,
         comorbidities: Optional[List[str]] = None,
-        limit: int = 30
+        limit: int = 10
     ) -> List[Dict[str, Any]]:
         """
-        Find similar cases for treatment optimization (Problem 2).
+        Find similar cases for treatment optimization.
         
         Args:
             query: Patient query text
@@ -43,18 +44,23 @@ class TreatmentFinder:
         Returns:
             List of similar cases with treatment outcomes
         """
-        must_conditions = [
-            # Must have outcome data
+
+        must_conditions = [ 
             FieldCondition(key="primary_outcome", range=Range(gte=0.0))
         ]
         
+        must_not_conditions = [ 
+            FieldCondition(key="patient_id", match=MatchValue(value=patient_id))
+        ]  
+
         should_conditions = []
         
         # Treatment filters
-        for treatment in candidate_treatments:
-            should_conditions.append(
-                FieldCondition(key="candidate_treatments", match=MatchValue(value=treatment))
-            )
+        if candidate_treatments:
+            for treatment in candidate_treatments:
+                should_conditions.append(
+                    FieldCondition(key="candidate_treatments", match=MatchValue(value=treatment))
+                )
         
         # Age range filter
         if age_range:
@@ -68,9 +74,10 @@ class TreatmentFinder:
             for comorbidity in comorbidities:
                 should_conditions.append(
                     FieldCondition(key="comorbidities", match=MatchValue(value=comorbidity))
-                )
+                ) 
         
-        query_filter = Filter(must=must_conditions, should=should_conditions)
+        query_filter = Filter(must_not = must_not_conditions, must=must_conditions, should=should_conditions)
+    
         query = self.embeddings.embed_query(query)
         try:
             # Use similarity_search_with_score for vector-based search
@@ -97,6 +104,7 @@ class TreatmentFinder:
             for result in results:
                 case = {
                     "id": result.id,
+                    "patient_id": result.payload.get("patient_id", ""),
                     "distance": 1 - result.score,  # Convert similarity to distance
                     "treatments_tried": result.payload.get("treatments_tried", []),
                     "primary_outcome": result.payload.get("primary_outcome", 0.0),
@@ -133,5 +141,6 @@ class TreatmentFinder:
 
         """
         response = self.llm.invoke(prompt)
+        return response.content
 
        
