@@ -272,6 +272,61 @@
             position: relative;
         }
 
+        .patient-modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 800px;
+            max-height: 90vh;
+            margin: 5% auto;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        .form-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .form-section h3 {
+            color: #d32f2f;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        .required {
+            color: red;
+        }
+
         .close {
             position: absolute;
             top: 15px;
@@ -383,11 +438,11 @@
         <!-- Main Dashboard Grid -->
         <div class="dashboard-grid">
             <!-- Survey Card -->
-            <div class="dashboard-card survey-card" onclick="openSurveyModal()">
+            <div class="dashboard-card survey-card" onclick="console.log('Survey card clicked'); document.getElementById('surveyModal').style.display='block';">
                 <div class="card-icon">📋</div>
                 <h3 class="card-title">Điền Form Khảo Sát</h3>
                 <p class="card-description">Đánh giá triệu chứng và tình trạng sức khỏe hiện tại. Nhận kết quả phân tích ngay lập tức.</p>
-                <button class="card-action">Bắt đầu khảo sát</button>
+                <button class="card-action" onclick="event.stopPropagation(); console.log('Survey button clicked'); document.getElementById('surveyModal').style.display='block';">Bắt đầu khảo sát</button>
             </div>
 
             <!-- AI Chat Card -->
@@ -429,51 +484,245 @@
         🚨
     </div>
 
-    <!-- Survey Modal -->
+    <!-- Patient Intake Modal -->
     <div id="surveyModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('surveyModal')">&times;</span>
-            <h2 style="margin-bottom: 20px; color: #333;">Khảo Sát Triệu Chứng</h2>
-            <form id="surveyForm">
-                <div class="form-group">
-                    <label class="form-label">Mức độ đau (1-10):</label>
-                    <select class="form-select" id="painLevel">
-                        <option value="">Chọn mức độ đau</option>
-                        <option value="1">1 - Không đau</option>
-                        <option value="3">3 - Đau nhẹ</option>
-                        <option value="5">5 - Đau vừa</option>
-                        <option value="7">7 - Đau nhiều</option>
-                        <option value="10">10 - Đau không chịu nổi</option>
-                    </select>
+        <div class="patient-modal-content">
+            <span class="close" onclick="console.log('Close button clicked'); document.getElementById('surveyModal').style.display='none';">&times;</span>
+            <h2 style="margin-bottom: 20px; color: #333;">📋 Form Nhập Thông Tin Bệnh Nhân</h2>
+            <form id="patientIntakeForm">
+                <!-- Thông tin cơ bản -->
+                <div class="form-section" style="background: #f8f9fa;">
+                    <h3>👤 Thông tin cơ bản</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Họ và tên:</label>
+                            <input type="text" class="form-input" name="full_name" placeholder="Nhập họ và tên đầy đủ">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tuổi: <span class="required">*</span></label>
+                            <input type="number" class="form-input" name="age" min="0" max="120" required placeholder="Nhập tuổi">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Giới tính: <span class="required">*</span></label>
+                            <select class="form-select" name="sex" required>
+                                <option value="">Chọn giới tính</option>
+                                <option value="male">Nam</option>
+                                <option value="female">Nữ</option>
+                                <option value="other">Khác</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Chiều cao (cm):</label>
+                            <input type="number" class="form-input" name="height_cm" min="30" max="250" placeholder="Ví dụ: 170">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Cân nặng (kg):</label>
+                            <input type="number" class="form-input" name="weight_kg" min="1" max="400" placeholder="Ví dụ: 65">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tỉnh/Thành phố:</label>
+                            <input type="text" class="form-input" name="province" placeholder="Ví dụ: Hà Nội">
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Triệu chứng chính:</label>
-                    <select class="form-select" id="symptoms">
-                        <option value="">Chọn triệu chứng</option>
-                        <option value="headache">Đau đầu</option>
-                        <option value="fever">Sốt</option>
-                        <option value="fatigue">Mệt mỏi</option>
-                        <option value="nausea">Buồn nôn</option>
-                        <option value="other">Khác</option>
-                    </select>
+
+                <!-- Triệu chứng chính -->
+                <div class="form-section" style="background: #fff5f5;">
+                    <h3>🩺 Triệu chứng chính</h3>
+                    <div class="form-group">
+                        <label class="form-label">Lý do khám chính: <span class="required">*</span></label>
+                        <textarea class="form-textarea" name="chief_complaint" rows="3" required placeholder="Mô tả chi tiết lý do đến khám (tối thiểu 5 ký tự)"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tóm tắt tình trạng:</label>
+                        <textarea class="form-textarea" name="summary_text" rows="2" placeholder="Tóm tắt ngắn gọn về tình trạng hiện tại"></textarea>
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Ngày bắt đầu:</label>
+                            <input type="date" class="form-input" name="onset_date">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Số ngày kéo dài: <span class="required">*</span></label>
+                            <input type="number" class="form-input" name="duration_days" min="0" max="36500" required placeholder="Số ngày">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Mức độ nghiêm trọng (0-10): <span class="required">*</span></label>
+                            <input type="number" class="form-input" name="severity_score" min="0" max="10" step="0.1" required placeholder="0 = nhẹ, 10 = rất nặng">
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Thời gian xuất hiện:</label>
-                    <input type="text" class="form-input" id="duration" placeholder="Ví dụ: 2 ngày, 1 tuần">
+
+                <!-- Chi tiết triệu chứng -->
+                <div class="form-section" style="background: #f0f8ff;">
+                    <h3>📝 Chi tiết triệu chứng</h3>
+                    <div class="form-group">
+                        <label class="form-label">Diễn biến:</label>
+                        <select class="form-select" name="course">
+                            <option value="">Chọn diễn biến</option>
+                            <option value="worsening">Xấu đi</option>
+                            <option value="improving">Cải thiện</option>
+                            <option value="stable">Ổn định</option>
+                            <option value="fluctuating">Thay đổi</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Yếu tố làm nặng/nhẹ:</label>
+                        <textarea class="form-textarea" name="aggravating_relieving" rows="2" placeholder="Mô tả các yếu tố làm triệu chứng nặng hơn hoặc nhẹ đi"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Triệu chứng kèm theo:</label>
+                        <input type="text" class="form-input" name="associated_symptoms" placeholder="Nhập các triệu chứng khác, cách nhau bởi dấu phẩy">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Vị trí:</label>
+                        <input type="text" class="form-input" name="location" placeholder="Vị trí cụ thể của triệu chứng">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Mô tả thêm:</label>
-                    <textarea class="form-textarea" id="description" rows="3" placeholder="Mô tả chi tiết triệu chứng..."></textarea>
+
+                <!-- Tiền sử bệnh -->
+                <div class="form-section" style="background: #fafafa;">
+                    <h3>🏥 Tiền sử bệnh và điều trị</h3>
+                    <div class="form-group">
+                        <label class="form-label">Bệnh lý kèm theo:</label>
+                        <input type="text" class="form-input" name="comorbidities" placeholder="Các bệnh lý khác, cách nhau bởi dấu phẩy">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Dị ứng:</label>
+                        <textarea class="form-textarea" name="allergies" rows="2" placeholder="Dị ứng thuốc, thực phẩm hoặc các chất khác"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Thuốc đang dùng:</label>
+                        <textarea class="form-textarea" name="current_medications" rows="2" placeholder="Liệt kê các loại thuốc đang sử dụng"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Các phương pháp điều trị đã thử:</label>
+                        <textarea class="form-textarea" name="treatments_tried" rows="2" placeholder="Mô tả các cách điều trị đã áp dụng"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Chống chỉ định:</label>
+                        <textarea class="form-textarea" name="contraindications" rows="2" placeholder="Các thuốc hoặc phương pháp điều trị không thể sử dụng"></textarea>
+                    </div>
                 </div>
-                <button type="submit" class="submit-btn">Gửi Khảo Sát</button>
+
+                <!-- Yếu tố nguy cơ -->
+                <div class="form-section" style="background: #fff8e1;">
+                    <h3>⚠️ Yếu tố nguy cơ</h3>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Tình trạng hút thuốc:</label>
+                            <select class="form-select" name="smoking_status">
+                                <option value="">Chọn tình trạng</option>
+                                <option value="never">Không bao giờ</option>
+                                <option value="former">Đã bỏ</option>
+                                <option value="current">Đang hút</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Sử dụng rượu bia:</label>
+                            <select class="form-select" name="alcohol_use">
+                                <option value="">Chọn mức độ</option>
+                                <option value="none">Không sử dụng</option>
+                                <option value="occasional">Thỉnh thoảng</option>
+                                <option value="frequent">Thường xuyên</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tình trạng mang thai:</label>
+                            <select class="form-select" name="pregnancy_status">
+                                <option value="">Chọn tình trạng</option>
+                                <option value="unknown">Không rõ</option>
+                                <option value="pregnant">Có thai</option>
+                                <option value="not_pregnant">Không có thai</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tiếp xúc nghề nghiệp:</label>
+                        <input type="text" class="form-input" name="occupational_exposure" placeholder="Tiếp xúc với hóa chất, bụi, khói... trong công việc">
+                    </div>
+                </div>
+
+                <!-- Dấu hiệu nguy hiểm -->
+                <div class="form-section" style="background: #ffebee; border: 2px solid #ffcdd2;">
+                    <h3>🚨 Dấu hiệu nguy hiểm</h3>
+                    <p style="color: #666; margin-bottom: 15px; font-style: italic;">Đánh dấu nếu bạn đang gặp phải các triệu chứng sau:</p>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="red_flags.severe_chest_pain">
+                            <span>Đau ngực dữ dội</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="red_flags.severe_breathing_difficulty">
+                            <span>Khó thở nghiêm trọng</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="red_flags.neurological_deficit">
+                            <span>Rối loạn thần kinh</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="red_flags.confusion_or_fainting">
+                            <span>Lú lẫn hoặc ngất xỉu</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="red_flags.uncontrolled_bleeding">
+                            <span>Chảy máu không cầm được</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="red_flags.fever_high_persistent">
+                            <span>Sốt cao kéo dài</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="red_flags.persistent_vomiting_dehydration">
+                            <span>Nôn mửa liên tục, mất nước</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="red_flags.severe_abdominal_pain">
+                            <span>Đau bụng dữ dội</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Thông tin liên hệ -->
+                <div class="form-section" style="background: #e8f5e8;">
+                    <h3>📞 Thông tin liên hệ</h3>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Số điện thoại: <span class="required">*</span></label>
+                            <input type="tel" class="form-input" name="contact.phone" required placeholder="Ví dụ: 0901234567">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email:</label>
+                            <input type="email" class="form-input" name="contact.email" placeholder="Ví dụ: example@email.com">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Mong muốn từ việc khám:</label>
+                        <textarea class="form-textarea" name="expectation" rows="2" placeholder="Bạn mong muốn điều gì từ cuộc khám này?"></textarea>
+                    </div>
+                </div>
+
+                <!-- Đồng ý -->
+                <div class="form-section" style="background: #f5f5f5;">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="consent" checked style="margin-top: 4px;">
+                        <span style="color: #333; line-height: 1.5;">
+                            Tôi đồng ý chia sẻ thông tin này với đội ngũ y tế để được tư vấn và hỗ trợ tốt nhất. 
+                            Tôi hiểu rằng đây chỉ là tham khảo và không thay thế cho việc khám bệnh trực tiếp với bác sĩ.
+                        </span>
+                    </label>
+                </div>
+
+                <button type="button" class="submit-btn" onclick="submitPatientForm()">📋 Gửi Thông Tin Bệnh Nhân</button>
             </form>
-            <div id="surveyResult" class="result-chart" style="display: none;">
-                <h3 style="color: #333; margin-bottom: 15px;">📊 Kết Quả Đánh Giá</h3>
+            
+            <div id="patientFormResult" class="result-chart" style="display: none;">
+                <h3 style="color: #333; margin-bottom: 15px;">✅ Đã gửi thành công!</h3>
                 <div style="background: #fff5f5; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #ffcdd2;">
-                    <p style="color: #d32f2f; font-weight: 600;">✅ Tình trạng: Ổn định</p>
-                    <p style="color: #666; margin-top: 5px;">Triệu chứng ở mức độ nhẹ, theo dõi thêm vài ngày.</p>
+                    <p style="color: #d32f2f; font-weight: 600;">Thông tin của bạn đã được ghi nhận</p>
+                    <p style="color: #666; margin-top: 5px;">Chúng tôi sẽ phân tích và liên hệ với bạn sớm nhất có thể.</p>
                 </div>
-                <p style="color: #e74c3c; font-size: 14px; font-style: italic;">⚠️ Đây chỉ là tham khảo, hãy gặp bác sĩ để được tư vấn chính xác.</p>
+                <p style="color: #e74c3c; font-size: 14px; font-style: italic;">⚠️ Nếu có triệu chứng nghiêm trọng, hãy đến cơ sở y tế gần nhất ngay lập tức.</p>
             </div>
         </div>
     </div>
@@ -557,10 +806,132 @@
     </div>
 
     <script>
-        // Modal functions
-        function openSurveyModal() {
-            document.getElementById('surveyModal').style.display = 'block';
+        console.log('JavaScript loading...');
+
+        // Submit patient form function
+        function submitPatientForm() {
+            console.log('submitPatientForm called');
+            
+            const form = document.getElementById('patientIntakeForm');
+            if (!form) {
+                console.error('Form not found!');
+                alert('Không tìm thấy form!');
+                return;
+            }
+            
+            // Collect form data
+            const formData = new FormData(form);
+            const patientData = {};
+            
+            // Handle regular fields
+            for (let [key, value] of formData.entries()) {
+                if (key.includes('.')) {
+                    // Handle nested objects like contact.phone, red_flags.severe_chest_pain
+                    const parts = key.split('.');
+                    if (!patientData[parts[0]]) {
+                        patientData[parts[0]] = {};
+                    }
+                    if (parts[0] === 'red_flags') {
+                        patientData[parts[0]][parts[1]] = value === 'on';
+                    } else {
+                        patientData[parts[0]][parts[1]] = value;
+                    }
+                } else {
+                    if (key === 'associated_symptoms' || key === 'comorbidities') {
+                        // Convert comma-separated strings to arrays
+                        patientData[key] = value ? value.split(',').map(item => item.trim()) : [];
+                    } else if (key === 'age' || key === 'duration_days') {
+                        patientData[key] = parseInt(value) || null;
+                    } else if (key === 'height_cm' || key === 'weight_kg' || key === 'severity_score') {
+                        patientData[key] = parseFloat(value) || null;
+                    } else if (key === 'consent') {
+                        patientData[key] = value === 'on';
+                    } else {
+                        patientData[key] = value || null;
+                    }
+                }
+            }
+            
+            // Handle checkboxes that weren't checked (they won't appear in FormData)
+            const redFlagCheckboxes = [
+                'severe_chest_pain', 'severe_breathing_difficulty', 'neurological_deficit',
+                'confusion_or_fainting', 'uncontrolled_bleeding', 'fever_high_persistent',
+                'persistent_vomiting_dehydration', 'severe_abdominal_pain'
+            ];
+            
+            if (!patientData.red_flags) {
+                patientData.red_flags = {};
+            }
+            
+            redFlagCheckboxes.forEach(flag => {
+                if (!(flag in patientData.red_flags)) {
+                    patientData.red_flags[flag] = false;
+                }
+            });
+            
+            // Generate patient_id if not provided
+            if (!patientData.patient_id) {
+                patientData.patient_id = 'patient_' + Date.now();
+            }
+            
+            console.log('Patient data to be sent:', patientData);
+            
+            // Disable button to prevent double submission
+            const submitBtn = document.querySelector('.submit-btn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Đang gửi...';
+            submitBtn.disabled = true;
+            
+            // Send to backend
+            fetch('/api/patient-intake', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(patientData)
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Success:', data);
+                
+                // Show success message
+                document.getElementById('patientFormResult').style.display = 'block';
+                submitBtn.textContent = 'Đã gửi thành công!';
+                submitBtn.style.background = '#4CAF50';
+                
+                // Show additional info if available
+                if (data.red_flags_detected && data.red_flags_detected.length > 0) {
+                    alert('⚠️ Phát hiện dấu hiệu nguy hiểm: ' + data.red_flags_detected.join(', ') + 
+                          '\nVui lòng đến cơ sở y tế gần nhất!');
+                }
+                
+                // Reset button after 3 seconds
+                setTimeout(() => {
+                    submitBtn.textContent = originalText;
+                    submitBtn.style.background = 'linear-gradient(135deg, #f44336, #d32f2f)';
+                    submitBtn.disabled = false;
+                    
+                    // Optionally close modal after success
+                    // document.getElementById('surveyModal').style.display = 'none';
+                }, 3000);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi gửi thông tin: ' + error.message + '\nVui lòng thử lại.');
+                
+                // Reset button on error
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            });
         }
+
+        console.log('JavaScript loaded successfully');
 
         function openChatModal() {
             console.log('openChatModal function called');
@@ -583,9 +954,7 @@
             alert('👤 Đang mở hồ sơ cá nhân... Tính năng quản lý thông tin bệnh nhân và cài đặt.');
         }
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
+        // Modal close functionality is now inline
 
         function emergencyCall() {
             if(confirm('🚨 Bạn có cần gọi cấp cứu không?\n\nSẽ kết nối với 115 (Cấp cứu) hoặc liên hệ bác sĩ khẩn cấp.')) {
@@ -593,29 +962,24 @@
             }
         }
 
-        // Survey form submission
-        document.getElementById('surveyForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        // Add real-time validation when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM Content Loaded");
             
-            const painLevel = document.getElementById('painLevel').value;
-            const symptoms = document.getElementById('symptoms').value;
-            const duration = document.getElementById('duration').value;
-            
-            if (!painLevel || !symptoms) {
-                alert('Vui lòng điền đầy đủ thông tin!');
-                return;
-            }
-            
-            // Simulate analysis
-            document.getElementById('surveyResult').style.display = 'block';
-            document.querySelector('.submit-btn').textContent = 'Đã gửi thành công!';
-            document.querySelector('.submit-btn').style.background = '#4CAF50';
-            
-            setTimeout(() => {
-                document.querySelector('.submit-btn').textContent = 'Gửi Khảo Sát';
-                document.querySelector('.submit-btn').style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
-            }, 2000);
+            // Add real-time validation
+            document.querySelectorAll('input[required], select[required], textarea[required]').forEach(field => {
+                field.addEventListener('blur', function() {
+                    if (!this.value.trim()) {
+                        this.style.borderColor = '#f44336';
+                    } else {
+                        this.style.borderColor = '#4CAF50';
+                    }
+                });
+            });
         });
+
+        // Test modal availability on page load
+        console.log('Survey modal element:', document.getElementById('surveyModal') ? 'Found' : 'Not found');
 
         // Close modal when clicking outside
         window.addEventListener('click', function(e) {
@@ -624,7 +988,15 @@
             }
         });
 
-
-
         // Add some interactive animations
-        document.querySelectorAll('.dashboard-card')
+        document.querySelectorAll('.dashboard-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>

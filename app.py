@@ -8,13 +8,14 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends, Req
 from fastapi.responses import JSONResponse, FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, field_validator
 import uvicorn
 import requests
 from werkzeug.utils import secure_filename
 from config import Config
 from agents.agent_decision import process_query, create_agent_graph
 from proxy_setting import *
+from agents.patient_db_agent import PatientIntakeForm
 # Load configuration
 config = Config()
 
@@ -69,6 +70,7 @@ class QueryRequest(BaseModel):
     image_data: Optional[str] = None
     conversation_history: List = []
 
+
 @app.get("/")
 async def root(request: Request):
     """Render the dashboard interface"""
@@ -78,6 +80,76 @@ async def root(request: Request):
 async def chat_interface(request: Request):
     """Render the AI chat interface"""
     return templates.TemplateResponse("index.html", {"request": request})
+
+@app.post("/api/patient-intake")
+async def patient_intake(patient_data: PatientIntakeForm):
+    """Process patient intake form data"""
+    print("=== Patient Intake Endpoint Called ===")
+    print(f"Received data: {patient_data}")
+    try:
+        # Generate patient_id if not provided
+        if not patient_data.patient_id:
+            patient_data.patient_id = f"patient_{int(time.time())}_{uuid.uuid4().hex[:6]}"
+        
+        # Create patient data directory if it doesn't exist
+        patient_data_dir = "data/patient_intake"
+        os.makedirs(patient_data_dir, exist_ok=True)
+        
+        # Generate filename with timestamp
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        filename = f"patient_intake_{timestamp}_{patient_data.patient_id}.json"
+        file_path = os.path.join(patient_data_dir, filename)
+        
+        # Convert to dict and save to JSON file
+        patient_dict = patient_data.dict()
+        patient_dict["created_at"] = time.strftime("%Y-%m-%d %H:%M:%S")
+        patient_dict["file_path"] = file_path
+        
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(patient_dict, f, ensure_ascii=False, indent=4)
+        
+        print(f"Patient intake data saved to: {file_path}")
+        
+        # Log the intake for monitoring
+        print(f"New patient intake: {patient_data.patient_id}")
+        print(f"Chief complaint: {patient_data.chief_complaint}")
+        print(f"Age: {patient_data.age}, Sex: {patient_data.sex}")
+        print(f"Severity score: {patient_data.severity_score}")
+        print(f"Contact phone: {patient_data.contact.phone}")
+        
+        # Check for red flags
+        red_flags_present = []
+        if patient_data.red_flags:
+            red_flags_dict = patient_data.red_flags.dict()
+            for flag, is_present in red_flags_dict.items():
+                if is_present:
+                    red_flags_present.append(flag)
+        
+        if red_flags_present:
+            print(f"⚠️ RED FLAGS DETECTED: {', '.join(red_flags_present)}")
+        
+        return {
+            "status": "success",
+            "message": "Thông tin bệnh nhân đã được ghi nhận thành công",
+            "patient_id": patient_data.patient_id,
+            "file_path": file_path,
+            "red_flags_detected": red_flags_present,
+            "created_at": patient_dict["created_at"]
+        }
+        
+    except Exception as e:
+        print(f"Error processing patient intake: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": "error",
+                "message": "Có lỗi xảy ra khi xử lý thông tin bệnh nhân",
+                "error": str(e)
+            }
+        )
 
 @app.post("/api/chat")
 async def chat(request: QueryRequest):

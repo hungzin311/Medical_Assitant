@@ -1,4 +1,4 @@
-from agents.patient_db_agent.patient_query_engine import PatientQueryEngine
+from agents.patient_db_agent import PatientQueryEngine
 from config import Config 
 import json
 import logging
