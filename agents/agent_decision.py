@@ -15,34 +15,17 @@ from config import Config
 
 #Set proxy  
 set_proxy()
-
 load_dotenv()
-
-# Load configuration
 config = Config()
-
-# Initialize memory
 memory = MemorySaver()
-
-# Specify a thread
 thread_config = {"configurable": {"thread_id": "1"}}
-
 
 # Agent that takes the decision of routing the request further to correct task specific agent
 class AgentConfig:
-    """Configuration settings for the agent decision system."""
-    
-    # Decision model
-    DECISION_MODEL = "gemini-2.5-flash"  # or whichever model you prefer
-    
-    # Vision model for image analysis
+    DECISION_MODEL = "gemini-2.5-flash"
     VISION_MODEL = "gemini-2.5-flash"
-    
-    # Confidence threshold for responses
     CONFIDENCE_THRESHOLD = 0.85
-    
     image_analyzer = ImageAnalysisAgent(config=config)
-
 
 class AgentState(MessagesState):
     """State maintained across the workflow."""
@@ -116,6 +99,17 @@ def create_agent_graph():
         current_input = state["current_input"]
         has_image = state["has_image"]
         image_type = state["image_type"]
+
+        # Check for NON-MEDICAL images and reject them
+        if image_type == "NON-MEDICAL":
+            updated_state = {
+                **state,
+                "output": AIMessage(content="Tôi rất xin lỗi, nhưng hình ảnh bạn tải lên không phải là hình ảnh y tế. Tôi chỉ có thể phân tích các hình ảnh y tế như X-quang, CT, MRI, ảnh da, nội soi, v.v. Vui lòng tải lên hình ảnh y tế để tôi có thể hỗ trợ bạn."),
+            }
+            # print("Updated state: ", updated_state['output'])
+            return {**updated_state,
+                    "agent_name": "NON_MEDICAL_FILTER",
+                    "next": "apply_guardrails"}
         
         # Prepare input for decision model
         input_text = current_input if isinstance(current_input, str) else current_input.get("text", "")
@@ -140,18 +134,6 @@ def create_agent_graph():
 
         Based on this information, which agent should handle this query?
         """
-        
-        # Check for NON-MEDICAL images and reject them
-        if image_type == "NON-MEDICAL":
-            updated_state = {
-                **state,
-                "output": AIMessage(content="Tôi rất xin lỗi, nhưng hình ảnh bạn tải lên không phải là hình ảnh y tế. Tôi chỉ có thể phân tích các hình ảnh y tế như X-quang, CT, MRI, ảnh da, nội soi, v.v. Vui lòng tải lên hình ảnh y tế để tôi có thể hỗ trợ bạn."),
-            }
-            # print("Updated state: ", updated_state['output'])
-            return {**updated_state,
-                    "agent_name": "NON_MEDICAL_FILTER",
-                    "next": "apply_guardrails"}
-
 
         # Make the decision
         decision = decision_chain.invoke({"input": decision_input})
@@ -346,10 +328,7 @@ def create_agent_graph():
 
     # Web Search Processor Node
     def run_web_search_processor_agent(state: AgentState) -> AgentState:
-        """Handles web search results, processes them with LLM, and generates a refined response."""
-
         print(f"Selected agent: WEB_SEARCH_PROCESSOR_AGENT")
-        print("[WEB_SEARCH_PROCESSOR_AGENT] Processing Web Search Results...")
         
         messages = state["messages"]
         web_search_context_limit = config.web_search.context_limit
@@ -385,8 +364,6 @@ def create_agent_graph():
 
     # Add the new general medical image agent function
     def run_general_medical_image_agent(state: AgentState) -> AgentState:
-        """Handle general medical image analysis."""
-
         print(f"Selected agent: GENERAL_MEDICAL_IMAGE_AGENT")
 
         current_input = state["current_input"]
@@ -636,7 +613,6 @@ def create_agent_graph():
     
     # Define the edges (workflow connections)
     workflow.set_entry_point("analyze_input")
-    # workflow.add_edge("analyze_input", "route_to_agent")
     # Add conditional routing for guardrails bypass
     workflow.add_conditional_edges(
         "analyze_input",

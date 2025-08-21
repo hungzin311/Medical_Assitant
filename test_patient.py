@@ -1,50 +1,22 @@
-import sys
-import logging
-from pathlib import Path
-from config import Config  
-# Add project root to path
-project_root = Path(__file__).parent.parent
-sys.path.append(str(project_root))
-from proxy_setting import set_proxy
-from config import Config
+from agents.patient_db_agent.patient_query_engine import PatientQueryEngine
+from config import Config 
 import json
-from agents.patient_db_agent.patient_vectorstore import PatientVectorStore
-from agents.patient_db_agent.find_treatment import TreatmentFinder
+import logging
 import pprint
-def demonstrate_refactored_usage():
+logging.basicConfig(level=logging.INFO)
 
-    # Initialize core components
-    config = Config()
-    patient_store = PatientVectorStore(config)
-    treatment_finder = TreatmentFinder(patient_store)
+# Tắt log từ httpx
+logging.getLogger("httpx").setLevel(logging.WARNING)
+def main(): 
+    config = Config() 
+    patient_query = PatientQueryEngine(config)
 
-    # Example 2: Treatment Finding Operations
-    print(f"\n{'='*50}")
-    print("2. TREATMENT FINDING OPERATIONS")
-    print(f"{'='*50}")
-    
-    try:
-        patient_records = treatment_finder.find_treatment_cases(
-            query="65-year-old male with chronic kidney disease stage 4 presenting with fluid overload and worsening renal function",
-            limit=5, 
-            patient_id = "PAT_009"
-        )
-        print(f"Found {len(patient_records)} similar patient records")
-        pprint.pprint(patient_records)
-        
-    except Exception as e:
-        print(f"❌ Error with treatment finder: {e}")
-    
-    
-def main():
-    """Main function to run the demonstration."""
-    # set_proxy()
-    try:
-        demonstrate_refactored_usage()
-    except Exception as e:
-        logging.error(f"Error in demonstration: {e}")
-        raise
+    # patient_record = patient_query.retrieve_patient_records("PAT_009")
+    result = patient_query.recommend_treatment("PAT_009", "65-year-old male with chronic kidney disease stage 4 presenting with fluid overload and worsening renal function")
+    pprint.pprint(result)
 
+    # with open("result.json", "w", encoding="utf-8") as f:
+    #     json.dump(result, f, ensure_ascii=False, indent=4)
 
-if __name__ == "__main__":
+if __name__ == "__main__":  
     main()

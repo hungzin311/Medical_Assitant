@@ -1,17 +1,14 @@
-from collections import OrderedDict
 import logging
 import cv2 
 import segmentation_models_pytorch as smp
 from torchgeometry.losses import one_hot
 import numpy as np
 from PIL import Image
-import cv2
 import imageio
-import matplotlib.pyplot as plt
 import torch
 import torch.nn.functional as F
 from torch import Tensor
-from torchvision.transforms import Resize, PILToTensor, ToPILImage, Compose, InterpolationMode
+from torchvision.transforms import Resize, InterpolationMode
 from torchvision import transforms
 from collections import OrderedDict
 from scipy import ndimage

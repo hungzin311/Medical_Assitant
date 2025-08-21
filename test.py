@@ -1,22 +1,14 @@
-from agents.patient_db_agent.patient_query_engine import PatientQueryEngine
-from config import Config 
-import json
-import logging
-import pprint
-logging.basicConfig(level=logging.INFO)
+from agents.agent_decision import create_agent_graph
 
-# Tắt log từ httpx
-logging.getLogger("httpx").setLevel(logging.WARNING)
 def main(): 
-    config = Config() 
-    patient_query = PatientQueryEngine(config)
+    graph = create_agent_graph()
+    try:
+        image_bytes = graph.get_graph().draw_mermaid_png()
+        with open("graph.png", "wb") as f:
+            f.write(image_bytes)
+    except Exception:
+        # This requires some extra dependencies and is optional
+        pass
 
-    # patient_record = patient_query.retrieve_patient_records("PAT_009")
-    result = patient_query.recommend_treatment("PAT_009", "65-year-old male with chronic kidney disease stage 4 presenting with fluid overload and worsening renal function")
-    pprint.pprint(result)
-
-    # with open("result.json", "w", encoding="utf-8") as f:
-    #     json.dump(result, f, ensure_ascii=False, indent=4)
-
-if __name__ == "__main__":  
+if __name__ == "__main__":
     main()
