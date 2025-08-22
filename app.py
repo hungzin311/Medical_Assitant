@@ -82,11 +82,29 @@ async def chat_interface(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 @app.post("/api/patient-intake")
-async def patient_intake(patient_data: PatientIntakeForm):
+async def patient_intake(request: Request):
     """Process patient intake form data"""
     print("=== Patient Intake Endpoint Called ===")
-    print(f"Received data: {patient_data}")
     try:
+        # Get raw JSON data first
+        raw_data = await request.json()
+        print(f"Raw JSON data received: {raw_data}")
+        
+        # Try to validate with Pydantic model
+        try:
+            patient_data = PatientIntakeForm(**raw_data)
+            print(f"Pydantic validation successful: {patient_data}")
+        except Exception as validation_error:
+            print(f"❌ Pydantic validation failed: {validation_error}")
+            return JSONResponse(
+                status_code=422,
+                content={
+                    "status": "validation_error",
+                    "message": "Dữ liệu không hợp lệ",
+                    "error": str(validation_error),
+                    "received_data": raw_data
+                }
+            )
         # Generate patient_id if not provided
         if not patient_data.patient_id:
             patient_data.patient_id = f"patient_{int(time.time())}_{uuid.uuid4().hex[:6]}"
@@ -99,31 +117,21 @@ async def patient_intake(patient_data: PatientIntakeForm):
         timestamp = time.strftime("%Y%m%d_%H%M%S")
         filename = f"patient_intake_{timestamp}_{patient_data.patient_id}.json"
         file_path = os.path.join(patient_data_dir, filename)
-        
+        print("convert to dict")
         # Convert to dict and save to JSON file
-        patient_dict = patient_data.dict()
-        patient_dict["created_at"] = time.strftime("%Y-%m-%d %H:%M:%S")
-        patient_dict["file_path"] = file_path
-        
+        patient_dict = patient_data.model_dump()
+        print("save to json")
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(patient_dict, f, ensure_ascii=False, indent=4)
         
-        print(f"Patient intake data saved to: {file_path}")
-        
-        # Log the intake for monitoring
-        print(f"New patient intake: {patient_data.patient_id}")
-        print(f"Chief complaint: {patient_data.chief_complaint}")
-        print(f"Age: {patient_data.age}, Sex: {patient_data.sex}")
-        print(f"Severity score: {patient_data.severity_score}")
-        print(f"Contact phone: {patient_data.contact.phone}")
-        
         # Check for red flags
-        red_flags_present = []
-        if patient_data.red_flags:
-            red_flags_dict = patient_data.red_flags.dict()
-            for flag, is_present in red_flags_dict.items():
-                if is_present:
-                    red_flags_present.append(flag)
+        print('Start extract flag')
+        print(patient_data.red_flags)
+        red_flags_present = {}
+        if patient_data.red_flags and isinstance(patient_data.red_flags, list):
+            for flag in patient_data.red_flags:
+                red_flags_present[flag] = True
+        print('Done extract flag')
         
         if red_flags_present:
             print(f"⚠️ RED FLAGS DETECTED: {', '.join(red_flags_present)}")
@@ -133,8 +141,7 @@ async def patient_intake(patient_data: PatientIntakeForm):
             "message": "Thông tin bệnh nhân đã được ghi nhận thành công",
             "patient_id": patient_data.patient_id,
             "file_path": file_path,
-            "red_flags_detected": red_flags_present,
-            "created_at": patient_dict["created_at"]
+            "red_flags_detected": list(red_flags_present.keys()),
         }
         
     except Exception as e:

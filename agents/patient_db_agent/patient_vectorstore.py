@@ -19,9 +19,9 @@ class PatientVectorStore:
     - DiseaseEvaluator: Population monitoring and risk assessment
     """
     
-    def __init__(self, config):
+    def __init__(self, config, collection_name):
         self.logger = logging.getLogger(__name__)
-        self.collection_name = "medical_records"
+        self.collection_name = collection_name
         self.embedding_dim = config.rag.embedding_dim
         self.embedding_model = config.rag.embedding_model
         self.retrieval_top_k = config.rag.top_k

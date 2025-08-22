@@ -4,7 +4,7 @@ from .find_treatment import TreatmentFinder
 from typing import List, Dict, Any
 from agents.patient_db_agent.patient_vectorstore import PatientVectorStore
 from pydantic import BaseModel, field_validator
-from typing import Optional
+from typing import Optional, Tuple, List
 
 class PatientQueryEngine:
     """
@@ -13,7 +13,7 @@ class PatientQueryEngine:
     
     def __init__(self, config):
         self.logger = logging.getLogger(__name__)
-        self.patient_store = PatientVectorStore(config)
+        self.patient_store = PatientVectorStore(config, collection_name='medical_records')
         self.treatment_finder = TreatmentFinder(self.patient_store)
         self.disease_evaluator = DiseaseEvaluation(self.patient_store)
         self.config = config
@@ -44,30 +44,20 @@ class ContactInfo(BaseModel):
     phone: str
     email: Optional[str] = None
 
-class RedFlags(BaseModel):
-    severe_chest_pain: bool = False
-    severe_breathing_difficulty: bool = False
-    neurological_deficit: bool = False
-    confusion_or_fainting: bool = False
-    uncontrolled_bleeding: bool = False
-    fever_high_persistent: bool = False
-    persistent_vomiting_dehydration: bool = False
-    severe_abdominal_pain: bool = False
-
 class PatientIntakeForm(BaseModel):
     patient_id: Optional[str] = None
     full_name: Optional[str] = None
     age: int
-    sex: str
-    height_cm: Optional[float] = None
-    weight_kg: Optional[float] = None
-    province: Optional[str] = None
+    sex: Optional[str] = None
+    bmi: Optional[float] = None
+    bmi_category: Optional[str] = None
+    geographic_region: Optional[str] = None
     
     chief_complaint: str
     summary_text: Optional[str] = None
     
     onset_date: Optional[str] = None
-    duration_days: int
+    disease_duration_days: int
     severity_score: float
     
     course: Optional[str] = None
@@ -87,14 +77,10 @@ class PatientIntakeForm(BaseModel):
     occupational_exposure: Optional[str] = None
     pregnancy_status: Optional[str] = None
     
-    red_flags: Optional[RedFlags] = RedFlags()
-    
-    expectation: Optional[str] = None
-    
+    red_flags: Optional[List[str]] = []
+        
     contact: ContactInfo
-    
-    consent: bool = True
-    
+        
     @field_validator('age')
     @classmethod
     def validate_age(cls, v):
@@ -119,13 +105,13 @@ class PatientIntakeForm(BaseModel):
     @field_validator('chief_complaint')
     @classmethod
     def validate_chief_complaint(cls, v):
-        if len(v.strip()) < 5:
-            raise ValueError('Chief complaint must be at least 5 characters')
+        if len(v.strip()) < 4:
+            raise ValueError('Chief complaint must be at least 4 characters')
         return v
     
-    @field_validator('duration_days')
+    @field_validator('disease_duration_days')
     @classmethod
-    def validate_duration_days(cls, v):
+    def validate_disease_duration_days(cls, v):
         if v < 0 or v > 36500:
-            raise ValueError('Duration days must be between 0 and 36500')
+            raise ValueError('Disease duration days must be between 0 and 36500')
         return v

@@ -521,7 +521,7 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Tỉnh/Thành phố:</label>
-                            <input type="text" class="form-input" name="province" placeholder="Ví dụ: Hà Nội">
+                            <input type="text" class="form-input" name="geographic_region" placeholder="Ví dụ: Hà Nội">
                         </div>
                     </div>
                 </div>
@@ -531,7 +531,7 @@
                     <h3>🩺 Triệu chứng chính</h3>
                     <div class="form-group">
                         <label class="form-label">Lý do khám chính: <span class="required">*</span></label>
-                        <textarea class="form-textarea" name="chief_complaint" rows="3" required placeholder="Mô tả chi tiết lý do đến khám (tối thiểu 5 ký tự)"></textarea>
+                        <textarea class="form-textarea" name="chief_complaint" rows="3" required placeholder="Mô tả chi tiết lý do đến khám (tối thiểu 4 ký tự)"></textarea>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Tóm tắt tình trạng:</label>
@@ -544,10 +544,10 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Số ngày kéo dài: <span class="required">*</span></label>
-                            <input type="number" class="form-input" name="duration_days" min="0" max="36500" required placeholder="Số ngày">
+                            <input type="number" class="form-input" name="disease_duration_days" min="0" max="36500" required placeholder="Số ngày">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Mức độ nghiêm trọng (0-10): <span class="required">*</span></label>
+                            <label class="form-label">Mức độ nghiêm trọng(0-10): <span class="required">*</span></label>
                             <input type="number" class="form-input" name="severity_score" min="0" max="10" step="0.1" required placeholder="0 = nhẹ, 10 = rất nặng">
                         </div>
                     </div>
@@ -696,10 +696,6 @@
                             <input type="email" class="form-input" name="contact.email" placeholder="Ví dụ: example@email.com">
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Mong muốn từ việc khám:</label>
-                        <textarea class="form-textarea" name="expectation" rows="2" placeholder="Bạn mong muốn điều gì từ cuộc khám này?"></textarea>
-                    </div>
                 </div>
 
                 <!-- Đồng ý -->
@@ -840,40 +836,50 @@
                     if (key === 'associated_symptoms' || key === 'comorbidities') {
                         // Convert comma-separated strings to arrays
                         patientData[key] = value ? value.split(',').map(item => item.trim()) : [];
-                    } else if (key === 'age' || key === 'duration_days') {
+                    } else if (key === 'age' || key === 'disease_duration_days') {
                         patientData[key] = parseInt(value) || null;
                     } else if (key === 'height_cm' || key === 'weight_kg' || key === 'severity_score') {
                         patientData[key] = parseFloat(value) || null;
-                    } else if (key === 'consent') {
-                        patientData[key] = value === 'on';
                     } else {
                         patientData[key] = value || null;
                     }
                 }
             }
             
-            // Handle checkboxes that weren't checked (they won't appear in FormData)
-            const redFlagCheckboxes = [
-                'severe_chest_pain', 'severe_breathing_difficulty', 'neurological_deficit',
-                'confusion_or_fainting', 'uncontrolled_bleeding', 'fever_high_persistent',
-                'persistent_vomiting_dehydration', 'severe_abdominal_pain'
-            ];
-            
-            if (!patientData.red_flags) {
-                patientData.red_flags = {};
+            if (!(Object.keys(patientData).includes('height_cm')) || !(Object.keys(patientData).includes('weight_kg'))) {
+                console.log('No height or weight');
+                patientData['bmi'] = null;
+                patientData['bmi_category'] = 'unknown';
+            }
+
+            else{
+                patientData['bmi'] = patientData['weight_kg'] / (patientData['height_cm'] / 100) ** 2;
+                patientData['bmi_category'] = patientData['bmi'] < 18.5 ? 'underweight' : patientData['bmi'] < 24.9 ? 'normal' : patientData['bmi'] < 29.9 ? 'overweight' : 'obese';
             }
             
-            redFlagCheckboxes.forEach(flag => {
-                if (!(flag in patientData.red_flags)) {
-                    patientData.red_flags[flag] = false;
-                }
-            });
+            delete patientData['height_cm'];
+            delete patientData['weight_kg'];
+            delete patientData['consent'];
             
+            // Convert red_flags object to array of active flags
+            if (patientData.red_flags && typeof patientData.red_flags === 'object') {
+                const activeFlags = [];
+                for (const [key, value] of Object.entries(patientData.red_flags)) {
+                    if (value === true) {
+                        activeFlags.push(key);
+                    }
+                }
+                patientData.red_flags = activeFlags;
+            } else {
+                patientData.red_flags = [];
+            }
+            
+            patientData['patient_id'] = 'PAT09';
+
             // Generate patient_id if not provided
             if (!patientData.patient_id) {
                 patientData.patient_id = 'patient_' + Date.now();
             }
-            
             console.log('Patient data to be sent:', patientData);
             
             // Disable button to prevent double submission
