@@ -9,7 +9,7 @@ sys.path.append(str(project_root))
 
 from typing import List, Dict, Any, Optional
 import logging
-from qdrant_client.http.models import Filter, FieldCondition, MatchValue, Range
+from qdrant_client.http.models import Filter, FieldCondition, MatchValue
 
 
 class DiseaseEvaluation:

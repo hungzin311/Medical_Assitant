@@ -44,7 +44,6 @@ class PatientVectorStore:
 
         if not self._does_collection_exist():
             self._create_patient_collection()
-            logging.info(f"Created new patient collection: {self.collection_name}")     
 
     def _does_collection_exist(self) -> bool:
         """Check if the patient collection already exists in Qdrant cloud."""

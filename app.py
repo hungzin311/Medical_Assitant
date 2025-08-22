@@ -1,21 +1,21 @@
 import os
 import uuid
-from typing import Dict, Union, Optional, List
+from typing import Optional, List
 import time
 import json
 import base64
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends, Request, Response, Cookie
-from fastapi.responses import JSONResponse, FileResponse, HTMLResponse
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel
 import uvicorn
-import requests
 from werkzeug.utils import secure_filename
 from config import Config
 from agents.agent_decision import process_query, create_agent_graph
 from proxy_setting import *
-from agents.patient_db_agent import PatientIntakeForm
+from agents.patient_db_agent import PatientQueryEngine
+from agents.patient_db_agent.patient_intake_form import PatientIntakeForm
 # Load configuration
 config = Config()
 
@@ -23,6 +23,8 @@ config = Config()
 set_proxy()
 
 graph = create_agent_graph()
+
+patient_query_engine = PatientQueryEngine(config)
 
 # Initialize FastAPI app with increased limits for large form data
 app = FastAPI(
@@ -83,19 +85,14 @@ async def chat_interface(request: Request):
 
 @app.post("/api/patient-intake")
 async def patient_intake(request: Request):
-    """Process patient intake form data"""
     print("=== Patient Intake Endpoint Called ===")
     try:
         # Get raw JSON data first
         raw_data = await request.json()
-        print(f"Raw JSON data received: {raw_data}")
-        
         # Try to validate with Pydantic model
         try:
             patient_data = PatientIntakeForm(**raw_data)
-            print(f"Pydantic validation successful: {patient_data}")
         except Exception as validation_error:
-            print(f"❌ Pydantic validation failed: {validation_error}")
             return JSONResponse(
                 status_code=422,
                 content={
@@ -105,33 +102,18 @@ async def patient_intake(request: Request):
                     "received_data": raw_data
                 }
             )
+        
+        # Ingest patient form
+        patient_query_engine.ingest_patient_form(patient_data)
+        
         # Generate patient_id if not provided
         if not patient_data.patient_id:
             patient_data.patient_id = f"patient_{int(time.time())}_{uuid.uuid4().hex[:6]}"
-        
-        # Create patient data directory if it doesn't exist
-        patient_data_dir = "data/patient_intake"
-        os.makedirs(patient_data_dir, exist_ok=True)
-        
-        # Generate filename with timestamp
-        timestamp = time.strftime("%Y%m%d_%H%M%S")
-        filename = f"patient_intake_{timestamp}_{patient_data.patient_id}.json"
-        file_path = os.path.join(patient_data_dir, filename)
-        print("convert to dict")
-        # Convert to dict and save to JSON file
-        patient_dict = patient_data.model_dump()
-        print("save to json")
-        with open(file_path, "w", encoding="utf-8") as f:
-            json.dump(patient_dict, f, ensure_ascii=False, indent=4)
-        
-        # Check for red flags
-        print('Start extract flag')
-        print(patient_data.red_flags)
+
         red_flags_present = {}
         if patient_data.red_flags and isinstance(patient_data.red_flags, list):
             for flag in patient_data.red_flags:
                 red_flags_present[flag] = True
-        print('Done extract flag')
         
         if red_flags_present:
             print(f"⚠️ RED FLAGS DETECTED: {', '.join(red_flags_present)}")
@@ -140,7 +122,6 @@ async def patient_intake(request: Request):
             "status": "success",
             "message": "Thông tin bệnh nhân đã được ghi nhận thành công",
             "patient_id": patient_data.patient_id,
-            "file_path": file_path,
             "red_flags_detected": list(red_flags_present.keys()),
         }
         
