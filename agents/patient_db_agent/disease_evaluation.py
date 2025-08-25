@@ -53,7 +53,7 @@ class DiseaseEvaluation:
                     query = query_vector, 
                     query_filter = Filter( 
                         must = [
-                            FieldCondition(key='patinet_id', match = MatchValue(value = patient_id))
+                            FieldCondition(key='patient_id', match = MatchValue(value = patient_id))
                         ]
                     ), 
                     limit = limit, 
@@ -91,6 +91,7 @@ class DiseaseEvaluation:
     def evaluate_based_record_llm(
         self, 
         patient_record: List[Dict[str, Any]], 
+        patient_form: List[Dict[str, Any]],
         evaluation_type: str = "disease_progression"
     ) -> Dict[str, Any]:
         
@@ -102,7 +103,7 @@ class DiseaseEvaluation:
             
             # Generate evaluation prompt based on type
             evaluation_prompt = self._create_evaluation_prompt(
-                current_patient, evaluation_type
+                current_patient, patient_form, evaluation_type
             )
             # Get LLM evaluation
             response = self.llm.invoke(evaluation_prompt)
@@ -152,13 +153,16 @@ class DiseaseEvaluation:
 
         return basic_info.strip() + "\n\n" + "\n\n".join(history_info)
     
-    def _create_evaluation_prompt(self, patient_info: str, evaluation_type: str) -> str:
+    def _create_evaluation_prompt(self, patient_info: str, patient_form: List[Dict[str, Any]], evaluation_type: str) -> str:
         """Create evaluation prompt based on type."""
         
         base_prompt = f"""
         Bạn là một chuyên gia y tế có kinh nghiệm cao trong việc phân tích và đánh giá tình trạng bệnh nhân. 
-        Nhiệm vụ của bạn là đánh giá bệnh nhân hiện tại dựa trên các trường hợp tương tự đã có.
+        Nhiệm vụ của bạn là đánh giá bệnh nhân hiện tại dựa trên các thông tin mà bệnh nhân vừa điền và dữ liệu của các lần khám trước.
+        -Thông tin bệnh nhân vừa cung cấp:
         {patient_info}
+        -Thông tin về các lần khám trước của bệnh nhân:
+        {patient_form}        
         """
         
         if evaluation_type == "disease_progression":

@@ -24,8 +24,8 @@ class PatientQueryEngine:
     def retrieve_patient_records(self, patient_id: str):
         return self.disease_evaluator.retrieve_patient_records(patient_id)
 
-    def evaluate_patient_records(self, patient_record: List[Dict[str, Any]]):
-        return self.disease_evaluator.evaluate_based_record_llm(patient_record)
+    def evaluate_patient_records(self, patient_record: List[Dict[str, Any]], patient_form: List[Dict[str, Any]]):
+        return self.disease_evaluator.evaluate_based_record_llm(patient_record, patient_form)
 
     def recommend_treatment(self, patient_id: str, query: str):
         """

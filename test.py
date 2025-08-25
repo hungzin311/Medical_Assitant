@@ -7,7 +7,6 @@ def main():
         with open("graph.png", "wb") as f:
             f.write(image_bytes)
     except Exception:
-        # This requires some extra dependencies and is optional
         pass
 
 if __name__ == "__main__":

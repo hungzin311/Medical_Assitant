@@ -4,11 +4,19 @@ from .patient_vectorstore import PatientVectorStore
 from .patient_intake_form import PatientIntakeForm
 from qdrant_client.models import Filter, FieldCondition, MatchValue
 from uuid import uuid4
+from qdrant_client import models
+import pprint
 
 class PatientFormVectorStore: 
     def __init__(self, config): 
         self.patient_vector_store = PatientVectorStore(config, collection_name='patient_form')
         self.client = self.patient_vector_store.client
+        self.client.create_payload_index(
+            collection_name=self.patient_vector_store.collection_name,
+            field_name="created_at",
+            field_schema=models.PayloadSchemaType.DATETIME
+        )
+
     
     def _collection_exist(self): 
         return self.patient_vector_store._does_collection_exist()
@@ -34,14 +42,21 @@ class PatientFormVectorStore:
     def retrieve_patient_form(self, patient_id: str):
         query_filter = Filter( 
             must = [
-                FieldCondition('patient_id', MatchValue(value=patient_id))
+                FieldCondition(key = 'patient_id', match = MatchValue(value=patient_id))
             ]
         )
-        patient_form = self.client.query_points(
-            collection_name = self.patient_vector_store.collection_name, 
-            query_filter = query_filter,
-            limit = 5, 
-            with_payload = True, 
-            order_by = 'created_at'
+        patient_form, _ = self.client.scroll(
+            collection_name=self.patient_vector_store.collection_name,
+            scroll_filter=query_filter,
+            limit=5,
+            with_payload=True,
+            order_by=models.OrderBy(
+                key="created_at",
+                direction=models.Direction.DESC  # Mới nhất trước
+            )
         )
-        return patient_form.points
+        
+        print(type(patient_form))
+        print(len(patient_form))
+
+        return patient_form

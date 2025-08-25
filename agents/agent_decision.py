@@ -147,15 +147,12 @@ def create_agent_graph():
             "agent_name": decision["agent"],
         }
         
-        # Route based on agent name and confidence
         if decision["confidence"] < AgentConfig.CONFIDENCE_THRESHOLD:
             return {"agent_state": updated_state, "next": "needs_validation"}
         
         return {"agent_state": updated_state, "next": decision["agent"]}
 
-    # Define agent execution functions (these will be implemented in their respective modules)
     def run_conversation_agent(state: AgentState) -> AgentState:
-        """Handle general conversation."""
 
         print(f"Selected agent: CONVERSATION_AGENT")
 
@@ -241,8 +238,6 @@ def create_agent_graph():
         }
     
     def run_rag_agent(state: AgentState) -> AgentState:
-        """Handle medical knowledge queries using RAG."""
-        # Initialize the RAG agent
 
         print(f"Selected agent: RAG_AGENT")
 
@@ -255,16 +250,13 @@ def create_agent_graph():
         recent_context = ""
         for msg in messages[-rag_context_limit:]:# limit controlled from config
             if isinstance(msg, HumanMessage):
-                # print("######### DEBUG 1:", msg)
                 recent_context += f"User: {msg.content}\n"
             elif isinstance(msg, AIMessage):
-                # print("######### DEBUG 2:", msg)
                 recent_context += f"Assistant: {msg.content}\n"
 
         try:
             response = rag_agent.process_query(query, chat_history=recent_context)
             
-            # Ensure response has the required keys
             if "response" not in response:
                 print("Error: RAG response is missing 'response' key")
                 response["response"] = "I apologize, but I encountered an error while processing your query. Please try again."
@@ -278,7 +270,6 @@ def create_agent_graph():
             insufficient_info = False
             response_text = response["response"]
             
-            # Ensure response_text is a string
             if not isinstance(response_text, str):
                 print(f"Warning: Response text is not a string, converting from {type(response_text)}")
                 response_text = str(response_text)
@@ -295,8 +286,7 @@ def create_agent_graph():
                 insufficient_info = True
 
             print(f"Insufficient info flag set to: {insufficient_info}")
-
-            # Store RAG output ONLY if confidence is high
+                
             if retrieval_confidence >= config.rag.min_retrieval_confidence:
                 response_output = AIMessage(content=response_text)
             else:
@@ -305,17 +295,13 @@ def create_agent_graph():
             return {
                 **state,
                 "output": response_output,
-                "needs_human_validation": False,  # Assuming no validation needed for RAG responses
+                "needs_human_validation": False,
                 "retrieval_confidence": retrieval_confidence,
                 "agent_name": "RAG_AGENT",
                 "insufficient_info": insufficient_info
             }
             
-        except Exception as e:
-            import traceback
-            print(f"Error in RAG agent: {e}")
-            print(traceback.format_exc())
-            
+        except Exception as e:    
             safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
             return {
                 **state,
@@ -404,22 +390,13 @@ def create_agent_graph():
         }
 
     # Define Routing Logic
-    def confidence_based_routing(state: AgentState) -> Dict[str, str]:
-        """Route based on RAG confidence score and response content."""
-        # Debug prints
-        print(f"Routing check - Retrieval confidence: {state.get('retrieval_confidence', 0.0)}")
-        print(f"Routing check - Insufficient info flag: {state.get('insufficient_info', False)}")
-        
-        # Redirect if confidence is low or if response indicates insufficient info
+    def confidence_based_routing(state: AgentState) -> str:
         if (state.get("retrieval_confidence", 0.0) < config.rag.min_retrieval_confidence or 
             state.get("insufficient_info", False)):
-            print("Re-routed to Web Search Agent due to low confidence or insufficient information...")
-            return "WEB_SEARCH_PROCESSOR_AGENT"  # Correct format
-        return "check_validation"  # No transition needed if confidence is high and info is sufficient
-    
-    
+            return "WEB_SEARCH_PROCESSOR_AGENT"
+        return "check_validation"  
+        
     def run_skin_lesion_agent(state: AgentState) -> AgentState:
-        """Handle skin lesion image analysis."""
 
         current_input = state["current_input"]
         image_path = current_input.get("image", None)
@@ -468,7 +445,6 @@ def create_agent_graph():
         }
 
     def run_polyp_segmentation_agent(state: AgentState) -> AgentState:
-        """Handle polyp segmentation image analysis."""
 
         current_input = state["current_input"]
         image_path = current_input.get("image", None)
@@ -634,8 +610,8 @@ def create_agent_graph():
             "SKIN_LESION_AGENT": "SKIN_LESION_AGENT",
             "POLYP_SEGMENTATION_AGENT": "POLYP_SEGMENTATION_AGENT",
             "GENERAL_MEDICAL_IMAGE_AGENT": "GENERAL_MEDICAL_IMAGE_AGENT",
-            "apply_guardrails": "apply_guardrails",  # For NON-MEDICAL images
-            "needs_validation": "RAG_AGENT"  # Default to RAG if confidence is low
+            "apply_guardrails": "apply_guardrails",  
+            "needs_validation": "RAG_AGENT" 
         }
     )
     
@@ -654,7 +630,7 @@ def create_agent_graph():
         lambda x: x["next"],
         {
             "human_validation": "human_validation",
-            END: "apply_guardrails"  # Route to guardrails instead of END
+            END: "apply_guardrails"  
         }
     )
     
@@ -679,16 +655,6 @@ def init_agent_state() -> AgentState:
 
 
 def process_query(query: Union[str, Dict], conversation_history: List[BaseMessage] = None, graph: StateGraph = None) -> Dict:
-    """
-    Process a user query through the agent decision system.
-    
-    Args:
-        query: User input (text string or dict with text and image)
-        conversation_history: Optional list of previous messages
-        
-    Returns:
-        Response from the appropriate agent
-    """
     # Initialize state
     state = init_agent_state()
     
@@ -709,16 +675,6 @@ def process_query(query: Union[str, Dict], conversation_history: List[BaseMessag
 
     # Run the graph
     result = graph.invoke(state, thread_config)
-
-    ### Tracking agent name
-    
-    # to_replay = None
-    # for state in graph.get_state_history(thread_config):
-    #     print("Num Messages: ", len(state.values["messages"]), "Next: ", state.next)
-    #     print("-" * 80)
-    #     if len(state.values["messages"]) == 6:
-    #         # We are somewhat arbitrarily selecting a specific state based on the number of chat messages in the state.
-    #         to_replay = state
 
     if len(result["messages"]) > config.max_conversation_history:
         result["messages"] = result["messages"][-config.max_conversation_history:]
