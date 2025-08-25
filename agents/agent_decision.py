@@ -291,14 +291,24 @@ def create_agent_graph():
                 response_output = AIMessage(content=response_text)
             else:
                 response_output = AIMessage(content="")
+                insufficient_info = True
             
+            if insufficient_info:
+                return {
+                    **state,
+                    "output": AIMessage(content=""),
+                    "needs_human_validation": False,
+                    "retrieval_confidence": 0.0,
+                    "agent_name": "RAG_AGENT",
+                    "next": "WEB_SEARCH_PROCESSOR_AGENT"
+                }
             return {
                 **state,
                 "output": response_output,
                 "needs_human_validation": False,
                 "retrieval_confidence": retrieval_confidence,
                 "agent_name": "RAG_AGENT",
-                "insufficient_info": insufficient_info
+                "next": "check_validation"
             }
             
         except Exception as e:    
@@ -306,10 +316,10 @@ def create_agent_graph():
             return {
                 **state,
                 "output": AIMessage(content="Tôi xin lỗi, nhưng tôi đã gặp lỗi khi xử lý truy vấn của bạn. Vui lòng thử lại hoặc diễn đạt lại câu hỏi của bạn." + safety_disclaimer),
-                "needs_human_validation": True,
+                "needs_human_validation": False,
                 "retrieval_confidence": 0.0,
                 "agent_name": "RAG_AGENT",
-                "insufficient_info": True
+                "next": "WEB_SEARCH_PROCESSOR_AGENT"
             }
 
     # Web Search Processor Node
@@ -388,13 +398,6 @@ def create_agent_graph():
             "needs_human_validation": True,  # Medical diagnosis always needs validation
             "agent_name": "GENERAL_MEDICAL_IMAGE_AGENT"
         }
-
-    # Define Routing Logic
-    def confidence_based_routing(state: AgentState) -> str:
-        if (state.get("retrieval_confidence", 0.0) < config.rag.min_retrieval_confidence or 
-            state.get("insufficient_info", False)):
-            return "WEB_SEARCH_PROCESSOR_AGENT"
-        return "check_validation"  
         
     def run_skin_lesion_agent(state: AgentState) -> AgentState:
 
@@ -587,9 +590,7 @@ def create_agent_graph():
     workflow.add_node("human_validation", perform_human_validation)
     workflow.add_node("apply_guardrails", apply_output_guardrails)
     
-    # Define the edges (workflow connections)
     workflow.set_entry_point("analyze_input")
-    # Add conditional routing for guardrails bypass
     workflow.add_conditional_edges(
         "analyze_input",
         check_if_bypassing,
@@ -614,11 +615,19 @@ def create_agent_graph():
             "needs_validation": "RAG_AGENT" 
         }
     )
+
+    workflow.add_conditional_edges( 
+        "RAG_AGENT",
+        lambda x: x['next'], 
+        {
+            "check_validation": "check_validation",
+            "WEB_SEARCH_PROCESSOR_AGENT": "WEB_SEARCH_PROCESSOR_AGENT"
+        }
+    )
     
     # Connect agent outputs to validation check
     workflow.add_edge("CONVERSATION_AGENT", "check_validation")
     workflow.add_edge("WEB_SEARCH_PROCESSOR_AGENT", "check_validation")
-    workflow.add_conditional_edges("RAG_AGENT", confidence_based_routing)
     workflow.add_edge("SKIN_LESION_AGENT", "check_validation")
     workflow.add_edge("POLYP_SEGMENTATION_AGENT", "check_validation")
     workflow.add_edge("GENERAL_MEDICAL_IMAGE_AGENT", "check_validation")
@@ -649,8 +658,7 @@ def init_agent_state() -> AgentState:
         "output": None,
         "needs_human_validation": False,
         "retrieval_confidence": 0.0,
-        "bypass_routing": False,
-        "insufficient_info": False
+        "bypass_routing": False
     }
 
 
