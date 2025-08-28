@@ -11,12 +11,6 @@ class ContentProcessor:
     Processes the parsed content - summarizes images, creates llm based semantic chunks
     """
     def __init__(self, config):
-        """
-        Initialize the response generator.
-        
-        Args:
-            llm: Large language model for image summarization
-        """
         self.logger = logging.getLogger(__name__)
         self.summarizer_model = config.rag.summarizer_model     # temperature 0.5
         self.chunker_model = config.rag.chunker_model     # temperature 0.0

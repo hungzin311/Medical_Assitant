@@ -14,9 +14,6 @@ from qdrant_client import QdrantClient, models
 from qdrant_client.http.models import Distance, SparseVectorParams, VectorParams, OptimizersConfigDiff
 
 class VectorStoreCloud:
-    """
-    Create cloud-based vector store, ingest documents, retrieve relevant documents
-    """
     def __init__(self, config):
         self.logger = logging.getLogger(__name__)
         self.collection_name = config.rag.collection_name
@@ -42,15 +39,7 @@ class VectorStoreCloud:
         )
 
     def _clean_text(self, text: str) -> str:
-        """
-        Clean text to avoid API validation errors.
-        
-        Args:
-            text: Input text to clean
-            
-        Returns:
-            Cleaned text
-        """
+
         # Replace problematic characters
         text = re.sub(r'[\x00-\x1F\x7F-\x9F]', '', text)  # Remove control characters
         
@@ -74,7 +63,6 @@ class VectorStoreCloud:
         return '\n'.join(lines).strip()
 
     def _does_collection_exist(self) -> bool:
-        """Check if the collection already exists in Qdrant cloud."""
         try:
             collection_info = self.client.get_collections()
             collection_names = [collection.name for collection in collection_info.collections]
@@ -84,7 +72,6 @@ class VectorStoreCloud:
             return False
 
     def _create_collection(self):
-        """Create a new collection with only dense vectors in cloud."""
         try:
             # Delete collection if it exists
             if self._does_collection_exist():

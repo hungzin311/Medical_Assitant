@@ -14,12 +14,6 @@ from qdrant_client.http.models import Filter, FieldCondition, MatchValue
 
 class DiseaseEvaluation:
     def __init__(self, patient_vector_store):
-        """
-        Initialize with reference to the patient vector store.
-        
-        Args:
-            patient_vector_store: Instance of PatientVectorStore for data access
-        """
         self.logger = logging.getLogger(__name__)
         self.client = patient_vector_store.client 
         self.collection_name = patient_vector_store.collection_name

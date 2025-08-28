@@ -21,7 +21,7 @@ class QueryExpander:
         Returns:
             Dictionary with original and expanded queries
         """
-        self.logger.info(f"Expanding query: {original_query}")
+        self.logger.info(f"Expanding query")
         
         # Generate expansions using chat history if available
         expanded_query = self._generate_expansions(original_query, chat_history)

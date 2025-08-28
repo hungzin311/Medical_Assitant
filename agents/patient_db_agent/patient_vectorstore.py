@@ -36,7 +36,6 @@ class PatientVectorStore:
             self.logger.error("Qdrant cloud URL or API key not provided. Check your environment variables.")
             raise ValueError("Qdrant cloud URL or API key not provided")
             
-        self.logger.info(f"Connecting to Qdrant cloud for patient database at {self.qdrant_url}")
         self.client = QdrantClient(
             url=self.qdrant_url,
             api_key=self.qdrant_api_key
@@ -46,7 +45,6 @@ class PatientVectorStore:
             self._create_patient_collection()
 
     def _does_collection_exist(self) -> bool:
-        """Check if the patient collection already exists in Qdrant cloud."""
         try:
             collection_info = self.client.get_collections()
             collection_names = [collection.name for collection in collection_info.collections]
@@ -156,15 +154,6 @@ class PatientVectorStore:
             raise e
 
     def ingest_patient_record(self, patient_data: Dict[str, Any]) -> str:
-        """
-        Ingest a single patient record into the vector store.
-        
-        Args:
-            patient_data: Dictionary containing patient information
-            
-        Returns:
-            Record ID of the inserted document
-        """
         # Ensure collection exists
         if not self._does_collection_exist():
             self._create_patient_collection()
@@ -198,8 +187,6 @@ class PatientVectorStore:
             raise e
 
     def _build_patient_payload(self, patient_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Build standardized payload from patient data."""
-        
         # Set defaults and process data
         current_time = datetime.now().isoformat()
         visit_date = patient_data.get('visit_date', datetime.now().strftime('%Y-%m-%d'))
@@ -312,7 +299,6 @@ class PatientVectorStore:
         return payload
 
     def _categorize_outcome(self, outcome_score: float) -> str:
-        """Categorize outcome score for filtering."""
         if outcome_score >= 0.8:
             return "excellent"
         elif outcome_score >= 0.6:
@@ -323,15 +309,7 @@ class PatientVectorStore:
             return "poor"
 
     def batch_ingest_patients(self, patient_records: List[Dict[str, Any]]) -> List[str]:
-        """
-        Batch ingest multiple patient records.
-        
-        Args:
-            patient_records: List of patient data dictionaries
-            
-        Returns:
-            List of record IDs
-        """
+
         # Ensure collection exists
         if not self._does_collection_exist():
             self._create_patient_collection()

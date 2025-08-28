@@ -95,7 +95,6 @@ class ResponseGenerator:
             # Combine retrieved documents into a single context
             context = "\n\n===DOCUMENT SECTION===\n\n".join(doc_texts)
             
-            self.logger.info(f"Retrieved documents: {context}")
             # Build the prompt
             prompt = self._build_prompt(query, context, chat_history)
             
