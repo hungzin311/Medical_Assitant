@@ -27,16 +27,6 @@ class DiseaseEvaluation:
         query: Optional[str] =None,
         limit: int = 5
     ) -> List[Dict[str, Any]]:
-        """
-        Patient record retrieval.
-        Args:
-            patient_id: patient ID for same-patient history
-            query: Optional query for similarity search
-            limit: Maximum number of results
-            
-        Returns:
-            List of retrieved patient records with scores
-        """
         try:
             #Retrieved records list
             patient_records = []
@@ -105,7 +95,6 @@ class DiseaseEvaluation:
             # Parse and structure the response
             evaluation_result = self._parse_evaluation_response(response.content, evaluation_type)
             
-            self.logger.info(f"Successfully completed {evaluation_type} evaluation")
             return evaluation_result
             
         except Exception as e:
@@ -184,43 +173,6 @@ class DiseaseEvaluation:
                 "comparison_insights": "So sánh với các trường hợp tương tự...",
                 "confidence_score": 0.90,
                 "reasoning": "Lý do chi tiết cho đánh giá..."
-            }
-            """
-                    
-        elif evaluation_type == "risk_assessment":
-            specific_prompt = """
-            NHIỆM VỤ: ĐÁNH GIÁ RỦI RO SỨC KHỎE
-
-            Hãy phân tích và đánh giá:
-            1. **Mức độ rủi ro tổng thể** (thấp/trung bình/cao/rất cao)
-            2. **Rủi ro biến chứng cụ thể** và xác suất xảy ra
-            3. **Yếu tố bảo vệ** có thể giảm rủi ro
-            4. **Biện pháp phòng ngừa** cần thiết
-            5. **Ưu tiên can thiệp** dựa trên mức độ cấp thiết
-
-            Trả lời theo định dạng JSON:
-            {
-                "overall_risk_level": "thấp/trung bình/cao/rất cao",
-                "risk_score": 0.75,
-                "specific_risks": [
-                    {
-                        "complication": "biến chứng 1",
-                        "probability": 0.30,
-                        "severity": "nghiêm trọng",
-                        "timeframe": "6 tháng"
-                    }
-                ],
-                "protective_factors": ["yếu tố bảo vệ 1", "yếu tố bảo vệ 2"],
-                "prevention_measures": ["biện pháp 1", "biện pháp 2"],
-                "intervention_priorities": [
-                    {
-                        "action": "hành động 1",
-                        "urgency": "cao",
-                        "expected_benefit": "giảm 30% rủi ro"
-                    }
-                ],
-                "confidence_score": 0.85,
-                "reasoning": "Lý do chi tiết cho đánh giá rủi ro..."
             }
             """
         else:

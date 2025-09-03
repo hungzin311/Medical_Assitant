@@ -1,13 +1,3 @@
-"""
-Patient Data Ingestion Pipeline
-
-This module handles the ingestion of patient medical records into the Qdrant vector database
-for the three core problems:
-1. Patient record retrieval
-2. Treatment optimization 
-3. Early warning systems
-"""
-
 import os
 import json
 import logging

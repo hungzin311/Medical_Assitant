@@ -6,7 +6,7 @@ class ContactInfo(BaseModel):
     phone: str
     email: Optional[str] = None
 
-class PatientIntakeForm(BaseModel):
+class PatientForm(BaseModel):
     patient_id: Optional[str] = None
     full_name: Optional[str] = None
     age: int

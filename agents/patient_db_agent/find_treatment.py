@@ -4,19 +4,8 @@ from qdrant_client.http.models import Filter, FieldCondition, MatchValue, Range
 
 
 class TreatmentFinder:
-    """
-    Handles treatment-related operations for patient records including:
-    - Patient record retrieval for treatment planning
-    - Finding similar treatment cases for optimization
-    """
-    
+
     def __init__(self, patient_vector_store):
-        """
-        Initialize with reference to the patient vector store.
-        
-        Args:
-            patient_vector_store: Instance of PatientVectorStore for data access
-        """
         self.logger = logging.getLogger(__name__)
         self.client = patient_vector_store.client 
         self.collection_name = patient_vector_store.collection_name
@@ -31,19 +20,6 @@ class TreatmentFinder:
         comorbidities: Optional[List[str]] = None,
         limit: int = 10
     ) -> List[Dict[str, Any]]:
-        """
-        Find similar cases for treatment optimization.
-        
-        Args:
-            query: Patient query text
-            candidate_treatments: List of candidate treatments
-            age_range: Optional age range filter
-            comorbidities: Optional comorbidity filters
-            limit: Maximum number of results
-            
-        Returns:
-            List of similar cases with treatment outcomes
-        """
 
         must_conditions = [ 
             FieldCondition(key="primary_outcome", range=Range(gte=0.0))

@@ -21,15 +21,6 @@ from config import Config
 from agents.rag_agent.vectorstore_qdrant_cloud import VectorStoreCloud
 
 def process_jsonl_with_payload(file_path):
-    """
-    Process a JSONL file with payload data (question, context, etc.)
-    
-    Args:
-        file_path: Path to the JSONL file
-        
-    Returns:
-        List of documents with metadata
-    """
     logger.info(f"Processing JSONL file with payload: {file_path}")
     documents = []
     

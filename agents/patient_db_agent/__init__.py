@@ -1,6 +1,6 @@
 import logging
 from .disease_evaluation import DiseaseEvaluation
-from .patient_intake_form import PatientIntakeForm
+from .patient_form import PatientForm
 from .find_treatment import TreatmentFinder
 from typing import List, Dict, Any
 from .patient_vectorstore import PatientVectorStore
@@ -28,9 +28,7 @@ class PatientQueryEngine:
         return self.disease_evaluator.evaluate_based_record_llm(patient_record, patient_form)
 
     def recommend_treatment(self, patient_id: str, query: str):
-        """
-        Recommend treatment for a patient based on their medical history and query.
-        """
+        
         patient_record = self.retrieve_patient_records(patient_id)
         
         # get attributes from patient record
@@ -44,7 +42,7 @@ class PatientQueryEngine:
         return self.treatment_finder.recommend_treatment_llm(patient_record, reference_records)
 
     ### Patient Form Store
-    def ingest_patient_form(self, patient_form: PatientIntakeForm):
+    def ingest_patient_form(self, patient_form: PatientForm):
         return self.patient_form_store.ingest_patient_form(patient_form)
 
     def retrieve_patient_form(self, patient_id: str):

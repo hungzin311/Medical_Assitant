@@ -8,17 +8,6 @@ from qdrant_client.http.models import Distance, VectorParams, OptimizersConfigDi
 
 
 class PatientVectorStore:
-    """
-    Core vector store operations for patient medical records including:
-    - Patient record ingestion and storage
-    - Vector embedding and indexing
-    - Collection management and optimization
-    
-    Note: Specialized operations have been moved to dedicated classes:
-    - TreatmentFinder: Patient record retrieval and treatment case finding
-    - DiseaseEvaluator: Population monitoring and risk assessment
-    """
-    
     def __init__(self, config, collection_name):
         self.logger = logging.getLogger(__name__)
         self.collection_name = collection_name

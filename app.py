@@ -15,7 +15,7 @@ from config import Config
 from agents.agent_decision import process_query, create_agent_graph
 from proxy_setting import *
 from agents.patient_db_agent import PatientQueryEngine
-from agents.patient_db_agent.patient_intake_form import PatientIntakeForm
+from agents.patient_db_agent.patient_form import PatientIntakeForm
 # Load configuration
 config = Config()
 

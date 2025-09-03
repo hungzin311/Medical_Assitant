@@ -4,7 +4,7 @@ import json
 import logging
 import pprint
 from agents.patient_db_agent import PatientQueryEngine
-from agents.patient_db_agent.patient_intake_form import PatientIntakeForm
+from agents.patient_db_agent.patient_form import PatientIntakeForm
 from proxy_setting import set_proxy
 
 set_proxy()

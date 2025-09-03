@@ -1,11 +1,10 @@
 from datetime import datetime
 import logging
 from .patient_vectorstore import PatientVectorStore
-from .patient_intake_form import PatientIntakeForm
+from .patient_form import PatientForm
 from qdrant_client.models import Filter, FieldCondition, MatchValue
 from uuid import uuid4
 from qdrant_client import models
-import pprint
 
 class PatientFormVectorStore: 
     def __init__(self, config): 
@@ -21,7 +20,7 @@ class PatientFormVectorStore:
     def _collection_exist(self): 
         return self.patient_vector_store._does_collection_exist()
     
-    def ingest_patient_form(self, patient_form: PatientIntakeForm):
+    def ingest_patient_form(self, patient_form: PatientForm):
         if not self._collection_exist():
             self.patient_vector_store._create_patient_collection()
 
