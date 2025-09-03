@@ -16,7 +16,8 @@
     "primary_outcome": 0.8,
     "facility_id": "HOSP_001",
     "geographic_region": "Northeast",
-    "clinical_tags": ["chest_pain", "cardiac", "emergency"]
+    "clinical_tags": ["chest_pain", "cardiac", "emergency"],
+    "primary_disease": ["hypertension", "diabetes_type_2"]
   },
   {
     "patient_id": "PAT_002", 
@@ -35,7 +36,8 @@
     "primary_outcome": 0.7,
     "facility_id": "HOSP_001",
     "geographic_region": "Northeast",
-    "clinical_tags": ["copd", "respiratory", "exacerbation"]
+    "clinical_tags": ["copd", "respiratory", "exacerbation"],
+    "primary_disease": ["copd"]
   },
   {
     "patient_id": "PAT_003",
@@ -55,7 +57,8 @@
     "facility_id": "HOSP_002",
     "geographic_region": "Northeast", 
     "high_risk_patient": true,
-    "clinical_tags": ["preeclampsia", "obstetric", "hypertension"]
+    "clinical_tags": ["preeclampsia", "obstetric", "hypertension"],
+    "primary_disease": ["pregnancy", "preeclampsia"]
   },
   {
     "patient_id": "PAT_004",

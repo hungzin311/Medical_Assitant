@@ -449,7 +449,7 @@
             <div class="dashboard-card chat-card" onclick="console.log('Card clicked'); window.location.href='/chat';">
                 <div class="card-icon">🤖</div>
                 <h3 class="card-title">Trò chuyện với AI</h3>
-                <p class="card-description">Hỏi đáp về triệu chứng, bệnh lý, thuốc men. Phân tích hình ảnh y tế và nhận tư vấn an toàn.</p>
+                <p class="card-description">Hỏi đáp về triệu chứng, bệnh lý, thuốc. Phân tích hình ảnh y tế và nhận tư vấn an toàn.</p>
                 <button class="card-action">Bắt đầu trò chuyện</button>
             </div>
 
@@ -496,33 +496,38 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="form-label">Họ và tên:</label>
-                            <input type="text" class="form-input" name="full_name" placeholder="Nhập họ và tên đầy đủ">
+                            <div class="form-input" id="full_name_display" style="background:#f9f9f9;">—</div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Tuổi: <span class="required">*</span></label>
-                            <input type="number" class="form-input" name="age" min="0" max="120" required placeholder="Nhập tuổi">
+                            <label class="form-label">Tuổi:</label>
+                            <input type="number" class="form-input" name="age" min="0" max="120" placeholder="—" disabled>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Giới tính: <span class="required">*</span></label>
-                            <select class="form-select" name="sex" required>
-                                <option value="">Chọn giới tính</option>
+                            <label class="form-label">Giới tính:</label>
+                            <select class="form-select" name="sex" disabled>
+                                <option value="">—</option>
                                 <option value="male">Nam</option>
                                 <option value="female">Nữ</option>
                                 <option value="other">Khác</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Chiều cao (cm):</label>
-                            <input type="number" class="form-input" name="height_cm" min="30" max="250" placeholder="Ví dụ: 170">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Cân nặng (kg):</label>
-                            <input type="number" class="form-input" name="weight_kg" min="1" max="400" placeholder="Ví dụ: 65">
-                        </div>
-                        <div class="form-group">
                             <label class="form-label">Tỉnh/Thành phố:</label>
-                            <input type="text" class="form-input" name="geographic_region" placeholder="Ví dụ: Hà Nội">
+                            <input type="text" class="form-input" name="geographic_region" placeholder="—" disabled>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Bệnh theo dõi -->
+                <div class="form-section" style="background:#eef7ff;">
+                    <h3>🧬 Bệnh đang theo dõi</h3>
+                    <div class="form-group">
+                        <label class="form-label">Chọn bệnh (có thể chọn nhiều):</label>
+                        <select id="disease-select" class="form-select" multiple></select>
+                    </div>
+                    <div class="form-group" id="new-disease-group" style="display:none;">
+                        <label class="form-label">Bệnh mới:</label>
+                        <input type="text" id="new-disease-input" class="form-input" placeholder="Nhập tên bệnh mới">
                     </div>
                 </div>
 
@@ -688,12 +693,12 @@
                     <h3>📞 Thông tin liên hệ</h3>
                     <div class="form-grid-2">
                         <div class="form-group">
-                            <label class="form-label">Số điện thoại: <span class="required">*</span></label>
-                            <input type="tel" class="form-input" name="contact.phone" required placeholder="Ví dụ: 0901234567">
+                            <label class="form-label">Số điện thoại:</label>
+                            <input type="tel" class="form-input" name="contact.phone" placeholder="—" disabled>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Email:</label>
-                            <input type="email" class="form-input" name="contact.email" placeholder="Ví dụ: example@email.com">
+                            <input type="email" class="form-input" name="contact.email" placeholder="—" disabled>
                         </div>
                     </div>
                 </div>
@@ -819,7 +824,7 @@
             const formData = new FormData(form);
             const patientData = {};
             
-            // Handle regular fields
+            // Handle regular fields (disabled fields are not included)
             for (let [key, value] of formData.entries()) {
                 if (key.includes('.')) {
                     // Handle nested objects like contact.phone, red_flags.severe_chest_pain
@@ -836,9 +841,9 @@
                     if (key === 'associated_symptoms' || key === 'comorbidities') {
                         // Convert comma-separated strings to arrays
                         patientData[key] = value ? value.split(',').map(item => item.trim()) : [];
-                    } else if (key === 'age' || key === 'disease_duration_days') {
+                    } else if (key === 'disease_duration_days') {
                         patientData[key] = parseInt(value) || null;
-                    } else if (key === 'height_cm' || key === 'weight_kg' || key === 'severity_score') {
+                    } else if (key === 'severity_score') {
                         patientData[key] = parseFloat(value) || null;
                     } else {
                         patientData[key] = value || null;
@@ -846,20 +851,16 @@
                 }
             }
             
-            if (!(Object.keys(patientData).includes('height_cm')) || !(Object.keys(patientData).includes('weight_kg'))) {
-                console.log('No height or weight');
-                patientData['bmi'] = null;
-                patientData['bmi_category'] = 'unknown';
-            }
-
-            else{
-                patientData['bmi'] = patientData['weight_kg'] / (patientData['height_cm'] / 100) ** 2;
-                patientData['bmi_category'] = patientData['bmi'] < 18.5 ? 'underweight' : patientData['bmi'] < 24.9 ? 'normal' : patientData['bmi'] < 29.9 ? 'overweight' : 'obese';
-            }
-            
-            delete patientData['height_cm'];
-            delete patientData['weight_kg'];
             delete patientData['consent'];
+
+            // Attach primary_disease from selection
+            const diseaseSelect = document.getElementById('disease-select');
+            if (diseaseSelect) {
+                const selected = Array.from(diseaseSelect.selectedOptions).map(o => o.value).filter(v => v && v !== '__NEW__');
+                const newDisease = (document.getElementById('new-disease-input')?.value || '').trim();
+                if (newDisease) selected.push(newDisease);
+                patientData['primary_disease'] = selected;
+            }
             
             // Convert red_flags object to array of active flags
             if (patientData.red_flags && typeof patientData.red_flags === 'object') {
@@ -873,8 +874,10 @@
             } else {
                 patientData.red_flags = [];
             }
-            
-            patientData['patient_id'] = 'PAT09';
+            // Use current patient id from loaded profile
+            if (window.currentPatientId) {
+                patientData['patient_id'] = window.currentPatientId;
+            }
 
             // Generate patient_id if not provided
             if (!patientData.patient_id) {
@@ -938,6 +941,59 @@
         }
 
         console.log('JavaScript loaded successfully');
+
+        // Helpers to fill and disable fields
+        function setValueAndDisable(selector, val) {
+            const el = document.querySelector(selector);
+            if (!el) return;
+            if (el.tagName === 'SELECT') {
+                for (const opt of el.options) {
+                    if (opt.value === String(val)) { opt.selected = true; break; }
+                }
+            } else if (el.tagName === 'INPUT') {
+                el.value = (val ?? '').toString();
+            }
+            el.setAttribute('disabled', 'disabled');
+        }
+
+        // Load profile & diseases for autofill
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/api/profile')
+                .then(r => r.json())
+                .then(data => {
+                    const profile = data.profile || {};
+                    window.currentPatientId = data.patient_id || profile.patient_id || 'demo_patient';
+                    const nameEl = document.getElementById('full_name_display');
+                    if (nameEl) nameEl.textContent = profile.full_name || window.currentPatientId;
+                    setValueAndDisable('input[name="age"]', profile.age);
+                    setValueAndDisable('select[name="sex"]', profile.sex);
+                    setValueAndDisable('input[name="geographic_region"]', profile.geographic_region);
+                    setValueAndDisable('input[name="contact.phone"]', profile.contact ? profile.contact.phone : '');
+                    setValueAndDisable('input[name="contact.email"]', profile.contact ? profile.contact.email : '');
+                })
+                .catch(() => {});
+
+            fetch('/api/patient/diseases')
+                .then(r => r.json())
+                .then(data => {
+                    const select = document.getElementById('disease-select');
+                    if (!select) return;
+                    select.innerHTML = '';
+                    (data.diseases || []).forEach(d => {
+                        const opt = document.createElement('option');
+                        opt.value = d; opt.textContent = d; select.appendChild(opt);
+                    });
+                    const optNew = document.createElement('option');
+                    optNew.value = '__NEW__'; optNew.textContent = '➕ Bệnh mới…';
+                    select.appendChild(optNew);
+                    select.addEventListener('change', () => {
+                        const show = Array.from(select.selectedOptions).some(o => o.value === '__NEW__');
+                        const ng = document.getElementById('new-disease-group');
+                        if (ng) ng.style.display = show ? 'block' : 'none';
+                    });
+                })
+                .catch(() => {});
+        });
 
         function openChatModal() {
             console.log('openChatModal function called');

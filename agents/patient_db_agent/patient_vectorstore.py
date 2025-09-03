@@ -71,11 +71,6 @@ class PatientVectorStore:
                 ("visit_date", "keyword"),
                 ("is_recent", "bool"),
                 
-                # Demographics (Problem 1)
-                ("age_group", "keyword"),
-                ("sex", "keyword"),
-                ("bmi_category", "keyword"),
-                
                 # Clinical filters
                 ("severity_category", "keyword"),
                 ("comorbidities", "keyword"),
@@ -88,17 +83,17 @@ class PatientVectorStore:
                 
                 # Population health (Problem 3)
                 ("facility_id", "keyword"),
-                ("geographic_region", "keyword"),
                 ("outbreak_risk", "bool"),
                 ("high_risk_patient", "bool"),
                 ("treatment_resistance", "bool"),
                 ("unusual_presentation", "bool"),
                 
                 # Range filters
-                ("age", "integer"),
                 ("severity_score", "float"),
                 ("primary_outcome", "float"),
                 ("comorbidity_count", "integer"),
+                # Disease tracking
+                ("primary_disease", "keyword"),  # store as keyword list
             ]
             
             # Create indexes
@@ -179,30 +174,6 @@ class PatientVectorStore:
         # Set defaults and process data
         current_time = datetime.now().isoformat()
         visit_date = patient_data.get('visit_date', datetime.now().strftime('%Y-%m-%d'))
-        
-        # Calculate age group
-        age = patient_data.get('age', 0)
-        if age < 18:
-            age_group = "0-18"
-        elif age < 30:
-            age_group = "18-30"
-        elif age < 50:
-            age_group = "30-50"
-        elif age < 65:
-            age_group = "50-65"
-        else:
-            age_group = "65+"
-            
-        # Calculate BMI category
-        bmi = patient_data.get('bmi', 0)
-        if bmi < 18.5:
-            bmi_category = "underweight"
-        elif bmi < 25:
-            bmi_category = "normal"
-        elif bmi < 30:
-            bmi_category = "overweight"
-        else:
-            bmi_category = "obese"
             
         # Determine if recent (last 90 days)
         try:
@@ -217,6 +188,7 @@ class PatientVectorStore:
             "patient_id": patient_data.get('patient_id', ''),
             "visit_id": patient_data.get('visit_id', ''),
             "record_type": patient_data.get('record_type', 'encounter'),
+            "primary_disease": patient_data.get('primary_disease', []),
             
             # Temporal context
             "timestamp": patient_data.get('timestamp', current_time),
@@ -228,14 +200,7 @@ class PatientVectorStore:
             # Clinical text
             "summary_text": patient_data.get('summary_text', ''),
             "chief_complaint": patient_data.get('chief_complaint', ''),
-            
-            # Demographics
-            "age": age,
-            "age_group": age_group,
-            "sex": patient_data.get('sex', ''),
-            "bmi": bmi,
-            "bmi_category": bmi_category,
-            
+                        
             # Clinical features
             "vital_signs": patient_data.get('vital_signs', {}),
             "lab_values": patient_data.get('lab_values', {}),
@@ -258,11 +223,9 @@ class PatientVectorStore:
             "adverse_events": patient_data.get('adverse_events', []),
             "disease_progression": patient_data.get('disease_progression', 'stable'),
             
-            # Population health
+            # Population health (no common demographics duplicated)
             "facility_id": patient_data.get('facility_id', ''),
             "provider_id": patient_data.get('provider_id', ''),
-            "geographic_region": patient_data.get('geographic_region', ''),
-            "insurance_type": patient_data.get('insurance_type', ''),
             
             # Pattern flags
             "outbreak_risk": patient_data.get('outbreak_risk', False),

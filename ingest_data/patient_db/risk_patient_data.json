@@ -18,7 +18,8 @@
     "geographic_region": "Northeast",
     "outbreak_risk": true,
     "unusual_presentation": true,
-    "clinical_tags": ["outbreak", "respiratory", "travel_related"]
+    "clinical_tags": ["outbreak", "respiratory", "travel_related"],
+    "primary_disease": ["respiratory_illness"]
   },
   {
     "patient_id": "PAT_012",

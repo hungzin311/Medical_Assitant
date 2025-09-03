@@ -25,19 +25,11 @@ class PatientDataIngestion:
         self.config = Config()
         self.logger = logging.getLogger(__name__)
         
-        # Initialize patient vector store
-        self.patient_store = PatientVectorStore(self.config)
+        # Initialize patient vector store for clinical encounter & tracking combined
+        self.patient_store = PatientVectorStore(self.config, collection_name="medical_records")
         
     def ingest_from_json(self, json_file_path: str) -> List[str]:
-        """
-        Ingest patient records from JSON file.
         
-        Args:
-            json_file_path: Path to JSON file containing patient records
-            
-        Returns:
-            List of ingested record IDs
-        """
         try:
             with open(json_file_path, 'r', encoding='utf-8') as f:
                 patient_records = json.load(f)
@@ -80,20 +72,16 @@ class PatientDataIngestion:
                     self.logger.warning(f"Missing required field {field} in record")
                     return None
             
-            # Set defaults
+            # Set defaults (demographics removed; they live in patient_profile)
             processed = {
                 'patient_id': record['patient_id'],
                 'visit_id': record.get('visit_id', f"visit_{uuid4().hex[:8]}"),
                 'record_type': record.get('record_type', 'encounter'),
+                'primary_disease': record.get('primary_disease', []),
                 'timestamp': record.get('timestamp', datetime.now().isoformat()),
                 'visit_date': record.get('visit_date', datetime.now().strftime('%Y-%m-%d')),
                 'summary_text': record['summary_text'],
                 'chief_complaint': record.get('chief_complaint', ''),
-                
-                # Demographics
-                'age': record.get('age', 50),
-                'sex': record.get('sex', 'U'),  # Unknown
-                'bmi': record.get('bmi', 25.0),
                 
                 # Clinical data
                 'vital_signs': record.get('vital_signs', {}),
@@ -116,11 +104,9 @@ class PatientDataIngestion:
                 'adverse_events': record.get('adverse_events', []),
                 'disease_progression': record.get('disease_progression', 'stable'),
                 
-                # Population health
+                # Population health (keep operational fields only)
                 'facility_id': record.get('facility_id', 'facility_001'),
                 'provider_id': record.get('provider_id', 'provider_001'),
-                'geographic_region': record.get('geographic_region', 'unknown'),
-                'insurance_type': record.get('insurance_type', 'unknown'),
                 
                 # Risk flags
                 'outbreak_risk': record.get('outbreak_risk', False),

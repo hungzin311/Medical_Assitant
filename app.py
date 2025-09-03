@@ -15,9 +15,12 @@ from config import Config
 from agents.agent_decision import process_query, create_agent_graph
 from proxy_setting import *
 from agents.patient_db_agent import PatientQueryEngine
-from agents.patient_db_agent.patient_form import PatientIntakeForm
+from agents.patient_db_agent.patient_form import PatientForm
 # Load configuration
 config = Config()
+
+# Default patient when no login/session available
+DEFAULT_PATIENT_ID = "PAT_001"
 
 #Set proxy 
 set_proxy()
@@ -73,6 +76,26 @@ class QueryRequest(BaseModel):
     conversation_history: List = []
 
 
+@app.get("/api/profile")
+async def get_profile(patient_id: Optional[str] = None):
+    pid = patient_id or DEFAULT_PATIENT_ID
+    try:
+        profile = patient_query_engine.get_patient_profile(pid)
+        return {"status": "success", "patient_id": pid, "profile": profile or {}}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
+
+@app.get("/api/patient/diseases")
+async def list_patient_diseases(patient_id: Optional[str] = None):
+    pid = patient_id or DEFAULT_PATIENT_ID
+    try:
+        diseases = patient_query_engine.get_patient_diseases(pid)
+        return {"status": "success", "patient_id": pid, "diseases": diseases}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
+
 @app.get("/")
 async def root(request: Request):
     """Render the dashboard interface"""
@@ -89,9 +112,12 @@ async def patient_intake(request: Request):
     try:
         # Get raw JSON data first
         raw_data = await request.json()
+        # Default patient id when not provided
+        if not raw_data.get('patient_id'):
+            raw_data['patient_id'] = DEFAULT_PATIENT_ID
         # Try to validate with Pydantic model
         try:
-            patient_data = PatientIntakeForm(**raw_data)
+            patient_data = PatientForm(**raw_data)
         except Exception as validation_error:
             return JSONResponse(
                 status_code=422,
@@ -105,10 +131,16 @@ async def patient_intake(request: Request):
         
         # Ingest patient form
         patient_query_engine.ingest_patient_form(patient_data)
+        # Update profile diseases
+        if patient_data.primary_disease:
+            try:
+                patient_query_engine.add_diseases_to_profile(patient_data.patient_id, patient_data.primary_disease)
+            except Exception as e:
+                print(f"Failed to update profile diseases: {str(e)}")
         
-        # Generate patient_id if not provided
+        # Ensure patient_id present
         if not patient_data.patient_id:
-            patient_data.patient_id = f"patient_{int(time.time())}_{uuid.uuid4().hex[:6]}"
+            patient_data.patient_id = DEFAULT_PATIENT_ID
 
         red_flags_present = {}
         if patient_data.red_flags and isinstance(patient_data.red_flags, list):

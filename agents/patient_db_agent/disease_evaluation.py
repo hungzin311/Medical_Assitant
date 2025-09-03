@@ -24,22 +24,34 @@ class DiseaseEvaluation:
     def retrieve_patient_records(
         self, 
         patient_id: str,
-        query: Optional[str] =None,
+        query: Optional[str] = None,
+        primary_disease: Optional[str] = None,
         limit: int = 5
     ) -> List[Dict[str, Any]]:
         try:
             #Retrieved records list
             patient_records = []
+            
+            # Build filter conditions
+            must_filters = [
+                FieldCondition(key="patient_id", match=MatchValue(value=patient_id))
+            ]
+            
+            # Add disease filter if specified
+            if primary_disease:
+                must_filters.append(
+                    FieldCondition(key="primary_disease", match=MatchValue(value=primary_disease))
+                )
+            
+            # Create filter
+            query_filter = Filter(must=must_filters)
+            
             if query: 
                 query_vector = self.embedding_model.embed_query(query)
                 patient_history = self.client.query_points(
                     collection_name = self.collection_name, 
                     query = query_vector, 
-                    query_filter = Filter( 
-                        must = [
-                            FieldCondition(key='patient_id', match = MatchValue(value = patient_id))
-                        ]
-                    ), 
+                    query_filter = query_filter,
                     limit = limit, 
                     using = 'dense', 
                     with_payload = True
@@ -47,15 +59,12 @@ class DiseaseEvaluation:
             else:
                 patient_history = self.client.query_points( 
                     collection_name=self.collection_name, 
-                    query_filter = Filter(
-                        must = [
-                            FieldCondition(key="patient_id", match=MatchValue(value=patient_id))
-                        ]
-                    ), 
+                    query_filter = query_filter, 
                     limit = limit, 
                     with_payload= True,
                     using="dense"
                 )
+            
             #Format results
             for result in patient_history.points: 
                 record = {

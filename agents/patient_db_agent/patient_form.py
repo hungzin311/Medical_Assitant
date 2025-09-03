@@ -2,18 +2,8 @@ from pydantic import BaseModel, field_validator
 from typing import Optional, List
 from datetime import datetime
 
-class ContactInfo(BaseModel):
-    phone: str
-    email: Optional[str] = None
-
 class PatientForm(BaseModel):
     patient_id: Optional[str] = None
-    full_name: Optional[str] = None
-    age: int
-    sex: Optional[str] = None
-    bmi: Optional[float] = None
-    bmi_category: Optional[str] = None
-    geographic_region: Optional[str] = None
     
     chief_complaint: str
     summary_text: Optional[str] = None
@@ -39,24 +29,15 @@ class PatientForm(BaseModel):
     occupational_exposure: Optional[str] = None
     pregnancy_status: Optional[str] = None
     
+    visit_id: Optional[str] = None
+    record_type: Optional[str] = "tracking_form"
+    primary_disease: Optional[List[str]] = None
+
     red_flags: Optional[List[str]] = []
         
-    contact: ContactInfo
     created_at: datetime = datetime.now()
         
-    @field_validator('age')
-    @classmethod
-    def validate_age(cls, v):
-        if v < 0 or v > 120:
-            raise ValueError('Age must be between 0 and 120')
-        return v
-    
-    @field_validator('sex')
-    @classmethod
-    def validate_sex(cls, v):
-        if v not in ['male', 'female', 'other']:
-            raise ValueError('Sex must be male, female, or other')
-        return v
+    # Demographics are sourced from patient_profile; not part of editable form
     
     @field_validator('severity_score')
     @classmethod
@@ -78,3 +59,15 @@ class PatientForm(BaseModel):
         if v < 0 or v > 36500:
             raise ValueError('Disease duration days must be between 0 and 36500')
         return v
+
+    # Primary disease must be provided (non-empty) for tracking forms
+    @field_validator('primary_disease')
+    @classmethod
+    def validate_primary_disease(cls, v):
+        if v is None or len(v) == 0:
+            raise ValueError('primary_disease must contain at least 1 disease')
+        # strip spaces and empty strings
+        cleaned = [d.strip() for d in v if d and d.strip()]
+        if len(cleaned) == 0:
+            raise ValueError('primary_disease must contain at least 1 valid disease name')
+        return cleaned

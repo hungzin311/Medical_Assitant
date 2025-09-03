@@ -16,6 +16,20 @@ class PatientFormVectorStore:
             field_schema=models.PayloadSchemaType.DATETIME
         )
 
+        # Index for patient and disease filtering
+        try:
+            self.client.create_payload_index(
+                collection_name=self.patient_vector_store.collection_name,
+                field_name="patient_id",
+                field_schema="keyword"
+            )
+            self.client.create_payload_index(
+                collection_name=self.patient_vector_store.collection_name,
+                field_name="primary_disease",
+                field_schema="keyword"
+            )
+        except Exception:
+            pass
     
     def _collection_exist(self): 
         return self.patient_vector_store._does_collection_exist()
@@ -24,8 +38,14 @@ class PatientFormVectorStore:
         if not self._collection_exist():
             self.patient_vector_store._create_patient_collection()
 
+        # Ensure visit_id & defaults
+        if not patient_form.visit_id:
+            patient_form.visit_id = str(uuid4())
+        if not patient_form.record_type:
+            patient_form.record_type = "tracking_form"
+
         payload = patient_form.model_dump()
-        record_id = str(uuid4())
+        record_id = payload.get("visit_id", str(uuid4()))
         # Create a dummy vector for patient form (since we don't need semantic search on forms)
         dummy_vector = [0.0] * self.patient_vector_store.embedding_dim
         
