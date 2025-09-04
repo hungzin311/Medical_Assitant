@@ -112,12 +112,15 @@ async def patient_intake(request: Request):
     try:
         # Get raw JSON data first
         raw_data = await request.json()
+
         # Default patient id when not provided
         if not raw_data.get('patient_id'):
             raw_data['patient_id'] = DEFAULT_PATIENT_ID
         # Try to validate with Pydantic model
         try:
             patient_data = PatientForm(**raw_data)
+            print(f"✅ Disease tracking form validated successfully for patient: {patient_data.patient_id}")
+            
         except Exception as validation_error:
             return JSONResponse(
                 status_code=422,
@@ -128,7 +131,6 @@ async def patient_intake(request: Request):
                     "received_data": raw_data
                 }
             )
-        
         # Ingest patient form
         patient_query_engine.ingest_patient_form(patient_data)
         # Update profile diseases
@@ -152,8 +154,10 @@ async def patient_intake(request: Request):
         
         return {
             "status": "success",
-            "message": "Thông tin bệnh nhân đã được ghi nhận thành công",
+            "message": "Thông tin theo dõi bệnh đã được ghi nhận thành công",
             "patient_id": patient_data.patient_id,
+            "visit_type": patient_data.visit_type,
+            "disease_status": patient_data.disease_status,
             "red_flags_detected": list(red_flags_present.keys()),
         }
         
@@ -341,7 +345,6 @@ async def validate_medical_output(
             
             # Save image if provided
             image_path = None
-            base64_path = None
             if image_data and image_data.startswith('data:image'):
                 # Extract image data from base64 string
                 try:
@@ -408,25 +411,11 @@ async def validate_medical_output(
                         except Exception as method2_error:
                             print(f"Method 2 failed: {str(method2_error)}")
                     
-                    # Method 3: Last resort - just save the base64 string
-                    if not success:
-                        pass
-                    # Make the image path relative for storage in JSON
-                    image_path = image_filename
-                    relative_image_path = image_path.replace("\\", "/")
-                    if relative_image_path.startswith("./"):
-                        relative_image_path = relative_image_path[2:]
-                    
-                    # Update the user_question with the image path if it's a parsed object
-                    if parsed_user_question and isinstance(parsed_user_question, dict):
-                        parsed_user_question["saved_image_path"] = relative_image_path
-                    
                 except Exception as e:
                     print(f"Failed to save image: {str(e)}")
                     import traceback
                     traceback.print_exc()
                     image_path = None
-                    base64_path = None
             
             # Create a log entry
             log_entry = {

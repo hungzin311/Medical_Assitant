@@ -504,12 +504,7 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Giới tính:</label>
-                            <select class="form-select" name="sex" disabled>
-                                <option value="">—</option>
-                                <option value="male">Nam</option>
-                                <option value="female">Nữ</option>
-                                <option value="other">Khác</option>
-                            </select>
+                            <input type="text" class="form-input" name="sex" placeholder="—" disabled>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Tỉnh/Thành phố:</label>
@@ -531,127 +526,218 @@
                     </div>
                 </div>
 
-                <!-- Triệu chứng chính -->
+                <!-- Visit Information -->
                 <div class="form-section" style="background: #fff5f5;">
-                    <h3>🩺 Triệu chứng chính</h3>
-                    <div class="form-group">
-                        <label class="form-label">Lý do khám chính: <span class="required">*</span></label>
-                        <textarea class="form-textarea" name="chief_complaint" rows="3" required placeholder="Mô tả chi tiết lý do đến khám (tối thiểu 4 ký tự)"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Tóm tắt tình trạng:</label>
-                        <textarea class="form-textarea" name="summary_text" rows="2" placeholder="Tóm tắt ngắn gọn về tình trạng hiện tại"></textarea>
-                    </div>
+                    <h3>🏥 Thông tin lượt khám</h3>
                     <div class="form-grid-2">
                         <div class="form-group">
-                            <label class="form-label">Ngày bắt đầu:</label>
-                            <input type="date" class="form-input" name="onset_date">
+                            <label class="form-label">Loại lượt khám:</label>
+                            <select class="form-select" name="visit_type">
+                                <option value="routine_followup">Tái khám định kỳ</option>
+                                <option value="urgent_followup">Tái khám khẩn cấp</option>
+                                <option value="emergency">Cấp cứu</option>
+                                <option value="medication_review">Đánh giá thuốc</option>
+                                <option value="lab_review">Xem kết quả xét nghiệm</option>
+                            </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Số ngày kéo dài: <span class="required">*</span></label>
-                            <input type="number" class="form-input" name="disease_duration_days" min="0" max="36500" required placeholder="Số ngày">
+                            <label class="form-label">Số ngày kể từ lần khám trước:</label>
+                            <input type="number" class="form-input" name="days_since_last_visit" min="0" placeholder="Số ngày">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Mức độ nghiêm trọng(0-10): <span class="required">*</span></label>
-                            <input type="number" class="form-input" name="severity_score" min="0" max="10" step="0.1" required placeholder="0 = nhẹ, 10 = rất nặng">
+                            <label class="form-label">Tình trạng bệnh:</label>
+                            <select class="form-select" name="disease_status">
+                                <option value="">Chọn tình trạng</option>
+                                <option value="stable">Ổn định</option>
+                                <option value="improving">Cải thiện</option>
+                                <option value="worsening">Xấu đi</option>
+                                <option value="resolved">Đã khỏi</option>
+                            </select>
                         </div>
                     </div>
                 </div>
 
-                <!-- Chi tiết triệu chứng -->
+                <!-- Current Status Assessment -->
                 <div class="form-section" style="background: #f0f8ff;">
-                    <h3>📝 Chi tiết triệu chứng</h3>
+                    <h3>📊 Đánh giá tình trạng hiện tại</h3>
                     <div class="form-group">
-                        <label class="form-label">Diễn biến:</label>
-                        <select class="form-select" name="course">
-                            <option value="">Chọn diễn biến</option>
-                            <option value="worsening">Xấu đi</option>
-                            <option value="improving">Cải thiện</option>
-                            <option value="stable">Ổn định</option>
-                            <option value="fluctuating">Thay đổi</option>
-                        </select>
+                        <label class="form-label">Triệu chứng hiện tại:</label>
+                        <input type="text" class="form-input" name="current_symptoms" placeholder="Nhập các triệu chứng hiện tại, cách nhau bởi dấu phẩy">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Yếu tố làm nặng/nhẹ:</label>
-                        <textarea class="form-textarea" name="aggravating_relieving" rows="2" placeholder="Mô tả các yếu tố làm triệu chứng nặng hơn hoặc nhẹ đi"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Triệu chứng kèm theo:</label>
-                        <input type="text" class="form-input" name="associated_symptoms" placeholder="Nhập các triệu chứng khác, cách nhau bởi dấu phẩy">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Vị trí:</label>
-                        <input type="text" class="form-input" name="location" placeholder="Vị trí cụ thể của triệu chứng">
-                    </div>
-                </div>
-
-                <!-- Tiền sử bệnh -->
-                <div class="form-section" style="background: #fafafa;">
-                    <h3>🏥 Tiền sử bệnh và điều trị</h3>
-                    <div class="form-group">
-                        <label class="form-label">Bệnh lý kèm theo:</label>
-                        <input type="text" class="form-input" name="comorbidities" placeholder="Các bệnh lý khác, cách nhau bởi dấu phẩy">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Dị ứng:</label>
-                        <textarea class="form-textarea" name="allergies" rows="2" placeholder="Dị ứng thuốc, thực phẩm hoặc các chất khác"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Thuốc đang dùng:</label>
-                        <textarea class="form-textarea" name="current_medications" rows="2" placeholder="Liệt kê các loại thuốc đang sử dụng"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Các phương pháp điều trị đã thử:</label>
-                        <textarea class="form-textarea" name="treatments_tried" rows="2" placeholder="Mô tả các cách điều trị đã áp dụng"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Chống chỉ định:</label>
-                        <textarea class="form-textarea" name="contraindications" rows="2" placeholder="Các thuốc hoặc phương pháp điều trị không thể sử dụng"></textarea>
-                    </div>
-                </div>
-
-                <!-- Yếu tố nguy cơ -->
-                <div class="form-section" style="background: #fff8e1;">
-                    <h3>⚠️ Yếu tố nguy cơ</h3>
                     <div class="form-grid-2">
                         <div class="form-group">
-                            <label class="form-label">Tình trạng hút thuốc:</label>
-                            <select class="form-select" name="smoking_status">
-                                <option value="">Chọn tình trạng</option>
-                                <option value="never">Không bao giờ</option>
-                                <option value="former">Đã bỏ</option>
-                                <option value="current">Đang hút</option>
+                            <label class="form-label">So với lần trước, triệu chứng:</label>
+                            <select class="form-select" name="symptom_severity_change">
+                                <option value="">Chọn mức độ thay đổi</option>
+                                <option value="better">Tốt hơn</option>
+                                <option value="same">Giống như trước</option>
+                                <option value="worse">Tệ hơn</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Sử dụng rượu bia:</label>
-                            <select class="form-select" name="alcohol_use">
+                            <label class="form-label">Mức độ nghiêm trọng tổng thể (0-10): <span class="required">*</span></label>
+                            <input type="number" class="form-input" name="overall_severity_score" min="0" max="10" step="0.1" required placeholder="0 = nhẹ, 10 = rất nặng">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vital Signs & Measurements -->
+                <div class="form-section" style="background: #f0fff0;">
+                    <h3>🌡️ Chỉ số sinh tồn & Đo lường</h3>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Huyết áp (mmHg):</label>
+                            <input type="text" class="form-input" name="vital_signs.blood_pressure" placeholder="Ví dụ: 120/80">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nhịp tim (lần/phút):</label>
+                            <input type="number" class="form-input" name="vital_signs.heart_rate" placeholder="72">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nhiệt độ (°C):</label>
+                            <input type="number" class="form-input" name="vital_signs.temperature" step="0.1" placeholder="36.5">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Cân nặng (kg):</label>
+                            <input type="number" class="form-input" name="vital_signs.weight" step="0.1" placeholder="70.0">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Kết quả xét nghiệm:</label>
+                        <textarea class="form-textarea" name="lab_values_text" rows="2" placeholder="Nhập kết quả xét nghiệm quan trọng (glucose, HbA1c, cholesterol...)"></textarea>
+                    </div>
+                </div>
+
+                <!-- Treatment Tracking -->
+                <div class="form-section" style="background: #fafafa;">
+                    <h3>💊 Theo dõi điều trị</h3>
+                    <div class="form-group">
+                        <label class="form-label">Thuốc hiện tại:</label>
+                        <textarea class="form-textarea" name="current_medications_text" rows="3" placeholder="Liệt kê thuốc đang dùng: tên thuốc, liều dùng, tần suất"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Thay đổi thuốc kể từ lần trước:</label>
+                        <input type="text" class="form-input" name="medication_changes" placeholder="Bắt đầu X, ngừng Y, tăng liều Z...">
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Phản ứng với điều trị:</label>
+                            <select class="form-select" name="treatment_response">
+                                <option value="">Chọn phản ứng</option>
+                                <option value="excellent">Rất tốt</option>
+                                <option value="good">Tốt</option>
+                                <option value="fair">Trung bình</option>
+                                <option value="poor">Kém</option>
+                                <option value="no_response">Không phản ứng</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tuân thủ uống thuốc:</label>
+                            <select class="form-select" name="medication_compliance">
                                 <option value="">Chọn mức độ</option>
-                                <option value="none">Không sử dụng</option>
-                                <option value="occasional">Thỉnh thoảng</option>
-                                <option value="frequent">Thường xuyên</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Tình trạng mang thai:</label>
-                            <select class="form-select" name="pregnancy_status">
-                                <option value="">Chọn tình trạng</option>
-                                <option value="unknown">Không rõ</option>
-                                <option value="pregnant">Có thai</option>
-                                <option value="not_pregnant">Không có thai</option>
+                                <option value="excellent">Rất tốt</option>
+                                <option value="good">Tốt</option>
+                                <option value="fair">Trung bình</option>
+                                <option value="poor">Kém</option>
                             </select>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Tiếp xúc nghề nghiệp:</label>
-                        <input type="text" class="form-input" name="occupational_exposure" placeholder="Tiếp xúc với hóa chất, bụi, khói... trong công việc">
+                        <label class="form-label">Tác dụng phụ:</label>
+                        <input type="text" class="form-input" name="side_effects" placeholder="Nếu có, liệt kê các tác dụng phụ gặp phải">
                     </div>
                 </div>
 
-                <!-- Dấu hiệu nguy hiểm -->
+                <!-- Functional Status & Quality of Life -->
+                <div class="form-section" style="background: #fff8e1;">
+                    <h3>💪 Tình trạng chức năng & Chất lượng cuộc sống</h3>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Chất lượng cuộc sống (0-10):</label>
+                            <input type="number" class="form-input" name="quality_of_life_score" min="0" max="10" step="0.1" placeholder="0 = rất tệ, 10 = rất tốt">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tuân thủ chế độ ăn:</label>
+                            <select class="form-select" name="diet_compliance">
+                                <option value="">Chọn mức độ</option>
+                                <option value="excellent">Rất tốt</option>
+                                <option value="good">Tốt</option>
+                                <option value="fair">Trung bình</option>
+                                <option value="poor">Kém</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tuân thủ tập luyện:</label>
+                            <select class="form-select" name="exercise_compliance">
+                                <option value="">Chọn mức độ</option>
+                                <option value="excellent">Rất tốt</option>
+                                <option value="good">Tốt</option>
+                                <option value="fair">Trung bình</option>
+                                <option value="poor">Kém</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Thay đổi lối sống:</label>
+                        <input type="text" class="form-input" name="lifestyle_changes" placeholder="Các thay đổi tích cực về lối sống, cách nhau bởi dấu phẩy">
+                    </div>
+                </div>
+
+                <!-- Clinical Notes & Goals -->
+                <div class="form-section" style="background: #f8f9fa;">
+                    <h3>📝 Ghi chú lâm sàng & Mục tiêu</h3>
+                    <div class="form-group">
+                        <label class="form-label">Ghi chú của bác sĩ:</label>
+                        <textarea class="form-textarea" name="provider_notes" rows="3" placeholder="Ghi chú về tình trạng bệnh nhân, kế hoạch điều trị..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Mối quan tâm của bệnh nhân:</label>
+                        <textarea class="form-textarea" name="patient_concerns" rows="2" placeholder="Những điều bệnh nhân quan tâm hoặc thắc mắc"></textarea>
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Mục tiêu đã đạt được:</label>
+                            <input type="text" class="form-input" name="treatment_goals_met" placeholder="Các mục tiêu điều trị đã hoàn thành">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Mục tiêu mới:</label>
+                            <input type="text" class="form-input" name="new_treatment_goals" placeholder="Các mục tiêu điều trị mới">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Kế hoạch lần khám tiếp theo:</label>
+                        <textarea class="form-textarea" name="next_visit_plan" rows="2" placeholder="Kế hoạch cho lần tái khám tiếp theo"></textarea>
+                    </div>
+                </div>
+
+                <!-- Comorbidities Tracking -->
+                <div class="form-section" style="background: #f0f8ff;">
+                    <h3>🏥 Theo dõi bệnh kèm theo</h3>
+                    <div class="form-group">
+                        <label class="form-label">Bệnh lý kèm theo hiện tại:</label>
+                        <input type="text" class="form-input" name="comorbidities" placeholder="Các bệnh lý khác đang điều trị, cách nhau bởi dấu phẩy">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Bệnh lý mới phát hiện:</label>
+                        <input type="text" class="form-input" name="new_comorbidities" placeholder="Các bệnh lý mới được chẩn đoán kể từ lần khám trước">
+                    </div>
+                </div>
+
+                <!-- Risk Assessment -->
                 <div class="form-section" style="background: #ffebee; border: 2px solid #ffcdd2;">
-                    <h3>🚨 Dấu hiệu nguy hiểm</h3>
-                    <p style="color: #666; margin-bottom: 15px; font-style: italic;">Đánh dấu nếu bạn đang gặp phải các triệu chứng sau:</p>
+                    <h3>⚠️ Đánh giá nguy cơ & Dấu hiệu cảnh báo</h3>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Mức độ nguy cơ:</label>
+                            <select class="form-select" name="risk_level">
+                                <option value="">Chọn mức độ nguy cơ</option>
+                                <option value="low">Thấp</option>
+                                <option value="moderate">Trung bình</option>
+                                <option value="high">Cao</option>
+                            </select>
+                        </div>
+                    </div>
+                    <p style="color: #666; margin-bottom: 15px; font-style: italic;">Đánh dấu nếu bệnh nhân có các dấu hiệu cảnh báo:</p>
                     <div class="checkbox-grid">
                         <label class="checkbox-label">
                             <input type="checkbox" name="red_flags.severe_chest_pain">
@@ -714,7 +800,7 @@
                     </label>
                 </div>
 
-                <button type="button" class="submit-btn" onclick="submitPatientForm()">📋 Gửi Thông Tin Bệnh Nhân</button>
+                <button type="button" class="submit-btn" onclick="submitPatientForm()">📋 Gửi Thông Tin Theo Dõi Bệnh</button>
             </form>
             
             <div id="patientFormResult" class="result-chart" style="display: none;">
@@ -827,28 +913,58 @@
             // Handle regular fields (disabled fields are not included)
             for (let [key, value] of formData.entries()) {
                 if (key.includes('.')) {
-                    // Handle nested objects like contact.phone, red_flags.severe_chest_pain
+                    // Handle nested objects like vital_signs.blood_pressure, red_flags.severe_chest_pain
                     const parts = key.split('.');
                     if (!patientData[parts[0]]) {
                         patientData[parts[0]] = {};
                     }
                     if (parts[0] === 'red_flags') {
                         patientData[parts[0]][parts[1]] = value === 'on';
+                    } else if (parts[0] === 'vital_signs') {
+                        // Handle vital signs - convert numbers appropriately
+                        if (parts[1] === 'heart_rate' || parts[1] === 'temperature' || parts[1] === 'weight') {
+                            patientData[parts[0]][parts[1]] = parseFloat(value) || null;
+                        } else {
+                            patientData[parts[0]][parts[1]] = value || null;
+                        }
                     } else {
                         patientData[parts[0]][parts[1]] = value;
                     }
                 } else {
-                    if (key === 'associated_symptoms' || key === 'comorbidities') {
+                    // Handle array fields
+                    if (key === 'current_symptoms' || key === 'comorbidities' || key === 'new_comorbidities' || 
+                        key === 'side_effects' || key === 'medication_changes' || key === 'lifestyle_changes' ||
+                        key === 'treatment_goals_met' || key === 'new_treatment_goals') {
                         // Convert comma-separated strings to arrays
-                        patientData[key] = value ? value.split(',').map(item => item.trim()) : [];
-                    } else if (key === 'disease_duration_days') {
+                        patientData[key] = value ? value.split(',').map(item => item.trim()).filter(item => item) : [];
+                    } else if (key === 'days_since_last_visit') {
                         patientData[key] = parseInt(value) || null;
-                    } else if (key === 'severity_score') {
-                        patientData[key] = parseFloat(value) || null;
+                    } else if (key === 'overall_severity_score' || key === 'quality_of_life_score') {
+                        patientData[key] = parseFloat(value) || 0.0;
                     } else {
                         patientData[key] = value || null;
                     }
                 }
+            }
+            
+            // Handle lab values text field - convert to object structure
+            if (patientData.lab_values_text) {
+                patientData.lab_values = { notes: patientData.lab_values_text };
+                delete patientData.lab_values_text;
+            } else {
+                patientData.lab_values = {};
+            }
+            
+            // Handle current medications text - convert to array structure
+            if (patientData.current_medications_text) {
+                const medications = patientData.current_medications_text.split('\n')
+                    .map(med => med.trim())
+                    .filter(med => med)
+                    .map(med => ({ description: med }));
+                patientData.current_medications = medications;
+                delete patientData.current_medications_text;
+            } else {
+                patientData.current_medications = [];
             }
             
             delete patientData['consent'];
@@ -966,7 +1082,7 @@
                     const nameEl = document.getElementById('full_name_display');
                     if (nameEl) nameEl.textContent = profile.full_name || window.currentPatientId;
                     setValueAndDisable('input[name="age"]', profile.age);
-                    setValueAndDisable('select[name="sex"]', profile.sex);
+                    setValueAndDisable('input[name="sex"]', profile.sex);
                     setValueAndDisable('input[name="geographic_region"]', profile.geographic_region);
                     setValueAndDisable('input[name="contact.phone"]', profile.contact ? profile.contact.phone : '');
                     setValueAndDisable('input[name="contact.email"]', profile.contact ? profile.contact.email : '');

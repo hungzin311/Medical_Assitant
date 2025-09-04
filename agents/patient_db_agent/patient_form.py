@@ -1,73 +1,99 @@
 from pydantic import BaseModel, field_validator
-from typing import Optional, List
+from typing import Optional, List, Dict, Union
 from datetime import datetime
+from enum import Enum
+
+class VisitType(str, Enum):
+    ROUTINE_FOLLOWUP = "routine_followup"
+    URGENT_FOLLOWUP = "urgent_followup" 
+    EMERGENCY = "emergency"
+    MEDICATION_REVIEW = "medication_review"
+    LAB_REVIEW = "lab_review"
+
+class TreatmentResponse(str, Enum):
+    EXCELLENT = "excellent"
+    GOOD = "good" 
+    FAIR = "fair"
+    POOR = "poor"
+    NO_RESPONSE = "no_response"
 
 class PatientForm(BaseModel):
+    # Core identification
     patient_id: Optional[str] = None
-    
-    chief_complaint: str
-    summary_text: Optional[str] = None
-    
-    onset_date: Optional[str] = None
-    disease_duration_days: int
-    severity_score: float
-    
-    course: Optional[str] = None
-    aggravating_relieving: Optional[str] = None
-    associated_symptoms: Optional[List[str]] = []
-    location: Optional[str] = None
-    
-    comorbidities: Optional[List[str]] = []
-    allergies: Optional[str] = None
-    
-    current_medications: Optional[str] = None
-    treatments_tried: Optional[str] = None
-    contraindications: Optional[str] = None
-    
-    smoking_status: Optional[str] = None
-    alcohol_use: Optional[str] = None
-    occupational_exposure: Optional[str] = None
-    pregnancy_status: Optional[str] = None
-    
     visit_id: Optional[str] = None
-    record_type: Optional[str] = "tracking_form"
-    primary_disease: Optional[List[str]] = None
-
-    red_flags: Optional[List[str]] = []
-        
-    created_at: datetime = datetime.now()
-        
-    # Demographics are sourced from patient_profile; not part of editable form
+    visit_type: VisitType = VisitType.ROUTINE_FOLLOWUP
     
-    @field_validator('severity_score')
+    # Disease being tracked
+    primary_disease: List[str]  # Required for tracking
+    disease_status: Optional[str] = None  # "stable", "improving", "worsening", "resolved"
+    
+    # Visit context
+    days_since_last_visit: Optional[int] = None
+    
+    # Current status assessment
+    current_symptoms: Optional[List[str]] = []
+    symptom_severity_change: Optional[str] = None  # "better", "same", "worse"
+    overall_severity_score: float = 0.0  # 0-10 scale
+    
+    # Vital signs & measurements
+    vital_signs: Optional[Dict[str, Union[float, str]]] = {}  # BP, HR, temp, weight, etc.
+    lab_values: Optional[Dict[str, Union[float, str]]] = {}   # glucose, HbA1c, etc.
+    
+    # Treatment tracking
+    current_medications: Optional[List[Dict[str, str]]] = []  # name, dose, frequency, start_date
+    medication_changes: Optional[List[str]] = []  # "started X", "stopped Y", "increased Z"
+    treatment_response: Optional[TreatmentResponse] = None
+    side_effects: Optional[List[str]] = []
+    
+    # Functional status
+    quality_of_life_score: Optional[float] = None  # 0-10 scale
+    
+    # Compliance & lifestyle
+    medication_compliance: Optional[str] = None  # "excellent", "good", "fair", "poor"
+    lifestyle_changes: Optional[List[str]] = []
+    diet_compliance: Optional[str] = None
+    exercise_compliance: Optional[str] = None
+    
+    # Clinical notes
+    provider_notes: Optional[str] = None
+    patient_concerns: Optional[str] = None
+    
+    # Goals & plans
+    treatment_goals_met: Optional[List[str]] = []
+    new_treatment_goals: Optional[List[str]] = []
+    next_visit_plan: Optional[str] = None
+    
+    # Risk assessment
+    red_flags: Optional[List[str]] = []
+    risk_level: Optional[str] = None  # "low", "moderate", "high"
+    
+    # Comorbidities tracking
+    comorbidities: Optional[List[str]] = []
+    new_comorbidities: Optional[List[str]] = []
+    
+    # System fields
+    record_type: str = "disease_tracking"
+    created_at: datetime = datetime.now()
+    provider_id: Optional[str] = None
+    
+    # Validators
+    @field_validator('overall_severity_score')
     @classmethod
     def validate_severity_score(cls, v):
         if v < 0 or v > 10:
             raise ValueError('Severity score must be between 0 and 10')
         return v
     
-    @field_validator('chief_complaint')
-    @classmethod
-    def validate_chief_complaint(cls, v):
-        if len(v.strip()) < 4:
-            raise ValueError('Chief complaint must be at least 4 characters')
-        return v
-    
-    @field_validator('disease_duration_days')
-    @classmethod
-    def validate_disease_duration_days(cls, v):
-        if v < 0 or v > 36500:
-            raise ValueError('Disease duration days must be between 0 and 36500')
-        return v
-
-    # Primary disease must be provided (non-empty) for tracking forms
     @field_validator('primary_disease')
     @classmethod
     def validate_primary_disease(cls, v):
-        if v is None or len(v) == 0:
-            raise ValueError('primary_disease must contain at least 1 disease')
-        # strip spaces and empty strings
-        cleaned = [d.strip() for d in v if d and d.strip()]
-        if len(cleaned) == 0:
-            raise ValueError('primary_disease must contain at least 1 valid disease name')
-        return cleaned
+        if not v or len(v) == 0:
+            raise ValueError('At least one primary disease must be specified for tracking')
+        return [d.strip() for d in v if d and d.strip()]
+    
+    @field_validator('quality_of_life_score')
+    @classmethod
+    def validate_qol_score(cls, v):
+        if v is not None and (v < 0 or v > 10):
+            raise ValueError('Quality of life score must be between 0 and 10')
+        return v

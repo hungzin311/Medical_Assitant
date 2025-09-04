@@ -17,10 +17,6 @@ from agents.patient_db_agent.patient_vectorstore import PatientVectorStore
 
 
 class PatientDataIngestion:
-    """
-    Handles ingestion of patient medical records from various sources.
-    """
-    
     def __init__(self, config_path: Optional[str] = None):
         self.config = Config()
         self.logger = logging.getLogger(__name__)
@@ -55,15 +51,6 @@ class PatientDataIngestion:
             return []
     
     def _validate_and_process_record(self, record: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """
-        Validate and process a patient record to ensure it meets schema requirements.
-        
-        Args:
-            record: Raw patient record
-            
-        Returns:
-            Processed record or None if invalid
-        """
         try:
             # Required fields
             required_fields = ['patient_id', 'summary_text']
@@ -134,12 +121,12 @@ def main():
     ingestion = PatientDataIngestion()
     
     # Ingest sample patient data
-    sample_file_path = "ingest_data/patient_db/sample_patient_data.json"
+    sample_file_path = "sample_patient_data.json"
     record_ids = ingestion.ingest_from_json(sample_file_path)
     print(f"Ingested {len(record_ids)} sample patient records")
     
     # Ingest risk patient data
-    risk_file_path = "ingest_data/patient_db/risk_patient_data.json"
+    risk_file_path = "risk_patient_data.json"
     risk_record_ids = ingestion.ingest_from_json(risk_file_path)
     print(f"Ingested {len(risk_record_ids)} risk patient records")
     

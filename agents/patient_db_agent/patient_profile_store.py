@@ -1,5 +1,5 @@
 from typing import Dict, Any, List, Optional
-from uuid import uuid4
+import uuid
 import logging
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams
@@ -50,7 +50,8 @@ class PatientProfileStore:
     # ---------------- public methods -----------------
     def upsert_profile(self, payload: Dict[str, Any]):
         """Insert or update patient profile. patient_id required."""
-        pid = str(uuid4())
+        patient_id = payload.get("patient_id")
+        pid = str(uuid.uuid5(uuid.NAMESPACE_DNS, patient_id)) 
         if not pid:
             raise ValueError("patient_id missing in profile payload")
         vector = [0.0] * self.embedding_dim
