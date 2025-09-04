@@ -36,8 +36,8 @@ class PatientForm(BaseModel):
     overall_severity_score: float = 0.0  # 0-10 scale
     
     # Vital signs & measurements
-    vital_signs: Optional[Dict[str, Union[float, str]]] = {}  # BP, HR, temp, weight, etc.
-    lab_values: Optional[Dict[str, Union[float, str]]] = {}   # glucose, HbA1c, etc.
+    vital_signs: Optional[Dict[str, Optional[Union[float, str]]]] = {}  # allow None for each measurement
+    lab_values: Optional[Dict[str, Optional[Union[float, str]]]] = {}   # allow None for labs
     
     # Treatment tracking
     current_medications: Optional[List[Dict[str, str]]] = []  # name, dose, frequency, start_date

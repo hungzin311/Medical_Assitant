@@ -394,6 +394,11 @@
             .quick-stats {
                 grid-template-columns: repeat(2, 1fr);
             }
+            .form-label[for] + .form-select[required] ~ .form-label::after,
+            label.form-label:has(+ .form-select[required])::after {
+                content: " *";
+                color: red;
+            }
         }
     </style>
 </head>
@@ -518,10 +523,18 @@
                     <h3>🧬 Bệnh đang theo dõi</h3>
                     <div class="form-group">
                         <label class="form-label">Chọn bệnh (có thể chọn nhiều):</label>
-                        <select id="disease-select" class="form-select" multiple></select>
+                        <div id="disease-checkbox-container" class="checkbox-grid" style="max-height: 200px; overflow-y: auto; border: 1px solid #e1e1e1; padding: 15px; border-radius: 8px; background: white;">
+                            <!-- Disease checkboxes will be populated here -->
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="new-disease-checkbox" style="margin-right: 8px;">
+                            <span>➕ Thêm bệnh mới</span>
+                        </label>
                     </div>
                     <div class="form-group" id="new-disease-group" style="display:none;">
-                        <label class="form-label">Bệnh mới:</label>
+                        <label class="form-label">Tên bệnh mới:</label>
                         <input type="text" id="new-disease-input" class="form-input" placeholder="Nhập tên bệnh mới">
                     </div>
                 </div>
@@ -562,7 +575,7 @@
                     <h3>📊 Đánh giá tình trạng hiện tại</h3>
                     <div class="form-group">
                         <label class="form-label">Triệu chứng hiện tại:</label>
-                        <input type="text" class="form-input" name="current_symptoms" placeholder="Nhập các triệu chứng hiện tại, cách nhau bởi dấu phẩy">
+                        <input type="text" class="form-input" name="current_symptoms" required placeholder="Nhập các triệu chứng hiện tại, cách nhau bởi dấu phẩy">
                     </div>
                     <div class="form-grid-2">
                         <div class="form-group">
@@ -575,9 +588,15 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Mức độ nghiêm trọng tổng thể (0-10): <span class="required">*</span></label>
-                            <input type="number" class="form-input" name="overall_severity_score" min="0" max="10" step="0.1" required placeholder="0 = nhẹ, 10 = rất nặng">
-                        </div>
+                            <label class="form-label">Mức độ nghiêm trọng tổng thể: </label>
+                            <select class="form-select" name="overall_severity_score" required>
+                              <option value="">Chọn mức độ</option>
+                              <option value="1">Nhẹ</option>
+                              <option value="5">Trung bình</option>
+                              <option value="7">Nặng</option>
+                              <option value="10">Rất nặng</option>
+                            </select>
+                          </div>
                     </div>
                 </div>
 
@@ -653,9 +672,16 @@
                     <h3>💪 Tình trạng chức năng & Chất lượng cuộc sống</h3>
                     <div class="form-grid-2">
                         <div class="form-group">
-                            <label class="form-label">Chất lượng cuộc sống (0-10):</label>
-                            <input type="number" class="form-input" name="quality_of_life_score" min="0" max="10" step="0.1" placeholder="0 = rất tệ, 10 = rất tốt">
-                        </div>
+                            <label class="form-label">Chất lượng cuộc sống:</label>
+                            <select class="form-input" name="quality_of_life_score">
+                                <option value="0">Rất tệ</option>
+                                <option value="2">Kém</option>
+                                <option value="4">Trung bình</option>
+                                <option value="6">Khá</option>
+                                <option value="8">Tốt</option>
+                                <option value="10">Rất tốt</option>
+                            </select>
+                        </div>                        
                         <div class="form-group">
                             <label class="form-label">Tuân thủ chế độ ăn:</label>
                             <select class="form-select" name="diet_compliance">
@@ -969,14 +995,18 @@
             
             delete patientData['consent'];
 
-            // Attach primary_disease from selection
-            const diseaseSelect = document.getElementById('disease-select');
-            if (diseaseSelect) {
-                const selected = Array.from(diseaseSelect.selectedOptions).map(o => o.value).filter(v => v && v !== '__NEW__');
+            // Attach primary_disease from checkboxes
+            const diseaseCheckboxes = document.querySelectorAll('input[name="disease_checkbox"]:checked');
+            const selectedDiseases = Array.from(diseaseCheckboxes).map(cb => cb.value);
+            
+            // Add new disease if specified
+            const newDiseaseCheckbox = document.getElementById('new-disease-checkbox');
+            if (newDiseaseCheckbox?.checked) {
                 const newDisease = (document.getElementById('new-disease-input')?.value || '').trim();
-                if (newDisease) selected.push(newDisease);
-                patientData['primary_disease'] = selected;
+                if (newDisease) selectedDiseases.push(newDisease);
             }
+            
+            patientData['primary_disease'] = selectedDiseases;
             
             // Convert red_flags object to array of active flags
             if (patientData.red_flags && typeof patientData.red_flags === 'object') {
@@ -1074,6 +1104,14 @@
 
         // Load profile & diseases for autofill
         document.addEventListener('DOMContentLoaded', () => {
+            // Append red * to required fields automatically
+            document.querySelectorAll('#patientIntakeForm [required]').forEach(el => {
+                const label = el.closest('.form-group')?.querySelector('.form-label');
+                if (label && !label.innerHTML.includes('<span class="required">*</span>')) {
+                    label.innerHTML += ' <span class="required">*</span>';
+                }
+            });
+
             fetch('/api/profile')
                 .then(r => r.json())
                 .then(data => {
@@ -1092,23 +1130,26 @@
             fetch('/api/patient/diseases')
                 .then(r => r.json())
                 .then(data => {
-                    const select = document.getElementById('disease-select');
-                    if (!select) return;
-                    select.innerHTML = '';
+                    const container = document.getElementById('disease-checkbox-container');
+                    if (!container) return;
+                    container.innerHTML = '';
                     (data.diseases || []).forEach(d => {
-                        const opt = document.createElement('option');
-                        opt.value = d; opt.textContent = d; select.appendChild(opt);
-                    });
-                    const optNew = document.createElement('option');
-                    optNew.value = '__NEW__'; optNew.textContent = '➕ Bệnh mới…';
-                    select.appendChild(optNew);
-                    select.addEventListener('change', () => {
-                        const show = Array.from(select.selectedOptions).some(o => o.value === '__NEW__');
-                        const ng = document.getElementById('new-disease-group');
-                        if (ng) ng.style.display = show ? 'block' : 'none';
+                        const label = document.createElement('label');
+                        label.className = 'checkbox-label';
+                        label.innerHTML = `
+                            <input type="checkbox" name="disease_checkbox" value="${d}" style="margin-right: 8px;">
+                            <span>${d}</span>
+                        `;
+                        container.appendChild(label);
                     });
                 })
                 .catch(() => {});
+
+            // Handle new disease checkbox
+            document.getElementById('new-disease-checkbox')?.addEventListener('change', function() {
+                const ng = document.getElementById('new-disease-group');
+                if (ng) ng.style.display = this.checked ? 'block' : 'none';
+            });
         });
 
         function openChatModal() {
