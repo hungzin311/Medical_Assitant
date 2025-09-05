@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from llm_config import get_gemini_llm, get_gemini_vision_llm, get_together_embeddings
+from llm_config import get_gemini_llm, get_gemini_vision_llm, get_fpt_embeddings
 
 # Load environment variables from .env file
 load_dotenv()
@@ -26,14 +26,13 @@ class RAGConfig:
         self.use_local = False
         # self.vector_local_path = "./data/qdrant_vietnamese_db"
         # self.doc_local_path = "./data/docs_vietnamese_db"
-        # self.parsed_content_dir = "./data/parsed_docs_vietnamese_db"
-        # Make sure these environment variables are set in your .env file
+        self.parsed_content_dir = "./data/parsed_docs_vietnamese_db"
         self.url = os.getenv("QDRANT_URL")
         self.api_key = os.getenv("QDRANT_API_KEY")
         self.collection_name = "medical_assistance_rag_vietnamese"
         self.chunk_size = 512
         self.chunk_overlap = 50
-        self.embedding_model = get_together_embeddings()
+        self.embedding_model = get_fpt_embeddings()
         self.llm = get_gemini_llm(temperature=0.1)  # Slightly creative but factual
         self.summarizer_model = get_gemini_llm(temperature=0.2)  # Slightly creative but factual
         self.chunker_model = get_gemini_llm(temperature=0.0)  # factual
@@ -52,7 +51,7 @@ class RAGConfig:
 
         self.min_retrieval_confidence = 0.80
 
-        self.context_limit = 20     # include last 20 messsages (10 Q&A pairs) in history
+        self.context_limit = 20     
 
 
 class PatientDBConfig:
@@ -64,13 +63,13 @@ class PatientDBConfig:
         self.url = os.getenv("QDRANT_URL")
         self.api_key = os.getenv("QDRANT_API_KEY")
         self.collection_name = "medical_records"  # Patient database collection
-        self.embedding_model = get_together_embeddings()
-        self.top_k = 50  # Higher default for patient searches
+        self.embedding_model = get_fpt_embeddings()
+        self.top_k = 50  
         self.llm = get_gemini_llm(temperature=0.1)  # Slightly creative but factual
-        self.max_age_range_default = 10  # ±10 years for treatment optimization
-        self.min_cases_for_confidence = 5  # Minimum cases for high confidence recommendations
-        self.outbreak_threshold = 5  # Minimum cases to trigger outbreak alert
-        self.risk_score_threshold = 0.7  # Threshold for high-risk classification
+        self.max_age_range_default = 10  
+        self.min_cases_for_confidence = 5  
+        self.outbreak_threshold = 5  
+        self.risk_score_threshold = 0.7  
         
         # Population monitoring settings
         self.monitoring_time_windows = ["7d", "30d", "90d"]

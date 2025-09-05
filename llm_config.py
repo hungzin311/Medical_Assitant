@@ -1,10 +1,28 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_together import TogetherEmbeddings
 import os
+from openai import OpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
 
+
+class FPTOpenAIEmbeddings:
+    """Simple wrapper to provide an embed_query API compatible with existing usage.
+
+    Uses FPT's embedding service via OpenAI client with configurable base_url and model.
+    """
+    def __init__(self, base_url: str = None, api_key: str = None, model_name: str = None):
+        self.base_url = base_url or os.getenv("FPT_BASE_URL") 
+        self.api_key = api_key or os.getenv("FPT_API_KEY")
+        self.model_name = model_name or os.getenv("FPT_EMBEDDING_MODEL")
+        self.client = OpenAI(api_key=self.api_key, base_url=self.base_url)
+
+    def embed_query(self, text: str):
+        if text is None:
+            return []
+        response = self.client.embeddings.create(input=text, model=self.model_name)
+        return response.data[0].embedding
 def get_gemini_llm(temperature=0.7):
     """Initialize and return a Gemini Pro LLM instance"""
     return ChatGoogleGenerativeAI(
@@ -30,3 +48,7 @@ def get_together_embeddings():
         model="intfloat/multilingual-e5-large-instruct",
         together_api_key=os.getenv("TOGETHER_API_KEY")
     ) 
+
+def get_fpt_embeddings(): 
+    """Alias to obtain the FPT embeddings wrapper."""
+    return FPTOpenAIEmbeddings()
