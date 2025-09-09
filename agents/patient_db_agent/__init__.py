@@ -22,15 +22,15 @@ class PatientQueryEngine:
         self.profile_store = PatientProfileStore(config)
     
 
-    def retrieve_patient_records(self, patient_id: str, primary_disease: str = None):
-        return self.disease_evaluator.retrieve_patient_records(patient_id, primary_disease=primary_disease)
+    def retrieve_patient_records(self, patient_id: str, primary_disease: str = None, query: str = None):
+        return self.disease_evaluator.retrieve_patient_records(patient_id, primary_disease=primary_disease, query=query)
 
     def evaluate_patient_records(self, patient_record: List[Dict[str, Any]], patient_form: List[Dict[str, Any]]):
         return self.disease_evaluator.evaluate_based_record_llm(patient_record, patient_form)
 
     def recommend_treatment(self, patient_id: str, query: str):
         
-        patient_record = self.retrieve_patient_records(patient_id)
+        patient_record = self.retrieve_patient_records(patient_id, query=query)
         
         # get attributes from patient record
         comorbidities = patient_record[0].get('comorbidities', [])

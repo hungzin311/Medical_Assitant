@@ -1,5 +1,6 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_together import TogetherEmbeddings
+from langchain_neo4j import Neo4jGraph
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -52,3 +53,9 @@ def get_together_embeddings():
 def get_fpt_embeddings(): 
     """Alias to obtain the FPT embeddings wrapper."""
     return FPTOpenAIEmbeddings()
+
+def get_graph_db():
+    uri = os.getenv("NEO4J_URI")
+    user = os.getenv("NEO4J_USER")
+    password = os.getenv("NEO4J_PASSWORD")
+    return Neo4jGraph(url=uri, username=user, password=password)

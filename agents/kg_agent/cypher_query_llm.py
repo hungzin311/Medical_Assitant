@@ -1,26 +1,15 @@
-import os
 from dotenv import load_dotenv
-from langchain_neo4j import Neo4jGraph, GraphCypherQAChain
-from pprint import pprint
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_neo4j import GraphCypherQAChain
 from langchain_core.prompts import FewShotPromptTemplate, PromptTemplate
 from proxy_setting import set_proxy
+from llm_config import *
 
 set_proxy()
 load_dotenv()
-uri = os.getenv("NEO4J_URI")
-user = os.getenv("NEO4J_USER")
-password = os.getenv("NEO4J_PASSWORD")
 
-graph = Neo4jGraph(url=uri, username=user, password=password)
+graph = get_graph_db()
 
-llm = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash",  # Gemini 2.0 supports multimodal inputs
-        google_api_key=os.getenv("GOOGLE_API_KEY"),
-        temperature=0.1,
-        convert_system_message_to_human=False,
-        max_output_tokens=4096  # Increase token limit for detailed image analysis
-    )
+llm = get_gemini_llm(temperature=0.0)
 
 examples = [
     {
@@ -102,8 +91,6 @@ prefix_prompt = """
     You are a Neo4j Cypher expert. Given an input question, create a syntactically correct Cypher query to run. Each query is limit 5 records.
     Below are a number of examples of questions and their corresponding Cypher queries:
 """
-
-
 prompt = FewShotPromptTemplate( 
     examples = examples, 
     example_prompt = example_prompt,
@@ -121,7 +108,5 @@ gemini_chain = GraphCypherQAChain.from_llm(
     return_direct = True
 )
 
-result = gemini_chain.invoke("Các bệnh liên quan đến đau bụng là")
-
-print(result)
-
+def retrieve_context_from_kg(question: str):
+    return gemini_chain.invoke(question)
