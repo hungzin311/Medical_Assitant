@@ -10,7 +10,7 @@ from agents.web_search_processor_agent import WebSearchProcessorAgent
 from agents.image_analysis_agent import ImageAnalysisAgent
 from langgraph.checkpoint.memory import MemorySaver
 from proxy_setting import *
-from agents.prompt import *
+from prompt import *
 from config import Config
 
 #Set proxy  
