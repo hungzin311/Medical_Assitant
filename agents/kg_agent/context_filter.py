@@ -1,6 +1,10 @@
 from langchain_core.prompts import PromptTemplate
-from llm_config import get_gemini_llm
 from typing import List, Dict, Any
+from pathlib import Path 
+import sys 
+sys.path.append(str(Path(__file__).parent.parent.parent))
+from llm_config import *
+import numpy as np 
 
 class ContextFilter:
     def __init__(self):
@@ -63,3 +67,46 @@ class ContextFilter:
             if isinstance(item, dict):
                 formatted.append(f"- {item}")
         return "\n".join(formatted)
+
+class ContextFilterEmbedding: 
+    def __init__(self, embedding_model, graph, cypher_query):
+        self.embedding_model = embedding_model
+        self.graph = graph
+        self.cypher_query = cypher_query
+
+    def cosine(self, a, b): 
+        return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b) + 1e-8))
+
+    def filter_context(self, kg_context: List[Dict], patient_info: Dict, question: str): 
+        age = patient_info.get('age', 'không rõ')
+        gender = patient_info.get('sex', 'không rõ')
+        medical_history = patient_info.get('medical_history', [])
+        current_diseases = patient_info.get('diseases_active', [])
+
+        context = f"""
+        THÔNG TIN BỆNH NHÂN:
+        - Tuổi: {age}
+        - Giới tính: {gender}
+        - Tiền sử bệnh: {medical_history}
+        - Các bệnh hiện tại: {current_diseases}
+        """
+        
+        q_vec = self.embedding_model.embed_query(context)
+        
+        scored = []
+        for item in kg_context:
+            emb = np.array(item['d']['embedding'])
+            score = self.cosine(emb, q_vec)
+            scored.append({"score": score, **item['d']})
+
+        top5 = sorted(scored, key=lambda x: x["score"], reverse=True)[:2]
+
+        content = [] 
+        for record in top5: 
+            print(record['score'])
+            print(record['name'])
+            result = self.graph.query(self.cypher_query, params={"disease_name": record['name']})
+            content.append(result)
+
+        return content  # Add return statement
+

@@ -59,3 +59,6 @@ def get_graph_db():
     user = os.getenv("NEO4J_USER")
     password = os.getenv("NEO4J_PASSWORD")
     return Neo4jGraph(url=uri, username=user, password=password)
+
+def get_fpt_vietnamese_embedding(): 
+    return FPTOpenAIEmbeddings(model_name="Vietnamese_Embedding")

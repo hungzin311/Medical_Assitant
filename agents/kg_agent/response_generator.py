@@ -1,19 +1,27 @@
-import os 
+from context_filter import ContextFilter, ContextFilterEmbedding
+from cypher_query_llm import retrieve_context_from_kg
+
+from pathlib import Path 
+import sys 
+sys.path.append(str(Path(__file__).parent.parent.parent))
 from dotenv import load_dotenv
-from agents.agent_decision import config
-from llm_config import * 
-from .cypher_query_llm import retrieve_context_from_kg
-from .context_filter import ContextFilter
+from config import Config
 from langchain_core.prompts import PromptTemplate
 from agents.patient_db_agent import PatientQueryEngine
+from llm_config import *
+from prompt import cypher_query
+import time 
 load_dotenv()
 
+embedding_model = get_fpt_vietnamese_embedding()
+graph = get_graph_db()
 llm = get_gemini_llm(temperature=0.2)
+
+config = Config()
 patient_query_engine = PatientQueryEngine(config)
-context_filter = ContextFilter()
+context_filter = ContextFilterEmbedding(embedding_model, graph, cypher_query)
 patient_id = "PAT_001"
 
-# Enhanced prompt with better context integration
 prompt = PromptTemplate(
     template="""
     Bạn là bác sĩ AI chuyên nghiệp. Hãy trả lời câu hỏi dựa trên thông tin bệnh nhân và kiến thức y tế đã được lọc.
@@ -48,7 +56,7 @@ def response_generator(question: str, use_filtering: bool = True):
         patient_info.update(patient_profile)
     
     # Retrieve KG context with patient awareness
-    kg_context = retrieve_context_from_kg(question, patient_info if use_filtering else None)
+    kg_context = retrieve_context_from_kg(question)
     
     if use_filtering and isinstance(kg_context, dict) and 'result' in kg_context:
         # Apply context filtering
@@ -61,6 +69,7 @@ def response_generator(question: str, use_filtering: bool = True):
         filtered_context = str(kg_context)
     
     # Generate response with filtered context
+    start_time = time.time()
     response = llm.invoke(
         prompt.format(
             patient_info=patient_info,
@@ -68,9 +77,18 @@ def response_generator(question: str, use_filtering: bool = True):
             question=question
         )
     )
+    end_time = time.time()
+    print(f"Time taken: {end_time - start_time} seconds")
     return response
 
 # Backward compatibility
 def response_generator_simple(question: str):
-    """Simple version without filtering for comparison"""
-    return response_generator(question, use_filtering=False)
+    return response_generator(question)
+
+def main():
+    question = "Bệnh tiểu đường"
+    response = response_generator(question)
+    # print(response.content)
+    
+if __name__ == "__main__":
+    main()

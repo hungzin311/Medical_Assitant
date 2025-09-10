@@ -1,8 +1,12 @@
 from dotenv import load_dotenv
 from langchain_neo4j import GraphCypherQAChain
 from langchain_core.prompts import FewShotPromptTemplate, PromptTemplate
+from pathlib import Path 
+import sys 
+sys.path.append(str(Path(__file__).parent.parent))
 from proxy_setting import set_proxy
 from llm_config import *
+from prompt import cypher_query
 
 set_proxy()
 load_dotenv()
@@ -14,31 +18,31 @@ llm = get_gemini_llm(temperature=0.0)
 examples = [
     {
         "question": "Phương pháp điều trị cho bệnh u lympho sau phúc mạc là gì?",
-        "query": "MATCH (d:Disease {name: 'u lympho sau phúc mạc'})-[:TREATED_BY]-(t:Treatment) RETURN t;",
+        "query": "MATCH (d:Disease) WHERE d.name CONTAINS 'u lympho sau phúc mạc' AND d.description IS NOT NULL RETURN d LIMIT 5;",
     },
     {
         "question": "Nguyên nhân của bệnh chảy máu khoảng cách sau phúc mạc là gì?",
-        "query": "MATCH (d:Disease {name: 'chảy máu khoảng cách sau phúc mạc'}) RETURN d;",
+        "query": "MATCH (d:Disease) WHERE d.name CONTAINS 'chảy máu khoảng cách sau phúc mạc' AND d.description IS NOT NULL RETURN d LIMIT 5;",
     },
     {
         "question": "Triệu chứng của bệnh chảy máu khoảng cách sau phúc mạc là gì?",
-        "query": "MATCH (d:Disease {name: 'chảy máu khoảng cách sau phúc mạc'})-[:HAS_SYMPTOM]-(s:Symptom) RETURN s;",
+        "query": "MATCH (d:Disease)-[:HAS_SYMPTOM]-(s:Symptom) WHERE d.name CONTAINS 'chảy máu khoảng cách sau phúc mạc' AND d.description IS NOT NULL RETURN s LIMIT 5;",
     },
     {
         "question": "Những bệnh lý nào có thể xuất hiện khi có triệu chứng khóc và đau?",
-        "query": "MATCH (s:Symptom)-[:HAS_SYMPTOM]-(d:Disease) WHERE s.symptoms CONTAINS 'khóc' AND s.symptoms CONTAINS 'đau' RETURN d;",
+        "query": "MATCH (s:Symptom) WHERE s.symptoms CONTAINS 'khóc' AND s.symptoms CONTAINS 'đau' MATCH (s)-[:HAS_SYMPTOM]-(d:Disease) WHERE d.description IS NOT NULL RETURN d LIMIT 5;",
     },
     {
         "question": "Có những loại thuốc phổ biến nào để điều trị bệnh chảy máu khoảng cách sau phúc mạc?",
-        "query": "MATCH (d:Disease {name: 'chảy máu khoảng cách sau phúc mạc'})-[:PRESCRIBED]-(m:Medication) RETURN m;",
+        "query": "MATCH (m:Medication) WHERE m.disease_name CONTAINS 'chảy máu khoảng cách sau phúc mạc' RETURN m LIMIT 5;",
     },
     {
         "question": "Người bệnh u lympho sau phúc mạc nên ăn thực phẩm gì?",
-        "query": "MATCH (d:Disease {name: 'u lympho sau phúc mạc'})-[:HAS_ADVICE]-(a:Advice) RETURN a;",
+        "query": "MATCH (a:Advice) WHERE a.disease_name CONTAINS 'u lympho sau phúc mạc' RETURN a LIMIT 5;",
     },
     {
         "question": "Bệnh u lympho sau phúc mạc có thể liên quan đến những bệnh nào khác?",
-        "query": "MATCH (d:Disease {name: 'u lympho sau phúc mạc'})-[:ASSOCIATED_WITH]->(d2:Disease) RETURN d2;",
+        "query": "MATCH (d:Disease)-[:ASSOCIATED_WITH]->(d2:Disease) WHERE d.name CONTAINS 'u lympho sau phúc mạc' AND exists(d2.description) RETURN d2 LIMIT 5;",
     }
 ]
 
@@ -55,6 +59,7 @@ prefix_prompt = """
         - description
         - category
         - cause
+        - embedding
 
     2. Treatment
         - disease_name
@@ -88,9 +93,15 @@ prefix_prompt = """
     - (Disease)-[:HAS_ADVICE]-(Advice)
     - (Disease)-[:ASSOCIATED_WITH]->(Disease)
 
-    You are a Neo4j Cypher expert. Given an input question, create a syntactically correct Cypher query to run. Each query is limit 5 records.
+    You are a Neo4j Cypher expert. Given an input question, create a syntactically correct Cypher query to run.
+    - Always match disease or symptom names using `CONTAINS` instead of exact equality.
+    - Always change the entity to lowercase.
+    - If the matched node label is `Disease`, ensure it has a non-null `description` property (`d.description IS NOT NULL`). For other labels you can ignore this condition.
+    - If the question is not asked to return symptoms and disease is one of the return list, then only disease nodes will be returned.
+    - After filtering, limit the results to 30 records.
     Below are a number of examples of questions and their corresponding Cypher queries:
 """
+
 prompt = FewShotPromptTemplate( 
     examples = examples, 
     example_prompt = example_prompt,
@@ -101,10 +112,9 @@ prompt = FewShotPromptTemplate(
 
 gemini_chain = GraphCypherQAChain.from_llm( 
     llm = llm, 
-    graph = graph, 
-    verbose = True, 
+    graph = graph,     
     cypher_prompt = prompt,
-    allow_dangerous_requests = True, 
+    allow_dangerous_requests = True,
     return_direct = True
 )
 
