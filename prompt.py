@@ -125,3 +125,47 @@ Bạn là một Trợ lý Y tế AI thân thiện và chuyên nghiệp. Bạn c�
 
         Hãy trả lời theo phong cách trên - thân thiện, chuyên nghiệp và hỏi thông tin chi tiết khi cần:
         """
+
+cypher_query = """MATCH (d:Disease)
+WHERE toLower(d.name) CONTAINS toLower($disease_name)
+  AND d.description IS NOT NULL          
+WITH d
+OPTIONAL MATCH (d)-[:TREATED_BY]-(t:Treatment)
+OPTIONAL MATCH (d)-[:HAS_SYMPTOM]-(s:Symptom)
+OPTIONAL MATCH (d)-[:PRESCRIBED]-(m:Medication)
+OPTIONAL MATCH (d)-[:HAS_ADVICE]-(a:Advice)
+OPTIONAL MATCH (d)-[:ASSOCIATED_WITH]->(ad:Disease)
+
+RETURN
+  {
+    name: d.name,
+    description: d.description,
+    category: d.category,
+    cause: d.cause
+  } AS disease,
+  COLLECT(DISTINCT {
+    method: t.method,
+    department: t.department
+  }) AS treatments,
+  COLLECT(DISTINCT {
+    symptoms: s.symptoms,
+    diagnosis: s.diagnosis
+  }) AS symptoms,
+  COLLECT(DISTINCT {
+    common_drugs: m.common_drugs,
+    drug_info: m.drug_info,
+    recommended_drugs: m.recommended_drugs
+  }) AS medications,
+  COLLECT(DISTINCT {
+    foods_to_eat: a.foods_to_eat,
+    foods_to_avoid: a.foods_to_avoid,
+    recommended_meals: a.recommended_meals,
+    prevention: a.prevention
+  }) AS advice,
+  COLLECT(DISTINCT {
+    description: ad.description,
+    category: ad.category,
+    cause: ad.cause
+  }) AS associated_diseases
+LIMIT 5
+"""
