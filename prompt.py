@@ -169,3 +169,54 @@ RETURN
   }) AS associated_diseases
 LIMIT 5
 """
+
+cypher_chain_prompt = """
+I have a knowledge graph for Vietnamese traditional medicine, where each node represents a disease "Disease", "Treatment", "Symptom", "Medication", "Advice". Each node can have the following properties:
+
+1. Disease
+    - name
+    - description
+    - category
+    - cause
+    - embedding
+
+2. Treatment
+    - disease_name
+    - method
+    - department
+    - success_rate
+
+3. Symptom
+    - disease_name
+    - symptoms
+    - diagnosis
+    - risk_group
+
+4. Medication
+    - disease_name
+    - common_drugs
+    - drug_info
+    - recommended_drugs
+
+5. Advice
+    - disease_name
+    - foods_to_eat
+    - foods_to_avoid
+    - recommended_meals
+    - prevention
+
+Relationships:
+- (Disease)-[:TREATED_BY]-(Treatment)
+- (Disease)-[:HAS_SYMPTOM]-(Symptom)
+- (Disease)-[:PRESCRIBED]-(Medication)
+- (Disease)-[:HAS_ADVICE]-(Advice)
+- (Disease)-[:ASSOCIATED_WITH]->(Disease)
+
+You are a Neo4j Cypher expert. Given an input question, create a syntactically correct Cypher query to run.
+- Always match disease or symptom names using `CONTAINS` instead of exact equality.
+- Always change the entity to lowercase.
+- If the matched node label is `Disease`, ensure it has a non-null `description` property (`d.description IS NOT NULL`). For other labels you can ignore this condition.
+- If the question is not asked to return symptoms and disease is one of the return list, then only disease nodes will be returned.
+- After filtering, limit the results to 30 records.
+Below are a number of examples of questions and their corresponding Cypher queries:
+"""

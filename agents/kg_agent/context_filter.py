@@ -1,9 +1,12 @@
 from langchain_core.prompts import PromptTemplate
-from typing import List, Dict, Any
+from typing import List, Dict
+from embedding_service import embed_text, cosine_similarity
+from cypher_query_llm import CypherQueryService
+
 from pathlib import Path 
 import sys 
 sys.path.append(str(Path(__file__).parent.parent.parent))
-from llm_config import *
+from llm_config import get_gemini_llm
 import numpy as np 
 
 class ContextFilter:
@@ -69,13 +72,8 @@ class ContextFilter:
         return "\n".join(formatted)
 
 class ContextFilterEmbedding: 
-    def __init__(self, embedding_model, graph, cypher_query):
-        self.embedding_model = embedding_model
-        self.graph = graph
-        self.cypher_query = cypher_query
-
-    def cosine(self, a, b): 
-        return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b) + 1e-8))
+    def __init__(self):
+        self.cypher_service = CypherQueryService()
 
     def filter_context(self, kg_context: List[Dict], patient_info: Dict, question: str): 
         age = patient_info.get('age', 'không rõ')
@@ -91,12 +89,13 @@ class ContextFilterEmbedding:
         - Các bệnh hiện tại: {current_diseases}
         """
         
-        q_vec = self.embedding_model.embed_query(context)
+        # Use embedding service
+        q_vec = embed_text(context)
         
         scored = []
         for item in kg_context:
             emb = np.array(item['d']['embedding'])
-            score = self.cosine(emb, q_vec)
+            score = cosine_similarity(emb, q_vec)
             scored.append({"score": score, **item['d']})
 
         top5 = sorted(scored, key=lambda x: x["score"], reverse=True)[:2]
@@ -105,8 +104,9 @@ class ContextFilterEmbedding:
         for record in top5: 
             print(record['score'])
             print(record['name'])
-            result = self.graph.query(self.cypher_query, params={"disease_name": record['name']})
+            # Use cypher service
+            result = self.cypher_service.get_disease_info(record['name'])
             content.append(result)
 
-        return content  # Add return statement
+        return content  
 
