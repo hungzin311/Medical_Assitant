@@ -1,12 +1,5 @@
-import sys
-from pathlib import Path
 from config import Config  
 import json
-
-# Add project root to path
-project_root = Path(__file__).parent.parent
-sys.path.append(str(project_root))
-
 from typing import List, Dict, Any, Optional
 import logging
 from qdrant_client.http.models import Filter, FieldCondition, MatchValue

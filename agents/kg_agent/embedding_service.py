@@ -1,4 +1,4 @@
-from kg_manager import get_kg_manager
+from .kg_manager import get_kg_manager
 from typing import List
 import numpy as np
 

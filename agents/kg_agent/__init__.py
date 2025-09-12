@@ -1,18 +1,17 @@
 import logging
-from .kg_manager import get_kg_manager
 from .cypher_query_llm import CypherQueryService
 from .context_filter import ContextFilterEmbedding
 from .response_generator import ResponseGenerator
 from typing import Dict, List, Any
+from agents.patient_db_agent import PatientQueryEngine
 
 class KGQueryEngine:
     """
     High-level query interface for Knowledge Graph operations.
     """
     
-    def __init__(self, patient_query_engine):
+    def __init__(self, patient_query_engine: PatientQueryEngine):
         self.logger = logging.getLogger(__name__)
-        self.kg_manager = get_kg_manager()
         self.cypher_service = CypherQueryService()
         self.context_filter = ContextFilterEmbedding()
         self.response_generator = ResponseGenerator(patient_query_engine)
@@ -32,15 +31,6 @@ class KGQueryEngine:
     def get_disease_information(self, disease_name: str) -> List[Dict]:
         """Get comprehensive disease information from KG"""
         return self.cypher_service.get_disease_info(disease_name)
-
-    def get_kg_status(self) -> Dict[str, bool]:
-        """Get status of KG components"""
-        return {
-            'graph_connected': self.kg_manager.graph is not None,
-            'llm_ready': self.kg_manager.llm is not None,
-            'embedding_ready': self.kg_manager.embedding_model is not None,
-            'cypher_chain_ready': self.kg_manager.cypher_chain is not None
-        }
     
     def clear_caches(self):
         """Clear all caches in KG services"""

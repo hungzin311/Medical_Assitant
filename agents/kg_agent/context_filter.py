@@ -1,11 +1,8 @@
 from langchain_core.prompts import PromptTemplate
 from typing import List, Dict
-from embedding_service import embed_text, cosine_similarity
-from cypher_query_llm import CypherQueryService
+from .embedding_service import embed_text, cosine_similarity
+from .cypher_query_llm import CypherQueryService
 
-from pathlib import Path 
-import sys 
-sys.path.append(str(Path(__file__).parent.parent.parent))
 from llm_config import get_gemini_llm
 import numpy as np 
 
@@ -94,6 +91,7 @@ class ContextFilterEmbedding:
         
         scored = []
         for item in kg_context:
+            print(item)
             emb = np.array(item['d']['embedding'])
             score = cosine_similarity(emb, q_vec)
             scored.append({"score": score, **item['d']})

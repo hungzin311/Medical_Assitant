@@ -1,7 +1,3 @@
-from pathlib import Path
-import sys
-sys.path.append(str(Path(__file__).parent.parent.parent))
-
 from dotenv import load_dotenv
 from langchain_neo4j import GraphCypherQAChain
 from langchain_core.prompts import FewShotPromptTemplate, PromptTemplate
@@ -10,7 +6,7 @@ from prompt import *
 import threading
 from proxy_setting import * 
 load_dotenv()
-
+set_proxy()
 class KGManager:
     """
     Singleton class for managing shared components (connections and models)
@@ -106,6 +102,7 @@ class KGManager:
             graph=self._graph,
             cypher_prompt=prompt,
             allow_dangerous_requests=True,
+            verbose = True,
             return_direct=True
         )
     
@@ -125,12 +122,15 @@ class KGManager:
     @property
     def cypher_chain(self):
         return self._cypher_chain
+
+    def get_llm(self, temperature: float = 0.0):
+        return get_gemini_llm(temperature=temperature)
     
     def reset_connections(self):
         """Reset all connections if needed"""
         try:
             self._graph = get_graph_db()
-            self._llm = get_gemini_llm(temperature=0.0)
+            self._llm = self.get_llm(temperature=0.0)
             self._embedding_model = get_fpt_vietnamese_embedding()
             self._setup_cypher_chain()
             print("All connections reset successfully")

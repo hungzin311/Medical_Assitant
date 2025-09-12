@@ -9,6 +9,8 @@ from agents.rag_agent import MedicalRAG
 from agents.web_search_processor_agent import WebSearchProcessorAgent
 from agents.image_analysis_agent import ImageAnalysisAgent
 from langgraph.checkpoint.memory import MemorySaver
+from agents.kg_agent import KGQueryEngine
+from agents.patient_db_agent import PatientQueryEngine
 from proxy_setting import *
 from prompt import *
 from config import Config
@@ -48,7 +50,7 @@ class AgentDecision(TypedDict):
     confidence: float
 
 
-def create_agent_graph():
+def create_agent_graph(patient_query_engine: PatientQueryEngine):
     """Create and configure the LangGraph for agent orchestration."""
     # LLM
     decision_model = config.agent_decision.llm
@@ -235,6 +237,15 @@ def create_agent_graph():
             **state,
             "output": response,
             "agent_name": "CONVERSATION_AGENT"
+        }
+    def run_kg_agent(state: AgentState) -> AgentState:
+        print(f"Selected agent: KG_AGENT")
+        kg_agent = KGQueryEngine(patient_query_engine)
+        response = kg_agent.generate_medical_response(state["current_input"], state["patient_id"])
+        return {
+            **state,
+            "output": response,
+            "agent_name": "KG_AGENT"
         }
     
     def run_rag_agent(state: AgentState) -> AgentState:
