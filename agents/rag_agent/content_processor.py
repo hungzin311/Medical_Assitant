@@ -1,10 +1,8 @@
 import re
 import logging
-from typing import List, Dict, Any, Optional, Tuple
-
+from typing import List, Any
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from langchain_openai import AzureOpenAIEmbeddings, AzureChatOpenAI
 
 class ContentProcessor:
     """
@@ -173,16 +171,6 @@ class ContentProcessor:
         return self._split_text_by_llm_suggestions(chunked_text, chunking_response)
     
     def _split_text_by_llm_suggestions(self, chunked_text: str, llm_response: str) -> List[str]:
-        """
-        Split text according to LLM suggested split points.
-        
-        Args:
-            chunked_text: Text with chunk markers
-            llm_response: LLM response with split suggestions
-            
-        Returns:
-            List of document chunks
-        """
         # Extract split points from LLM response
         split_after = [] 
         if "split_after:" in llm_response:

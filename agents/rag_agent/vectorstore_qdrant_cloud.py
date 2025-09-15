@@ -1,17 +1,13 @@
 import os
 import re
 import logging
-import importlib.util
 from uuid import uuid4
-from pathlib import Path
-from typing import List, Dict, Any, Tuple, Optional
+from typing import List, Dict, Any, Tuple
 
 from langchain_core.documents import Document
-from langchain.storage import InMemoryStore
 from .cloud_docstore import CloudDocStore
 from langchain_qdrant import QdrantVectorStore, RetrievalMode
-from qdrant_client import models
-from qdrant_client.http.models import Distance, SparseVectorParams, VectorParams, OptimizersConfigDiff
+from qdrant_client.http.models import Distance, VectorParams, OptimizersConfigDiff
 from ..qdrant_client_manager import QdrantClientManager
 
 class VectorStoreCloud:

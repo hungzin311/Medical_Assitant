@@ -3,7 +3,6 @@ import threading
 from dotenv import load_dotenv
 from llm_config import get_gemini_llm, get_gemini_vision_llm, get_fpt_embeddings
 
-# Load environment variables from .env file
 load_dotenv()
 
 class AgentDecisoinConfig:

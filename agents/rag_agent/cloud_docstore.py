@@ -1,7 +1,6 @@
-import os
-import json
+
 import logging
-from typing import List, Dict, Any, Optional, Sequence, Iterator
+from typing import List, Optional, Iterator
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import PointStruct, VectorParams, Distance
 

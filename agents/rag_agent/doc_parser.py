@@ -6,9 +6,7 @@ from typing import Dict, List, Tuple, Any
 from docling.datamodel.base_models import InputFormat
 from docling.datamodel.pipeline_options import (
     PdfPipelineOptions, 
-    TableFormerMode, 
-    RapidOcrOptions, 
-    smolvlm_picture_description
+    TableFormerMode
 )
 from docling.document_converter import DocumentConverter, PdfFormatOption
 from docling_core.types.doc import PictureItem, TableItem
