@@ -1,4 +1,5 @@
 import os
+import threading
 from dotenv import load_dotenv
 from llm_config import get_gemini_llm, get_gemini_vision_llm, get_fpt_embeddings
 
@@ -112,7 +113,19 @@ class UIConfig:
         self.enable_image_upload = True
 
 class Config:
+    _instance = None 
+    _lock = threading.Lock()
+    def __new__(cls): 
+        if cls._instance is None: 
+            with cls._lock: 
+                if cls._instance is None: 
+                    cls._instance = super(Config, cls).__new__(cls)
+                    cls._instance._initialized = False
+        return cls._instance
+
     def __init__(self):
+        if self._initialized:
+            return
         self.agent_decision = AgentDecisoinConfig()
         self.conversation = ConversationConfig()
         self.rag = RAGConfig()
@@ -124,3 +137,6 @@ class Config:
         self.ui = UIConfig()
         self.tavily_api_key = os.getenv("TAVILY_API_KEY")
         self.max_conversation_history = 20  # Include last 20 messsages (10 Q&A pairs) in history
+        print("Config initialized successfully")
+        
+        self._initialized = True

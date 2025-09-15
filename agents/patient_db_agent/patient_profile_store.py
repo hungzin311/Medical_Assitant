@@ -1,9 +1,9 @@
 from typing import Dict, Any, List, Optional
 import uuid
 import logging
-from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams
 from qdrant_client.models import Filter, FieldCondition, MatchValue, PayloadSchemaType
+from ..qdrant_client_manager import QdrantClientManager
 
 
 class PatientProfileStore:
@@ -15,23 +15,22 @@ class PatientProfileStore:
         self.qdrant_url = config.rag.url
         self.qdrant_api_key = config.rag.api_key
         self.embedding_dim = 4
-        self.client = QdrantClient(url=self.qdrant_url, api_key=self.qdrant_api_key)
+        
+        # Initialize singleton client manager
+        self.client_manager = QdrantClientManager(config)
+        self.client = self.client_manager.client
         if not self._collection_exist():
             self._create_collection()
 
     def _collection_exist(self) -> bool:
-        try:
-            cols = self.client.get_collections()
-            return any(c.name == self.collection_name for c in cols.collections)
-        except Exception as e:
-            self.logger.error(f"Error checking collection exist: {e}")
-            return False
+        return self.client_manager.does_collection_exist(self.collection_name)
 
     def _create_collection(self):
         try:
-            self.client.create_collection(
+            vectors_config = {"dense": VectorParams(size=self.embedding_dim, distance=Distance.COSINE)}
+            self.client_manager.create_collection(
                 collection_name=self.collection_name,
-                vectors_config={"dense": VectorParams(size=self.embedding_dim, distance=Distance.COSINE)}
+                vectors_config=vectors_config
             )
             # basic indexes
             self.client.create_payload_index(

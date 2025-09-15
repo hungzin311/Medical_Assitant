@@ -25,9 +25,10 @@ DEFAULT_PATIENT_ID = "PAT_001"
 #Set proxy 
 set_proxy()
 
-graph = create_agent_graph()
-
 patient_query_engine = PatientQueryEngine(config)
+
+graph = create_agent_graph(patient_query_engine)
+
 
 # Initialize FastAPI app with increased limits for large form data
 app = FastAPI(

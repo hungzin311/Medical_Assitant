@@ -1,12 +1,12 @@
 from datetime import datetime
 import logging
 from .patient_form import PatientForm
-from qdrant_client import QdrantClient
 from qdrant_client.models import Filter, FieldCondition, MatchValue, VectorParams
 from qdrant_client.http.models import Distance
 from uuid import uuid4
 from qdrant_client import models
 from typing import List
+from ..qdrant_client_manager import QdrantClientManager
 
 class PatientFormVectorStore: 
     def __init__(self, config, collection_name: str = "patient_form"): 
@@ -15,19 +15,32 @@ class PatientFormVectorStore:
         self.qdrant_url = config.rag.url
         self.qdrant_api_key = config.rag.api_key
         self.embedding_dim = 4
-        self.client = QdrantClient(url=self.qdrant_url, api_key=self.qdrant_api_key)
+        
+        # Initialize singleton client manager
+        self.client_manager = QdrantClientManager(config)
+        self.client = self.client_manager.client
         if not self._collection_exist():
             self._create_collection()
-
     
-        self.client.create_payload_index(
+    def _collection_exist(self) -> bool:
+        return self.client_manager.does_collection_exist(self.collection_name)
+    
+    def _create_collection(self):
+        vectors_config = {"dense": VectorParams(size=self.embedding_dim, distance=Distance.COSINE)}
+        self.client_manager.create_collection(
             collection_name=self.collection_name,
-            field_name="created_at",
-            field_schema=models.PayloadSchemaType.DATETIME
+            vectors_config=vectors_config
         )
-
-        # Index for patient and disease filtering
+        
+        # Create payload indexes
         try:
+            self.client.create_payload_index(
+                collection_name=self.collection_name,
+                field_name="created_at",
+                field_schema=models.PayloadSchemaType.DATETIME
+            )
+            
+            # Index for patient and disease filtering
             self.client.create_payload_index(
                 collection_name=self.collection_name,
                 field_name="patient_id",
@@ -40,20 +53,6 @@ class PatientFormVectorStore:
             )
         except Exception:
             pass
-    
-    def _collection_exist(self) -> bool:
-        try:
-            cols = self.client.get_collections()
-            return any(c.name == self.collection_name for c in cols.collections)
-        except Exception as e:
-            self.logger.error(f"Error checking collection exist: {e}")
-            return False
-    
-    def _create_collection(self):
-        self.client.create_collection(
-            collection_name=self.collection_name,
-            vectors_config={"dense": VectorParams(size=self.embedding_dim, distance=Distance.COSINE)}
-        )
 
     def ingest_patient_form(self, patient_form: PatientForm):
         if not self._collection_exist():

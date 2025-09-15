@@ -1,11 +1,9 @@
-import os
 import logging
 from uuid import uuid4
 from datetime import datetime
 from typing import List, Dict, Any
-from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams, OptimizersConfigDiff
-
+from ..qdrant_client_manager import QdrantClientManager
 
 class PatientVectorStore:
     def __init__(self, config, collection_name):
@@ -20,43 +18,28 @@ class PatientVectorStore:
         self.qdrant_api_key = config.rag.api_key
         self.llm = config.patient_db.llm
         
-        # Initialize cloud client
-        if not self.qdrant_url or not self.qdrant_api_key:
-            self.logger.error("Qdrant cloud URL or API key not provided. Check your environment variables.")
-            raise ValueError("Qdrant cloud URL or API key not provided")
-            
-        self.client = QdrantClient(
-            url=self.qdrant_url,
-            api_key=self.qdrant_api_key
-        )
+        # Initialize singleton client manager
+        self.client_manager = QdrantClientManager(config)
+        self.client = self.client_manager.client
 
         if not self._does_collection_exist():
             self._create_patient_collection()
 
     def _does_collection_exist(self) -> bool:
-        try:
-            collection_info = self.client.get_collections()
-            collection_names = [collection.name for collection in collection_info.collections]
-            return self.collection_name in collection_names
-        except Exception as e:
-            self.logger.error(f"Error checking for collection existence: {e}")
-            return False
+        return self.client_manager.does_collection_exist(self.collection_name)
 
     def _create_patient_collection(self):
         """Create a new patient collection with optimized indexing."""
         try:
-            # Delete collection if it exists
-            if self._does_collection_exist():
-                self.logger.info(f"Deleting existing collection: {self.collection_name}")
-                self.client.delete_collection(collection_name=self.collection_name)
-                
             # Create collection with vector configuration
-            self.client.create_collection(
+            vectors_config = {"dense": VectorParams(size=self.embedding_dim, distance=Distance.COSINE)}
+            optimizers_config = OptimizersConfigDiff(
+                indexing_threshold=0,  # Build index immediately
+            )
+            self.client_manager.create_collection(
                 collection_name=self.collection_name,
-                vectors_config={"dense": VectorParams(size=self.embedding_dim, distance=Distance.COSINE)},
-                optimizers_config=OptimizersConfigDiff(
-                    indexing_threshold=0,  # Build index immediately
-                )
+                vectors_config=vectors_config,
+                optimizers_config=optimizers_config
             )
             
             # Create payload indexes for efficient filtering

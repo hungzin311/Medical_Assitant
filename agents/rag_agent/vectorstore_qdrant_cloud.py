@@ -10,8 +10,9 @@ from langchain_core.documents import Document
 from langchain.storage import InMemoryStore
 from .cloud_docstore import CloudDocStore
 from langchain_qdrant import QdrantVectorStore, RetrievalMode
-from qdrant_client import QdrantClient, models
+from qdrant_client import models
 from qdrant_client.http.models import Distance, SparseVectorParams, VectorParams, OptimizersConfigDiff
+from ..qdrant_client_manager import QdrantClientManager
 
 class VectorStoreCloud:
     def __init__(self, config):
@@ -27,16 +28,9 @@ class VectorStoreCloud:
         self.qdrant_url = config.rag.url
         self.qdrant_api_key = config.rag.api_key
         
-        # Initialize cloud client
-        if not self.qdrant_url or not self.qdrant_api_key:
-            self.logger.error("Qdrant cloud URL or API key not provided. Check your environment variables.")
-            raise ValueError("Qdrant cloud URL or API key not provided")
-            
-        self.logger.info(f"Connecting to Qdrant cloud at {self.qdrant_url}")
-        self.client = QdrantClient(
-            url=self.qdrant_url,
-            api_key=self.qdrant_api_key
-        )
+        # Initialize singleton client manager
+        self.client_manager = QdrantClientManager(config)
+        self.client = self.client_manager.client
 
     def _clean_text(self, text: str) -> str:
 
@@ -63,32 +57,18 @@ class VectorStoreCloud:
         return '\n'.join(lines).strip()
 
     def _does_collection_exist(self) -> bool:
-        try:
-            collection_info = self.client.get_collections()
-            collection_names = [collection.name for collection in collection_info.collections]
-            return self.collection_name in collection_names
-        except Exception as e:
-            self.logger.error(f"Error checking for collection existence: {e}")
-            return False
+        return self.client_manager.does_collection_exist(self.collection_name)
 
     def _create_collection(self):
-        try:
-            # Delete collection if it exists
-            if self._does_collection_exist():
-                self.logger.info(f"Deleting existing collection: {self.collection_name}")
-                self.client.delete_collection(collection_name=self.collection_name)
-                
-            self.client.create_collection(
-                collection_name=self.collection_name,
-                vectors_config={"dense": VectorParams(size=self.embedding_dim, distance=Distance.COSINE)},
-                optimizers_config=OptimizersConfigDiff(
-                    indexing_threshold=0,  # Build index immediately
-                )
-            )
-            self.logger.info(f"Created new cloud collection: {self.collection_name}")
-        except Exception as e:
-            self.logger.error(f"Error creating cloud collection: {e}")
-            raise e
+        vectors_config = {"dense": VectorParams(size=self.embedding_dim, distance=Distance.COSINE)}
+        optimizers_config = OptimizersConfigDiff(
+            indexing_threshold=0,  # Build index immediately
+        )
+        self.client_manager.create_collection(
+            collection_name=self.collection_name,
+            vectors_config=vectors_config,
+            optimizers_config=optimizers_config
+        )
             
     def load_vectorstore(self) -> Tuple[QdrantVectorStore, CloudDocStore]:
         """
@@ -127,16 +107,6 @@ class VectorStoreCloud:
             document_chunks: List[str],
             document_path: str,
         ) -> Tuple[QdrantVectorStore, CloudDocStore, List[str]]:
-        """
-        Create a vector store in cloud from document chunks or upsert documents to existing store.
-        
-        Args:
-            document_chunks: List of document chunks
-            document_path: Path to the original document
-            
-        Returns:
-            Tuple containing (vectorstore, docstore, doc_ids)
-        """
         
         # Generate unique IDs for each chunk
         doc_ids = [str(uuid4()) for _ in range(len(document_chunks))]
