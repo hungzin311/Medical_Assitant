@@ -19,7 +19,7 @@ class VectorStoreCloud:
         self.embedding_model = config.rag.embedding_model
         self.retrieval_top_k = config.rag.top_k
         self.vector_search_type = config.rag.vector_search_type
-        
+
         # Cloud configuration
         self.qdrant_url = config.rag.url
         self.qdrant_api_key = config.rag.api_key

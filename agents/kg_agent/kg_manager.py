@@ -40,28 +40,20 @@ class KGManager:
     def _setup_cypher_chain(self):
         examples = [
             {
-                "question": "Phương pháp điều trị cho bệnh u lympho sau phúc mạc là gì?",
-                "query": "MATCH (d:Disease) WHERE d.name CONTAINS 'u lympho sau phúc mạc' AND d.description IS NOT NULL RETURN d LIMIT 30;",
+                "question": "Triệu chứng của bệnh cảm cúm là gì?",
+                "query": "MATCH (d:Disease)-[:HAS_SYMPTOM]-(s:Symptom) WHERE d.name CONTAINS 'cảm cúm' AND d.description IS NOT NULL RETURN s LIMIT 30;",
             },
             {
-                "question": "Nguyên nhân của bệnh chảy máu khoảng cách sau phúc mạc là gì?",
-                "query": "MATCH (d:Disease) WHERE d.name CONTAINS 'chảy máu khoảng cách sau phúc mạc' AND d.description IS NOT NULL RETURN d LIMIT 30;",
+                "question": "Các bệnh có triệu chứng ho là gì?",
+                "query": "MATCH (s:Symptom) WHERE ANY(symptom IN s.symptoms WHERE symptom =~ '.*\\\\bho\\\\b.*') MATCH (s)-[:HAS_SYMPTOM]-(d:Disease) WHERE d.description IS NOT NULL RETURN d LIMIT 30;",
             },
             {
-                "question": "Triệu chứng của bệnh chảy máu khoảng cách sau phúc mạc là gì?",
-                "query": "MATCH (d:Disease)-[:HAS_SYMPTOM]-(s:Symptom) WHERE d.name CONTAINS 'chảy máu khoảng cách sau phúc mạc' AND d.description IS NOT NULL RETURN s LIMIT 30;",
+                "question": "Thuốc điều trị bệnh viêm phổi là gì?",
+                "query": "MATCH (m:Medication) WHERE m.disease_name CONTAINS 'viêm phổi' RETURN m LIMIT 30;",
             },
             {
-                "question": "Những bệnh lý nào có thể xuất hiện khi có triệu chứng khóc và đau?",
-                "query": "MATCH (s:Symptom) WHERE s.symptoms CONTAINS 'khóc' AND s.symptoms CONTAINS 'đau' MATCH (s)-[:HAS_SYMPTOM]-(d:Disease) WHERE d.description IS NOT NULL RETURN d LIMIT 30;",
-            },
-            {
-                "question": "Có những loại thuốc phổ biến nào để điều trị bệnh chảy máu khoảng cách sau phúc mạc?",
-                "query": "MATCH (m:Medication) WHERE m.disease_name CONTAINS 'chảy máu khoảng cách sau phúc mạc' RETURN m LIMIT 30;",
-            },
-            {
-                "question": "Người bệnh u lympho sau phúc mạc nên ăn thực phẩm gì?",
-                "query": "MATCH (a:Advice) WHERE a.disease_name CONTAINS 'u lympho sau phúc mạc' RETURN a LIMIT 30;",
+                "question": "Thông tin chi tiết về bệnh cao huyết áp",
+                "query": "MATCH (d:Disease) WHERE d.name CONTAINS 'cao huyết áp' AND d.description IS NOT NULL OPTIONAL MATCH (d)-[:TREATED_BY]-(t:Treatment) OPTIONAL MATCH (d)-[:HAS_SYMPTOM]-(s:Symptom) OPTIONAL MATCH (d)-[:PRESCRIBED]-(m:Medication) OPTIONAL MATCH (d)-[:HAS_ADVICE]-(a:Advice) RETURN d, t, s, m, a LIMIT 30;",
             }
         ]
         

@@ -19,6 +19,32 @@ def to_lowercase(text):
     else:
         return text
 
+def parse_list_field(field_value):
+    """Parse string representation of list into actual list and convert to lowercase."""
+    if not field_value or field_value == "Không có thông tin":
+        return []
+    
+    if isinstance(field_value, str):
+        # Try to parse string representation of list
+        if field_value.startswith('[') and field_value.endswith(']'):
+            try:
+                # Use ast.literal_eval to safely parse the string list
+                import ast
+                parsed_list = ast.literal_eval(field_value)
+                if isinstance(parsed_list, list):
+                    return [item.lower().strip() if isinstance(item, str) else item for item in parsed_list]
+            except (ValueError, SyntaxError):
+                # If parsing fails, split by comma and clean up
+                items = field_value.strip('[]').split(',')
+                return [item.strip().strip('\'"').lower() for item in items if item.strip()]
+        else:
+            # Single item, not a list
+            return [field_value.lower().strip()]
+    elif isinstance(field_value, list):
+        return [item.lower().strip() if isinstance(item, str) else item for item in field_value]
+    else:
+        return [str(field_value).lower()]
+
 def truncate_text(text, max_tokens=2000):
     if not text or not isinstance(text, str):
         return ""
@@ -73,7 +99,7 @@ def create_disease_embedding(name, description):
         combined_text = truncate_text(combined_text, max_tokens=2000)
         
         if not combined_text.strip():
-            print(f"⚠️ Empty text after truncation for disease: {name}")
+            print(f"Empty text after truncation for disease: {name}")
             return None
             
         # Create embedding using Vietnamese_Embedding model
@@ -83,11 +109,11 @@ def create_disease_embedding(name, description):
         if embedding and len(embedding) > 0:
             return embedding
         else:
-            print(f"⚠️ Empty embedding generated for disease: {name}")
+            print(f"Empty embedding generated for disease: {name}")
             return None
             
     except Exception as e:
-        print(f"❌ Error creating embedding for {name}: {e}")
+        print(f"Error creating embedding for {name}: {e}")
         return None
     
 def clear_graph(graph_instance):
@@ -111,9 +137,9 @@ def create_unique_constraints(graph_instance):
     for constraint in constraints:
         try:
             graph_instance.run(constraint)
-            print(f"✅ Created constraint: {constraint.split('FOR')[1].split('REQUIRE')[0].strip()}")
+            print(f"Created constraint: {constraint.split('FOR')[1].split('REQUIRE')[0].strip()}")
         except Exception as e:
-            print(f"⚠️ Constraint may already exist: {e}")
+            print(f"Constraint may already exist: {e}")
 
 def check_node_exists(graph, associated_disease):
     disease_name = to_lowercase(associated_disease)
@@ -184,21 +210,41 @@ def process_row(row, graph_instance, df_data):
 
     if disease_symptom and check_method and people_easy_get and disease_node:
         # Create symptom node and relationship
-        symptom_node = Node("Symptom", disease_name=to_lowercase(disease_name), symptoms=to_lowercase(disease_symptom), diagnosis=to_lowercase(check_method), risk_group=to_lowercase(people_easy_get))
+        symptoms_list = parse_list_field(disease_symptom)
+        diagnosis_list = parse_list_field(check_method)
+        symptom_node = Node("Symptom", 
+                           disease_name=to_lowercase(disease_name), 
+                           symptoms=symptoms_list, 
+                           diagnosis=diagnosis_list, 
+                           risk_group=to_lowercase(people_easy_get))
         graph_instance.merge(symptom_node, "Symptom", "disease_name")
         has_rela = Relationship(disease_node, "HAS_SYMPTOM", symptom_node)
         graph_instance.create(has_rela)
 
     if drug_recommend and drug_common and drug_detail and disease_node:
         # Create medication node and relationship
-        medication_node = Node("Medication", disease_name=to_lowercase(disease_name), common_drugs=to_lowercase(drug_common), drug_info=to_lowercase(drug_detail), recommended_drugs=to_lowercase(drug_recommend))
+        recommended_drugs_list = parse_list_field(drug_recommend)
+        common_drugs_list = parse_list_field(drug_common)
+        medication_node = Node("Medication", 
+                              disease_name=to_lowercase(disease_name), 
+                              common_drugs=common_drugs_list, 
+                              drug_info=to_lowercase(drug_detail), 
+                              recommended_drugs=recommended_drugs_list)
         graph_instance.merge(medication_node, "Medication", "disease_name")
         prescribed_rela = Relationship(disease_node, "PRESCRIBED", medication_node)
         graph_instance.create(prescribed_rela)
 
     if nutrition_do_eat and nutrition_not_eat and nutrition_recommend_meal and disease_prevention and disease_node:
         # Create nutrition node and relationship
-        nutrition_node = Node("Advice", disease_name=to_lowercase(disease_name), foods_to_eat=to_lowercase(nutrition_do_eat), recommended_meals=to_lowercase(nutrition_recommend_meal), foods_to_avoid=to_lowercase(nutrition_not_eat), prevention=to_lowercase(disease_prevention))
+        foods_to_eat_list = parse_list_field(nutrition_do_eat)
+        foods_to_avoid_list = parse_list_field(nutrition_not_eat) 
+        recommended_meals_list = parse_list_field(nutrition_recommend_meal)
+        nutrition_node = Node("Advice", 
+                             disease_name=to_lowercase(disease_name), 
+                             foods_to_eat=foods_to_eat_list, 
+                             recommended_meals=recommended_meals_list, 
+                             foods_to_avoid=foods_to_avoid_list, 
+                             prevention=to_lowercase(disease_prevention))
         graph_instance.merge(nutrition_node, "Advice", "disease_name")
         treated_rela = Relationship(disease_node, "HAS_ADVICE", nutrition_node)
         graph_instance.create(treated_rela)
@@ -268,6 +314,6 @@ if __name__ == "__main__":
                 future.result()  # Retrieve and handle exceptions if any
                 completed += 1
                 if completed % 50 == 0:
-                    print(f"✅ Processed {completed}/{len(df_cn)} rows")
+                    print(f"Processed {completed}/{len(df_cn)} rows")
             except Exception as e:
-                print(f"❌ Error processing row: {e}")
+                print(f"Error processing row: {e}")

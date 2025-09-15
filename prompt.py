@@ -4,7 +4,7 @@ decision_agent_prompt = """Bạn là một hệ thống phân loại y tế thô
 
     Các tác nhân có sẵn:
     1. CONVERSATION_AGENT - Cho trò chuyện chung, lời chào và XỬ LÝ CÁC CÂU HỎI Y TẾ CHƯA RÕ RÀNG cần thu thập thêm thông tin từ bệnh nhân.
-    2. RAG_AGENT - CHỈ cho câu hỏi y tế CỤ THỂ và ĐẦY ĐỦ THÔNG TIN, bao gồm: triệu chứng chi tiết, câu hỏi về bệnh tật cụ thể, điều trị, thuốc men, giải phẫu, sinh lý học.
+    2. PARALLEL_KG_RAG_AGENT - CHỈ cho câu hỏi y tế CỤ THỂ và ĐẦY ĐỦ THÔNG TIN. Chạy song song cả Knowledge Graph và RAG để tìm thông tin y tế từ cơ sở tri thức và tài liệu chuyên khoa.
     3. WEB_SEARCH_PROCESSOR_AGENT - Cho câu hỏi về phát triển y tế gần đây, dịch bệnh hiện tại hoặc thông tin y tế nhạy cảm theo thời gian.
     4. SKIN_LESION_AGENT - CHỈ khi người dùng YÊU CẦU PHÂN VÙNG (segmentation) tổn thương DA cụ thể. Từ khóa: "phân vùng da", "segmentation da", "vùng tổn thương da", "ranh giới da", "phân đoạn da", "tổn thương da".
     5. POLYP_SEGMENTATION_AGENT - CHỈ khi người dùng YÊU CẦU PHÂN VÙNG (segmentation) POLYP/NỘI SOI ĐẠI TRÀNG cụ thể. Từ khóa: "phân vùng polyp", "segmentation polyp", "polyp", "nội soi đại tràng", "đại tràng", "ruột già", "colonoscopy".
@@ -20,7 +20,7 @@ decision_agent_prompt = """Bạn là một hệ thống phân loại y tế thô
       * "Tôi bị đau" (chưa rõ đau ở đâu)
       * "Con tôi có vấn đề" (chưa rõ vấn đề gì)
 
-    **RAG_AGENT được sử dụng khi:**
+    **PARALLEL_KG_RAG_AGENT được sử dụng khi:**
     - Câu hỏi y tế có ÍT NHẤT MỘT TRIỆU CHỨNG CỤ THỂ hoặc câu hỏi y tế rõ ràng:
       * "Tôi bị ngứa da, nổi mẩn đỏ" (có triệu chứng cụ thể)
       * "Con tôi bị sốt" (có triệu chứng cụ thể)
@@ -28,6 +28,7 @@ decision_agent_prompt = """Bạn là một hệ thống phân loại y tế thô
       * "Triệu chứng của viêm phổi là gì?" (câu hỏi y tế cụ thể)
       * "Thuốc paracetamol có tác dụng phụ gì?" (câu hỏi về thuốc)
       * "Cách điều trị cao huyết áp" (câu hỏi về điều trị)
+    - Tác nhân này chạy song song cả Knowledge Graph và RAG để tìm thông tin y tế
 
     HƯỚNG DẪN QUAN TRỌNG CHO HÌNH ẢNH Y TẾ:
     
@@ -54,10 +55,10 @@ decision_agent_prompt = """Bạn là một hệ thống phân loại y tế thô
     - "Xin chào, bạn có thể giúp tôi phân tích triệu chứng không?" → CONVERSATION_AGENT (chưa nêu triệu chứng cụ thể)
     - "Tôi cảm thấy không khỏe" → CONVERSATION_AGENT (quá mơ hồ, không có triệu chứng cụ thể)
     - "Tôi bị đau" → CONVERSATION_AGENT (chưa rõ đau ở đâu)
-    - "Tôi bị ngứa da, nổi mẩn đỏ" → RAG_AGENT (có triệu chứng cụ thể)
-    - "Con tôi bị sốt" → RAG_AGENT (có triệu chứng cụ thể)
-    - "Tôi bị đau đầu" → RAG_AGENT (có triệu chứng cụ thể)
-    - "Triệu chứng của cảm cúm là gì?" → RAG_AGENT (câu hỏi y tế cụ thể)
+    - "Tôi bị ngứa da, nổi mẩn đỏ" → PARALLEL_KG_RAG_AGENT (có triệu chứng cụ thể)
+    - "Con tôi bị sốt" → PARALLEL_KG_RAG_AGENT (có triệu chứng cụ thể)
+    - "Tôi bị đau đầu" → PARALLEL_KG_RAG_AGENT (có triệu chứng cụ thể)
+    - "Triệu chứng của cảm cúm là gì?" → PARALLEL_KG_RAG_AGENT (câu hỏi y tế cụ thể)
     - "Xin chào, bạn khỏe không?" → CONVERSATION_AGENT (lời chào)
 
     Bạn phải cung cấp câu trả lời của mình ở định dạng JSON với cấu trúc sau:
@@ -127,7 +128,7 @@ Bạn là một Trợ lý Y tế AI thân thiện và chuyên nghiệp. Bạn c�
         """
 
 cypher_query = """MATCH (d:Disease)
-WHERE toLower(d.name) CONTAINS toLower($disease_name)
+WHERE d.name CONTAINS $disease_name
   AND d.description IS NOT NULL          
 WITH d
 OPTIONAL MATCH (d)-[:TREATED_BY]-(t:Treatment)
@@ -188,7 +189,7 @@ I have a knowledge graph for Vietnamese traditional medicine, where each node re
 
 3. Symptom
     - disease_name
-    - symptoms
+    - symptoms (array of symptom strings)
     - diagnosis
     - risk_group
 
@@ -213,11 +214,54 @@ Relationships:
 - (Disease)-[:ASSOCIATED_WITH]->(Disease)
 
 You are a Neo4j Cypher expert. Given an input question, create a syntactically correct Cypher query to run.
-- Always match disease or symptom names using `CONTAINS` instead of exact equality.
-- Always change the entity to lowercase.
+
+IMPORTANT MATCHING RULES:
+- For disease names: Use `CONTAINS` for partial matching (e.g., `d.name CONTAINS $disease_name`)
+- For symptoms in arrays: Use word boundary matching to find exact words, not substrings
+  * Use `ANY(symptom IN s.symptoms WHERE symptom =~ '.*\\\\b' + $symptom + '\\\\b.*')` 
+  * This finds exact word matches, so "ho" won't match "phong" but will match "ho khan" or "ho có đờm"
 - If the matched node label is `Disease`, ensure it has a non-null `description` property (`d.description IS NOT NULL`). For other labels you can ignore this condition.
 - If the question is not asked to return symptoms and disease is one of the return list, then only disease nodes will be returned.
 - After filtering, limit the results to 30 records.
 - When answering, only provide the Cypher query, no additional comments or prefixes.
+
 Below are a number of examples of questions and their corresponding Cypher queries:
+
+Question: Tìm các triệu chứng có từ "ho"
+MATCH (s:Symptom) 
+WHERE ANY(symptom IN s.symptoms WHERE symptom =~ '.*\\\\bho\\\\b.*')
+MATCH (s)-[:HAS_SYMPTOM]-(d:Disease) 
+WHERE d.description IS NOT NULL
+RETURN d,
+       size(s.symptoms) as total_symptoms,
+       size([symptom IN s.symptoms WHERE symptom =~ '.*\\\\bho\\\\b.*']) as matched_symptoms,
+       [symptom IN s.symptoms WHERE symptom =~ '.*\\\\bho\\\\b.*'] as matched_symptom_list
+LIMIT 30;
+
+Question: Các bệnh có triệu chứng "đau đầu"
+MATCH (s:Symptom) 
+WHERE ANY(symptom IN s.symptoms WHERE symptom =~ '.*\\\\bđau đầu\\\\b.*')
+MATCH (s)-[:HAS_SYMPTOM]-(d:Disease) 
+WHERE d.description IS NOT NULL
+RETURN d,
+       size(s.symptoms) as total_symptoms,
+       size([symptom IN s.symptoms WHERE symptom =~ '.*\\\\bđau đầu\\\\b.*']) as matched_symptoms,
+       [symptom IN s.symptoms WHERE symptom =~ '.*\\\\bđau đầu\\\\b.*'] as matched_symptom_list
+LIMIT 30;
+
+Question: Tìm các triệu chứng có từ "khó thở"
+MATCH (s:Symptom) 
+WHERE ANY(symptom IN s.symptoms WHERE symptom =~ '.*\\\\bkhó thở\\\\b.*')
+MATCH (s)-[:HAS_SYMPTOM]-(d:Disease) 
+WHERE d.description IS NOT NULL
+RETURN d,
+       size(s.symptoms) as total_symptoms,
+       size([symptom IN s.symptoms WHERE symptom =~ '.*\\\\bkhó thở\\\\b.*']) as matched_symptoms,
+       [symptom IN s.symptoms WHERE symptom =~ '.*\\\\bkhó thở\\\\b.*'] as matched_symptom_list
+LIMIT 30;
+
+Question: Tìm thông tin về bệnh viêm phổi
+MATCH (d:Disease)
+WHERE d.name CONTAINS 'viêm phổi' AND d.description IS NOT NULL
+RETURN d LIMIT 30;
 """

@@ -80,18 +80,40 @@ class ContextFilterEmbedding:
         
         scored = []
         for item in kg_context:
+            num_symptoms = item.get('total_symptoms', 0)
+            matched_symptoms = item.get('matched_symptoms', 0)
+            matched_symptoms_list = item.get('matched_symptom_list', [])  # Sửa lỗi typo
+            
             emb = np.array(item['d']['embedding'])
             score = cosine_similarity(emb, q_vec)
-            scored.append({"score": score, **item['d']})
+            
+            # Tạo scored item với thông tin đầy đủ
+            scored_item = {
+                "score": score,
+                "name": item['d']['name'],  # Thông tin bệnh
+                "symptom_analysis": {
+                    "total_symptoms": num_symptoms,
+                    "matched_symptoms": matched_symptoms,
+                    "matched_symptoms_list": matched_symptoms_list,
+                }
+            }
+            scored.append(scored_item)
 
-        top5 = sorted(scored, key=lambda x: x["score"], reverse=True)[:2]
+        # Sắp xếp theo score và lấy top 2
+        top_results = sorted(scored, key=lambda x: x["score"], reverse=True)[:2]
 
         content = [] 
-        for record in top5: 
-            print(record['score'])
-            print(record['name'])
-            # Use cypher service
-            result = self.cypher_service.get_disease_info(record['name'])
+        for record in top_results: 
+            print(f"Disease: {record['name']}, Score: {record['score']:.3f}")
+            
+            # Lấy thông tin chi tiết từ cypher service
+            detailed_info = self.cypher_service.get_disease_info(record['name'])
+            
+            # Kết hợp thông tin
+            result = {
+                "disease_info": record,  # Thông tin bệnh + symptom analysis
+                "detailed_data": detailed_info[0] if detailed_info else {}  # Thông tin chi tiết từ DB
+            }
             content.append(result)
 
         return content  

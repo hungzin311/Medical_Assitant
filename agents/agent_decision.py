@@ -14,6 +14,9 @@ from agents.patient_db_agent import PatientQueryEngine
 from proxy_setting import *
 from prompt import decision_agent_prompt, conversation_agent_prompt
 from config import Config
+import concurrent.futures
+import asyncio 
+
 
 #Set proxy  
 set_proxy()
@@ -65,6 +68,8 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
     decision_chain = decision_prompt | decision_model | json_parser
 
     kg_agent = KGQueryEngine(patient_query_engine)
+
+    rag_agent = MedicalRAG(config)
     
     def analyze_input(state: AgentState) -> AgentState:
         """Analyze the input to detect images and determine input type."""
@@ -148,9 +153,8 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
             "agent_name": decision["agent"],
         }
         
-        if decision["confidence"] < AgentConfig.CONFIDENCE_THRESHOLD:
-            return {"agent_state": updated_state, "next": "needs_validation"}
-        
+        # if decision["confidence"] < AgentConfig.CONFIDENCE_THRESHOLD:
+        #     return {"agent_state": updated_state, "next": "needs_validation"}
         return {"agent_state": updated_state, "next": decision["agent"]}
 
     def run_conversation_agent(state: AgentState) -> AgentState:
@@ -237,155 +241,154 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
             "output": response,
             "agent_name": "CONVERSATION_AGENT"
         }
-    def run_kg_agent(state: AgentState) -> AgentState:
-        print(f"Selected agent: KG_AGENT")
+    
+    def run_kg_rag_parallel(state: AgentState) -> AgentState:
+        print(f"Selected agent: PARALLEL_KG_RAG_AGENT")
         
         messages = state["messages"]
-        kg_context_limit = config.kg.context_limit if hasattr(config, 'kg') else 10
-        
-        # Get recent chat history for context
-        recent_context = ""
-        for msg in messages[-kg_context_limit:]:
-            if isinstance(msg, HumanMessage):
-                recent_context += f"User: {msg.content}\n"
-            elif isinstance(msg, AIMessage):
-                recent_context += f"Assistant: {msg.content}\n"
-        
-        # Convert chat history to the format expected by KG agent
-        chat_history = []
-        for msg in messages[-kg_context_limit:]:
-            if isinstance(msg, HumanMessage):
-                chat_history.append({"role": "user", "content": msg.content})
-            elif isinstance(msg, AIMessage):
-                chat_history.append({"role": "assistant", "content": msg.content})
-        
-        try:
+        query = state["current_input"]
+        kg_context_limit = config.rag.context_limit 
+        rag_context_limit = config.rag.context_limit
+        patient_id = state.get('patient_id', 'PAT_001')
 
-            patient_id = state.get("patient_id", "PAT_001")  # Default patient for testing
-            
-            response = kg_agent.generate_medical_response(
-                question=state["current_input"], 
-                patient_id=patient_id,
-                chat_history=chat_history
-            )
-            
-            # Check if KG agent returned insufficient information
-            insufficient_info = False
-            if ("Không có thông tin liên quan" in response):
-                print("KG agent response indicates insufficient information, routing to web search")
-                insufficient_info = True
-                
-            if insufficient_info:
-                return {
-                    **state,
-                    "output": AIMessage(content=""),
-                    "needs_human_validation": False,
-                    "agent_name": "KG_AGENT",
-                    "next": "WEB_SEARCH_PROCESSOR_AGENT"
+        def run_kg_only(): 
+            chat_history = [] 
+            for msg in messages[-kg_context_limit:]:
+                if isinstance(msg, HumanMessage): 
+                    chat_history.append({"role": "user", "content": msg.content})
+                elif isinstance(msg, AIMessage):
+                    chat_history.append({"role": "assistant", "content": msg.content})
+            try:
+                response = kg_agent.generate_medical_response(
+                    question=query, 
+                    patient_id=patient_id,
+                    chat_history=chat_history
+                )
+            except Exception as e:
+                print(f"Error in KG agent: {e}")
+                response = "Tôi không có đủ thông tin"
+
+            insufficient_info = "Không có thông tin liên quan" in response
+
+            return { 
+                'response': response,
+                'insufficient_info': insufficient_info,
+                'agent_name': 'KG_AGENT'
+            }
+        
+        def run_rag_only(): 
+            chat_history = [] 
+            for msg in messages[-rag_context_limit:]:
+                if isinstance(msg, HumanMessage): 
+                    chat_history.append({"role": "user", "content": msg.content})
+                elif isinstance(msg, AIMessage):
+                    chat_history.append({"role": "assistant", "content": msg.content})
+            try:
+                response = rag_agent.process_query(query, chat_history=chat_history)
+            except Exception as e:
+                print(f"Error in RAG agent: {e}")
+                response = {
+                    "response": "Tôi không có đủ thông tin",
+                    "confidence": 0.0,
+                    "sources": []
                 }
+            if response.get('confidence', 0.0) < config.rag.min_retrieval_confidence: 
+                insufficient_info = True
+                response_text = 'Tôi không có đủ thông tin'
+            elif not isinstance(response, dict):
+                insufficient_info = True
+                response_text = 'Tôi không có đủ thông tin'
+            else:
+                response_text = response.get('response', 'Tôi không có đủ thông tin')
+
+                insufficient_info = (
+                    "Tôi không có đủ thông tin" in response_text or 
+                    "không đủ thông tin" in response_text.lower() or
+                    "thông tin không đầy đủ" in response_text.lower() or
+                    "không thể trả lời" in response_text.lower() or
+                    "không trả lời được" in response_text.lower()
+                )
             
             return {
-                **state,
-                "output": AIMessage(content=response),
-                "needs_human_validation": False,
-                "agent_name": "KG_AGENT",
-                "next": "check_validation"
+                "response": response_text,
+                "insufficient_info": insufficient_info,
+                "agent_name": "RAG_AGENT",
+                "confidence": response.get("confidence", 0.0),
+                "sources": response.get("sources", [])
             }
             
-        except Exception as e:
-            print(f"Error in KG agent: {e}")
+        with concurrent.futures.ThreadPoolExecutor(max_workers = 2) as executor: 
+            kg_future = executor.submit(run_kg_only)
+            rag_future = executor.submit(run_rag_only)
+
+            kg_result = kg_future.result()
+            rag_result = rag_future.result()
+            
+        kg_insufficient = kg_result['insufficient_info']
+        rag_insufficient = rag_result['insufficient_info']
+        
+        print(f"KG insufficient_info: {kg_insufficient}")
+        print(f"RAG insufficient_info: {rag_insufficient}")
+        print(f"RAG confidence: {rag_result.get('confidence', 0.0)}")
+        print(f"RAG sources count: {len(rag_result.get('sources', []))}")
+        
+        # Case 1: Both have insufficient info -> Go to web search
+        if kg_insufficient and rag_insufficient:
+            print("Both KG and RAG have insufficient info -> Routing to Web Search")
             return {
                 **state,
                 "output": AIMessage(content=""),
                 "needs_human_validation": False,
-                "agent_name": "KG_AGENT",
-                "next": "WEB_SEARCH_PROCESSOR_AGENT"
-            } 
-    
-    def run_rag_agent(state: AgentState) -> AgentState:
-
-        print(f"Selected agent: RAG_AGENT")
-
-        rag_agent = MedicalRAG(config)
+                "agent_name": "PARALLEL_KG_RAG_AGENT",
+                "next": "WEB_SEARCH_PROCESSOR_AGENT",
+                "kg_result": kg_result,
+                "rag_result": rag_result
+            }
         
-        messages = state["messages"]
-        query = state["current_input"]
-        rag_context_limit = config.rag.context_limit
-
-        recent_context = ""
-        for msg in messages[-rag_context_limit:]:
-            if isinstance(msg, HumanMessage):
-                recent_context += f"User: {msg.content}\n"
-            elif isinstance(msg, AIMessage):
-                recent_context += f"Assistant: {msg.content}\n"
-
-        try:
-            response = rag_agent.process_query(query, chat_history=recent_context)
-            
-            if "response" not in response:
-                print("Error: RAG response is missing 'response' key")
-                response["response"] = "I apologize, but I encountered an error while processing your query. Please try again."
-                
-            retrieval_confidence = response.get("confidence", 0.0)  # Default to 0.0 if not provided
-
-            print(f"Retrieval Confidence: {retrieval_confidence}")
-            print(f"Sources: {len(response.get('sources', []))}")
-
-            # Check if response indicates insufficient information
-            insufficient_info = False
-            response_text = response["response"]
-            
-            if not isinstance(response_text, str):
-                print(f"Warning: Response text is not a string, converting from {type(response_text)}")
-                response_text = str(response_text)
-                
-            if (
-                "Tôi không có đủ thông tin" in response_text or 
-                "không đủ thông tin" in response_text.lower() or
-                "thông tin không đầy đủ" in response_text.lower() or
-                "không thể trả lời" in response_text.lower() or
-                "không trả lời được" in response_text.lower()   
-                ):
-                
-                print("RAG response indicates insufficient information")
-                insufficient_info = True
-
-            print(f"Insufficient info flag set to: {insufficient_info}")
-                
-            if retrieval_confidence >= config.rag.min_retrieval_confidence:
-                response_output = AIMessage(content=response_text)
-            else:
-                response_output = AIMessage(content="")
-                insufficient_info = True
-            
-            if insufficient_info:
-                return {
-                    **state,
-                    "output": AIMessage(content=""),
-                    "needs_human_validation": False,
-                    "retrieval_confidence": 0.0,
-                    "agent_name": "RAG_AGENT",
-                    "next": "WEB_SEARCH_PROCESSOR_AGENT"
-                }
+        # Case 2: Only KG has sufficient info
+        elif not kg_insufficient and rag_insufficient:
+            print("Using KG result (RAG insufficient)")
             return {
                 **state,
-                "output": response_output,
+                "output": AIMessage(content=kg_result['response']),
                 "needs_human_validation": False,
-                "retrieval_confidence": retrieval_confidence,
-                "agent_name": "RAG_AGENT",
+                "agent_name": "KG_AGENT",
                 "next": "check_validation"
             }
-            
-        except Exception as e:    
+        
+        # Case 3: Only RAG has sufficient info
+        elif kg_insufficient and not rag_insufficient:
+            print("Using RAG result (KG insufficient)")
             return {
                 **state,
-                "output": AIMessage(content="Tôi xin lỗi, nhưng tôi đã gặp lỗi khi xử lý truy vấn của bạn. Vui lòng thử lại hoặc diễn đạt lại câu hỏi của bạn."),
+                "output": AIMessage(content=rag_result['response']),
                 "needs_human_validation": False,
-                "retrieval_confidence": 0.0,
                 "agent_name": "RAG_AGENT",
-                "next": "WEB_SEARCH_PROCESSOR_AGENT"
+                "next": "check_validation",
+                "retrieval_confidence": rag_result['confidence']
             }
-
+        
+        # Case 4: Both have sufficient info -> Combine or choose best
+        else:
+            print("Both agents have sufficient info -> Combining results")
+            
+            if rag_result.get('confidence', 0) > 0.7:
+                chosen_response = rag_result['response']
+                chosen_agent = "RAG_AGENT"
+            else:
+                chosen_response = kg_result['response']
+                chosen_agent = "KG_AGENT"
+            
+            return {
+                **state,
+                "output": AIMessage(content=chosen_response),
+                "needs_human_validation": False,
+                "agent_name": chosen_agent,
+                "next": "check_validation",
+                "kg_result": kg_result,
+                "rag_result": rag_result
+            }
+        
     # Web Search Processor Node
     def run_web_search_processor_agent(state: AgentState) -> AgentState:
         print(f"Selected agent: WEB_SEARCH_PROCESSOR_AGENT")
@@ -642,8 +645,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
     workflow.add_node("analyze_input", analyze_input)
     workflow.add_node("route_to_agent", route_to_agent)
     workflow.add_node("CONVERSATION_AGENT", run_conversation_agent)
-    workflow.add_node("KG_AGENT", run_kg_agent)
-    workflow.add_node("RAG_AGENT", run_rag_agent)
+    workflow.add_node('PARALLEL_KG_RAG_AGENT', run_kg_rag_parallel)
     workflow.add_node("WEB_SEARCH_PROCESSOR_AGENT", run_web_search_processor_agent)
     workflow.add_node("SKIN_LESION_AGENT", run_skin_lesion_agent)
     workflow.add_node("POLYP_SEGMENTATION_AGENT", run_polyp_segmentation_agent)
@@ -668,37 +670,27 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         lambda x: x["next"],
         {
             "CONVERSATION_AGENT": "CONVERSATION_AGENT",
-            "KG_AGENT": "KG_AGENT",
-            "RAG_AGENT": "RAG_AGENT",
+            "PARALLEL_KG_RAG_AGENT": "PARALLEL_KG_RAG_AGENT",
             "WEB_SEARCH_PROCESSOR_AGENT": "WEB_SEARCH_PROCESSOR_AGENT",
             "SKIN_LESION_AGENT": "SKIN_LESION_AGENT",
             "POLYP_SEGMENTATION_AGENT": "POLYP_SEGMENTATION_AGENT",
             "GENERAL_MEDICAL_IMAGE_AGENT": "GENERAL_MEDICAL_IMAGE_AGENT",
-            "apply_guardrails": "apply_guardrails",  
-            "needs_validation": "RAG_AGENT"
+            "apply_guardrails": "apply_guardrails"  
+            # "needs_validation": "RAG_AGENT"
         }
     )
 
-    workflow.add_conditional_edges( 
-        "RAG_AGENT",
-        lambda x: x['next'], 
+    workflow.add_conditional_edges(
+        "PARALLEL_KG_RAG_AGENT",
+        lambda x: x['next'],
         {
             "check_validation": "check_validation",
             "WEB_SEARCH_PROCESSOR_AGENT": "WEB_SEARCH_PROCESSOR_AGENT"
         }
     )
-
-    workflow.add_conditional_edges( 
-        "KG_AGENT",
-        lambda x: x['next'], 
-        {
-            "check_validation": "check_validation",
-            "WEB_SEARCH_PROCESSOR_AGENT": "WEB_SEARCH_PROCESSOR_AGENT"
-        }
-    )
-    
     # Connect agent outputs to validation check
     workflow.add_edge("CONVERSATION_AGENT", "check_validation")
+    workflow.add_edge("PARALLEL_KG_RAG_AGENT", "check_validation")
     workflow.add_edge("WEB_SEARCH_PROCESSOR_AGENT", "check_validation")
     workflow.add_edge("SKIN_LESION_AGENT", "check_validation")
     workflow.add_edge("POLYP_SEGMENTATION_AGENT", "check_validation")
