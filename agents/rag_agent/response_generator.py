@@ -113,7 +113,6 @@ class ResponseGenerator:
             else:
                 response_text = str(response)
 
-            # Add safety disclaimer and sources to response
             safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
             
             if hasattr(self, 'include_sources') and self.include_sources and sources:
@@ -138,23 +137,13 @@ class ResponseGenerator:
             self.logger.error(f"Error generating response: {e}")
             import traceback
             self.logger.error(traceback.format_exc())
-            safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
             return {
-                "response": "Tôi xin lỗi, nhưng tôi đã gặp lỗi khi tạo câu trả lời. Vui lòng thử diễn đạt lại câu hỏi của bạn." + safety_disclaimer,
+                "response": "Tôi xin lỗi, nhưng tôi đã gặp lỗi khi tạo câu trả lời. Vui lòng thử diễn đạt lại câu hỏi của bạn.",
                 "sources": [],
                 "confidence": 0.0
             }
 
     def _extract_sources(self, documents: List[Dict[str, Any]]) -> List[Dict[str, str]]:
-        """
-        Extract source information from retrieved documents for citation.
-        
-        Args:
-            documents: List of retrieved document dictionaries
-            
-        Returns:
-            List of source information dictionaries
-        """
         sources = []
         seen_sources = set()  # Track unique sources to avoid duplicates
         

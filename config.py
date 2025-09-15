@@ -22,7 +22,6 @@ class RAGConfig:
         self.vector_db_type = "qdrant"
         self.embedding_dim = 1024  
         self.distance_metric = "Cosine"
-        # Set use_local to False to use cloud Qdrant
         self.use_local = False
         # self.vector_local_path = "./data/qdrant_vietnamese_db"
         # self.doc_local_path = "./data/docs_vietnamese_db"

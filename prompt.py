@@ -218,5 +218,6 @@ You are a Neo4j Cypher expert. Given an input question, create a syntactically c
 - If the matched node label is `Disease`, ensure it has a non-null `description` property (`d.description IS NOT NULL`). For other labels you can ignore this condition.
 - If the question is not asked to return symptoms and disease is one of the return list, then only disease nodes will be returned.
 - After filtering, limit the results to 30 records.
+- When answering, only provide the Cypher query, no additional comments or prefixes.
 Below are a number of examples of questions and their corresponding Cypher queries:
 """

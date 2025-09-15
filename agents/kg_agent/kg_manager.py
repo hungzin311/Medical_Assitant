@@ -22,19 +22,18 @@ class KGManager:
             with cls._lock:
                 if cls._instance is None:
                     cls._instance = super(KGManager, cls).__new__(cls)
-                    cls._instance._initialized = False
+                    cls._instance._initialized = True
         return cls._instance
     
     def __init__(self):
         if self._initialized:
-            return
+            return 
             
         self._graph = None
         self._llm = None
         self._embedding_model = None
         self._cypher_chain = None
         
-        # Initialize components
         self._initialize_components()
         self._initialized = True
     
@@ -58,33 +57,33 @@ class KGManager:
         examples = [
             {
                 "question": "Phương pháp điều trị cho bệnh u lympho sau phúc mạc là gì?",
-                "query": "MATCH (d:Disease) WHERE d.name CONTAINS 'u lympho sau phúc mạc' AND d.description IS NOT NULL RETURN d LIMIT 5;",
+                "query": "MATCH (d:Disease) WHERE d.name CONTAINS 'u lympho sau phúc mạc' AND d.description IS NOT NULL RETURN d LIMIT 30;",
             },
             {
                 "question": "Nguyên nhân của bệnh chảy máu khoảng cách sau phúc mạc là gì?",
-                "query": "MATCH (d:Disease) WHERE d.name CONTAINS 'chảy máu khoảng cách sau phúc mạc' AND d.description IS NOT NULL RETURN d LIMIT 5;",
+                "query": "MATCH (d:Disease) WHERE d.name CONTAINS 'chảy máu khoảng cách sau phúc mạc' AND d.description IS NOT NULL RETURN d LIMIT 30;",
             },
             {
                 "question": "Triệu chứng của bệnh chảy máu khoảng cách sau phúc mạc là gì?",
-                "query": "MATCH (d:Disease)-[:HAS_SYMPTOM]-(s:Symptom) WHERE d.name CONTAINS 'chảy máu khoảng cách sau phúc mạc' AND d.description IS NOT NULL RETURN s LIMIT 5;",
+                "query": "MATCH (d:Disease)-[:HAS_SYMPTOM]-(s:Symptom) WHERE d.name CONTAINS 'chảy máu khoảng cách sau phúc mạc' AND d.description IS NOT NULL RETURN s LIMIT 30;",
             },
             {
                 "question": "Những bệnh lý nào có thể xuất hiện khi có triệu chứng khóc và đau?",
-                "query": "MATCH (s:Symptom) WHERE s.symptoms CONTAINS 'khóc' AND s.symptoms CONTAINS 'đau' MATCH (s)-[:HAS_SYMPTOM]-(d:Disease) WHERE d.description IS NOT NULL RETURN d LIMIT 5;",
+                "query": "MATCH (s:Symptom) WHERE s.symptoms CONTAINS 'khóc' AND s.symptoms CONTAINS 'đau' MATCH (s)-[:HAS_SYMPTOM]-(d:Disease) WHERE d.description IS NOT NULL RETURN d LIMIT 30;",
             },
             {
                 "question": "Có những loại thuốc phổ biến nào để điều trị bệnh chảy máu khoảng cách sau phúc mạc?",
-                "query": "MATCH (m:Medication) WHERE m.disease_name CONTAINS 'chảy máu khoảng cách sau phúc mạc' RETURN m LIMIT 5;",
+                "query": "MATCH (m:Medication) WHERE m.disease_name CONTAINS 'chảy máu khoảng cách sau phúc mạc' RETURN m LIMIT 30;",
             },
             {
                 "question": "Người bệnh u lympho sau phúc mạc nên ăn thực phẩm gì?",
-                "query": "MATCH (a:Advice) WHERE a.disease_name CONTAINS 'u lympho sau phúc mạc' RETURN a LIMIT 5;",
+                "query": "MATCH (a:Advice) WHERE a.disease_name CONTAINS 'u lympho sau phúc mạc' RETURN a LIMIT 30;",
             }
         ]
         
         example_prompt = PromptTemplate(
             input_variables=["question", "query"],
-            template="User input: {question}\nCypher query: {query}"
+            template="User input: {question}\n{query}"
         )
         
         prefix_prompt = cypher_chain_prompt
@@ -93,7 +92,7 @@ class KGManager:
             examples=examples,
             example_prompt=example_prompt,
             prefix=prefix_prompt,
-            suffix="User input: {question}\nCypher query: ",
+            suffix="User input: {question}\n",
             input_variables=["question"],
         )
         

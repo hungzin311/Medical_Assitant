@@ -72,26 +72,14 @@ class ContextFilterEmbedding:
     def __init__(self):
         self.cypher_service = CypherQueryService()
 
-    def filter_context(self, kg_context: List[Dict], patient_info: Dict, question: str): 
-        age = patient_info.get('age', 'không rõ')
-        gender = patient_info.get('sex', 'không rõ')
-        medical_history = patient_info.get('medical_history', [])
-        current_diseases = patient_info.get('diseases_active', [])
-
-        context = f"""
-        THÔNG TIN BỆNH NHÂN:
-        - Tuổi: {age}
-        - Giới tính: {gender}
-        - Tiền sử bệnh: {medical_history}
-        - Các bệnh hiện tại: {current_diseases}
-        """
+    def filter_context(self, kg_context: List[Dict], patient_context: str, question: str): 
         
+        context = patient_context
         # Use embedding service
         q_vec = embed_text(context)
         
         scored = []
         for item in kg_context:
-            print(item)
             emb = np.array(item['d']['embedding'])
             score = cosine_similarity(emb, q_vec)
             scored.append({"score": score, **item['d']})

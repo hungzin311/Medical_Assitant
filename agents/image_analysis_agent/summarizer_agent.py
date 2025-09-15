@@ -162,11 +162,10 @@ class MedicalImageSummarizer:
             return summarized_result
         except Exception as e:
             self.logger.error(f"Error summarizing diagnosis: {e}")
-            safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
             return {
                 "image_id": image_id,
                 "original_diagnosis": diagnosis,
-                "summary": f"Tôi đã gặp lỗi khi tóm tắt chẩn đoán này. Vui lòng xem lại chẩn đoán gốc hoặc tham khảo ý kiến bác sĩ chuyên khoa.{safety_disclaimer}\n\n[Image_ID: {image_id}]",
+                "summary": f"Tôi đã gặp lỗi khi tóm tắt chẩn đoán này. Vui lòng xem lại chẩn đoán gốc hoặc tham khảo ý kiến bác sĩ chuyên khoa.\n\n[Image_ID: {image_id}]",
                 "success": False,
                 "error": str(e)
             }
@@ -215,5 +214,4 @@ class MedicalImageSummarizer:
             return f"{response.content}{safety_disclaimer}"
         except Exception as e:
             self.logger.error(f"Error generating follow-up response: {e}")
-            safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
-            return f"Tôi xin lỗi, tôi đã gặp lỗi khi xử lý câu hỏi tiếp theo của bạn. Vui lòng thử diễn đạt lại câu hỏi của bạn hoặc tham khảo ý kiến bác sĩ chuyên khoa để được thông tin chính xác.{safety_disclaimer}\n\n[Image_ID: {image_id}]" 
+            return f"Tôi xin lỗi, tôi đã gặp lỗi khi xử lý câu hỏi tiếp theo của bạn. Vui lòng thử diễn đạt lại câu hỏi của bạn hoặc tham khảo ý kiến bác sĩ chuyên khoa để được thông tin chính xác.\n\n[Image_ID: {image_id}]" 

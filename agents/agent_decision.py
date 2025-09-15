@@ -12,7 +12,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from agents.kg_agent import KGQueryEngine
 from agents.patient_db_agent import PatientQueryEngine
 from proxy_setting import *
-from prompt import *
+from prompt import decision_agent_prompt, conversation_agent_prompt
 from config import Config
 
 #Set proxy  
@@ -22,7 +22,6 @@ config = Config()
 memory = MemorySaver()
 thread_config = {"configurable": {"thread_id": "1"}}
 
-# Agent that takes the decision of routing the request further to correct task specific agent
 class AgentConfig:
     DECISION_MODEL = "gemini-2.5-flash"
     VISION_MODEL = "gemini-2.5-flash"
@@ -40,7 +39,7 @@ class AgentState(MessagesState):
     needs_human_validation: bool  # Whether human validation is required
     retrieval_confidence: float  # Confidence in retrieval (for RAG agent)
     bypass_routing: bool  # Flag to bypass agent routing for guardrails
-    insufficient_info: bool  # Flag indicating RAG response has insufficient information
+    patient_id: Optional[str]  # Patient ID for KG and patient database queries
 
 
 class AgentDecision(TypedDict):
@@ -62,11 +61,11 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
     decision_prompt = ChatPromptTemplate.from_messages([
     ("human", f"System: {decision_agent_prompt}\n\nUser: {{input}}")])
 
-    
     # Create the decision chain
     decision_chain = decision_prompt | decision_model | json_parser
+
+    kg_agent = KGQueryEngine(patient_query_engine)
     
-    # Define graph state transformations
     def analyze_input(state: AgentState) -> AgentState:
         """Analyze the input to detect images and determine input type."""
         current_input = state["current_input"]
@@ -240,13 +239,68 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         }
     def run_kg_agent(state: AgentState) -> AgentState:
         print(f"Selected agent: KG_AGENT")
-        kg_agent = KGQueryEngine(patient_query_engine)
-        response = kg_agent.generate_medical_response(state["current_input"], state["patient_id"])
-        return {
-            **state,
-            "output": response,
-            "agent_name": "KG_AGENT"
-        }
+        
+        messages = state["messages"]
+        kg_context_limit = config.kg.context_limit if hasattr(config, 'kg') else 10
+        
+        # Get recent chat history for context
+        recent_context = ""
+        for msg in messages[-kg_context_limit:]:
+            if isinstance(msg, HumanMessage):
+                recent_context += f"User: {msg.content}\n"
+            elif isinstance(msg, AIMessage):
+                recent_context += f"Assistant: {msg.content}\n"
+        
+        # Convert chat history to the format expected by KG agent
+        chat_history = []
+        for msg in messages[-kg_context_limit:]:
+            if isinstance(msg, HumanMessage):
+                chat_history.append({"role": "user", "content": msg.content})
+            elif isinstance(msg, AIMessage):
+                chat_history.append({"role": "assistant", "content": msg.content})
+        
+        try:
+
+            patient_id = state.get("patient_id", "PAT_001")  # Default patient for testing
+            
+            response = kg_agent.generate_medical_response(
+                question=state["current_input"], 
+                patient_id=patient_id,
+                chat_history=chat_history
+            )
+            
+            # Check if KG agent returned insufficient information
+            insufficient_info = False
+            if ("Không có thông tin liên quan" in response):
+                print("KG agent response indicates insufficient information, routing to web search")
+                insufficient_info = True
+                
+            if insufficient_info:
+                return {
+                    **state,
+                    "output": AIMessage(content=""),
+                    "needs_human_validation": False,
+                    "agent_name": "KG_AGENT",
+                    "next": "WEB_SEARCH_PROCESSOR_AGENT"
+                }
+            
+            return {
+                **state,
+                "output": AIMessage(content=response),
+                "needs_human_validation": False,
+                "agent_name": "KG_AGENT",
+                "next": "check_validation"
+            }
+            
+        except Exception as e:
+            print(f"Error in KG agent: {e}")
+            return {
+                **state,
+                "output": AIMessage(content=""),
+                "needs_human_validation": False,
+                "agent_name": "KG_AGENT",
+                "next": "WEB_SEARCH_PROCESSOR_AGENT"
+            } 
     
     def run_rag_agent(state: AgentState) -> AgentState:
 
@@ -259,7 +313,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         rag_context_limit = config.rag.context_limit
 
         recent_context = ""
-        for msg in messages[-rag_context_limit:]:# limit controlled from config
+        for msg in messages[-rag_context_limit:]:
             if isinstance(msg, HumanMessage):
                 recent_context += f"User: {msg.content}\n"
             elif isinstance(msg, AIMessage):
@@ -323,10 +377,9 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
             }
             
         except Exception as e:    
-            safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
             return {
                 **state,
-                "output": AIMessage(content="Tôi xin lỗi, nhưng tôi đã gặp lỗi khi xử lý truy vấn của bạn. Vui lòng thử lại hoặc diễn đạt lại câu hỏi của bạn." + safety_disclaimer),
+                "output": AIMessage(content="Tôi xin lỗi, nhưng tôi đã gặp lỗi khi xử lý truy vấn của bạn. Vui lòng thử lại hoặc diễn đạt lại câu hỏi của bạn."),
                 "needs_human_validation": False,
                 "retrieval_confidence": 0.0,
                 "agent_name": "RAG_AGENT",
@@ -400,8 +453,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
             else:
                 response = AIMessage(content=diagnosis_result["diagnosis"])
         else:
-            safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
-            response = AIMessage(content="Tôi đã gặp lỗi khi phân tích hình ảnh y tế này. Vui lòng thử lại hoặc tham khảo ý kiến bác sĩ chuyên khoa." + safety_disclaimer)
+            response = AIMessage(content="Tôi đã gặp lỗi khi phân tích hình ảnh y tế này. Vui lòng thử lại hoặc tham khảo ý kiến bác sĩ chuyên khoa.")
 
         return {
             **state,
@@ -448,8 +500,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
             else:
                 response = AIMessage(content="Dưới đây là kết quả phân vùng tổn thương da dựa trên ảnh đã được cung cấp:")
         else:
-            safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
-            response = AIMessage(content="Hình ảnh được tải lên không đủ rõ nét để có thể chẩn đoán hoặc hình ảnh này không phải là hình ảnh y tế." + safety_disclaimer)
+            response = AIMessage(content="Hình ảnh được tải lên không đủ rõ nét để có thể chẩn đoán hoặc hình ảnh này không phải là hình ảnh y tế.")
 
         return {
             **state,
@@ -504,8 +555,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
             else:
                 response = AIMessage(content=f"Dưới đây là kết quả phân vùng polyp từ hình ảnh nội soi đại tràng:\n\n{diagnosis_result['diagnosis']}")
         else:
-            safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
-            response = AIMessage(content="Không thể thực hiện phân vùng polyp trên hình ảnh này. Hình ảnh có thể không đủ rõ nét hoặc không phải là hình ảnh nội soi đại tràng phù hợp." + safety_disclaimer)
+            response = AIMessage(content="Không thể thực hiện phân vùng polyp trên hình ảnh này. Hình ảnh có thể không đủ rõ nét hoặc không phải là hình ảnh nội soi đại tràng phù hợp.")
 
         return {
             **state,
@@ -592,6 +642,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
     workflow.add_node("analyze_input", analyze_input)
     workflow.add_node("route_to_agent", route_to_agent)
     workflow.add_node("CONVERSATION_AGENT", run_conversation_agent)
+    workflow.add_node("KG_AGENT", run_kg_agent)
     workflow.add_node("RAG_AGENT", run_rag_agent)
     workflow.add_node("WEB_SEARCH_PROCESSOR_AGENT", run_web_search_processor_agent)
     workflow.add_node("SKIN_LESION_AGENT", run_skin_lesion_agent)
@@ -617,18 +668,28 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         lambda x: x["next"],
         {
             "CONVERSATION_AGENT": "CONVERSATION_AGENT",
+            "KG_AGENT": "KG_AGENT",
             "RAG_AGENT": "RAG_AGENT",
             "WEB_SEARCH_PROCESSOR_AGENT": "WEB_SEARCH_PROCESSOR_AGENT",
             "SKIN_LESION_AGENT": "SKIN_LESION_AGENT",
             "POLYP_SEGMENTATION_AGENT": "POLYP_SEGMENTATION_AGENT",
             "GENERAL_MEDICAL_IMAGE_AGENT": "GENERAL_MEDICAL_IMAGE_AGENT",
             "apply_guardrails": "apply_guardrails",  
-            "needs_validation": "RAG_AGENT" 
+            "needs_validation": "RAG_AGENT"
         }
     )
 
     workflow.add_conditional_edges( 
         "RAG_AGENT",
+        lambda x: x['next'], 
+        {
+            "check_validation": "check_validation",
+            "WEB_SEARCH_PROCESSOR_AGENT": "WEB_SEARCH_PROCESSOR_AGENT"
+        }
+    )
+
+    workflow.add_conditional_edges( 
+        "KG_AGENT",
         lambda x: x['next'], 
         {
             "check_validation": "check_validation",
@@ -669,7 +730,8 @@ def init_agent_state() -> AgentState:
         "output": None,
         "needs_human_validation": False,
         "retrieval_confidence": 0.0,
-        "bypass_routing": False
+        "bypass_routing": False,
+        "patient_id": None
     }
 
 

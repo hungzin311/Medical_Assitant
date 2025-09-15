@@ -184,7 +184,7 @@ class MedicalRAG:
         try:
             # Step 1: Expand query
             self.logger.info(f"1. Expanding query: '{query}'")
-            expansion_result = self.query_expander.expand_query(query, chat_history)
+            expansion_result = self.query_expander.expand_query(query, mode="rag", chat_history=chat_history)
             expanded_query = expansion_result["expanded_query"]
             self.logger.info(f"   Original: '{query}'")
             self.logger.info(f"   Expanded: '{expanded_query}'")

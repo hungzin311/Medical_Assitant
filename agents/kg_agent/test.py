@@ -9,7 +9,7 @@ def main():
     config = Config()
     patient_query_engine = PatientQueryEngine(config)
     kg_query_engine = KGQueryEngine(patient_query_engine)
-    x = kg_query_engine.generate_medical_response("What is the treatment for cancer?", "PAT_001")
+    x = kg_query_engine.generate_medical_response("Đây là bệnh gì với các triệu chứng đau đầu, buồn nôn trong 2 ngày?", "PAT_001")
     print(x)
 if __name__ == "__main__":
     main()

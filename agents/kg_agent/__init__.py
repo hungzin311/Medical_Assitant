@@ -2,7 +2,7 @@ import logging
 from .cypher_query_llm import CypherQueryService
 from .context_filter import ContextFilterEmbedding
 from .response_generator import ResponseGenerator
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from agents.patient_db_agent import PatientQueryEngine
 
 class KGQueryEngine:
@@ -24,9 +24,9 @@ class KGQueryEngine:
         """Filter KG context based on patient profile"""
         return self.context_filter.filter_context(kg_context, patient_info, question)
     
-    def generate_medical_response(self, question: str, patient_id: str) -> str:
+    def generate_medical_response(self, question: str, patient_id: str, chat_history: Optional[List[Dict[str, str]]] = None) -> str:
         """Generate complete medical response using filtered KG context"""
-        return self.response_generator.generate_response(question, patient_id)
+        return self.response_generator.generate_response(question, patient_id, chat_history)
     
     def get_disease_information(self, disease_name: str) -> List[Dict]:
         """Get comprehensive disease information from KG"""
