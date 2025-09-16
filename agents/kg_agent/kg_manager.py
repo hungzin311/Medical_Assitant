@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 from langchain_neo4j import GraphCypherQAChain
 from langchain_core.prompts import FewShotPromptTemplate, PromptTemplate
-from llm_config import get_gemini_llm, get_fpt_vietnamese_embedding, get_graph_db
+from llm_config import get_gemini_llm_2, get_fpt_vietnamese_embedding, get_graph_db
 from prompt import cypher_chain_prompt
 import threading
 from proxy_setting import set_proxy
@@ -29,7 +29,7 @@ class KGManager:
             return 
             
         self._graph = get_graph_db()
-        self._llm = get_gemini_llm(temperature=0.0)
+        self._llm = get_gemini_llm_2(temperature=0.0)
         self._embedding_model = get_fpt_vietnamese_embedding()
         self._cypher_chain = None
         self._setup_cypher_chain()
@@ -99,7 +99,7 @@ class KGManager:
         return self._cypher_chain
 
     def get_llm(self, temperature: float = 0.0):
-        return get_gemini_llm(temperature=temperature)
+        return get_gemini_llm_2(temperature=temperature)
     
     def reset_connections(self):
         """Reset all connections if needed"""

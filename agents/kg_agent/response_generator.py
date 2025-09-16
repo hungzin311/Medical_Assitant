@@ -2,7 +2,7 @@ from typing import List, Dict, Optional
 from .cypher_query_llm import CypherQueryService
 from .context_filter import ContextFilterEmbedding
 from langchain_core.prompts import PromptTemplate
-from llm_config import get_gemini_llm
+from llm_config import get_gemini_llm_2
 from agents.patient_db_agent import PatientQueryEngine
 from agents.rag_agent.query_expander import QueryExpander
 from config import Config
@@ -39,7 +39,7 @@ class ResponseGenerator:
     def __init__(self, patient_query_engine: PatientQueryEngine):
         self.cypher_query_llm = CypherQueryService()
         self.context_filter = ContextFilterEmbedding()
-        self.llm = get_gemini_llm(temperature=0.2)
+        self.llm = get_gemini_llm_2(temperature=0.2)
         self.patient_query_engine = patient_query_engine
         self.query_expander = QueryExpander(config)
     

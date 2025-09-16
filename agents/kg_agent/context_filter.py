@@ -3,12 +3,12 @@ from typing import List, Dict
 from .embedding_service import embed_text, cosine_similarity
 from .cypher_query_llm import CypherQueryService
 
-from llm_config import get_gemini_llm
+from llm_config import get_gemini_llm_2
 import numpy as np 
 
 class ContextFilter:
     def __init__(self):
-        self.llm = get_gemini_llm(temperature=0.1)
+        self.llm = get_gemini_llm_2(temperature=0.1)
         self.filter_prompt = PromptTemplate(
             template="""
             Bạn là chuyên gia y tế. Hãy lọc thông tin từ knowledge graph chỉ giữ lại những thông tin PHÙ HỢP với hồ sơ bệnh nhân.

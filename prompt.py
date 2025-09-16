@@ -216,13 +216,14 @@ Relationships:
 You are a Neo4j Cypher expert. Given an input question, create a syntactically correct Cypher query to run.
 
 IMPORTANT MATCHING RULES:
-- For disease names: Use `CONTAINS` for partial matching (e.g., `d.name CONTAINS $disease_name`)
+- For disease names: Use `CONTAINS` for partial matching (e.g., `d.name CONTAINS $disease_name`), disease name is always in lowercase.
 - For symptoms in arrays: Use word boundary matching to find exact words, not substrings
   * Use `ANY(symptom IN s.symptoms WHERE symptom =~ '.*\\\\b' + $symptom + '\\\\b.*')` 
   * This finds exact word matches, so "ho" won't match "phong" but will match "ho khan" or "ho có đờm"
 - If the matched node label is `Disease`, ensure it has a non-null `description` property (`d.description IS NOT NULL`). For other labels you can ignore this condition.
 - If the question is not asked to return symptoms and disease is one of the return list, then only disease nodes will be returned.
 - After filtering, limit the results to 30 records.
+- Always return the disease node as d in all cases.
 - When answering, only provide the Cypher query, no additional comments or prefixes.
 
 Below are a number of examples of questions and their corresponding Cypher queries:
@@ -231,7 +232,7 @@ Question: Tìm các triệu chứng có từ "ho"
 MATCH (s:Symptom) 
 WHERE ANY(symptom IN s.symptoms WHERE symptom =~ '.*\\\\bho\\\\b.*')
 MATCH (s)-[:HAS_SYMPTOM]-(d:Disease) 
-WHERE d.description IS NOT NULL
+AND d.description IS NOT NULL
 RETURN d,
        size(s.symptoms) as total_symptoms,
        size([symptom IN s.symptoms WHERE symptom =~ '.*\\\\bho\\\\b.*']) as matched_symptoms,
@@ -253,7 +254,7 @@ Question: Tìm các triệu chứng có từ "khó thở"
 MATCH (s:Symptom) 
 WHERE ANY(symptom IN s.symptoms WHERE symptom =~ '.*\\\\bkhó thở\\\\b.*')
 MATCH (s)-[:HAS_SYMPTOM]-(d:Disease) 
-WHERE d.description IS NOT NULL
+AND d.description IS NOT NULL
 RETURN d,
        size(s.symptoms) as total_symptoms,
        size([symptom IN s.symptoms WHERE symptom =~ '.*\\\\bkhó thở\\\\b.*']) as matched_symptoms,
@@ -263,5 +264,6 @@ LIMIT 30;
 Question: Tìm thông tin về bệnh viêm phổi
 MATCH (d:Disease)
 WHERE d.name CONTAINS 'viêm phổi' AND d.description IS NOT NULL
+AND d.description IS NOT NULL
 RETURN d LIMIT 30;
 """

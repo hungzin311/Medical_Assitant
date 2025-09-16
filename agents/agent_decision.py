@@ -266,9 +266,9 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
                 )
             except Exception as e:
                 print(f"Error in KG agent: {e}")
-                response = "Tôi không có đủ thông tin"
+                response = "Tôi không có thông tin liên quan"
 
-            insufficient_info = "Không có thông tin liên quan" in response
+            insufficient_info = "không có thông tin liên quan" in response.lower()
 
             return { 
                 'response': response,

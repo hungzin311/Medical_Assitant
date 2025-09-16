@@ -32,6 +32,14 @@ def get_gemini_llm(temperature=0.7):
         temperature=temperature,
         convert_system_message_to_human=False
     )
+def get_gemini_llm_2(temperature=0.7):
+    """Initialize and return a Gemini Pro LLM instance"""
+    return ChatGoogleGenerativeAI(
+        model="gemini-2.5-flash",
+        google_api_key=os.getenv("GOOGLE_API_KEY_2"),
+        temperature=temperature,
+        convert_system_message_to_human=False
+    )
 
 def get_gemini_vision_llm(temperature=0.2):
     """Initialize and return a Gemini Pro Vision LLM instance for image analysis"""
