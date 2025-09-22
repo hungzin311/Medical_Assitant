@@ -217,9 +217,11 @@ You are a Neo4j Cypher expert. Given an input question, create a syntactically c
 
 IMPORTANT MATCHING RULES:
 - For disease names: Use `CONTAINS` for partial matching (e.g., `d.name CONTAINS $disease_name`), disease name is always in lowercase.
-- For symptoms in arrays: Use word boundary matching to find exact words, not substrings
-  * Use `ANY(symptom IN s.symptoms WHERE symptom =~ '.*\\\\b' + $symptom + '\\\\b.*')` 
+- For symptoms in arrays: Use word boundary matching to find exact words with single word (not substrings) and substring with multiple words
+  * Use `ANY(symptom IN s.symptoms WHERE symptom =~ '.*\\\\b' + $symptom + '\\\\b.*')` (for single word)
+  * Use `ANY(symptom IN s.symptoms WHERE symptom =~ '.*' + $symptom + '.*')` (for multiple words)
   * This finds exact word matches, so "ho" won't match "phong" but will match "ho khan" or "ho có đờm"
+  * This finds substring matches, so "khó thở" will match "khó thở nhẹ", "khó thở nặng",...
 - If the matched node label is `Disease`, ensure it has a non-null `description` property (`d.description IS NOT NULL`). For other labels you can ignore this condition.
 - If the question is not asked to return symptoms and disease is one of the return list, then only disease nodes will be returned.
 - After filtering, limit the results to 30 records.
@@ -258,14 +260,14 @@ examples_cypher_query = [
   { 
     "question": "Các bệnh có triệu chứng mệt mỏi và chóng mặt",
     "query": """MATCH (s:Symptom)
-                WHERE ANY(symptom IN s.symptoms WHERE symptom =~ '.*\\\\bmệt mỏi\\\\b.*')
-                  AND ANY(symptom IN s.symptoms WHERE symptom =~ '.*\\\\bchóng mặt\\\\b.*')
+                WHERE ANY(symptom IN s.symptoms WHERE symptom =~ '.*mệt mỏi.*')
+                  AND ANY(symptom IN s.symptoms WHERE symptom =~ '.*chóng mặt.*')
                 MATCH (s)-[:HAS_SYMPTOM]-(d:Disease)
                 WHERE d.description IS NOT NULL
                 RETURN d, 
                 size(s.symptoms) as total_symptoms, 
-                size([symptom IN s.symptoms WHERE symptom =~ '.*\\\\bmệt mỏi\\\\b.*' OR symptom =~ '.*\\\\bchóng mặt\\\\b.*']) as matched_symptoms, 
-                [symptom IN s.symptoms WHERE symptom =~ '.*\\\\bmệt mỏi\\\\b.*' OR symptom =~ '.*\\\\bchóng mặt\\\\b.*'] as matched_symptom_list
+                size([symptom IN s.symptoms WHERE symptom =~ '.*mệt mỏi.*' OR symptom =~ '.*chóng mặt.*']) as matched_symptoms, 
+                [symptom IN s.symptoms WHERE symptom =~ '.*mệt mỏi.*' OR symptom =~ '.*chóng mặt.*'] as matched_symptom_list
                 LIMIT 30;""",
   },
   {
