@@ -227,43 +227,49 @@ IMPORTANT MATCHING RULES:
 - When answering, only provide the Cypher query, no additional comments or prefixes.
 
 Below are a number of examples of questions and their corresponding Cypher queries:
-
-Question: Tìm các triệu chứng có từ "ho"
-MATCH (s:Symptom) 
-WHERE ANY(symptom IN s.symptoms WHERE symptom =~ '.*\\\\bho\\\\b.*')
-MATCH (s)-[:HAS_SYMPTOM]-(d:Disease) 
-AND d.description IS NOT NULL
-RETURN d,
-       size(s.symptoms) as total_symptoms,
-       size([symptom IN s.symptoms WHERE symptom =~ '.*\\\\bho\\\\b.*']) as matched_symptoms,
-       [symptom IN s.symptoms WHERE symptom =~ '.*\\\\bho\\\\b.*'] as matched_symptom_list
-LIMIT 30;
-
-Question: Các bệnh có triệu chứng "đau đầu"
-MATCH (s:Symptom) 
-WHERE ANY(symptom IN s.symptoms WHERE symptom =~ '.*\\\\bđau đầu\\\\b.*')
-MATCH (s)-[:HAS_SYMPTOM]-(d:Disease) 
-WHERE d.description IS NOT NULL
-RETURN d,
-       size(s.symptoms) as total_symptoms,
-       size([symptom IN s.symptoms WHERE symptom =~ '.*\\\\bđau đầu\\\\b.*']) as matched_symptoms,
-       [symptom IN s.symptoms WHERE symptom =~ '.*\\\\bđau đầu\\\\b.*'] as matched_symptom_list
-LIMIT 30;
-
-Question: Tìm các triệu chứng có từ "khó thở"
-MATCH (s:Symptom) 
-WHERE ANY(symptom IN s.symptoms WHERE symptom =~ '.*\\\\bkhó thở\\\\b.*')
-MATCH (s)-[:HAS_SYMPTOM]-(d:Disease) 
-AND d.description IS NOT NULL
-RETURN d,
-       size(s.symptoms) as total_symptoms,
-       size([symptom IN s.symptoms WHERE symptom =~ '.*\\\\bkhó thở\\\\b.*']) as matched_symptoms,
-       [symptom IN s.symptoms WHERE symptom =~ '.*\\\\bkhó thở\\\\b.*'] as matched_symptom_list
-LIMIT 30;
-
-Question: Tìm thông tin về bệnh viêm phổi
-MATCH (d:Disease)
-WHERE d.name CONTAINS 'viêm phổi' AND d.description IS NOT NULL
-AND d.description IS NOT NULL
-RETURN d LIMIT 30;
 """
+
+examples_cypher_query = [
+  {
+    "question": "Triệu chứng của bệnh cảm cúm là gì?",
+    "query": "MATCH (d:Disease)-[:HAS_SYMPTOM]-(s:Symptom) WHERE d.name CONTAINS 'cảm cúm' AND d.description IS NOT NULL RETURN s LIMIT 30;",
+  },
+  {
+    "question": "Thuốc điều trị bệnh viêm phổi là gì?",
+    "query": "MATCH (m:Medication) WHERE m.disease_name CONTAINS 'viêm phổi' RETURN m LIMIT 30;",
+  },
+  {
+    "question": "Thông tin chi tiết về bệnh cao huyết áp",
+    "query": "MATCH (d:Disease) WHERE d.name CONTAINS 'cao huyết áp' AND d.description IS NOT NULL OPTIONAL MATCH (d)-[:TREATED_BY]-(t:Treatment) OPTIONAL MATCH (d)-[:HAS_SYMPTOM]-(s:Symptom) OPTIONAL MATCH (d)-[:PRESCRIBED]-(m:Medication) OPTIONAL MATCH (d)-[:HAS_ADVICE]-(a:Advice) RETURN d, t, s, m, a LIMIT 30;",
+  },
+  {
+    "question": "Tìm các triệu chứng có từ ho",
+    "query":""" MATCH (s:Symptom) 
+                WHERE ANY(symptom IN s.symptoms WHERE symptom =~ '.*\\\\bho\\\\b.*')
+                MATCH (s)-[:HAS_SYMPTOM]-(d:Disease) 
+                WHERE d.description IS NOT NULL
+                RETURN d,
+                      size(s.symptoms) as total_symptoms,
+                      size([symptom IN s.symptoms WHERE symptom =~ '.*\\\\bho\\\\b.*']) as matched_symptoms,
+                      [symptom IN s.symptoms WHERE symptom =~ '.*\\\\bho\\\\b.*'] as matched_symptom_list
+                LIMIT 30;
+            """
+  }, 
+  { 
+    "question": "Các bệnh có triệu chứng mệt mỏi và chóng mặt",
+    "query": """MATCH (s:Symptom)
+                WHERE ANY(symptom IN s.symptoms WHERE symptom =~ '.*\\\\bmệt mỏi\\\\b.*')
+                  AND ANY(symptom IN s.symptoms WHERE symptom =~ '.*\\\\bchóng mặt\\\\b.*')
+                MATCH (s)-[:HAS_SYMPTOM]-(d:Disease)
+                WHERE d.description IS NOT NULL
+                RETURN d, 
+                size(s.symptoms) as total_symptoms, 
+                size([symptom IN s.symptoms WHERE symptom =~ '.*\\\\bmệt mỏi\\\\b.*' OR symptom =~ '.*\\\\bchóng mặt\\\\b.*']) as matched_symptoms, 
+                [symptom IN s.symptoms WHERE symptom =~ '.*\\\\bmệt mỏi\\\\b.*' OR symptom =~ '.*\\\\bchóng mặt\\\\b.*'] as matched_symptom_list
+                LIMIT 30;""",
+  },
+  {
+    "question": "Thông tin chi tiết về bệnh viêm phổi",
+    "query": "MATCH (d:Disease) WHERE d.name CONTAINS 'viêm phổi' AND d.description IS NOT NULL RETURN d LIMIT 30;",
+  }
+]

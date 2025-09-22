@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 from langchain_neo4j import GraphCypherQAChain
 from langchain_core.prompts import FewShotPromptTemplate, PromptTemplate
 from llm_config import get_gemini_llm_2, get_fpt_vietnamese_embedding, get_graph_db
-from prompt import cypher_chain_prompt
+from prompt import cypher_chain_prompt, examples_cypher_query
 import threading
 from proxy_setting import set_proxy
 load_dotenv()
@@ -38,24 +38,7 @@ class KGManager:
         self._initialized = True
                 
     def _setup_cypher_chain(self):
-        examples = [
-            {
-                "question": "Triệu chứng của bệnh cảm cúm là gì?",
-                "query": "MATCH (d:Disease)-[:HAS_SYMPTOM]-(s:Symptom) WHERE d.name CONTAINS 'cảm cúm' AND d.description IS NOT NULL RETURN s LIMIT 30;",
-            },
-            {
-                "question": "Các bệnh có triệu chứng ho là gì?",
-                "query": "MATCH (s:Symptom) WHERE ANY(symptom IN s.symptoms WHERE symptom =~ '.*\\\\bho\\\\b.*') MATCH (s)-[:HAS_SYMPTOM]-(d:Disease) WHERE d.description IS NOT NULL RETURN d LIMIT 30;",
-            },
-            {
-                "question": "Thuốc điều trị bệnh viêm phổi là gì?",
-                "query": "MATCH (m:Medication) WHERE m.disease_name CONTAINS 'viêm phổi' RETURN m LIMIT 30;",
-            },
-            {
-                "question": "Thông tin chi tiết về bệnh cao huyết áp",
-                "query": "MATCH (d:Disease) WHERE d.name CONTAINS 'cao huyết áp' AND d.description IS NOT NULL OPTIONAL MATCH (d)-[:TREATED_BY]-(t:Treatment) OPTIONAL MATCH (d)-[:HAS_SYMPTOM]-(s:Symptom) OPTIONAL MATCH (d)-[:PRESCRIBED]-(m:Medication) OPTIONAL MATCH (d)-[:HAS_ADVICE]-(a:Advice) RETURN d, t, s, m, a LIMIT 30;",
-            }
-        ]
+        examples = examples_cypher_query
         
         example_prompt = PromptTemplate(
             input_variables=["question", "query"],
