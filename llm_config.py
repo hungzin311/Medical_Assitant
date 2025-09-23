@@ -1,10 +1,11 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_together import TogetherEmbeddings
 from langchain_neo4j import Neo4jGraph
+from langchain_openai import ChatOpenAI
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
-
+from httpx import Client
 load_dotenv()
 
 
@@ -70,3 +71,12 @@ def get_graph_db():
 
 def get_fpt_vietnamese_embedding(): 
     return FPTOpenAIEmbeddings(model_name="Vietnamese_Embedding")
+
+def get_fpt_llm(temperature=0.2):
+    client = Client(verify=False)
+    return ChatOpenAI(
+    model="google/medgemma-27b-text-it",
+    openai_api_base="https://my-container-gmzsmq3d-8000.serverless.fptcloud.com/v1",
+    openai_api_key="your_api_key",
+    http_client=client,  
+    )

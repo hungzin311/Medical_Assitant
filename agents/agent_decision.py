@@ -251,6 +251,8 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         rag_context_limit = config.rag.context_limit
         patient_id = state.get('patient_id', 'PAT_001')
 
+        print(f"Patient ID: {patient_id}")
+
         def run_kg_only(): 
             chat_history = [] 
             for msg in messages[-kg_context_limit:]:
@@ -722,31 +724,24 @@ def init_agent_state() -> AgentState:
         "output": None,
         "needs_human_validation": False,
         "retrieval_confidence": 0.0,
-        "bypass_routing": False,
-        "patient_id": None
+        "bypass_routing": False
     }
 
 
 def process_query(query: Union[str, Dict], conversation_history: List[BaseMessage] = None, graph: StateGraph = None) -> Dict:
-    # Initialize state
     state = init_agent_state()
     
-    # Add conversation history if provided
     if conversation_history:
         state["messages"] = conversation_history
     
-    # Add the current query
     state["current_input"] = query
 
-    # To handle image upload case
     if isinstance(query, dict):
         query = query.get("text", "") + ", user uploaded an image for diagnosis."
     
-    # Add query to messages if no conversation history was provided
     if not conversation_history:
         state["messages"] = [HumanMessage(content=query)]
 
-    # Run the graph
     result = graph.invoke(state, thread_config)
 
     if len(result["messages"]) > config.max_conversation_history:

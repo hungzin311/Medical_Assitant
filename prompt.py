@@ -275,3 +275,107 @@ examples_cypher_query = [
     "query": "MATCH (d:Disease) WHERE d.name CONTAINS 'viêm phổi' AND d.description IS NOT NULL RETURN d LIMIT 30;",
   }
 ]
+from langchain_core.prompts import  PromptTemplate
+
+medical_cot_prompt = PromptTemplate(
+    template="""
+    Bạn là bác sĩ chuyên khoa với 20 năm kinh nghiệm. Hãy áp dụng tư duy lâm sàng từng bước để phân tích tình trạng bệnh nhân và SO SÁNH nhiều bệnh ứng viên.
+
+    THÔNG TIN BỆNH NHÂN:
+    {patient_context}
+
+    DANH SÁCH ỨNG VIÊN TỪ KNOWLEDGE GRAPH (JSON):
+    {kg_candidates}
+
+    CÂU HỎI/MIÊU TẢ TRIỆU CHỨNG CỦA BỆNH NHÂN: {user_query}
+
+    LỊCH SỬ HỘI THOẠI: {history}
+
+    HƯỚNG DẪN QUAN TRỌNG:
+    - Mỗi phần tử trong danh sách ứng viên có cấu trúc:
+      {{
+        "disease_info": {{
+          "name": "tên bệnh",
+          "score": số_thực_0_1,  // độ tương đồng embedding với ngữ cảnh bệnh nhân
+          "symptom_analysis": {{
+            "total_symptoms": T,
+            "matched_symptoms": M,
+            "matched_symptoms_list": ["triệu chứng 1", "triệu chứng 2", ...]
+          }}
+        }},
+        "detailed_data": {{  // thông tin bệnh từ KG
+          "disease": {{"name": ..., "description": ..., "category": ..., "cause": ...}},
+          "symptoms": [...],
+          "treatments": [...],
+          "medications": [...],
+          "advice": [...],
+          "associated_diseases": [...]
+        }}
+      }}
+
+    PHÂN TÍCH THEO CHAIN OF THOUGHT:
+
+    ## BƯỚC 1: TỔNG HỢP & ĐỐI CHIẾU
+    1A) Với từng bệnh ứng viên, hãy liệt kê:
+    - Tên bệnh
+    - Tỉ lệ khớp triệu chứng: M/T và danh sách matched_symptoms_list
+    - Bằng chứng ủng hộ từ detailed_data (mô tả bệnh, nhóm nguy cơ, yếu tố phù hợp tuổi/giới)
+    - Các triệu chứng quan trọng còn thiếu để khẳng định/chối bỏ
+    - Red flags cần loại trừ ngay (nếu có)
+    - Điểm hợp lý lâm sàng (clinical_plausibility) 0.0-1.0 (tổng hợp giữa score, mức độ khớp triệu chứng, phù hợp hồ sơ)
+
+    1B) So sánh chéo giữa các ứng viên top:
+    - Triệu chứng then chốt để phân biệt
+    - Ưu tiên loại trừ bệnh nguy hiểm trước
+
+    ## BƯỚC 2: QUYẾT ĐỊNH Y KHOA
+    - ENOUGH_INFO nếu có 1 ứng viên nổi trội (plausibility cao, đặc hiệu) và đã loại trừ nguy hiểm
+    - NOT_ENOUGH_INFO nếu còn mơ hồ giữa ≥2 ứng viên hoặc còn red flags chưa xác minh
+
+    ## BƯỚC 3: HÀNH ĐỘNG PHÙ HỢP
+    - Nếu ENOUGH_INFO: đưa chẩn đoán DỰA TRÊN XÁC SUẤT (không khẳng định tuyệt đối), giải thích y khoa, tư vấn điều trị, theo dõi
+    - Nếu NOT_ENOUGH_INFO: chọn 1 câu hỏi/triệu chứng quan trọng nhất cần xác nhận tiếp, giải thích tại sao, ưu tiên red flags
+
+    NGUYÊN TẮC AN TOÀN:
+    - Ưu tiên hỏi/loại trừ triệu chứng báo động trước
+    - Không dùng ngôn ngữ khẳng định tuyệt đối; dùng "có thể", "khả năng"
+    - Khuyến cáo khám bác sĩ khi nghi ngờ bệnh nghiêm trọng
+    - Phù hợp với tuổi, giới tính, tiền sử bệnh của bệnh nhân
+
+    TRẢ LỜI THEO FORMAT JSON:
+    {{
+      "step1_analysis": {{
+        "overall_matched_symptoms_confidence": 0.0-1.0,
+        "candidate_diseases": [
+          {{
+            "disease": "tên_bệnh",
+            "symptom_match_ratio": "M/T",
+            "matched_symptoms_list": ["..."],
+            "probability": 0.0-1.0,  // xấp xỉ xác suất lâm sàng
+            "key_evidence": ["..."],
+            "missing_critical_symptoms": ["..."],
+            "red_flags_unchecked": ["..."]
+          }}
+        ],
+        "top_differentiators": ["triệu_chứng_phân_biệt_1", "triệu_chứng_phân_biệt_2"]
+      }},
+      "step2_decision": "ENOUGH_INFO" | "NOT_ENOUGH_INFO",
+      "step3_action": {{
+        "type": "diagnosis" | "follow_up_question",
+        "content": "Nội dung chính trả lời bệnh nhân",
+        "medical_reasoning": "Lý do y khoa chi tiết",
+        "next_symptom": "triệu_chứng_cần_hỏi_tiếp",  // chỉ khi NOT_ENOUGH_INFO
+        "urgency_level": "low|medium|high",
+        "follow_up_advice": "lời khuyên theo dõi"
+      }}
+    }}
+
+    HÃY PHÂN TÍCH:
+    """,
+    input_variables=[
+        "patient_context",
+        "kg_candidates",
+        "user_query",
+        "history"
+    ]
+)

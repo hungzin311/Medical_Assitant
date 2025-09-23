@@ -1,3 +1,6 @@
+from pathlib import Path
+import sys
+sys.path.append(str(Path(__file__).parent.parent.parent))
 from agents.kg_agent import KGQueryEngine
 from agents.patient_db_agent import PatientQueryEngine
 from proxy_setting import set_proxy

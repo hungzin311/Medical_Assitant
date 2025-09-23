@@ -9,54 +9,21 @@ class MedicalImageSummarizer:
     """
     
     def __init__(self, llm):
-        """
-        Initialize the medical image summarizer.
-        
-        Args:
-            llm: The LLM model for summarization and follow-up recommendations
-        """
         self.logger = logging.getLogger(__name__)
         self.llm = llm
         self.memory = {}  # Dictionary to store diagnosis info by image_id
         self.logger.info("Medical Image Summarizer initialized")
     
     def store_diagnosis(self, image_id: str, diagnosis_data: Dict[str, Any]) -> None:
-        """
-        Store diagnosis information in memory for future reference.
-        
-        Args:
-            image_id: Unique identifier for the image
-            diagnosis_data: Diagnosis information to store
-        """
         self.memory[image_id] = diagnosis_data
         # self.logger.info(f"Stored diagnosis for image {image_id}")
     
     def get_stored_diagnosis(self, image_id: str) -> Optional[Dict[str, Any]]:
-        """
-        Retrieve stored diagnosis information.
-        
-        Args:
-            image_id: Unique identifier for the image
-            
-        Returns:
-            Stored diagnosis data or None if not found
-        """
         return self.memory.get(image_id)
     
     def summarize_diagnosis(self, diagnosis_result: Dict[str, Any], 
                            chat_history: List = None, 
                            user_query: str = None) -> Dict[str, Any]:
-        """
-        Summarize the diagnosis results and provide follow-up recommendations.
-        
-        Args:
-            diagnosis_result: The raw diagnosis result from the image analysis
-            chat_history: Optional chat history for context
-            user_query: Optional user query for context
-            
-        Returns:
-            Dictionary containing summarized diagnosis and follow-up recommendations
-        """
         self.logger.info("Summarizing diagnosis results")
         
         # Extract diagnosis from the result
@@ -171,16 +138,6 @@ class MedicalImageSummarizer:
             }
     
     def generate_followup_response(self, image_id: str, follow_up_query: str) -> str:
-        """
-        Generate a response to a follow-up query based on stored diagnosis.
-        
-        Args:
-            image_id: Unique identifier for the previously diagnosed image
-            follow_up_query: User's follow-up question
-            
-        Returns:
-            Response to the follow-up query
-        """
         # Retrieve the stored diagnosis
         stored_diagnosis = self.get_stored_diagnosis(image_id)
         
