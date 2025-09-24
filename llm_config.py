@@ -75,8 +75,8 @@ def get_fpt_vietnamese_embedding():
 def get_fpt_llm(temperature=0.2):
     client = Client(verify=False)
     return ChatOpenAI(
-    model="google/medgemma-27b-text-it",
-    openai_api_base="https://my-container-gmzsmq3d-8000.serverless.fptcloud.com/v1",
-    openai_api_key="your_api_key",
-    http_client=client,  
+        model="google/medgemma-27b-text-it",
+        openai_api_base= os.getenv('FPT_LLM_COMPLETION'),
+        openai_api_key="your_api_key",
+        http_client=client,  
     )
