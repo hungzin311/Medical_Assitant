@@ -1,15 +1,15 @@
-from langchain_openai import ChatOpenAI
-from dotenv import load_dotenv
-from httpx import Client
+from agents.kg_agent import KGQueryEngine
+from agents.patient_db_agent import PatientQueryEngine
+from proxy_setting import set_proxy
 
-client = Client(verify=False)
+set_proxy()
 
-llm = ChatOpenAI(
-    model="google/medgemma-27b-text-it",
-    openai_api_base="https://my-container-gmzsmq3d-8000.serverless.fptcloud.com/v1",
-    openai_api_key="your_api_key",
-    http_client=client,  
-)
-
-resp = llm.invoke("Hãy giải thích lợi ích của MRI trong chẩn đoán thần kinh")
-print(resp.content)
+def main(): 
+    from config import Config
+    config = Config()
+    patient_query_engine = PatientQueryEngine(config)
+    kg_query_engine = KGQueryEngine(patient_query_engine)
+    x = kg_query_engine.generate_medical_response("Đây là bệnh gì với các triệu chứng đau đầu, buồn nôn trong 2 ngày?", "PAT_001")
+    print(x)
+if __name__ == "__main__":
+    main()

@@ -100,7 +100,7 @@ class ContextFilterEmbedding:
             scored.append(scored_item)
 
         # Sắp xếp theo score và lấy top 3
-        top_results = sorted(scored, key=lambda x: x["score"], reverse=True)[:2]
+        top_results = sorted(scored, key=lambda x: x["score"], reverse=True)[:3]
 
         content = [] 
         for record in top_results: 

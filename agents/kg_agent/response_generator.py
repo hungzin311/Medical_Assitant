@@ -18,6 +18,7 @@ class ResponseGenerator:
         self.llm = get_fpt_llm(temperature=0.2)
         self.patient_query_engine = patient_query_engine
         self.query_expander = QueryExpander(config)
+        self.cached_kg_candidates = None
     
     def generate_response(self, question: str, patient_id: str, chat_history: Optional[List[Dict[str, str]]] = None):
         # patient profile
