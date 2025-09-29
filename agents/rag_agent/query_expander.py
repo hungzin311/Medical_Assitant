@@ -68,8 +68,8 @@ class QueryExpander:
     
     def _generate_kg_refine_query(self, query: str, patient_info: Dict = None, chat_history: Optional[List[Dict[str, str]]] = None) -> Dict[str, Any]:
         prompt = f"""
-        Bạn là trợ lý y tế AI, nhiệm vụ của bạn là CHỈ chuẩn hoá lại câu hỏi của người dùng
-        để truy vấn Knowledge Graph và mô tả ngắn gọn thông tin bệnh nhân.  
+        Bạn là trợ lý y tế AI, nhiệm vụ của bạn là CHỈ chuẩn hoá lại truy vấn của người dùng
+        để truy vấn Knowledge Graph và mô tả ngắn gọn thông tin bệnh nhân.
         Tuyệt đối KHÔNG bịa thêm triệu chứng hay bệnh.
 
         ────────────────────────────────
@@ -79,28 +79,38 @@ class QueryExpander:
 
         LỊCH SỬ TRÒ CHUYỆN (nếu có): {chat_history}
 
-        CÂU HỎI GỐC CỦA NGƯỜI DÙNG:
+        CÂU HỎI/MIÊU TẢ GỐC CỦA NGƯỜI DÙNG:
         \"\"\"{query}\"\"\"
 
         ────────────────────────────────
-        NHIỆM VỤ 1 – REFINE CÂU HỎI
+        NHIỆM VỤ 1 – REFINE TRUY VẤN
         ────────────────────────────────
         1. Chỉ sử dụng thông tin người dùng đã nêu (kể cả trong lịch sử).
         2. KHÔNG tự bịa thêm bất cứ triệu chứng, bệnh hay ý định mới.
-        3. Nếu người dùng liệt kê TRIỆU CHỨNG → biến thành câu hỏi:
-        “Đây là bệnh gì với các triệu chứng A, B, …?”
-        – Giữ nguyên các triệu chứng, tách bằng dấu phẩy.
-        4. Nếu người dùng hỏi về BỆNH hoặc ĐIỀU TRỊ cụ thể:
-        – Khái quát tên bệnh khi cần (vd. “tiểu đường loại 2” → “tiểu đường”),
-        – Giữ nguyên nội dung hỏi (triệu chứng, điều trị, nguyên nhân…).
-        5. Câu hỏi phải là câu đầy đủ, tự nhiên bằng tiếng Việt.
+        3. BẢO TOÀN PHỦ ĐỊNH/LOẠI TRỪ: Nếu có cụm như "không", "không kèm", "không có",
+           "chưa", "không bị" (ví dụ: "không đau ngực", "không có yếu tố X"), PHẢI giữ NGUYÊN
+           trong truy vấn đã chuẩn hoá (không được lược bỏ hay suy diễn ngược).
+        4. TỔNG QUÁT HÓA THÔNG TIN Y TẾ: Có thể khái quát hóa các thông tin cụ thể thành 
+           thuật ngữ y tế chung (vd. "huyết áp cao kéo dài 1 tuần" → "huyết áp cao",
+           "đau đầu 3 ngày" → "đau đầu").
+        5. Nếu người dùng liệt kê TRIỆU CHỨNG → chuẩn hoá thành một TRUY VẤN MÔ TẢ TRUNG LẬP
+           (không bắt buộc ở dạng câu hỏi), tập trung vào truy xuất bệnh liên quan.
+           Ví dụ có thể dùng:
+           - "các bệnh có triệu chứng A, B, …; không có/không kèm C, D"
+           - "triệu chứng: A, B; không kèm C, D"
+           KHÔNG tự động chuyển thành câu hỏi "Đây là bệnh gì…".
+        6. Nếu người dùng hỏi về BỆNH hoặc ĐIỀU TRỊ cụ thể:
+           – Khái quát tên bệnh khi cần (vd. "tiểu đường loại 2" → "tiểu đường"),
+           – Giữ nguyên mục tiêu (triệu chứng, điều trị, nguyên nhân…).
+        7. Giữ nguyên phong cách của người dùng (hỏi/miêu tả/mệnh lệnh) nếu phù hợp; không đổi mục đích.
+        8. Câu văn phải đầy đủ, tự nhiên bằng tiếng Việt.
 
         ────────────────────────────────
         NHIỆM VỤ 2 – MÔ TẢ BỆNH NHÂN
         ────────────────────────────────
         Tóm tắt thành 1–2 câu ngắn gọn, chỉ dùng thông tin có thật:
         - Tuổi / giới tính (nếu biết),
-        - Tiền sử bệnh, tình trạng hiện tại, triệu chứng chính.
+        - Tiền sử bệnh, tình trạng hiện tại, triệu chứng chính (bao gồm cả phủ định quan trọng nếu có).
 
         ────────────────────────────────
         ĐỊNH DẠNG KẾT QUẢ
@@ -109,7 +119,7 @@ class QueryExpander:
         Trả về đúng JSON sau (KHÔNG thêm trường khác):
 
         {{
-        "refined_question": "<câu hỏi đã chuẩn hoá>",
+        "refined_question": "<truy vấn đã chuẩn hoá (không bắt buộc dạng câu hỏi; giữ phủ định nếu có)>",
         "patient_context": "<mô tả bệnh nhân>"
         }}
         """

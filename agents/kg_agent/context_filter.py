@@ -117,4 +117,3 @@ class ContextFilterEmbedding:
             content.append(result)
 
         return content  
-

@@ -16,6 +16,10 @@ from agents.agent_decision import process_query, create_agent_graph
 from proxy_setting import *
 from agents.patient_db_agent import PatientQueryEngine
 from agents.patient_db_agent.patient_form import PatientForm
+import logging
+
+logging.getLogger("httpx").disabled = True
+
 # Load configuration
 config = Config()
 

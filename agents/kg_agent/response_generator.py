@@ -15,7 +15,7 @@ class ResponseGenerator:
     def __init__(self, patient_query_engine: PatientQueryEngine):
         self.cypher_query_llm = CypherQueryService()
         self.context_filter = ContextFilterEmbedding()
-        self.llm = get_fpt_llm(temperature=0.2)
+        self.llm = get_fpt_llm(temperature=0.0)
         self.patient_query_engine = patient_query_engine
         self.query_expander = QueryExpander(config)
         self.cached_kg_candidates = None
@@ -42,6 +42,8 @@ class ResponseGenerator:
             kg_candidates_json = json.dumps(filtered_context, ensure_ascii=False)
             self.cached_kg_candidates = kg_candidates_json
             print("Updated KG cache with new context")
+            with open('abc.json', 'w', encoding='utf-8') as f: 
+                f.write(kg_candidates_json)
 
         else:
             # Use cached context if KG retrieve failed
