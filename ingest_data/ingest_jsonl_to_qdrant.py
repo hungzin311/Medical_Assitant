@@ -20,15 +20,6 @@ from agents.rag_agent import MedicalRAG
 from config import Config
 
 def process_jsonl_file(file_path):
-    """
-    Process a JSONL file and return a list of documents
-    
-    Args:
-        file_path: Path to the JSONL file
-        
-    Returns:
-        List of document chunks ready for ingestion
-    """
     logger.info(f"Processing JSONL file: {file_path}")
     document_chunks = []
     

@@ -6,17 +6,15 @@ from pathlib import Path
 import argparse
 import time
 import warnings
+from concurrent.futures import ThreadPoolExecutor, as_completed
 warnings.filterwarnings('ignore')
 
-# Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Add project root to path if needed
-sys.path.append(str(Path(__file__).parent))
+# sys.path.append(str(Path(__file__).parent.parent))
 
 # Import components
-from agents.rag_agent import MedicalRAG
 from config import Config
 from agents.rag_agent.vectorstore_qdrant_cloud import VectorStoreCloud
 
@@ -64,18 +62,7 @@ def process_jsonl_with_payload(file_path):
         logger.error(traceback.format_exc())
         return []
 
-def chunk_large_content(documents, chunk_size=2000, chunk_overlap=100):
-    """
-    Split large documents into smaller chunks with overlap
-    
-    Args:
-        documents: List of documents with metadata
-        chunk_size: Maximum size of each chunk
-        chunk_overlap: Overlap between chunks
-        
-    Returns:
-        List of chunked documents with metadata
-    """
+def chunk_large_content(documents, chunk_size=8000, chunk_overlap=100):
     chunked_documents = []
     
     for doc in documents:
@@ -129,18 +116,35 @@ def chunk_large_content(documents, chunk_size=2000, chunk_overlap=100):
         
     return chunked_documents
 
-def ingest_documents_to_qdrant(documents, config, collection_name=None):
-    """
-    Ingest documents directly to Qdrant
+def process_document_batch(batch_data, vector_store, document_path):
+    batch_contents, batch_metadatas, batch_start_idx = batch_data
     
-    Args:
-        documents: List of documents with metadata
-        config: Configuration object
-        collection_name: Optional custom collection name
-    
-    Returns:
-        Result of ingestion
-    """
+    try:
+        # Create vector store with documents and metadata (payload-based approach)
+        vectorstore, doc_ids = vector_store.create_vectorstore_with_metadata(
+            document_chunks=batch_contents,
+            metadatas=batch_metadatas,
+            document_path=f"{document_path}_batch_{batch_start_idx}"
+        )
+        
+        return {
+            "success": True,
+            "batch_start_idx": batch_start_idx,
+            "documents_processed": len(doc_ids),
+            "doc_ids": doc_ids
+        }
+        
+    except Exception as e:
+        logger.error(f"Error processing batch starting at {batch_start_idx}: {e}")
+        return {
+            "success": False,
+            "batch_start_idx": batch_start_idx,
+            "error": str(e),
+            "documents_processed": 0,
+            "doc_ids": []
+        }
+
+def ingest_documents_to_qdrant(documents, config, collection_name=None, batch_size=50, num_workers=8):
     try:
         # Use custom collection name if provided
         if collection_name:
@@ -151,7 +155,7 @@ def ingest_documents_to_qdrant(documents, config, collection_name=None):
         vector_store = VectorStoreCloud(config)
         
         # Chunk large documents
-        chunked_documents = chunk_large_content(documents, chunk_size=2000, chunk_overlap=100)
+        chunked_documents = chunk_large_content(documents, chunk_size=8000, chunk_overlap=100)
         logger.info(f"Processing {len(documents)} documents into {len(chunked_documents)} chunks")
         
         # Extract content and metadata
@@ -160,26 +164,67 @@ def ingest_documents_to_qdrant(documents, config, collection_name=None):
         
         # Create vector store
         start_time = time.time()
-        logger.info(f"Creating vector store with {len(contents)} document chunks...")
+        logger.info(f"Creating vector store with {len(contents)} document chunks using {num_workers} workers...")
         
         # Use a custom document path identifier
         document_path = f"jsonl_payload_{start_time}"
         
-        # Create vector store with documents and metadata
-        result = vector_store.create_vectorstore_with_metadata(
-            document_chunks=contents,
-            metadatas=metadatas,
-            document_path=document_path
-        )
+        # Prepare batches for concurrent processing
+        batches = []
+        for i in range(0, len(contents), batch_size):
+            batch_contents = contents[i:i+batch_size]
+            batch_metadatas = metadatas[i:i+batch_size]
+            batches.append((batch_contents, batch_metadatas, i))
+        
+        logger.info(f"Processing {len(batches)} batches with batch size {batch_size}")
+        
+        # Process batches concurrently
+        all_doc_ids = []
+        successful_batches = 0
+        failed_batches = 0
+        
+        with ThreadPoolExecutor(max_workers=num_workers) as executor:
+            # Submit all batch processing tasks
+            futures = [executor.submit(process_document_batch, batch, vector_store, document_path) 
+                      for batch in batches]
+            
+            # Process completed futures
+            for future in as_completed(futures):
+                try:
+                    result = future.result()
+                    if result["success"]:
+                        successful_batches += 1
+                        all_doc_ids.extend(result["doc_ids"])
+                        logger.info(f"Batch {result['batch_start_idx']} completed: {result['documents_processed']} documents processed")
+                    else:
+                        failed_batches += 1
+                        logger.error(f"Batch {result['batch_start_idx']} failed: {result.get('error', 'Unknown error')}")
+                    
+                    # Progress update
+                    total_completed = successful_batches + failed_batches
+                    if total_completed % 10 == 0 or total_completed == len(batches):
+                        logger.info(f"Progress: {total_completed}/{len(batches)} batches completed ({successful_batches} successful, {failed_batches} failed)")
+                        
+                except Exception as e:
+                    failed_batches += 1
+                    logger.error(f"Error processing batch future: {e}")
         
         # Restore original collection name if changed
         if collection_name and hasattr(config.rag, 'collection_name'):
             config.rag.collection_name = original_collection_name
+        
+        total_time = time.time() - start_time
+        logger.info(f"Concurrent ingestion completed in {total_time:.2f}s: {len(all_doc_ids)} documents ingested successfully")
             
         return {
-            "success": True,
-            "documents_ingested": len(contents),
-            "document_path": document_path
+            "success": successful_batches > 0,
+            "documents_ingested": len(all_doc_ids),
+            "successful_batches": successful_batches,
+            "failed_batches": failed_batches,
+            "total_batches": len(batches),
+            "document_path": document_path,
+            "doc_ids": all_doc_ids,
+            "processing_time": total_time
         }
         
     except Exception as e:
@@ -199,6 +244,8 @@ def main():
     parser.add_argument("--file", type=str, help="Path to JSONL file to ingest")
     parser.add_argument("--dir", type=str, help="Path to directory containing JSONL files to ingest")
     parser.add_argument("--collection", type=str, help="Custom collection name (optional)")
+    parser.add_argument("--batch-size", type=int, default=50, help="Batch size for processing (default: 50)")
+    parser.add_argument("--workers", type=int, default=8, help="Number of concurrent workers (default: 4)")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     
     # Parse arguments
@@ -237,8 +284,9 @@ def main():
             
             if documents:
                 # Ingest the documents
-                logger.info(f"Ingesting {len(documents)} documents from {file_path}")
-                result = ingest_documents_to_qdrant(documents, config, collection_name)
+                logger.info(f"Ingesting {len(documents)} documents from {file_path} with batch_size={args.batch_size}, workers={args.workers}")
+                result = ingest_documents_to_qdrant(documents, config, collection_name, 
+                                                  batch_size=args.batch_size, num_workers=args.workers)
                 print("Ingestion result:", json.dumps(result, indent=2))
             else:
                 logger.error(f"No valid documents found in {file_path}")
@@ -270,8 +318,9 @@ def main():
             
             # Ingest all documents together
             if all_documents:
-                logger.info(f"Ingesting {len(all_documents)} total documents from {len(jsonl_files)} files")
-                result = ingest_documents_to_qdrant(all_documents, config, collection_name)
+                logger.info(f"Ingesting {len(all_documents)} total documents from {len(jsonl_files)} files with batch_size={args.batch_size}, workers={args.workers}")
+                result = ingest_documents_to_qdrant(all_documents, config, collection_name,
+                                                  batch_size=args.batch_size, num_workers=args.workers)
                 print("Ingestion result:", json.dumps(result, indent=2))
             else:
                 logger.error("No valid documents found in any files")

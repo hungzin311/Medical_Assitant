@@ -5,7 +5,6 @@ from uuid import uuid4
 from typing import List, Dict, Any, Tuple
 
 from langchain_core.documents import Document
-from .cloud_docstore import CloudDocStore
 from langchain_qdrant import QdrantVectorStore, RetrievalMode
 from qdrant_client.http.models import Distance, VectorParams, OptimizersConfigDiff
 from ..qdrant_client_manager import QdrantClientManager
@@ -66,12 +65,12 @@ class VectorStoreCloud:
             optimizers_config=optimizers_config
         )
             
-    def load_vectorstore(self) -> Tuple[QdrantVectorStore, CloudDocStore]:
+    def load_vectorstore(self) -> QdrantVectorStore:
         """
-        Load existing cloud vectorstore and local docstore for retrieval operations without ingesting new documents.
+        Load existing cloud vectorstore for retrieval operations without ingesting new documents.
         
         Returns:
-            Tuple containing (vectorstore, docstore)
+            QdrantVectorStore instance
         """
         # Check if collection exists
         if not self._does_collection_exist():
@@ -79,7 +78,7 @@ class VectorStoreCloud:
             raise ValueError(f"Cloud collection {self.collection_name} does not exist")
             
         # Fall back to dense-only retrieval
-        self.logger.info("Falling back to dense embeddings only")
+        self.logger.info("Loading vectorstore with dense embeddings")
         qdrant_vectorstore = QdrantVectorStore(
             client=self.client,
             collection_name=self.collection_name,
@@ -88,33 +87,25 @@ class VectorStoreCloud:
             vector_name="dense",
         )
         
-        # Document storage (now cloud-based)
-        docstore = CloudDocStore(
-            qdrant_url=self.qdrant_url,
-            qdrant_api_key=self.qdrant_api_key,
-            collection_name=f"{self.collection_name}_docstore"
-        )
-        
-        self.logger.info(f"Successfully loaded existing cloud vectorstore and local docstore")
-        return qdrant_vectorstore, docstore
+        self.logger.info(f"Successfully loaded existing cloud vectorstore")
+        return qdrant_vectorstore
 
     def create_vectorstore(
             self,
             document_chunks: List[str],
             document_path: str,
-        ) -> Tuple[QdrantVectorStore, CloudDocStore, List[str]]:
+        ) -> Tuple[QdrantVectorStore, List[str]]:
         
         # Generate unique IDs for each chunk
         doc_ids = [str(uuid4()) for _ in range(len(document_chunks))]
         
         # Create langchain documents with length limit
-        MAX_CHUNK_LENGTH = 2000  # Characters limit for Together API - further reduced to avoid 400 errors
+        MAX_CHUNK_LENGTH = 8000  # Characters limit for embeddings
         langchain_documents = []
         valid_doc_ids = []
         
         for id_idx, chunk in enumerate(document_chunks):
             # Clean and truncate chunk if too long
-            # Remove special characters that might cause API issues
             chunk = self._clean_text(chunk)
             
             if len(chunk) > MAX_CHUNK_LENGTH:
@@ -122,13 +113,15 @@ class VectorStoreCloud:
                 chunk = chunk[:MAX_CHUNK_LENGTH]
                 
             try:
+                # Store full content in metadata payload
                 langchain_documents.append(
                     Document(
-                        page_content=chunk,
+                        page_content=chunk,  # This will be used for embedding
                         metadata={
                             "source": os.path.basename(document_path),
                             "doc_id": doc_ids[id_idx],
-                            "source_path": os.path.join("http://localhost:8000/", document_path)
+                            "source_path": os.path.join("http://localhost:8000/", document_path),
+                            "full_content": chunk  # Store full content in payload
                         }
                     )
                 )
@@ -144,9 +137,9 @@ class VectorStoreCloud:
         else:
             self.logger.info(f"Cloud collection {self.collection_name} already exists, will upsert documents")
         
-        qdrant_vectorstore, docstore = self.load_vectorstore()
+        qdrant_vectorstore = self.load_vectorstore()
         
-        # Ingest documents into vector and doc stores with error handling
+        # Ingest documents into vector store with error handling
         try:
             # Process documents in smaller batches to avoid API limits
             BATCH_SIZE = 1  # Reduced batch size for better reliability
@@ -158,31 +151,14 @@ class VectorStoreCloud:
                 
                 try:
                     # Process each document individually for maximum reliability
-                    successful_docs = []
-                    successful_ids = []
-                    
                     for j, (doc, doc_id) in enumerate(zip(batch_docs, batch_ids)):
                         try:
-                            # Try to add single document
+                            # Add document with full content in payload
                             qdrant_vectorstore.add_documents(documents=[doc], ids=[doc_id])
-                            successful_docs.append(doc)
-                            successful_ids.append(doc_id)
                             self.logger.info(f"Successfully added document {i+j+1}/{len(langchain_documents)}")
                         except Exception as doc_error:
                             self.logger.error(f"Error adding document {i+j+1}: {doc_error}")
                             continue
-                    
-                    # Encode string chunks to bytes before storing in cloud (only successful ones)
-                    if successful_docs:
-                        encoded_chunks = []
-                        for doc in successful_docs:
-                            encoded_chunks.append(doc.page_content.encode('utf-8'))
-                            
-                        docstore.mset(list(zip(successful_ids, encoded_chunks)))
-                        
-                        self.logger.info(f"Successfully added {len(successful_docs)}/{len(batch_docs)} documents in this batch")
-                    else:
-                        self.logger.warning(f"No documents were successfully added in batch {i//BATCH_SIZE + 1}")
                         
                 except Exception as batch_error:
                     self.logger.error(f"Error processing batch: {batch_error}")
@@ -194,27 +170,14 @@ class VectorStoreCloud:
             self.logger.error(f"Error in batch processing: {e}")
             raise e
         
-        return qdrant_vectorstore, docstore, valid_doc_ids
+        return qdrant_vectorstore, valid_doc_ids
 
     def retrieve_relevant_chunks(
             self,
             query: str,
             vectorstore: QdrantVectorStore,
-            docstore: CloudDocStore,
-        ) -> Tuple[List[Dict[str, Any]], List[str]]:
-        """
-        Retrieve relevant chunks based on a query from cloud vector store.
-        
-        Args:
-            query: User query
-            vectorstore: Vector store containing embeddings
-            docstore: Document store containing actual content
-            
-        Returns:
-            Tuple containing (retrieved_docs, picture_reference_paths)
-            where retrieved_docs is a list of dictionaries with content and score
-        """
-        # Use similarity_search_with_score to get documents and scores
+        ) -> List[Dict[str, Any]]:
+       
         results = vectorstore.similarity_search_with_score(
             query=query,
             k=self.retrieval_top_k
@@ -224,33 +187,27 @@ class VectorStoreCloud:
         
         for chunk, score in results:
             try:
-                # Get document ID from metadata
-                doc_id = chunk.metadata.get('doc_id')
-                if not doc_id:
-                    self.logger.warning(f"Missing doc_id in metadata for chunk")
+                # Get document content directly from payload
+                doc_content = chunk.metadata.get('full_content') or chunk.page_content
+                
+                if not doc_content:
+                    self.logger.warning(f"Missing content in metadata for chunk")
                     continue
-                
-                # Get full document from doc store as bytes and decode to string
-                doc_content_bytes = docstore.mget([doc_id])[0]
-                
-                # Skip if document content is None
-                if doc_content_bytes is None:
-                    self.logger.warning(f"Document content is None for doc_id: {doc_id}")
-                    continue
-                
-                doc_content = doc_content_bytes.decode('utf-8')
-                
-                # Add metadata to the document
-                formatted_doc = doc_content
                 
                 # Create document dict in the format expected by reranker
                 doc_dict = {
-                    "id": chunk.metadata['doc_id'],
-                    "content": formatted_doc,
+                    "id": chunk.metadata.get('doc_id', 'unknown'),
+                    "content": doc_content,
                     "score": score,  # Use the actual similarity score
-                    "source": chunk.metadata['source'],
-                    "source_path": chunk.metadata['source_path'],
+                    "source": chunk.metadata.get('source', 'unknown'),
+                    "source_path": chunk.metadata.get('source_path', ''),
                 }
+                
+                # Add any additional metadata from the chunk
+                for key, value in chunk.metadata.items():
+                    if key not in ['doc_id', 'source', 'source_path', 'full_content']:
+                        doc_dict[key] = value
+                        
                 retrieved_docs.append(doc_dict)
             except Exception as e:
                 self.logger.error(f"Error processing document: {e}")
@@ -263,24 +220,12 @@ class VectorStoreCloud:
             document_chunks: List[str],
             metadatas: List[Dict[str, Any]],
             document_path: str,
-        ) -> Tuple[QdrantVectorStore, CloudDocStore, List[str]]:
-        """
-        Create a vector store in cloud from document chunks with metadata
-        
-        Args:
-            document_chunks: List of document chunks
-            metadatas: List of metadata dictionaries corresponding to each chunk
-            document_path: Path or identifier for the document source
-            
-        Returns:
-            Tuple containing (vectorstore, docstore, doc_ids)
-        """
-        
+        ) -> Tuple[QdrantVectorStore, List[str]]:
         # Generate unique IDs for each chunk
         doc_ids = [str(uuid4()) for _ in range(len(document_chunks))]
         
         # Create langchain documents with length limit
-        MAX_CHUNK_LENGTH = 2000  # Characters limit for Together API - further reduced to avoid 400 errors
+        MAX_CHUNK_LENGTH = 8000  # Characters limit for embeddings
         langchain_documents = []
         valid_doc_ids = []
         
@@ -297,14 +242,15 @@ class VectorStoreCloud:
                 combined_metadata = {
                     "source": os.path.basename(document_path),
                     "doc_id": doc_ids[id_idx],
-                    "source_path": document_path
+                    "source_path": document_path,
+                    "full_content": chunk  # Store full content in payload
                 }
                 # Add custom metadata
                 combined_metadata.update(metadata)
                 
                 langchain_documents.append(
                     Document(
-                        page_content=chunk,
+                        page_content=chunk,  # This will be used for embedding
                         metadata=combined_metadata
                     )
                 )
@@ -320,12 +266,12 @@ class VectorStoreCloud:
         else:
             self.logger.info(f"Cloud collection {self.collection_name} already exists, will upsert documents")
         
-        qdrant_vectorstore, docstore = self.load_vectorstore()
+        qdrant_vectorstore = self.load_vectorstore()
         
-        # Ingest documents into vector and doc stores with error handling
+        # Ingest documents into vector store with error handling
         try:
             # Process documents in smaller batches to avoid API limits
-            BATCH_SIZE = 1  # Reduced batch size for better reliability
+            BATCH_SIZE = 100  # Reduced batch size for better reliability
             for i in range(0, len(langchain_documents), BATCH_SIZE):
                 batch_docs = langchain_documents[i:i+BATCH_SIZE]
                 batch_ids = valid_doc_ids[i:i+BATCH_SIZE]
@@ -334,31 +280,14 @@ class VectorStoreCloud:
                 
                 try:
                     # Process each document individually for maximum reliability
-                    successful_docs = []
-                    successful_ids = []
-                    
                     for j, (doc, doc_id) in enumerate(zip(batch_docs, batch_ids)):
                         try:
-                            # Try to add single document
+                            # Add document with full content in payload
                             qdrant_vectorstore.add_documents(documents=[doc], ids=[doc_id])
-                            successful_docs.append(doc)
-                            successful_ids.append(doc_id)
                             self.logger.info(f"Successfully added document {i+j+1}/{len(langchain_documents)}")
                         except Exception as doc_error:
                             self.logger.error(f"Error adding document {i+j+1}: {doc_error}")
                             continue
-                    
-                    # Encode string chunks to bytes before storing in cloud (only successful ones)
-                    if successful_docs:
-                        encoded_chunks = []
-                        for doc in successful_docs:
-                            encoded_chunks.append(doc.page_content.encode('utf-8'))
-                            
-                        docstore.mset(list(zip(successful_ids, encoded_chunks)))
-                        
-                        self.logger.info(f"Successfully added {len(successful_docs)}/{len(batch_docs)} documents in this batch")
-                    else:
-                        self.logger.warning(f"No documents were successfully added in batch {i//BATCH_SIZE + 1}")
                         
                 except Exception as batch_error:
                     self.logger.error(f"Error processing batch: {batch_error}")
@@ -370,4 +299,4 @@ class VectorStoreCloud:
             self.logger.error(f"Error in batch processing: {e}")
             raise e
         
-        return qdrant_vectorstore, docstore, valid_doc_ids 
+        return qdrant_vectorstore, valid_doc_ids 
