@@ -155,7 +155,6 @@ class VectorStoreCloud:
                         try:
                             # Add document with full content in payload
                             qdrant_vectorstore.add_documents(documents=[doc], ids=[doc_id])
-                            self.logger.info(f"Successfully added document {i+j+1}/{len(langchain_documents)}")
                         except Exception as doc_error:
                             self.logger.error(f"Error adding document {i+j+1}: {doc_error}")
                             continue
@@ -275,16 +274,13 @@ class VectorStoreCloud:
             for i in range(0, len(langchain_documents), BATCH_SIZE):
                 batch_docs = langchain_documents[i:i+BATCH_SIZE]
                 batch_ids = valid_doc_ids[i:i+BATCH_SIZE]
-                
-                self.logger.info(f"Processing batch {i//BATCH_SIZE + 1}/{(len(langchain_documents)-1)//BATCH_SIZE + 1} with {len(batch_docs)} documents")
-                
+                                
                 try:
                     # Process each document individually for maximum reliability
                     for j, (doc, doc_id) in enumerate(zip(batch_docs, batch_ids)):
                         try:
                             # Add document with full content in payload
                             qdrant_vectorstore.add_documents(documents=[doc], ids=[doc_id])
-                            self.logger.info(f"Successfully added document {i+j+1}/{len(langchain_documents)}")
                         except Exception as doc_error:
                             self.logger.error(f"Error adding document {i+j+1}: {doc_error}")
                             continue

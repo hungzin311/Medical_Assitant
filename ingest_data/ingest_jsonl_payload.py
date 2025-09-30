@@ -11,8 +11,7 @@ warnings.filterwarnings('ignore')
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-
-# sys.path.append(str(Path(__file__).parent.parent))
+logging.getLogger("httpx").disabled = True
 
 # Import components
 from config import Config
@@ -46,7 +45,6 @@ def process_jsonl_with_payload(file_path):
                     # Only add if there's content
                     if doc["page_content"]:
                         documents.append(doc)
-                        logger.info(f"Processed document {i+1}: {doc['metadata']['question_idx']} - {doc['metadata']['title'][:30]}...")
                     else:
                         logger.warning(f"Skipping line {i+1} - missing context content")
                         
@@ -54,7 +52,6 @@ def process_jsonl_with_payload(file_path):
                     logger.error(f"Error parsing JSON line {i+1}: {line[:50]}...")
                     continue
         
-        logger.info(f"Successfully processed {len(documents)} documents from {file_path}")
         return documents
     except Exception as e:
         logger.error(f"Error processing JSONL file: {e}")
@@ -62,7 +59,7 @@ def process_jsonl_with_payload(file_path):
         logger.error(traceback.format_exc())
         return []
 
-def chunk_large_content(documents, chunk_size=8000, chunk_overlap=100):
+def chunk_large_content(documents, chunk_size=10000, chunk_overlap=100):
     chunked_documents = []
     
     for doc in documents:
@@ -116,16 +113,38 @@ def chunk_large_content(documents, chunk_size=8000, chunk_overlap=100):
         
     return chunked_documents
 
-def process_document_batch(batch_data, vector_store, document_path):
+def process_document_batch(batch_data, qdrant_vectorstore, document_path):
     batch_contents, batch_metadatas, batch_start_idx = batch_data
     
     try:
-        # Create vector store with documents and metadata (payload-based approach)
-        vectorstore, doc_ids = vector_store.create_vectorstore_with_metadata(
-            document_chunks=batch_contents,
-            metadatas=batch_metadatas,
-            document_path=f"{document_path}_batch_{batch_start_idx}"
-        )
+        from uuid import uuid4
+        from langchain_core.documents import Document
+        
+        # Generate unique IDs for each chunk in this batch
+        doc_ids = [str(uuid4()) for _ in range(len(batch_contents))]
+        
+        # Create langchain documents
+        langchain_documents = []
+        for idx, (chunk, metadata) in enumerate(zip(batch_contents, batch_metadatas)):
+            # Merge metadata with standard fields
+            combined_metadata = {
+                "source": f"{document_path}_batch_{batch_start_idx}",
+                "doc_id": doc_ids[idx],
+                "source_path": f"{document_path}_batch_{batch_start_idx}",
+                "full_content": chunk  # Store full content in payload
+            }
+            # Add custom metadata
+            combined_metadata.update(metadata)
+            
+            langchain_documents.append(
+                Document(
+                    page_content=chunk,  # This will be used for embedding
+                    metadata=combined_metadata
+                )
+            )
+        
+        # Add documents directly to the shared vectorstore
+        qdrant_vectorstore.add_documents(documents=langchain_documents, ids=doc_ids)
         
         return {
             "success": True,
@@ -155,7 +174,7 @@ def ingest_documents_to_qdrant(documents, config, collection_name=None, batch_si
         vector_store = VectorStoreCloud(config)
         
         # Chunk large documents
-        chunked_documents = chunk_large_content(documents, chunk_size=8000, chunk_overlap=100)
+        chunked_documents = chunk_large_content(documents, chunk_size=16000, chunk_overlap=100)
         logger.info(f"Processing {len(documents)} documents into {len(chunked_documents)} chunks")
         
         # Extract content and metadata
@@ -168,6 +187,10 @@ def ingest_documents_to_qdrant(documents, config, collection_name=None, batch_si
         
         # Use a custom document path identifier
         document_path = f"jsonl_payload_{start_time}"
+        
+        # Initialize shared vectorstore once
+        qdrant_vectorstore = vector_store.load_vectorstore()
+        logger.info("Shared vectorstore initialized successfully")
         
         # Prepare batches for concurrent processing
         batches = []
@@ -184,8 +207,8 @@ def ingest_documents_to_qdrant(documents, config, collection_name=None, batch_si
         failed_batches = 0
         
         with ThreadPoolExecutor(max_workers=num_workers) as executor:
-            # Submit all batch processing tasks
-            futures = [executor.submit(process_document_batch, batch, vector_store, document_path) 
+            # Submit all batch processing tasks with shared vectorstore
+            futures = [executor.submit(process_document_batch, batch, qdrant_vectorstore, document_path) 
                       for batch in batches]
             
             # Process completed futures
@@ -219,11 +242,8 @@ def ingest_documents_to_qdrant(documents, config, collection_name=None, batch_si
         return {
             "success": successful_batches > 0,
             "documents_ingested": len(all_doc_ids),
-            "successful_batches": successful_batches,
             "failed_batches": failed_batches,
             "total_batches": len(batches),
-            "document_path": document_path,
-            "doc_ids": all_doc_ids,
             "processing_time": total_time
         }
         
