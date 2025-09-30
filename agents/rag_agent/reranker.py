@@ -30,17 +30,7 @@ class Reranker:
             self.logger.error(f"Error loading reranker model: {e}")
             raise
     
-    def rerank(self, query: str, documents: Union[List[Dict[str, Any]], List[str]], parsed_content_dir: str) -> List[Dict[str, Any]]:
-        """
-        Rerank documents based on query relevance using cross-encoder.
-        
-        Args:
-            query: User query
-            documents: Either a list of documents (dictionaries) or a list of strings
-            
-        Returns:
-            Reranked list of documents with updated scores
-        """
+    def rerank(self, query: str, documents: Union[List[Dict[str, Any]], List[str]]) -> List[Dict[str, Any]]:
         try:
             if not documents:
                 return []

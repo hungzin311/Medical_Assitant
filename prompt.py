@@ -349,12 +349,12 @@ medical_cot_prompt = PromptTemplate(
         "candidate_diseases": [
           {{
             "disease": "tên_bệnh",
-            "symptom_match_ratio": "M/T",
-            "matched_symptoms_list": ["..."],
-            "probability": 0.0-1.0,  // xấp xỉ xác suất lâm sàng
-            "key_evidence": ["..."],
-            "missing_critical_symptoms": ["..."],
-            "red_flags_unchecked": ["..."]
+            "symptom_match": "M/T",
+            "matched_symptoms": ["triệu_chứng_1", "triệu_chứng_2"],
+            "probability": 0.0-1.0,
+            "supporting_evidence": ["bằng_chứng_1", "bằng_chứng_2"],
+            "missing_symptoms": ["thiếu_triệu_chứng_1"],
+            "red_flags": ["cảnh_báo_1"]
           }}
         ],
         "top_differentiators": ["triệu_chứng_phân_biệt_1", "triệu_chứng_phân_biệt_2"]

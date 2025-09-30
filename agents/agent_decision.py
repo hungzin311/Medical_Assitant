@@ -374,7 +374,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         else:
             print("Both agents have sufficient info -> Combining results")
             
-            if rag_result.get('confidence', 0) > 0.7:
+            if rag_result.get('confidence', 0) > 0.9:
                 chosen_response = rag_result['response']
                 chosen_agent = "RAG_AGENT"
             else:

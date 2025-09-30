@@ -6,13 +6,7 @@ class ResponseGenerator:
     Generates responses based on retrieved context and user query.
     """
     def __init__(self, config):
-        """
-        Initialize the response generator.
         
-        Args:
-            config: Configuration object
-            llm: Large language model for response generation
-        """
         self.logger = logging.getLogger(__name__)
         self.response_generator_model = config.rag.response_generator_model
         self.include_sources = getattr(config.rag, "include_sources", True)
@@ -23,17 +17,6 @@ class ResponseGenerator:
             context: str,
             chat_history: Optional[List[Dict[str, str]]] = None
         ) -> str:
-        """
-        Build the prompt for the language model.
-        
-        Args:
-            query: User query
-            context: Formatted context from retrieved documents
-            chat_history: Optional chat history
-            
-        Returns:
-            Complete prompt string
-        """
 
         response_format_instructions = """Hướng dẫn:
         1. Trả lời câu hỏi CHỈ dựa trên thông tin được cung cấp trong ngữ cảnh.
@@ -76,17 +59,7 @@ class ResponseGenerator:
             retrieved_docs: List[Dict[str, Any]],
             chat_history: Optional[List[Dict[str, str]]] = None,
         ) -> Dict[str, Any]:
-        """
-        Generate a response based on retrieved documents.
-        
-        Args:
-            query: User query
-            retrieved_docs: List of retrieved document dictionaries
-            chat_history: Optional chat history
-            
-        Returns:
-            Dict containing response text and source information
-        """
+    
         try:
            
             # Extract content from documents for context
@@ -188,15 +161,7 @@ class ResponseGenerator:
         return formatted_sources
 
     def _calculate_confidence(self, documents: List[Dict[str, Any]]) -> float:
-        """
-        Calculate confidence score based on retrieved documents.
-        
-        Args:
-            documents: Retrieved documents
-            
-        Returns:
-            Confidence score between 0 and 1
-        """
+    
         if not documents:
             return 0.0
             

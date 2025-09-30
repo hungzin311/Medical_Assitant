@@ -23,9 +23,6 @@ class RAGConfig:
         self.embedding_dim = 1024  
         self.distance_metric = "Cosine"
         self.use_local = False
-        # self.vector_local_path = "./data/qdrant_vietnamese_db"
-        # self.doc_local_path = "./data/docs_vietnamese_db"
-        self.parsed_content_dir = "./data/parsed_docs_vietnamese_db"
         self.url = os.getenv("QDRANT_URL")
         self.api_key = os.getenv("QDRANT_API_KEY")
         self.collection_name = "medical_assistance_rag_vietnamese"
@@ -35,7 +32,7 @@ class RAGConfig:
         self.llm = get_gemini_llm(temperature=0.1)  # Slightly creative but factual
         self.summarizer_model = get_gemini_llm(temperature=0.2)  # Slightly creative but factual
         self.chunker_model = get_gemini_llm(temperature=0.0)  # factual
-        self.response_generator_model = get_gemini_llm(temperature=0.2)  # Slightly creative but factual
+        self.response_generator_model = get_gemini_llm(temperature=0.0)  # Slightly creative but factual
         self.top_k = 10
         self.vector_search_type = 'similarity'  # or 'mmr'
 

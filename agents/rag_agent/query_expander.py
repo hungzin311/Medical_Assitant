@@ -23,44 +23,46 @@ class QueryExpander:
         }
     
     def _generate_expansions(self, query: str, chat_history: Optional[List[Dict[str, str]]] = None) -> str:
-        """Use LLM to expand query with medical terminology using chat history for context."""
+        """Use LLM to expand query with Vietnamese medical terminology for similarity-based embedding."""
         prompt = f"""
-        Bạn là chuyên gia y tế giúp tạo ra các QUERY TÌM KIẾM mở rộng để tìm thông tin y tế chính xác.
+        Bạn là chuyên gia y tế giúp tạo ra các QUERY TÌM KIẾM mở rộng bằng tiếng Việt để tìm thông tin y tế chính xác.
         
         Câu hỏi gốc: {query}
         Lịch sử trò chuyện: {chat_history}
         
-        NHIỆM VỤ: Tạo ra 2-3 câu truy vấn tìm kiếm (search queries) khác nhau để tìm thông tin y tế liên quan.
+        NHIỆM VỤ: Tạo ra 1 câu truy vấn tìm kiếm tối ưu HOÀN TOÀN BẰNG TIẾNG VIỆT.
         
-        HƯỚNG DẪN CHO MULTILINGUAL E5 EMBEDDING:
-        - Tạo các câu truy vấn hoàn chỉnh, không phải câu hỏi phản hồi
-        - Mỗi query nên tập trung vào một khía cạnh khác nhau của vấn đề
-        - Sử dụng thuật ngữ y tế chính xác và từ đồng nghĩa
-        - Bao gồm cả tiếng Việt và thuật ngữ y tế quốc tế
-        - Tạo query cụ thể để tránh trùng lặp với các bệnh khác
-        - Mỗi query trên một dòng riêng biệt
-        - Nếu người dùng chỉ hỏi về các triệu chứng thì không đưa ra các câu hỏi liên quan đến cách chữa trị
+        HƯỚNG DẪN CHO VIETNAMESE SIMILARITY EMBEDDING:
+        - CHỈ sử dụng tiếng Việt, KHÔNG dùng thuật ngữ tiếng Anh
+        - Tạo 1 câu truy vấn hoàn chỉnh, mô tả rõ ràng và tập trung (không phải câu hỏi)
+        - Bao gồm thuật ngữ y tế tiếng Việt chính xác và từ đồng nghĩa quan trọng
+        - Tích hợp các từ khóa liên quan và triệu chứng kèm theo vào 1 câu duy nhất
+        - Tạo query cụ thể và tập trung để tránh nhầm lẫn với các bệnh khác
+        - Nếu hỏi về triệu chứng thì tập trung vào triệu chứng, không đề cập điều trị
+        - Tối ưu hóa cho similarity search với ngữ cảnh phong phú trong 1 câu
         
         VÍ DỤ:
         Câu hỏi: "Tôi bị nổi mẩn đỏ và ngứa"
-        Query mở rộng:
-        triệu chứng nổi mẩn đỏ ngứa trên da nguyên nhân
-        phát ban da đỏ kèm ngứa có thể là dấu hiệu của viêm da dị ứng dermatitis eczema
-        các bệnh lý da gây nổi mẩn đỏ và ngứa như urticaria mề đay viêm da tiếp xúc
+        Query tối ưu:
+        triệu chứng nổi mẩn đỏ ngứa trên da phát ban dị ứng viêm da tiếp xúc mề đay nguyên nhân gây ra
         
         Câu hỏi: "Thuốc điều trị cảm cúm"
-        Query mở rộng:
-        các loại thuốc điều trị cảm cúm cảm lạnh hiệu quả
-        thuốc kháng virus antiviral oseltamivir điều trị influenza
-        phương pháp điều trị triệu chứng cảm cúm hạ sốt giảm đau
+        Query tối ưu:
+        thuốc điều trị cảm cúm cảm lạnh kháng vi rút hạ sốt giảm đau phương pháp sử dụng hiệu quả
         
         Câu hỏi: "Triệu chứng tiểu đường"
-        Query mở rộng:
-        triệu chứng bệnh tiểu đường type 1 type 2 dấu hiệu nhận biết
-        diabetes mellitus biểu hiện lâm sàng khát nước tiểu nhiều
-        chẩn đoán tiểu đường đái tháo đường xét nghiệm đường huyết
+        Query tối ưu:
+        triệu chứng bệnh tiểu đường đái tháo đường loại một loại hai khát nước tiểu nhiều dấu hiệu nhận biết chẩn đoán
         
-        Hãy tạo 2-3 query tìm kiếm cho câu hỏi trên (mỗi query một dòng, không đánh số):
+        Câu hỏi: "Đau bụng dưới bên phải"
+        Query tối ưu:
+        triệu chứng đau bụng dưới bên phải hạ sườn phải viêm ruột thừa các bệnh lý nguyên nhân có thể
+        
+        Câu hỏi: "Cách phòng ngừa cao huyết áp"
+        Query tối ưu:
+        phương pháp phòng ngừa bệnh cao huyết áp tăng huyết áp chế độ ăn uống lối sống biện pháp dự phòng
+        
+        Hãy tạo 1 câu query tìm kiếm tối ưu HOÀN TOÀN BẰNG TIẾNG VIỆT cho câu hỏi trên:
         """
         expansion = self.model.invoke(prompt)
         

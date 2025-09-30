@@ -7,6 +7,8 @@ from .reranker import Reranker
 from .query_expander import QueryExpander
 from .response_generator import ResponseGenerator
 
+logging.getLogger("httpx").disabled = True
+
 class MedicalRAG:
     """
     Medical Retrieval-Augmented Generation system that integrates all components.
@@ -26,7 +28,6 @@ class MedicalRAG:
         self.reranker = Reranker(config)
         self.query_expander = QueryExpander(config)
         self.response_generator = ResponseGenerator(config)
-        self.parsed_content_dir = self.config.rag.parsed_content_dir
     
     def ingest_directory(self, directory_path: str) -> Dict[str, Any]:
         """
@@ -161,17 +162,15 @@ class MedicalRAG:
             self.logger.info(f"1. Expanding query: '{query}'")
             expansion_result = self.query_expander.expand_query(query, mode="rag", chat_history=chat_history)
             expanded_query = expansion_result["expanded_query"]
-            self.logger.info(f"   Original: '{query}'")
             self.logger.info(f"   Expanded: '{expanded_query}'")
             query = expanded_query
 
             # Step 2: Retrieval
             self.logger.info(f"2. Retrieving relevant documents for the query: '{query}'")
-            vectorstore, docstore = self.vector_store.load_vectorstore()
+            vectorstore = self.vector_store.load_vectorstore()
             retrieved_documents = self.vector_store.retrieve_relevant_chunks(
                 query=query,
                 vectorstore=vectorstore,
-                docstore=docstore,
                 )
 
             self.logger.info(f"   Retrieved {len(retrieved_documents)} relevant document chunks")
@@ -190,7 +189,7 @@ class MedicalRAG:
             # Step 3: Rerank the retrieved documents if we have a reranker and enough documents
             self.logger.info(f"3. Reranking the retrieved documents")
             if self.reranker and len(retrieved_documents) > 1:
-                reranked_documents = self.reranker.rerank(query, retrieved_documents, self.parsed_content_dir)
+                reranked_documents = self.reranker.rerank(query, retrieved_documents)
                 self.logger.info(f"   Reranked retrieved documents and chose top {len(reranked_documents)}")
             else:
                 self.logger.info(f"   Could not rerank the retrieved documents, falling back to original scores")
