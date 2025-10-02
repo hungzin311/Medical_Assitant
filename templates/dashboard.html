@@ -918,8 +918,127 @@
         </div>
     </div>
 
+    <!-- Blood Pressure Report Modal -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content" style="max-width: 1400px; max-height: 90vh; overflow-y: auto;">
+            <span class="close" onclick="closeModal('reportModal')">&times;</span>
+            <h2 style="margin-bottom: 20px; color: #333;">📊 Báo Cáo Huyết Áp 7 Ngày</h2>
+            
+            <!-- Patient Selector -->
+            <div style="margin-bottom: 25px;">
+                <label style="font-weight: 600; color: #333; display: block; margin-bottom: 10px;">
+                    👤 Chọn bệnh nhân:
+                </label>
+                <select id="patientSelector" onchange="loadBloodPressureReport()" style="width: 100%; padding: 12px; border: 2px solid #e1e1e1; border-radius: 8px; font-size: 16px;">
+                    <option value="6">Patient 6 - Kịch bản điều trị 7 ngày</option>
+                    <option value="1">Patient 1 - Normal BP</option>
+                    <option value="2">Patient 2 - Hypertension</option>
+                    <option value="3">Patient 3 - Hypotension</option>
+                    <option value="4">Patient 4 - Hypertensive Crisis</option>
+                    <option value="5">Patient 5 - BP Variability</option>
+                </select>
+            </div>
+
+            <!-- Loading indicator -->
+            <div id="reportLoading" style="text-align: center; padding: 40px; display: none;">
+                <div style="font-size: 24px; margin-bottom: 10px;">⏳</div>
+                <div style="color: #666;">Đang tải dữ liệu...</div>
+            </div>
+
+            <!-- Report Content -->
+            <div id="reportContent">
+                <!-- Summary Stats -->
+                <div id="reportSummary" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+
+                <!-- Chart Container -->
+                <div id="chartContainer" style="margin-bottom: 30px;">
+                    <!-- Charts will be dynamically generated here -->
+                </div>
+
+                <!-- Daily Analysis Table -->
+                <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <h3 style="color: #333; margin-bottom: 20px;">📋 Phân Tích Theo Ngày</h3>
+                    <div id="dailyAnalysis" style="overflow-x: auto;">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Medical Recommendations -->
+                <div id="medicalRecommendations" style="background: #fff3cd; border-radius: 12px; padding: 20px; margin-top: 30px; border: 2px solid #ffc107;">
+                    <h3 style="color: #856404; margin-bottom: 15px;">💡 Khuyến Nghị Y Khoa</h3>
+                    <div id="recommendationsContent">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- AI Medical Report Section -->
+                <div id="aiReportSection" style="margin-top: 30px; display: none;">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 25px; color: white; margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h3 style="margin: 0 0 10px 0;">🤖 Báo Cáo Y Khoa Chi Tiết (AI-Generated)</h3>
+                                <p style="margin: 0; opacity: 0.9; font-size: 14px;">
+                                    Phân tích dựa trên AHA/ESC Guidelines & Medical Literature
+                                </p>
+                            </div>
+                            <button onclick="generateMedicalReport()" id="generateReportBtn" style="background: white; color: #667eea; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: transform 0.2s;">
+                                ✨ Tạo Báo Cáo
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Report Loading -->
+                    <div id="reportGenerating" style="display: none; text-align: center; padding: 40px; background: white; border-radius: 12px;">
+                        <div style="font-size: 48px; margin-bottom: 15px;">⏳</div>
+                        <div style="font-size: 18px; color: #333; margin-bottom: 10px;">Đang tạo báo cáo y khoa...</div>
+                        <div style="color: #666;">LLM đang phân tích dữ liệu và tham khảo medical guidelines</div>
+                    </div>
+
+                    <!-- Generated Report -->
+                    <div id="generatedReport" style="display: none;">
+                        <!-- Thresholds Summary -->
+                        <div id="thresholdsDisplay" style="background: #e3f2fd; border-radius: 12px; padding: 20px; margin-bottom: 20px; border-left: 4px solid #2196f3;">
+                            <h4 style="color: #1976d2; margin-top: 0;">📊 Ngưỡng Theo Dõi Mới (Derived from Guidelines)</h4>
+                            <div id="thresholdsContent"></div>
+                        </div>
+
+                        <!-- Full Report -->
+                        <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <div id="fullReportContent" style="line-height: 1.8; color: #333;">
+                                <!-- Markdown content will be rendered here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="margin-top: 30px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <button onclick="printReport()" style="background: #2196F3; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                    🖨️ In Báo Cáo
+                </button>
+                <button onclick="emailReport()" style="background: #4CAF50; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                    📧 Gửi Email
+                </button>
+                <button onclick="downloadReportPDF()" style="background: #FF9800; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                    📥 Tải PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Include Marked.js for Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <script>
         console.log('JavaScript loading...');
+        
+        // Store current report data for report generation
+        let currentReportData = null;
 
         // Submit patient form function
         function submitPatientForm() {
@@ -1158,7 +1277,8 @@
         }
 
         function openReportModal() {
-            alert('🔄 Đang tải báo cáo... Tính năng sẽ hiển thị tóm tắt sức khỏe và nút gửi email.');
+            document.getElementById('reportModal').style.display = 'block';
+            loadBloodPressureReport();
         }
 
         function openProgressModal() {
@@ -1171,6 +1291,547 @@
 
         function openProfileModal() {
             alert('👤 Đang mở hồ sơ cá nhân... Tính năng quản lý thông tin bệnh nhân và cài đặt.');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Blood Pressure Report Functions
+        let bpChartInstance = null;
+
+        async function loadBloodPressureReport() {
+            const patientId = document.getElementById('patientSelector').value;
+            const loading = document.getElementById('reportLoading');
+            const content = document.getElementById('reportContent');
+            
+            loading.style.display = 'block';
+            content.style.display = 'none';
+            
+            try {
+                const response = await fetch(`/api/blood-pressure-report?patient_id=${patientId}`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    displayBPReport(data.data);
+                    loading.style.display = 'none';
+                    content.style.display = 'block';
+                } else {
+                    throw new Error(data.message || 'Failed to load report');
+                }
+            } catch (error) {
+                console.error('Error loading BP report:', error);
+                loading.innerHTML = `<div style="color: #f44336;">❌ Không thể tải báo cáo: ${error.message}</div>`;
+            }
+        }
+
+        function displayBPReport(data) {
+            // Store data for report generation
+            currentReportData = data;
+            
+            // Display summary statistics
+            displaySummaryStats(data.summary);
+            
+            // Display chart
+            displayBPChart(data.chart_data);
+            
+            // Display daily analysis
+            displayDailyAnalysis(data.daily_analysis);
+            
+            // Display recommendations
+            displayRecommendations(data.recommendations);
+            
+            // Show AI report section (only for Patient 6 with 7 days)
+            const patientId = document.getElementById('patientSelector').value;
+            if (patientId === '6') {
+                document.getElementById('aiReportSection').style.display = 'block';
+            } else {
+                document.getElementById('aiReportSection').style.display = 'none';
+            }
+        }
+
+        function displaySummaryStats(summary) {
+            const summaryDiv = document.getElementById('reportSummary');
+            summaryDiv.innerHTML = `
+                <div style="background: linear-gradient(135deg, #e3f2fd, #bbdefb); padding: 20px; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 14px; color: #1976d2; margin-bottom: 5px;">Tâm Thu Trung Bình</div>
+                    <div style="font-size: 28px; font-weight: bold; color: #0d47a1;">${summary.mean_systolic} <span style="font-size: 16px;">mmHg</span></div>
+                </div>
+                <div style="background: linear-gradient(135deg, #e1f5fe, #b3e5fc); padding: 20px; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 14px; color: #0288d1; margin-bottom: 5px;">Tâm Trương Trung Bình</div>
+                    <div style="font-size: 28px; font-weight: bold; color: #01579b;">${summary.mean_diastolic} <span style="font-size: 16px;">mmHg</span></div>
+                </div>
+                <div style="background: linear-gradient(135deg, #fff3e0, #ffe0b2); padding: 20px; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 14px; color: #f57c00; margin-bottom: 5px;">Số Lần Vượt Ngưỡng</div>
+                    <div style="font-size: 28px; font-weight: bold; color: #e65100;">${summary.alerts_count}</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #f3e5f5, #e1bee7); padding: 20px; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 14px; color: #7b1fa2; margin-bottom: 5px;">Phân Loại</div>
+                    <div style="font-size: 20px; font-weight: bold; color: #4a148c;">${summary.classification}</div>
+                </div>
+            `;
+        }
+
+        let chartInstances = [];
+
+        function displayBPChart(chartData) {
+            const container = document.getElementById('chartContainer');
+            
+            // Destroy existing charts if any
+            chartInstances.forEach(chart => chart.destroy());
+            chartInstances = [];
+            
+            // Clear container
+            container.innerHTML = '';
+            
+            // Check if we have daily data (for 7-day view)
+            if (chartData.daily_charts && chartData.daily_charts.length > 1) {
+                // Multiple days - create separate charts
+                chartData.daily_charts.forEach((dayData, index) => {
+                    const dayDiv = document.createElement('div');
+                    dayDiv.style.cssText = 'background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px;';
+                    
+                    const dayLabel = index === 0 ? 'Ngày 1 (CAO HUYẾT ÁP - Trước điều trị)' : `Ngày ${index + 1} (Bình thường - Sau điều trị)`;
+                    const bgColor = index === 0 ? '#ffebee' : '#e8f5e9';
+                    
+                    dayDiv.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: ${bgColor}; padding: 12px; border-radius: 8px;">
+                            <h3 style="color: #333; margin: 0;">📈 ${dayLabel}</h3>
+                            <div style="font-size: 14px; color: #666;">
+                                <strong>TB:</strong> ${dayData.mean_sys}/${dayData.mean_dia} mmHg
+                            </div>
+                        </div>
+                        <canvas id="bpChart_day${index}" style="max-height: 350px;"></canvas>
+                    `;
+                    
+                    container.appendChild(dayDiv);
+                    
+                    // Create chart for this day
+                    const ctx = document.getElementById(`bpChart_day${index}`).getContext('2d');
+                    const chart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: dayData.labels,
+                            datasets: [
+                                {
+                                    label: 'Tâm Thu (Systolic)',
+                                    data: dayData.systolic,
+                                    borderColor: '#e74c3c',
+                                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                                    borderWidth: 2,
+                                    tension: 0.4,
+                                    pointRadius: 0,
+                                    pointHoverRadius: 4
+                                },
+                                {
+                                    label: 'Tâm Trương (Diastolic)',
+                                    data: dayData.diastolic,
+                                    borderColor: '#3498db',
+                                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                                    borderWidth: 2,
+                                    tension: 0.4,
+                                    pointRadius: 0,
+                                    pointHoverRadius: 4
+                                },
+                                {
+                                    label: 'Ngưỡng Stage 2 HTN (140/90)',
+                                    data: Array(dayData.labels.length).fill(140),
+                                    borderColor: '#dc3545',
+                                    borderWidth: 1.5,
+                                    borderDash: [5, 5],
+                                    pointRadius: 0,
+                                    fill: false
+                                },
+                                {
+                                    label: 'Ngưỡng Elevated (120/80)',
+                                    data: Array(dayData.labels.length).fill(120),
+                                    borderColor: '#ff9800',
+                                    borderWidth: 1,
+                                    borderDash: [3, 3],
+                                    pointRadius: 0,
+                                    fill: false
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            interaction: {
+                                mode: 'index',
+                                intersect: false
+                            },
+                            plugins: {
+                                legend: {
+                                    display: index === 0, // Only show legend on first chart
+                                    position: 'top'
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            if (context.datasetIndex < 2) {
+                                                return context.dataset.label + ': ' + context.parsed.y + ' mmHg';
+                                            }
+                                            return null;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: false,
+                                    min: 50,
+                                    max: 180,
+                                    title: {
+                                        display: true,
+                                        text: 'Huyết Áp (mmHg)',
+                                        font: { size: 12 }
+                                    },
+                                    grid: {
+                                        color: 'rgba(0, 0, 0, 0.05)'
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Thời Gian (Giờ)',
+                                        font: { size: 12 }
+                                    },
+                                    ticks: {
+                                        maxRotation: 45,
+                                        minRotation: 45,
+                                        maxTicksLimit: 12
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    
+                    chartInstances.push(chart);
+                });
+            } else {
+                // Single day - create one chart
+                const chartDiv = document.createElement('div');
+                chartDiv.style.cssText = 'background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);';
+                chartDiv.innerHTML = `
+                    <h3 style="color: #333; margin-bottom: 20px;">📈 Biểu Đồ Huyết Áp</h3>
+                    <canvas id="bpChart_single" style="max-height: 450px;"></canvas>
+                `;
+                container.appendChild(chartDiv);
+                
+                const ctx = document.getElementById('bpChart_single').getContext('2d');
+                const chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [
+                            {
+                                label: 'Tâm Thu (Systolic)',
+                                data: chartData.systolic,
+                                borderColor: '#e74c3c',
+                                backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                                borderWidth: 2,
+                                tension: 0.4,
+                                pointRadius: 0,
+                                pointHoverRadius: 5
+                            },
+                            {
+                                label: 'Tâm Trương (Diastolic)',
+                                data: chartData.diastolic,
+                                borderColor: '#3498db',
+                                backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                                borderWidth: 2,
+                                tension: 0.4,
+                                pointRadius: 0,
+                                pointHoverRadius: 5
+                            },
+                            {
+                                label: 'Ngưỡng Stage 2 HTN (140/90)',
+                                data: Array(chartData.labels.length).fill(140),
+                                borderColor: '#dc3545',
+                                borderWidth: 1.5,
+                                borderDash: [5, 5],
+                                pointRadius: 0,
+                                fill: false
+                            },
+                            {
+                                label: 'Ngưỡng Elevated (120/80)',
+                                data: Array(chartData.labels.length).fill(120),
+                                borderColor: '#ff9800',
+                                borderWidth: 1,
+                                borderDash: [3, 3],
+                                pointRadius: 0,
+                                fill: false
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': ' + context.parsed.y + ' mmHg';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                min: 50,
+                                max: 200,
+                                title: {
+                                    display: true,
+                                    text: 'Huyết Áp (mmHg)'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Thời Gian'
+                                },
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                chartInstances.push(chart);
+            }
+        }
+
+        function displayDailyAnalysis(dailyData) {
+            const analysisDiv = document.getElementById('dailyAnalysis');
+            let tableHTML = `
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                            <th style="padding: 12px; text-align: left;">Ngày</th>
+                            <th style="padding: 12px; text-align: center;">Tâm Thu TB</th>
+                            <th style="padding: 12px; text-align: center;">Tâm Trương TB</th>
+                            <th style="padding: 12px; text-align: center;">Min/Max</th>
+                            <th style="padding: 12px; text-align: center;">Cảnh Báo</th>
+                            <th style="padding: 12px; text-align: left;">Đánh Giá</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            dailyData.forEach((day, index) => {
+                const statusColor = day.status === 'normal' ? '#4CAF50' : 
+                                   day.status === 'elevated' ? '#FF9800' : '#f44336';
+                tableHTML += `
+                    <tr style="border-bottom: 1px solid #e9ecef;">
+                        <td style="padding: 12px; font-weight: 600;">Ngày ${index + 1}</td>
+                        <td style="padding: 12px; text-align: center;">${day.mean_sys} mmHg</td>
+                        <td style="padding: 12px; text-align: center;">${day.mean_dia} mmHg</td>
+                        <td style="padding: 12px; text-align: center; font-size: 12px;">${day.min_sys}-${day.max_sys}/${day.min_dia}-${day.max_dia}</td>
+                        <td style="padding: 12px; text-align: center;"><span style="background: ${day.alerts > 0 ? '#ffebee' : '#e8f5e9'}; color: ${day.alerts > 0 ? '#c62828' : '#2e7d32'}; padding: 4px 12px; border-radius: 12px; font-weight: 600;">${day.alerts}</span></td>
+                        <td style="padding: 12px;"><span style="color: ${statusColor}; font-weight: 600;">●</span> ${day.assessment}</td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            analysisDiv.innerHTML = tableHTML;
+        }
+
+        function displayRecommendations(recommendations) {
+            const recDiv = document.getElementById('recommendationsContent');
+            let html = '<ul style="list-style: none; padding: 0; margin: 0;">';
+            
+            recommendations.forEach(rec => {
+                const icon = rec.priority === 'high' ? '🔴' : rec.priority === 'medium' ? '🟡' : '🟢';
+                html += `
+                    <li style="padding: 12px 0; border-bottom: 1px solid #f0e5d8; display: flex; align-items: start;">
+                        <span style="font-size: 20px; margin-right: 12px;">${icon}</span>
+                        <div>
+                            <div style="font-weight: 600; color: #333; margin-bottom: 5px;">${rec.title}</div>
+                            <div style="color: #666; font-size: 14px;">${rec.description}</div>
+                        </div>
+                    </li>
+                `;
+            });
+            
+            html += '</ul>';
+            recDiv.innerHTML = html;
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        function emailReport() {
+            alert('📧 Tính năng gửi email đang được phát triển.\n\nBáo cáo sẽ được gửi đến email đã đăng ký của bạn.');
+        }
+
+        function downloadReportPDF() {
+            alert('📥 Tính năng tải PDF đang được phát triển.\n\nBạn có thể sử dụng chức năng In và chọn "Save as PDF".');
+        }
+
+        // Generate Medical Report using LLM
+        async function generateMedicalReport() {
+            if (!currentReportData) {
+                alert('⚠️ Vui lòng load dữ liệu bệnh nhân trước!');
+                return;
+            }
+
+            const btn = document.getElementById('generateReportBtn');
+            const generating = document.getElementById('reportGenerating');
+            const reportDiv = document.getElementById('generatedReport');
+            
+            // Show loading
+            btn.disabled = true;
+            btn.textContent = '⏳ Đang tạo...';
+            generating.style.display = 'block';
+            reportDiv.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/generate-bp-medical-report', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        patient_id: currentReportData.patient_id,
+                        daily_analysis: currentReportData.daily_analysis,
+                        summary: currentReportData.summary
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    // Display thresholds
+                    displayThresholds(result.data.thresholds);
+                    
+                    // Render markdown report
+                    const reportContent = document.getElementById('fullReportContent');
+                    reportContent.innerHTML = marked.parse(result.data.report);
+                    
+                    // Apply styling to markdown content
+                    styleMarkdownContent(reportContent);
+                    
+                    // Show report
+                    generating.style.display = 'none';
+                    reportDiv.style.display = 'block';
+                    
+                    // Scroll to report
+                    reportDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    
+                    btn.textContent = '✅ Đã tạo xong';
+                    setTimeout(() => {
+                        btn.disabled = True;
+                    }, 2000);
+                } else {
+                    throw new Error(result.message || 'Failed to generate report');
+                }
+            } catch (error) {
+                console.error('Error generating report:', error);
+                generating.innerHTML = `<div style="color: #f44336; padding: 20px;">❌ Lỗi khi tạo báo cáo: ${error.message}</div>`;
+                btn.textContent = '❌ Thử lại';
+                btn.disabled = false;
+            }
+        }
+
+        function displayThresholds(thresholds) {
+            const content = document.getElementById('thresholdsContent');
+            content.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 15px;">
+                    <div style="background: white; padding: 15px; border-radius: 8px; border-left: 3px solid #2196f3;">
+                        <div style="font-weight: 600; color: #1976d2; margin-bottom: 10px;">Huyết Áp Tâm Thu</div>
+                        <div style="font-size: 14px; color: #555; line-height: 1.8;">
+                            🟢 Elevated: ≥${thresholds.systolic.elevated} mmHg<br>
+                            🟡 High: ≥${thresholds.systolic.high} mmHg<br>
+                            🔴 Critical: ≥${thresholds.systolic.critical} mmHg
+                        </div>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; border-left: 3px solid #00bcd4;">
+                        <div style="font-weight: 600; color: #0097a7; margin-bottom: 10px;">Huyết Áp Tâm Trương</div>
+                        <div style="font-size: 14px; color: #555; line-height: 1.8;">
+                            🟢 Elevated: ≥${thresholds.diastolic.elevated} mmHg<br>
+                            🟡 High: ≥${thresholds.diastolic.high} mmHg<br>
+                            🔴 Critical: ≥${thresholds.diastolic.critical} mmHg
+                        </div>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; border-left: 3px solid #9c27b0;">
+                        <div style="font-weight: 600; color: #7b1fa2; margin-bottom: 10px;">Tần Suất Theo Dõi</div>
+                        <div style="font-size: 14px; color: #555; line-height: 1.8;">
+                            📅 Tuần 1-2: ${thresholds.monitoring_frequency.week_1_2}<br>
+                            📅 Tuần 3-4: ${thresholds.monitoring_frequency.week_3_4}<br>
+                            📅 Sau 1 tháng: ${thresholds.monitoring_frequency.after_1_month}
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; padding: 15px; background: white; border-radius: 8px;">
+                    <div style="font-weight: 600; color: #333; margin-bottom: 10px;">⏰ Thời Điểm Quan Trọng:</div>
+                    <div style="font-size: 14px; color: #555;">
+                        ${thresholds.critical_times.map(time => `<span style="display: inline-block; background: #f5f5f5; padding: 4px 12px; border-radius: 4px; margin-right: 8px; margin-bottom: 8px;">🕐 ${time}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function styleMarkdownContent(container) {
+            // Style headers
+            container.querySelectorAll('h2').forEach(h2 => {
+                h2.style.cssText = 'color: #1976d2; border-bottom: 2px solid #e3f2fd; padding-bottom: 10px; margin-top: 30px; margin-bottom: 15px; font-size: 24px;';
+            });
+            container.querySelectorAll('h3').forEach(h3 => {
+                h3.style.cssText = 'color: #0288d1; margin-top: 25px; margin-bottom: 12px; font-size: 20px;';
+            });
+            container.querySelectorAll('h4').forEach(h4 => {
+                h4.style.cssText = 'color: #0097a7; margin-top: 20px; margin-bottom: 10px; font-size: 18px;';
+            });
+            
+            // Style lists
+            container.querySelectorAll('ul').forEach(ul => {
+                ul.style.cssText = 'margin-left: 20px; line-height: 2;';
+            });
+            container.querySelectorAll('li').forEach(li => {
+                li.style.cssText = 'margin-bottom: 8px;';
+            });
+            
+            // Style strong/bold text
+            container.querySelectorAll('strong').forEach(strong => {
+                strong.style.cssText = 'color: #d32f2f; font-weight: 700;';
+            });
+            
+            // Style code/references
+            container.querySelectorAll('code').forEach(code => {
+                code.style.cssText = 'background: #f5f5f5; padding: 2px 6px; border-radius: 3px; color: #e91e63; font-size: 0.9em;';
+            });
+            
+            // Style tables if any
+            container.querySelectorAll('table').forEach(table => {
+                table.style.cssText = 'width: 100%; border-collapse: collapse; margin: 20px 0;';
+            });
+            container.querySelectorAll('th, td').forEach(cell => {
+                cell.style.cssText = 'border: 1px solid #ddd; padding: 12px; text-align: left;';
+            });
+            container.querySelectorAll('th').forEach(th => {
+                th.style.cssText += 'background: #f5f5f5; font-weight: 600;';
+            });
+            
+            // Style paragraphs
+            container.querySelectorAll('p').forEach(p => {
+                p.style.cssText = 'margin-bottom: 15px; text-align: justify;';
+            });
         }
 
         // Modal close functionality is now inline

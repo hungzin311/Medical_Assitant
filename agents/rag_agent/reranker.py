@@ -6,21 +6,10 @@ from typing import List, Dict, Any, Union
 from sentence_transformers import CrossEncoder
 
 class Reranker:
-    """
-    Reranks retrieved documents using a cross-encoder model for more accurate results.
-    """
     def __init__(self, config):
-        """
-        Initialize the reranker with configuration.
         
-        Args:
-            config: Configuration object containing reranker settings
-        """
         self.logger = logging.getLogger(__name__)
-        
-        # Load the cross-encoder model for reranking
         # For medical data, specialized models like 'pritamdeka/S-PubMedBert-MS-MARCO'
-        # would be ideal, but using a general one here for simplicity
         try:
             self.model_name = config.rag.reranker_model
             self.logger.info(f"Loading reranker model: {self.model_name}")
@@ -39,7 +28,6 @@ class Reranker:
             if documents:
                 # if the retrieved documents is just a list of strings, we add a default score
                 if isinstance(documents[0], str):
-                    # Convert simple strings to dictionaries
                     docs_list = []
                     for i, doc_text in enumerate(documents):
                         docs_list.append({
@@ -50,15 +38,11 @@ class Reranker:
                     documents = docs_list
                 # if the retrieved documents is a list of dictionaries, we use the original score
                 elif isinstance(documents[0], dict):
-                    # Ensure all required fields exist in dictionaries
                     for i, doc in enumerate(documents):
-                        # Ensure ID exists
                         if "id" not in doc:
                             doc["id"] = i
-                        # Ensure score exists
                         if "score" not in doc:
                             doc["score"] = 1.0
-                        # Ensure content exists (unlikely to be missing but just in case)
                         if "content" not in doc:
                             if "text" in doc:  # Some implementations might use "text" instead
                                 doc["content"] = doc["text"]
@@ -67,17 +51,12 @@ class Reranker:
             
             # Create query-document pairs for scoring
             pairs = [(query, doc["content"]) for doc in documents]
-            
-            # Get relevance scores
             scores = self.model.predict(pairs)
             
-            # Add scores to documents
             for i, score in enumerate(scores):
                 documents[i]["rerank_score"] = float(score)  # Store the new score from reranking
-                # If the original document didn't have a score, use the rerank score
                 if "score" not in documents[i]:
                     documents[i]["score"] = 1.0
-                # Combine (average) the original score and rerank score
                 documents[i]["combined_score"] = (documents[i]["score"] + float(score)) / 2
             
             # Sort by combined score
