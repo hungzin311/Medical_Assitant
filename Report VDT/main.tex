@@ -1,0 +1,87 @@
+% !TeX spellcheck = en_US
+\documentclass[12pt, a4paper]{article}
+\usepackage[utf8]{vietnam}
+\usepackage[english,vietnamese]{babel}
+\usepackage{float}
+\usepackage{adjustbox}
+\setlength{\belowcaptionskip}{-10pt}
+\setlength{\intextsep}{10pt plus 2pt minus 2pt}
+\setlength{\parskip}{0.5\baselineskip}%
+\setlength{\parindent}{0pt}%
+\usepackage{ragged2e}
+\usepackage{titlesec}
+% Set the title of the current document to be produced.
+\newcommand{\doctitle}{{{\Huge \textbf{\coursetitle}}}}
+\input{includes/packages}                                 
+\input{includes/custom-commands}   
+\input{includes/metadata}                                 \usepackage{tocloft}
+\setlength{\cftbeforefigskip}{0.4ex} % Điều chỉnh khoảng cách cho Danh sách Hình vẽ
+% Nếu bạn cũng muốn áp dụng cho Danh sách Bảng biểu, thêm dòng:
+\setlength{\cftbeforetabskip}{0.4ex}
+\hypersetup{hidelinks}
+
+
+
+
+\begin{document} 
+
+\titlespacing{\section}{0pt}{10pt}{6pt}       % Giảm từ 12pt (trên) và 9pt (dưới)
+\titlespacing{\subsection}{0pt}{8pt}{4pt}     % Khoảng cách cho subsection
+\titlespacing{\subsubsection}{0pt}{6pt}{3pt}  % Khoảng cách cho subsubsection
+\setlength{\parskip}{3pt} % Đặt khoảng cách giữa các đoạn văn, bạn có thể thử 0pt
+\setlength{\parindent}{15pt} % Nếu parskip là 0, bạn có thể muốn thụt đầu dòng
+
+\setlist{noitemsep, topsep=0pt, partopsep=0pt}
+\selectlanguage{vietnamese}
+    \raggedbottom
+    \clearpage
+    \pagenumbering{arabic}
+    \thispagestyle{empty}
+    %-------------------------------------------------------------
+    %-- Make the header of the document                          |
+    %------>------>------>------>------>------>------>------>--> |
+    \input{includes/document-header}
+    \selectlanguage{vietnamese}
+    %\hrule width0.3\textwidth
+    \begingroup
+    \normalsize
+    
+\justifying
+\begingroup
+    \let\clearpage\relax
+    \tableofcontents
+    \listoftables
+    \listoffigures
+\endgroup
+\newpage
+\begin{center}
+    \Large\bfseries Lời mở đầu
+\end{center}
+\vspace{0.5cm}
+
+Trong bối cảnh nhu cầu chăm sóc sức khỏe ban đầu và tiếp cận thông tin y tế ngày càng tăng cao, việc phát triển các giải pháp hỗ trợ hiệu quả và đáng tin cậy trở thành ưu tiên hàng đầu. Tuy nhiên, người dân vẫn gặp nhiều khó khăn trong việc tiếp cận dịch vụ tư vấn y tế kịp thời, đặc biệt ở các khu vực ngoài đô thị, cùng với việc thiếu hiểu biết về các biện pháp chăm sóc sức khỏe cơ bản tại nhà.
+
+Đồng thời, sự phát triển mạnh mẽ của trí tuệ nhân tạo, đặc biệt là các hệ thống đa tác nhân (multi-agent) và AI đa phương thức (multimodal AI), đang mở ra những cơ hội to lớn trong lĩnh vực y tế số. Các công nghệ này có khả năng xử lý, phân tích và kết hợp nhiều dạng dữ liệu khác nhau như văn bản, hình ảnh, giúp cung cấp thông tin y khoa chính xác và cá nhân hóa cho từng người dùng.
+
+Nhận thức được tiềm năng và thách thức này, báo cáo được thực hiện nhằm nghiên cứu và phát triển một hệ thống Multi-Agent trợ lý y tế ảo với khả năng phân tích triệu chứng đa phương thức và cung cấp thông tin y khoa đáng tin cậy. Hệ thống được thiết kế để hỗ trợ người dùng phổ thông trong việc nhận diện, hiểu và xử lý các vấn đề sức khỏe thường gặp một cách hiệu quả và an toàn.
+\begin{center}
+    \Large\bfseries Tóm tắt nội dung và đóng góp
+\end{center}
+\vspace{0.5cm}
+
+Báo cáo này trình bày nghiên cứu về việc phát triển hệ thống Multi-Agent trợ lý y tế ảo với khả năng phân tích triệu chứng đa phương thức, được cấu trúc qua ba phần chính với những nội dung và đóng góp cụ thể như sau:
+
+\begin{itemize}
+    \item \textbf{Giới thiệu đề tài:} Phần này phân tích bối cảnh thực tiễn về nhu cầu chăm sóc sức khỏe và những thách thức trong việc tiếp cận thông tin y tế. Đồng thời trình bày bối cảnh công nghệ với sự phát triển của AI đa tác nhân và đa phương thức trong lĩnh vực y tế. Đóng góp chính là xác định rõ mục tiêu xây dựng hệ thống trợ lý y tế ảo có khả năng hỗ trợ người dùng phổ thông trong việc nhận diện và xử lý các vấn đề sức khỏe thường gặp.
+
+    \item \textbf{Giải pháp đề xuất và Kiến trúc hệ thống:} Phần này mô tả chi tiết kiến trúc Multi-Agent Medical Assistant gồm Vision Module và Text Module, cùng với các thành phần chuyên biệt như Decision Agent, RAG Agent, Web Search Agent và Normal Conversation Agent. Đóng góp quan trọng là thiết kế một kiến trúc mô-đun, linh hoạt và có khả năng mở rộng, tích hợp các công nghệ hiện đại để xử lý đa phương thức và đảm bảo độ tin cậy trong lĩnh vực y tế.
+
+    \item \textbf{Triển khai công nghệ và Kết quả:} Phần cuối trình bày việc triển khai hệ thống sử dụng các công nghệ tiên tiến như LangGraph, Gemini 2.0 Flash, Qdrant và bộ dữ liệu VimedAQA. Kết quả thực nghiệm cho thấy hệ thống hoạt động ổn định với giao diện demo real-time và khả năng xử lý đa phương thức. Đóng góp chính là một hệ thống prototype hoàn chỉnh với tiềm năng ứng dụng cao trong thực tiễn chăm sóc sức khỏe số.
+\end{itemize}
+
+\newpage
+\input{content}
+
+\input{references}
+
+\end{document} 
