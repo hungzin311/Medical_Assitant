@@ -279,7 +279,7 @@ from langchain_core.prompts import  PromptTemplate
 
 medical_cot_prompt = PromptTemplate(
     template="""
-    Bạn là bác sĩ chuyên khoa với 20 năm kinh nghiệm. Hãy áp dụng tư duy lâm sàng từng bước để phân tích tình trạng bệnh nhân và SO SÁNH nhiều bệnh ứng viên.
+    Bạn là bác sĩ chuyên khoa. Hãy áp dụng tư duy lâm sàng từng bước để phân tích tình trạng bệnh nhân và SO SÁNH nhiều bệnh ứng viên.
 
     THÔNG TIN BỆNH NHÂN:
     {patient_context}
@@ -361,11 +361,9 @@ medical_cot_prompt = PromptTemplate(
       }},
       "step2_decision": "ENOUGH_INFO" | "NOT_ENOUGH_INFO",
       "step3_action": {{
-        "type": "diagnosis" | "follow_up_question",
         "content": "Nội dung chính trả lời bệnh nhân",
-        "medical_reasoning": "Lý do y khoa chi tiết",
+        "confidence": "0.0 - 1.0" // độ tự tin của mô hình cho câu trả lời chính,
         "next_symptom": "triệu_chứng_cần_hỏi_tiếp",  // chỉ khi NOT_ENOUGH_INFO
-        "urgency_level": "low|medium|high",
         "follow_up_advice": "lời khuyên theo dõi"
       }}
     }}

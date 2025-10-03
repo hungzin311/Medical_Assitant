@@ -42,9 +42,7 @@ class ResponseGenerator:
             kg_candidates_json = json.dumps(filtered_context, ensure_ascii=False)
             self.cached_kg_candidates = kg_candidates_json
             print("Updated KG cache with new context")
-            with open('abc.json', 'w', encoding='utf-8') as f: 
-                f.write(kg_candidates_json)
-
+            
         else:
             # Use cached context if KG retrieve failed
             if self.cached_kg_candidates:

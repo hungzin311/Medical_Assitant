@@ -197,7 +197,7 @@ class VectorStoreCloud:
                 doc_dict = {
                     "id": chunk.metadata.get('doc_id', 'unknown'),
                     "content": doc_content,
-                    "score": score,  # Use the actual similarity score
+                    "score": score,
                     "source": chunk.metadata.get('source', 'unknown'),
                     "source_path": chunk.metadata.get('source_path', ''),
                 }

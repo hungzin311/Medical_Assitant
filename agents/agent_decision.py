@@ -294,6 +294,11 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
                     "confidence": 0.0,
                     "sources": []
                 }
+            import json
+            with open('rag_response.json' , 'w', encoding='utf-8') as f:
+                json.dump(response, f, ensure_ascii=False)
+            print(isinstance(response, dict))
+            response_text = response.get('response', 'Tôi không có đủ thông tin')
             if response.get('confidence', 0.0) < config.rag.min_retrieval_confidence: 
                 insufficient_info = True
                 response_text = 'Tôi không có đủ thông tin'
