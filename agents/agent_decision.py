@@ -15,8 +15,6 @@ from proxy_setting import *
 from prompt import decision_agent_prompt, conversation_agent_prompt
 from config import Config
 import concurrent.futures
-import asyncio 
-
 
 #Set proxy  
 set_proxy()
@@ -202,7 +200,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
             for i in range(len(messages)-1, -1, -1):
                 if isinstance(messages[i], AIMessage): 
                     if "image_id" in getattr(messages[i], "metadata", {}): 
-                        image_id = getattr(messages[i], "meatadata", {}).get("image_id", None)
+                        image_id = getattr(messages[i], "metadata", {}).get("image_id", None)
                         print(f"Found image_id: {image_id}")
                         break
             
@@ -266,14 +264,33 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
                     patient_id=patient_id,
                     chat_history=chat_history
                 )
+
+                response_text = response.get('response', 'Tôi không có thông tin liên quan')
+                confidence = float(response.get('confidence', 0.0))
+
+                import json
+                with open('kg_response.json', 'w', encoding='utf-8') as f:
+                    json_text = json.dumps(response, ensure_ascii=False, indent=4)
+                    json_text = json_text.replace('\\n', '\n')
+                    f.write(json_text)
+
             except Exception as e:
                 print(f"Error in KG agent: {e}")
-                response = "Tôi không có thông tin liên quan"
+                response_text = "Tôi không có thông tin liên quan"
+                confidence = 0.0
 
-            insufficient_info = "không có thông tin liên quan" in response.lower()
+            insufficient_info = (
+                    "Tôi không có đủ thông tin" in response_text or 
+                    "không đủ thông tin" in response_text.lower() or
+                    "thông tin không đầy đủ" in response_text.lower() or
+                    "không thể trả lời" in response_text.lower() or
+                    "không trả lời được" in response_text.lower() or
+                    "không có thông tin liên quan" in response_text.lower()
+                )
 
             return { 
-                'response': response,
+                'response': response_text,
+                'confidence': confidence,
                 'insufficient_info': insufficient_info,
                 'agent_name': 'KG_AGENT'
             }
@@ -287,27 +304,23 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
                     chat_history.append({"role": "assistant", "content": msg.content})
             try:
                 response = rag_agent.process_query(query, chat_history=chat_history)
+                response_text = response.get('response', 'Tôi không có đủ thông tin')
+                confidence = float(response.get('confidence', 0.0)) 
+
+                import json
+                with open('rag_response.json', 'w', encoding='utf-8') as f:
+                    json_text = json.dumps(response, ensure_ascii=False, indent=4)
+                    json_text = json_text.replace('\\n', '\n')
+                    f.write(json_text)
             except Exception as e:
                 print(f"Error in RAG agent: {e}")
-                response = {
-                    "response": "Tôi không có đủ thông tin",
-                    "confidence": 0.0,
-                    "sources": []
-                }
-            import json
-            with open('rag_response.json' , 'w', encoding='utf-8') as f:
-                json.dump(response, f, ensure_ascii=False)
-            print(isinstance(response, dict))
-            response_text = response.get('response', 'Tôi không có đủ thông tin')
-            if response.get('confidence', 0.0) < config.rag.min_retrieval_confidence: 
-                insufficient_info = True
-                response_text = 'Tôi không có đủ thông tin'
-            elif not isinstance(response, dict):
+                response_text = "Tôi không có đủ thông tin"
+                confidence = 0.0
+
+            if confidence < config.rag.min_retrieval_confidence: 
                 insufficient_info = True
                 response_text = 'Tôi không có đủ thông tin'
             else:
-                response_text = response.get('response', 'Tôi không có đủ thông tin')
-
                 insufficient_info = (
                     "Tôi không có đủ thông tin" in response_text or 
                     "không đủ thông tin" in response_text.lower() or
@@ -318,9 +331,9 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
             
             return {
                 "response": response_text,
+                "confidence": confidence,
                 "insufficient_info": insufficient_info,
                 "agent_name": "RAG_AGENT",
-                "confidence": response.get("confidence", 0.0),
                 "sources": response.get("sources", [])
             }
             
@@ -379,7 +392,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         else:
             print("Both agents have sufficient info -> Combining results")
             
-            if rag_result.get('confidence', 0) > 0.9:
+            if rag_result.get('confidence', 0.0) > kg_result.get('confidence', 0.0) + 0.05:
                 chosen_response = rag_result['response']
                 chosen_agent = "RAG_AGENT"
             else:

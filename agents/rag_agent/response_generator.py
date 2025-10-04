@@ -9,7 +9,7 @@ class ResponseGenerator:
     def __init__(self, config):
         
         self.logger = logging.getLogger(__name__)
-        self.response_generator_model = config.rag.response_generator_model
+        self.response_generator_model = config.rag.llm
         self.include_sources = getattr(config.rag, "include_sources", True)
 
     def _build_prompt(
@@ -56,7 +56,7 @@ PHÂN TÍCH THEO CHAIN OF THOUGHT:
 - NOT_ENOUGH_INFO nếu thông tin chưa đủ hoặc không có trong tài liệu
 
 ## BƯỚC 3: HÀNH ĐỘNG PHÙ HỢP
-- Nếu ENOUGH_INFO: đưa câu trả lời dựa trên tài liệu, giải thích y khoa, tư vấn phù hợp
+- Nếu ENOUGH_INFO: đưa câu trả lời dựa trên tài liệu, tư vấn phù hợp
 - Nếu NOT_ENOUGH_INFO: nêu rõ thông tin nào còn thiếu, khuyến nghị tham khảo thêm hoặc khám bác sĩ
 
 NGUYÊN TẮC AN TOÀN:
@@ -67,20 +67,6 @@ NGUYÊN TẮC AN TOÀN:
 
 TRẢ LỜI THEO FORMAT JSON:
 {{
-  "step1_analysis": {{
-    "document_relevance_score": 0.0-1.0,
-    "key_information": ["thông_tin_quan_trọng_1", "thông_tin_quan_trọng_2"],
-    "related_conditions": [
-      {{
-        "condition": "tên_bệnh_hoặc_tình_trạng",
-        "evidence_strength": 0.0-1.0,
-        "supporting_details": ["chi_tiết_ủng_hộ_1", "chi_tiết_ủng_hộ_2"],
-        "source_confidence": 0.0-1.0
-      }}
-    ],
-    "missing_information": ["thông_tin_còn_thiếu_1", "thông_tin_còn_thiếu_2"]
-  }},
-  "step2_decision": "ENOUGH_INFO" | "NOT_ENOUGH_INFO",
   "step3_action": {{
     "content": "Nội dung chính trả lời bệnh nhân với format đẹp, có cấu trúc rõ ràng",
     "information_gaps": "thông_tin_còn_thiếu",  // chỉ khi NOT_ENOUGH_INFO
@@ -131,6 +117,7 @@ HÃY PHÂN TÍCH:"""
                 
                 # Extract content from step3_action (similar to KG agent)
                 content = response_json.get("step3_action", {}).get("content", "Không có thông tin liên quan từ tài liệu.")
+                confidence = response_json.get('step3_action', {}).get('confidence', 0.0)
                 
                 # Ensure we have good structured content
                 if not content or len(content.strip()) < 10:
@@ -147,9 +134,6 @@ HÃY PHÂN TÍCH:"""
             # Extract sources for citation
             sources = self._extract_sources(retrieved_docs) if hasattr(self, 'include_sources') and self.include_sources else []
             
-            # Calculate confidence
-            confidence = self._calculate_confidence(retrieved_docs)
-
             # Add safety disclaimer
             safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
             
@@ -190,18 +174,15 @@ HÃY PHÂN TÍCH:"""
             source = doc.get("source")
             source_path = doc.get("source_path")
             
-            # Skip if no source information is available
             if not source:
                 continue
                 
             # Create a unique identifier for this source
             source_id = f"{source}|{source_path}"
             
-            # Skip if we've already included this source
             if source_id in seen_sources:
                 continue
                 
-            # Add to our sources list
             source_info = {
                 "title": source,
                 "path": source_path,

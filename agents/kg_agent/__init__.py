@@ -5,6 +5,8 @@ from .response_generator import ResponseGenerator
 from typing import Dict, List, Any, Optional
 from agents.patient_db_agent import PatientQueryEngine
 
+logging.getLogger("httpx").disabled = True
+
 class KGQueryEngine:
     """
     High-level query interface for Knowledge Graph operations.

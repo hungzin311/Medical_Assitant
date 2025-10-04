@@ -9,6 +9,8 @@ from langchain_qdrant import QdrantVectorStore, RetrievalMode
 from qdrant_client.http.models import Distance, VectorParams, OptimizersConfigDiff
 from ..qdrant_client_manager import QdrantClientManager
 
+logging.getLogger("httpx").disabled = True
+
 class VectorStoreCloud:
     def __init__(self, config):
         self.logger = logging.getLogger(__name__)

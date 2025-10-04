@@ -14,13 +14,6 @@ class MedicalRAG:
     Medical Retrieval-Augmented Generation system that integrates all components.
     """
     def __init__(self, config):
-        """
-        Initialize the RAG Agent.
-        
-        Args:
-            config: Configuration object with RAG settings
-        """
-        # Set up logging
         self.logger = logging.getLogger(f"{self.__module__}")
         self.logger.info("Initializing Medical RAG system")
         self.config = config
@@ -156,7 +149,6 @@ class MedicalRAG:
         start_time = time.time()
         self.logger.info(f"RAG Agent processing query: {query}")
         
-        # Process query and return result, passing chat_history
         try:
             # Step 1: Expand query
             self.logger.info(f"1. Expanding query: '{query}'")

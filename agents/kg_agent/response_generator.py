@@ -66,11 +66,14 @@ class ResponseGenerator:
             
             response_json = json.loads(response_text)
             content = response_json.get("step3_action", {}).get("content", "không có thông tin liên quan")
-            
+            confidence = response_json.get('step3_action', {}).get('confidence', 0.0)
         except (json.JSONDecodeError, KeyError) as e:
             print(f"Error parsing JSON response: {e}")
             content = response.content  # Fallback to original content
 
         safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
         
-        return content + safety_disclaimer
+        return {
+            "response": content + safety_disclaimer,
+            "confidence": confidence
+        }

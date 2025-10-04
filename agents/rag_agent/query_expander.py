@@ -32,31 +32,35 @@ class QueryExpander:
         
         NHIỆM VỤ: Tạo ra 1 câu truy vấn tìm kiếm tối ưu HOÀN TOÀN BẰNG TIẾNG VIỆT.
         
-        HƯỚNG DẪN CHO VIETNAMESE SIMILARITY EMBEDDING:
-        - CHỈ sử dụng tiếng Việt, KHÔNG dùng thuật ngữ tiếng Anh
-        - Tạo 1 câu truy vấn hoàn chỉnh, mô tả rõ ràng và tập trung (không phải câu hỏi)
-        - Bao gồm thuật ngữ y tế tiếng Việt chính xác và từ đồng nghĩa quan trọng
-        - Tích hợp các từ khóa liên quan và triệu chứng kèm theo vào 1 câu duy nhất
-        - Tạo query cụ thể và tập trung để tránh nhầm lẫn với các bệnh khác
-        - Nếu hỏi về triệu chứng thì tập trung vào triệu chứng, không đề cập điều trị
-        - Tối ưu hóa cho similarity search với ngữ cảnh phong phú trong 1 câu
+        NGUYÊN TẮC QUAN TRỌNG:
+        - CHỈ mở rộng DỰA VÀO NỘI DUNG có trong câu hỏi gốc
+        - KHÔNG tự bịa thêm triệu chứng hay bệnh lý không được đề cập
+        - CHỈ thêm từ đồng nghĩa trực tiếp và thuật ngữ y tế tương ứng
+        - GIỮ NGUYÊN ý định và phạm vi của câu hỏi ban đầu
         
-        VÍ DỤ:
+        HƯỚNG DẪN MỞ RỘNG HẠN CHẾ:
+        - CHỈ sử dụng tiếng Việt, KHÔNG dùng thuật ngữ tiếng Anh
+        - Tạo 1 câu truy vấn hoàn chỉnh, mô tả rõ ràng và tập trung
+        - CHỈ bao gồm từ đồng nghĩa trực tiếp của các triệu chứng đã nêu
+        - KHÔNG thêm các triệu chứng kèm theo hoặc bệnh lý liên quan không được đề cập
+        - Tập trung vào những gì người dùng THỰC SỰ hỏi
+        
+        VÍ DỤ MỞ RỘNG HẠN CHẾ:
         Câu hỏi: "Tôi bị nổi mẩn đỏ và ngứa"
         Query tối ưu:
         triệu chứng nổi mẩn đỏ ngứa trên da phát ban dị ứng viêm da tiếp xúc mề đay nguyên nhân gây ra
         
         Câu hỏi: "Thuốc điều trị cảm cúm"
         Query tối ưu:
-        thuốc điều trị cảm cúm cảm lạnh kháng vi rút hạ sốt giảm đau phương pháp sử dụng hiệu quả
+        thuốc điều trị cảm cúm cảm lạnh
         
         Câu hỏi: "Triệu chứng tiểu đường"
         Query tối ưu:
-        triệu chứng bệnh tiểu đường đái tháo đường loại một loại hai khát nước tiểu nhiều dấu hiệu nhận biết chẩn đoán
+        triệu chứng bệnh tiểu đường đái tháo đường dấu hiệu
         
         Câu hỏi: "Đau bụng dưới bên phải"
         Query tối ưu:
-        triệu chứng đau bụng dưới bên phải hạ sườn phải viêm ruột thừa các bệnh lý nguyên nhân có thể
+        triệu chứng đau bụng dưới bên phải hạ sườn phải
         
         Câu hỏi: "Cách phòng ngừa cao huyết áp"
         Query tối ưu:

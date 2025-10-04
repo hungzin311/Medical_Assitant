@@ -29,10 +29,7 @@ class RAGConfig:
         self.chunk_size = 512
         self.chunk_overlap = 50
         self.embedding_model = get_fpt_embeddings()
-        self.llm = get_gemini_llm(temperature=0.1)  # Slightly creative but factual
-        self.summarizer_model = get_gemini_llm(temperature=0.2)  # Slightly creative but factual
-        self.chunker_model = get_gemini_llm(temperature=0.0)  # factual
-        self.response_generator_model = get_gemini_llm(temperature=0.0)  # Slightly creative but factual
+        self.llm = get_gemini_llm(temperature=0.0)  
         self.top_k = 10
         self.vector_search_type = 'similarity'  # or 'mmr'
 

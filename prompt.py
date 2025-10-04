@@ -333,7 +333,7 @@ medical_cot_prompt = PromptTemplate(
     - NOT_ENOUGH_INFO nếu còn mơ hồ giữa ≥2 ứng viên hoặc còn red flags chưa xác minh
 
     ## BƯỚC 3: HÀNH ĐỘNG PHÙ HỢP
-    - Nếu ENOUGH_INFO: đưa chẩn đoán DỰA TRÊN XÁC SUẤT (không khẳng định tuyệt đối), giải thích y khoa, tư vấn điều trị, theo dõi
+    - Nếu ENOUGH_INFO: đưa chẩn đoán DỰA TRÊN XÁC SUẤT (không khẳng định tuyệt đối), tư vấn điều trị, theo dõi
     - Nếu NOT_ENOUGH_INFO: chọn 1 câu hỏi/triệu chứng quan trọng nhất cần xác nhận tiếp, giải thích tại sao, ưu tiên red flags
 
     NGUYÊN TẮC AN TOÀN:
@@ -344,22 +344,6 @@ medical_cot_prompt = PromptTemplate(
 
     TRẢ LỜI THEO FORMAT JSON:
     {{
-      "step1_analysis": {{
-        "overall_matched_symptoms_confidence": 0.0-1.0,
-        "candidate_diseases": [
-          {{
-            "disease": "tên_bệnh",
-            "symptom_match": "M/T",
-            "matched_symptoms": ["triệu_chứng_1", "triệu_chứng_2"],
-            "probability": 0.0-1.0,
-            "supporting_evidence": ["bằng_chứng_1", "bằng_chứng_2"],
-            "missing_symptoms": ["thiếu_triệu_chứng_1"],
-            "red_flags": ["cảnh_báo_1"]
-          }}
-        ],
-        "top_differentiators": ["triệu_chứng_phân_biệt_1", "triệu_chứng_phân_biệt_2"]
-      }},
-      "step2_decision": "ENOUGH_INFO" | "NOT_ENOUGH_INFO",
       "step3_action": {{
         "content": "Nội dung chính trả lời bệnh nhân",
         "confidence": "0.0 - 1.0" // độ tự tin của mô hình cho câu trả lời chính,
