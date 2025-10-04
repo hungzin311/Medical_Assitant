@@ -10,15 +10,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --dark-bg: #0a0e1a;
-            --card-bg: rgba(255, 255, 255, 0.95);
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --text-primary: #1a1a2e;
-            --text-secondary: #6c757d;
-            --border-color: rgba(255, 255, 255, 0.2);
+            --primary-gradient: linear-gradient(135deg, #ED1B2E 0%, #F05A6E 100%);
+            --secondary-gradient: linear-gradient(135deg, #ED1B2E 0%, #FF6B7A 100%);
+            --accent-gradient: linear-gradient(135deg, #00C1D5 0%, #00D9A5 100%);
+            --viettel-red: #ED1B2E;
+            --viettel-red-light: #F05A6E;
+            --viettel-cyan: #00C1D5;
+            --light-bg: #F8F9FA;
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --text-primary: #2D3748;
+            --text-secondary: #4A5568;
+            --text-light: #718096;
+            --border-color: rgba(237, 27, 46, 0.1);
         }
 
         * {
@@ -29,11 +33,8 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: var(--dark-bg);
-            background-image: 
-                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
+            background: linear-gradient(180deg, #FFFFFF 0%, #F8F9FA 50%, #F1F3F5 100%);
+            background-attachment: fixed;
             min-height: 100vh;
             color: var(--text-primary);
         }
@@ -47,15 +48,17 @@
 
         .sidebar {
             width: 320px;
-            background: var(--glass-bg);
+            background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(20px);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
+            border: 2px solid rgba(237, 27, 46, 0.1);
+            border-radius: 24px;
             padding: 30px;
-            height: fit-content;
+            min-height: calc(100vh - 40px);
+            display: flex;
+            flex-direction: column;
             position: sticky;
             top: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 40px rgba(237, 27, 46, 0.08);
         }
 
         .sidebar-header {
@@ -74,21 +77,23 @@
         }
 
         .sidebar-header p {
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--text-secondary);
             font-size: 0.9rem;
+            font-weight: 500;
         }
 
         .agent-section {
-            margin-bottom: 25px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+            padding: 18px;
+            background: linear-gradient(135deg, rgba(237, 27, 46, 0.03) 0%, rgba(0, 193, 213, 0.03) 100%);
+            border-radius: 16px;
+            border: 1.5px solid rgba(237, 27, 46, 0.1);
         }
 
         .agent-section h6 {
-            color: #fff;
-            font-weight: 600;
+            color: var(--viettel-red);
+            font-weight: 700;
+            font-size: 0.95rem;
             margin-bottom: 15px;
             display: flex;
             align-items: center;
@@ -103,8 +108,9 @@
 
         .agent-section li {
             padding: 8px 0;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.9rem;
+            color: var(--text-primary);
+            font-size: 0.88rem;
+            font-weight: 500;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -113,34 +119,38 @@
         .agent-section li i {
             width: 16px;
             text-align: center;
-            color: #4facfe;
+            color: var(--viettel-cyan);
+            font-size: 0.9rem;
         }
 
         .clear-btn {
             width: 100%;
             padding: 12px;
-            background: var(--secondary-gradient);
-            border: none;
+            background: linear-gradient(135deg, rgba(237, 27, 46, 0.08) 0%, rgba(237, 27, 46, 0.12) 100%);
+            border: 2px solid rgba(237, 27, 46, 0.2);
             border-radius: 12px;
-            color: white;
-            font-weight: 600;
+            color: var(--viettel-red);
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 0.9rem;
+            margin-top: auto;
         }
 
         .clear-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(245, 87, 108, 0.4);
+            box-shadow: 0 8px 20px rgba(237, 27, 46, 0.15);
+            background: linear-gradient(135deg, rgba(237, 27, 46, 0.12) 0%, rgba(237, 27, 46, 0.15) 100%);
+            border-color: var(--viettel-red);
         }
 
         .chat-container {
             flex: 1;
-            background: var(--card-bg);
+            background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(20px);
-            border-radius: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border-radius: 28px;
+            border: 2px solid rgba(255, 107, 122, 0.1);
+            box-shadow: 0 10px 50px rgba(255, 107, 122, 0.08);
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -148,7 +158,7 @@
 
         .chat-header {
             padding: 25px 30px;
-            background: var(--primary-gradient);
+            background: linear-gradient(135deg, #ED1B2E 0%, #F05A6E 100%);
             color: white;
             text-align: center;
             position: relative;
@@ -221,11 +231,12 @@
         }
 
         .user-message .message-content {
-            background: var(--accent-gradient);
+            background: linear-gradient(135deg, #00C1D5 0%, #00D9A5 100%);
             color: white;
             padding: 18px 24px;
             border-radius: 20px 20px 8px 20px;
             font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0, 193, 213, 0.2);
         }
 
         .assistant-message {
@@ -233,30 +244,30 @@
         }
 
         .assistant-message .message-content {
-            background: rgba(255, 255, 255, 0.8);
+            background: #FFFFFF;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(237, 27, 46, 0.08);
             color: var(--text-primary);
             padding: 18px 24px;
             border-radius: 20px 20px 20px 8px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(237, 27, 46, 0.06);
         }
 
         .agent-tag {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: var(--primary-gradient);
+            background: linear-gradient(135deg, #ED1B2E 0%, #F05A6E 100%);
             color: white;
-            padding: 6px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
             font-size: 0.75rem;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 8px;
             width: fit-content;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(237, 27, 46, 0.25);
         }
 
         .agent-tag i.fa-arrow-right {
@@ -279,20 +290,21 @@
         }
 
         .agent-flow-info {
-            background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+            background: linear-gradient(135deg, #E8F8F5, #F0FBFF);
             padding: 10px 14px;
             border-radius: 12px;
             font-size: 0.85rem;
-            color: #1976d2;
+            color: #00C1D5;
+            font-weight: 500;
             margin-bottom: 12px;
-            border-left: 4px solid #2196f3;
-            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.1);
+            border-left: 4px solid #00C1D5;
+            box-shadow: 0 2px 8px rgba(0, 193, 213, 0.15);
         }
 
         .thinking-progress {
             width: 100%;
             height: 3px;
-            background: rgba(79, 172, 254, 0.2);
+            background: rgba(237, 27, 46, 0.15);
             border-radius: 2px;
             overflow: hidden;
             margin-top: 8px;
@@ -300,7 +312,7 @@
 
         .thinking-progress-bar {
             height: 100%;
-            background: var(--accent-gradient);
+            background: linear-gradient(90deg, #ED1B2E 0%, #00C1D5 100%);
             border-radius: 2px;
             animation: progressSlide 3s ease-in-out infinite;
         }
@@ -313,30 +325,30 @@
 
         .chat-footer {
             padding: 25px 30px;
-            background: rgba(255, 255, 255, 0.05);
+            background: linear-gradient(180deg, transparent 0%, rgba(248, 249, 250, 0.8) 100%);
             backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 2px solid rgba(237, 27, 46, 0.08);
         }
 
         .input-container {
             display: flex;
             align-items: end;
             gap: 15px;
-            background: rgba(255, 255, 255, 0.9);
+            background: white;
             backdrop-filter: blur(20px);
-            border-radius: 20px;
+            border-radius: 24px;
             padding: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(237, 27, 46, 0.12);
+            box-shadow: 0 4px 20px rgba(237, 27, 46, 0.08);
         }
 
         .file-upload-btn {
             width: 45px;
             height: 45px;
             border-radius: 50%;
-            border: none;
-            background: var(--secondary-gradient);
-            color: white;
+            border: 2px solid rgba(237, 27, 46, 0.15);
+            background: rgba(237, 27, 46, 0.05);
+            color: var(--viettel-red);
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
@@ -347,8 +359,10 @@
         }
 
         .file-upload-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 8px 25px rgba(245, 87, 108, 0.4);
+            transform: scale(1.05);
+            background: rgba(237, 27, 46, 0.1);
+            border-color: var(--viettel-red);
+            box-shadow: 0 4px 15px rgba(237, 27, 46, 0.2);
         }
 
         .file-upload-input {
@@ -382,7 +396,7 @@
             height: 45px;
             border-radius: 50%;
             border: none;
-            background: var(--accent-gradient);
+            background: linear-gradient(135deg, #00C1D5 0%, #00D9A5 100%);
             color: white;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -392,8 +406,8 @@
         }
 
         .send-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 193, 213, 0.4);
         }
 
         .preview-container {
@@ -441,13 +455,13 @@
             flex-direction: column;
             gap: 8px;
             padding: 20px 24px;
-            background: rgba(255, 255, 255, 0.95);
+            background: #FFFFFF;
             backdrop-filter: blur(15px);
             border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(237, 27, 46, 0.1);
             align-self: flex-start;
             max-width: 400px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(237, 27, 46, 0.08);
             animation: slideIn 0.4s ease-out;
         }
 
@@ -460,7 +474,7 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: var(--primary-gradient);
+            background: linear-gradient(135deg, #ED1B2E 0%, #00C1D5 100%);
             animation: pulse 1.5s infinite ease-in-out;
         }
 
@@ -615,14 +629,14 @@
         }
         
         .validation-buttons .btn-primary {
-            background: var(--accent-gradient);
+            background: linear-gradient(135deg, #00C1D5 0%, #00D9A5 100%);
             border: none;
             color: white;
         }
         
         #validation-comments textarea {
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: white;
+            border: 2px solid rgba(237, 27, 46, 0.15);
             border-radius: 12px;
             padding: 12px;
             resize: vertical;
@@ -637,20 +651,20 @@
         .validation-section {
             margin-top: 16px;
             padding: 15px;
-            background: rgba(248, 249, 250, 0.95);
+            background: linear-gradient(135deg, rgba(237, 27, 46, 0.03) 0%, rgba(0, 193, 213, 0.03) 100%);
             border-radius: 12px;
-            border-left: 4px solid #0dcaf0;
+            border-left: 4px solid var(--viettel-red);
         }
         
         .validation-section h5 {
-            color: #0dcaf0;
-            font-weight: 600;
+            color: var(--viettel-red);
+            font-weight: 700;
             margin-bottom: 12px;
         }
         
         #validation-comments textarea:focus {
-            box-shadow: 0 0 0 0.25rem rgba(13, 202, 240, 0.25);
-            border-color: #0dcaf0;
+            box-shadow: 0 0 0 0.25rem rgba(237, 27, 46, 0.1);
+            border-color: var(--viettel-red);
         }
     </style>
 </head>
@@ -694,9 +708,7 @@
                     RAG Capabilities
                 </h6>
                 <ul>
-                    <li><i class="fas fa-file-alt"></i> Docling PDF parsing</li>
                     <li><i class="fas fa-vector-square"></i> Advanced embedding</li>
-                    <li><i class="fas fa-cut"></i> Semantic chunking</li>
                     <li><i class="fas fa-expand-arrows-alt"></i> Query expansion</li>
                     <li><i class="fas fa-search-plus"></i> Vector similarity search</li>
                     <li><i class="fas fa-shield-alt"></i> Hallucination prevention</li>
@@ -819,7 +831,7 @@
                     ${transitionHtml}
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <i class="fas fa-cog fa-spin" style="color: #4facfe;"></i>
+                            <i class="fas fa-cog fa-spin" style="color: #00C1D5;"></i>
                             <span style="color: #333; font-size: 0.95rem; font-weight: 500;">
                                 ${displayName}
                             </span>
