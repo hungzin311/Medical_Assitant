@@ -11,13 +11,13 @@ from agents.image_analysis_agent import ImageAnalysisAgent
 from langgraph.checkpoint.memory import MemorySaver
 from agents.kg_agent import KGQueryEngine
 from agents.patient_db_agent import PatientQueryEngine
-from proxy_setting import *
-from prompt import decision_agent_prompt, conversation_agent_prompt
-from config import Config
+from utils.proxy_setting import *
+from utils.prompt import decision_agent_prompt, conversation_agent_prompt
+from utils.config import Config
 import concurrent.futures
 
 #Set proxy  
-set_proxy()
+# set_proxy()
 load_dotenv()
 config = Config()
 memory = MemorySaver()
@@ -219,7 +219,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
 
         # Create context from recent conversation history
         recent_context = ""
-        for msg in messages:  # currently considering complete history - limit control from config
+        for msg in messages:  # currently considering complete history - limit control from utils.config
             if isinstance(msg, HumanMessage):
                 recent_context += f"User: {msg.content}\n"
             elif isinstance(msg, AIMessage):
@@ -417,7 +417,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         web_search_context_limit = config.web_search.context_limit
 
         recent_context = ""
-        for msg in messages[-web_search_context_limit:]: # limit controlled from config
+        for msg in messages[-web_search_context_limit:]: # limit controlled from utils.config
             if isinstance(msg, HumanMessage):
                 recent_context += f"User: {msg.content}\n"
             elif isinstance(msg, AIMessage):

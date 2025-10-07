@@ -1,12 +1,12 @@
 from dotenv import load_dotenv
 from langchain_neo4j import GraphCypherQAChain
 from langchain_core.prompts import FewShotPromptTemplate, PromptTemplate
-from llm_config import get_gemini_llm_2, get_fpt_vietnamese_embedding, get_graph_db
-from prompt import cypher_chain_prompt, examples_cypher_query
+from utils.llm_config import get_gemini_llm_2, get_fpt_vietnamese_embedding, get_graph_db
+from utils.prompt import cypher_chain_prompt, examples_cypher_query
 import threading
-from proxy_setting import set_proxy
+from utils.proxy_setting import set_proxy
 load_dotenv()
-set_proxy()
+# set_proxy()
 class KGManager:
     """
     Singleton class for managing shared components (connections and models)

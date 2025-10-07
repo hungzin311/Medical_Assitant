@@ -1,6 +1,6 @@
 from .kg_manager import get_kg_manager
 from typing import Dict, List, Any, Optional
-from prompt import cypher_query
+from utils.prompt import cypher_query
 
 class CypherQueryService: 
     def __init__(self):

@@ -1,11 +1,11 @@
 from typing import List, Dict, Optional
 from .cypher_query_llm import CypherQueryService
 from .context_filter import ContextFilterEmbedding
-from llm_config import get_gemini_llm_2
+from utils.llm_config import get_gemini_llm_2
 from agents.patient_db_agent import PatientQueryEngine
 from agents.rag_agent.query_expander import QueryExpander
-from config import Config
-from prompt import medical_cot_prompt
+from utils.config import Config
+from utils.prompt import medical_cot_prompt
 import json
 
 config = Config()

@@ -8,7 +8,7 @@ import sys
 project_root = Path(__file__).parent.parent.parent
 sys.path.append(str(project_root))
 
-from config import Config
+from utils.config import Config
 from agents.patient_db_agent import PatientQueryEngine
 
 def main():

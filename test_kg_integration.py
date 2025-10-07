@@ -5,7 +5,7 @@ Test script to verify KG agent integration with the main workflow
 
 from agents.agent_decision import create_agent_graph, process_query
 from agents.patient_db_agent import PatientQueryEngine
-from config import Config
+from utils.config import Config
 import sys
 import os
 

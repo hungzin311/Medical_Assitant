@@ -6,7 +6,7 @@ from pathlib import Path
 import sys
 sys.path.append(str(Path(__file__).parent.parent))
 
-from llm_config import *
+from utils.llm_config import *
 
 URI = "neo4j://127.0.0.1:7687"
 AUTH = ("neo4j", "Hung31102004")

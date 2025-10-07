@@ -17,7 +17,7 @@ sys.path.append(str(Path(__file__).parent))
 
 # Import components
 from agents.rag_agent import MedicalRAG
-from config import Config
+from utils.config import Config
 
 def process_jsonl_file(file_path):
     logger.info(f"Processing JSONL file: {file_path}")

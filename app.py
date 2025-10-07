@@ -11,9 +11,9 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 import uvicorn
 from werkzeug.utils import secure_filename
-from config import Config
+from utils.config import Config
 from agents.agent_decision import process_query, create_agent_graph
-from proxy_setting import *
+from utils.proxy_setting import *
 from agents.patient_db_agent import PatientQueryEngine
 from agents.patient_db_agent.patient_form import PatientForm
 import logging
@@ -27,7 +27,7 @@ config = Config()
 DEFAULT_PATIENT_ID = "PAT_001"
 
 #Set proxy 
-set_proxy()
+# set_proxy()
 
 patient_query_engine = PatientQueryEngine(config)
 
@@ -732,7 +732,7 @@ async def generate_bp_medical_report(request: Request):
     """Generate comprehensive medical report using LLM + medical guidelines"""
     try:
         import pandas as pd
-        from llm_config import get_gemini_llm
+        from utils.llm_config import get_gemini_llm
         
         data = await request.json()
         patient_id = data.get('patient_id', '6')

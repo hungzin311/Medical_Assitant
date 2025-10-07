@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 logging.getLogger("httpx").disabled = True
 
 # Import components
-from config import Config
+from utils.config import Config
 from agents.rag_agent.vectorstore_qdrant_cloud import VectorStoreCloud
 
 def process_jsonl_with_payload(file_path):

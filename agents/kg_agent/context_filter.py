@@ -3,7 +3,7 @@ from typing import List, Dict
 from .embedding_service import embed_text, cosine_similarity
 from .cypher_query_llm import CypherQueryService
 
-from llm_config import get_gemini_llm_2
+from utils.llm_config import get_gemini_llm_2
 import numpy as np 
 
 class ContextFilter:

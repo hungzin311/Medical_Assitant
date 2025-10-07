@@ -1,7 +1,7 @@
 import os
 import threading
 from dotenv import load_dotenv
-from llm_config import get_gemini_llm, get_gemini_vision_llm, get_fpt_embeddings
+from utils.llm_config import get_gemini_llm, get_gemini_vision_llm, get_fpt_embeddings
 
 load_dotenv()
 
