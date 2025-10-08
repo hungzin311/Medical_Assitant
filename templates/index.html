@@ -16,9 +16,9 @@
             --viettel-red: #ED1B2E;
             --viettel-red-light: #F05A6E;
             --viettel-cyan: #00C1D5;
-            --light-bg: #F8F9FA;
-            --card-bg: rgba(255, 255, 255, 0.98);
-            --glass-bg: rgba(255, 255, 255, 0.95);
+            --light-bg: #e4e8ef;
+            --card-bg: rgba(236, 239, 243, 0.95);
+            --glass-bg: rgba(232, 235, 240, 0.92);
             --text-primary: #2D3748;
             --text-secondary: #4A5568;
             --text-light: #718096;
@@ -33,7 +33,7 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(180deg, #FFFFFF 0%, #F8F9FA 50%, #F1F3F5 100%);
+            background: linear-gradient(180deg, #eef2f4 0%, #f1f5f8 50%, #ecf1f4 100%);
             background-attachment: fixed;
             min-height: 100vh;
             color: var(--text-primary);
@@ -48,7 +48,7 @@
 
         .sidebar {
             width: 320px;
-            background: rgba(255, 255, 255, 0.98);
+            background: rgba(248, 250, 252, 0.95);
             backdrop-filter: blur(20px);
             border: 2px solid rgba(237, 27, 46, 0.1);
             border-radius: 24px;
@@ -146,7 +146,7 @@
 
         .chat-container {
             flex: 1;
-            background: rgba(255, 255, 255, 0.98);
+            background: rgba(248, 250, 252, 0.95);
             backdrop-filter: blur(20px);
             border-radius: 28px;
             border: 2px solid rgba(255, 107, 122, 0.1);
@@ -158,7 +158,7 @@
 
         .chat-header {
             padding: 25px 30px;
-            background: linear-gradient(135deg, #ED1B2E 100%, #F05A6E 0%);
+            background: linear-gradient(135deg, #E60000 100%);
             color: white;
             text-align: center;
             position: relative;
@@ -204,7 +204,7 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
-            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.02), transparent);
+            background: linear-gradient(to bottom, rgba(248, 250, 252, 0.02), transparent);
         }
 
         .message {
@@ -244,7 +244,7 @@
         }
 
         .assistant-message .message-content {
-            background: #FFFFFF;
+            background: #FAFBFC;
             backdrop-filter: blur(10px);
             border: 2px solid rgba(237, 27, 46, 0.08);
             color: var(--text-primary);
@@ -334,7 +334,7 @@
             display: flex;
             align-items: end;
             gap: 15px;
-            background: white;
+            background: #FAFBFC;
             backdrop-filter: blur(20px);
             border-radius: 24px;
             padding: 8px;
@@ -455,7 +455,7 @@
             flex-direction: column;
             gap: 8px;
             padding: 20px 24px;
-            background: #FFFFFF;
+            background: #FAFBFC;
             backdrop-filter: blur(15px);
             border-radius: 20px;
             border: 2px solid rgba(237, 27, 46, 0.1);
@@ -524,7 +524,7 @@
             width: 100%;
             margin: 15px 0;
             font-size: 0.9rem;
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(248, 250, 252, 0.8);
             border-radius: 10px;
             overflow: hidden;
         }
@@ -536,13 +536,13 @@
         }
 
         .message th {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(240, 242, 245, 0.9);
             font-weight: 600;
             color: var(--text-primary);
         }
 
         .message tr:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(240, 242, 245, 0.5);
         }
 
         .capabilities-list {
@@ -635,7 +635,7 @@
         }
         
         #validation-comments textarea {
-            background: white;
+            background: #FAFBFC;
             border: 2px solid rgba(237, 27, 46, 0.15);
             border-radius: 12px;
             padding: 12px;
