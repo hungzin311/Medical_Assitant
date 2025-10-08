@@ -27,7 +27,7 @@ config = Config()
 DEFAULT_PATIENT_ID = "PAT_001"
 
 #Set proxy 
-# set_proxy()
+set_proxy()
 
 patient_query_engine = PatientQueryEngine(config)
 

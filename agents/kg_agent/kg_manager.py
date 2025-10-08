@@ -6,7 +6,7 @@ from utils.prompt import cypher_chain_prompt, examples_cypher_query
 import threading
 from utils.proxy_setting import set_proxy
 load_dotenv()
-# set_proxy()
+set_proxy()
 class KGManager:
     """
     Singleton class for managing shared components (connections and models)
@@ -60,7 +60,7 @@ class KGManager:
             graph=self._graph,
             cypher_prompt=prompt,
             allow_dangerous_requests=True,
-            verbose = True,
+            # verbose = True,
             return_direct=True
         )
     

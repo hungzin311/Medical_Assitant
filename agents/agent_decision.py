@@ -17,7 +17,7 @@ from utils.config import Config
 import concurrent.futures
 
 #Set proxy  
-# set_proxy()
+set_proxy()
 load_dotenv()
 config = Config()
 memory = MemorySaver()

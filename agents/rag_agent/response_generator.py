@@ -1,5 +1,6 @@
 import logging
 import json
+import re
 from typing import List, Dict, Any, Optional, Union
 
 class ResponseGenerator:
@@ -107,11 +108,9 @@ HÃY PHÂN TÍCH:"""
                 else:
                     response_text = str(response).strip()
                 
-                # Handle JSON formatting
-                if response_text.startswith("```json"):
-                    response_text = response_text[7:]  # Remove ```json
-                if response_text.endswith("```"):
-                    response_text = response_text[:-3]  # Remove ```
+                match = re.search(r"```json\s*(\{.*?\})\s*```", response_text, re.DOTALL)
+                if match:
+                    response_text = match.group(1)  # chỉ lấy phần { ... }
                 
                 response_json = json.loads(response_text)
                 

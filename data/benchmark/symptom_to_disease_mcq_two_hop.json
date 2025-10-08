@@ -1,0 +1,266 @@
+[
+    {
+        "question_idx": 69,
+        "question": "những triệu chứng như [cấu trúc răng bất thường, đau răng nóng và lạnh, tổn thương răng] có thể chỉ ra bệnh gì?",
+        "choices": [
+            "xơ gan",
+            "viêm tủy cấp tính; viêm tủy mãn tính",
+            "tê lưỡi trong kỳ kinh nguyệt",
+            "giảm bạch cầu và giảm bạch cầu hạt ở người già"
+        ],
+        "answer": 1
+    },
+    {
+        "question_idx": 70,
+        "question": "những bệnh lý nào có thể xuất hiện khi có triệu chứng [tan máu, cyanide]?",
+        "choices": [
+            "hội chứng lectin lạnh; bệnh hemoglobin m",
+            "xơ gan dược phẩm",
+            "viêm họng herpetic",
+            "phát ban cảm lạnh"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 71,
+        "question": "những triệu chứng như [khó chịu ở bụng, tiêu chảy, chán ăn] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "bệnh đẳng bào tử; bệnh sán dây đa dạng",
+            "viêm màng ngoài tim sau nhồi máu cơ tim",
+            "tứ chứng fallot",
+            "viêm tai giữa tiết"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 72,
+        "question": "những triệu chứng như [chảy máu chấn thương, móng tay dày và giòn, ngón tay cứng và đau] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "hội chứng mộng du",
+            "viêm da rùa vàng",
+            "bệnh nấm móng; bệnh nấm móng",
+            "chuyển vị hoàn toàn động mạch chủ"
+        ],
+        "answer": 2
+    },
+    {
+        "question_idx": 73,
+        "question": "những triệu chứng như [khối u, tiêu chảy, chảy máu ruột] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "ngộ độc paraquat",
+            "bệnh sán dây đa dạng",
+            "thụt niệu quản",
+            "viêm phổi do virus cúm ở trẻ em; nhiễm e. coli xuất huyết đường ruột"
+        ],
+        "answer": 3
+    },
+    {
+        "question_idx": 74,
+        "question": "bạn có thể cho biết những bệnh lý nào có thể xuất hiện khi có triệu chứng [nôn ra máu nhiều lần] không?",
+        "choices": [
+            "hội chứng xé niêm mạc thực quản và tim; bệnh dierlafuwa",
+            "u nang phế quản phổi bẩm sinh",
+            "viêm phổi do lipid",
+            "cối xay gió đậu đỏ"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 75,
+        "question": "những triệu chứng như [mệt mỏi, suy tim, khó thở] thường liên quan đến bệnh gì?",
+        "choices": [
+            "hẹp van động mạch chủ bẩm sinh ở trẻ em; kết nối lạc tĩnh mạch phổi một phần ở trẻ em",
+            "hội chứng mộng du",
+            "pemphigus thoái hóa",
+            "viêm màng bồ đào ở trẻ em và thanh thiếu niên"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 76,
+        "question": "những triệu chứng như [đau bụng, buồn nôn, tiêu chảy] thường liên quan đến bệnh lý nào?",
+        "choices": [
+            "ngộ độc thực phẩm vibrio parahaemolytic; ngộ độc thực phẩm bacillus cereus",
+            "viêm màng cứng liên quan đến vi khuẩn gram dương và gram âm",
+            "viêm màng bồ đào ở trẻ em và thanh thiếu niên",
+            "phình động mạch cảnh"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 77,
+        "question": "những triệu chứng như [đau ngực, đau tiền kinh nguyệt và đau ngực sưng] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "các nốt vú; các nốt vú - xét nghiệm",
+            "vô kinh vùng dưới đồi chức năng",
+            "khí phế thũng tự phát",
+            "tai liên kết"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 78,
+        "question": "những triệu chứng như [tai, sợ ánh sáng, đau mắt] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "bệnh đẳng bào tử",
+            "ngộ độc thực phẩm bacillus cereus",
+            "mụn cóc da",
+            "viêm màng cứng liên quan đến vi khuẩn gram dương và gram âm; viêm giác mạc mycobacterium không lao"
+        ],
+        "answer": 3
+    },
+    {
+        "question_idx": 79,
+        "question": "bệnh gì có thể xuất hiện khi có các triệu chứng như [nốt, quần áo và ngọc bích]?",
+        "choices": [
+            "khối u âm hộ kết hợp mang thai",
+            "nhiễm e. coli xuất huyết đường ruột",
+            "viêm màng bồ đào ở trẻ em và thanh thiếu niên",
+            "tai liên kết; nevus xanh ác tính"
+        ],
+        "answer": 3
+    },
+    {
+        "question_idx": 80,
+        "question": "những triệu chứng như [quần áo và ngọc bích, mụn nhọt, mụn mủ, ngứa] có thể chỉ ra bệnh gì?",
+        "choices": [
+            "ngộ độc paraquat",
+            "viêm da rùa vàng; viêm nang lông bào tử furfuria",
+            "hội chứng mộng du",
+            "các nốt vú"
+        ],
+        "answer": 1
+    },
+    {
+        "question_idx": 81,
+        "question": "những triệu chứng như [đau cùn, đau lưng, đau tai] có thể chỉ ra bệnh gì?",
+        "choices": [
+            "đau ung thư; đau ung thư",
+            "vô kinh vùng dưới đồi chức năng",
+            "xơ gan dược phẩm",
+            "bệnh thận tiểu đường ở trẻ em"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 82,
+        "question": "những bệnh lý nào có thể xuất hiện khi bạn cảm thấy [đau tinh hoàn]?",
+        "choices": [
+            "viêm họng herpetic",
+            "u lympho tế bào trung tâm nang da nguyên phát",
+            "u quái tinh hoàn; mất ống dẫn tinh",
+            "dòng chảy ngược của đĩa ba lá"
+        ],
+        "answer": 2
+    },
+    {
+        "question_idx": 83,
+        "question": "những bệnh lý nào có thể xuất hiện khi có [tổn thương màng nhầy]?",
+        "choices": [
+            "viêm phổi do lipid",
+            "khủng hoảng tuyến yên và đột quỵ tuyến yên",
+            "u nang phế quản phổi bẩm sinh",
+            "u vàng mặt phẳng khuếch tán; pemphigus thoái hóa; loét khủng khiếp"
+        ],
+        "answer": 3
+    },
+    {
+        "question_idx": 84,
+        "question": "có bệnh lý nào có thể phát triển từ triệu chứng [ngứa] không?",
+        "choices": [
+            "hội chứng mộng du",
+            "bệnh hemoglobin m",
+            "bệnh thận đa u tủy",
+            "pemphigus giống herpes; khối u cơ vân ác tính của bộ phận sinh dục bên ngoài; khối u âm hộ kết hợp mang thai"
+        ],
+        "answer": 3
+    },
+    {
+        "question_idx": 85,
+        "question": "những triệu chứng như [nỗi đau của bạn, nỗi sợ ánh sáng, nước mắt] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "ngộ độc thực phẩm bacillus cereus",
+            "viêm màng bồ đào ở trẻ em và thanh thiếu niên; viêm màng cứng mycobacterium không điển hình; cối xay gió đậu đỏ",
+            "nhiễm e. coli xuất huyết đường ruột",
+            "bệnh thận đa u tủy"
+        ],
+        "answer": 1
+    },
+    {
+        "question_idx": 86,
+        "question": "những triệu chứng như [suy tim, tím tái, khó thở] thường dẫn đến bệnh gì?",
+        "choices": [
+            "trẻ em cổ xiên bẩm sinh",
+            "tạp chí hàng tháng; chuyển vị hoàn toàn động mạch chủ; lối thoát đôi tâm thất phải",
+            "u màng não góc cầu não",
+            "bệnh thần kinh carcinoid"
+        ],
+        "answer": 1
+    },
+    {
+        "question_idx": 87,
+        "question": "những bệnh lý nào có thể phát triển từ các triệu chứng của [thiếu máu tán huyết]?",
+        "choices": [
+            "bệnh lao niệu đạo và dương vật",
+            "rối loạn tái tạo hồng cầu tinh khiết; bệnh globulosis di truyền; bệnh hồng cầu hình elip di truyền",
+            "hội chứng lectin lạnh",
+            "u nang nasser"
+        ],
+        "answer": 1
+    },
+    {
+        "question_idx": 88,
+        "question": "những triệu chứng như [đi tiểu thường xuyên, tiểu máu, đau khi tiểu] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "bệnh thận đa u tủy",
+            "viêm phổi do lipid",
+            "thụt niệu quản; bệnh lao niệu đạo; staphylococcus sarcoma trong bàng quang",
+            "huyết khối dưới màng cứng cấp tính"
+        ],
+        "answer": 2
+    },
+    {
+        "question_idx": 89,
+        "question": "những triệu chứng như [suy nhược, đi tiểu thường xuyên, tiểu máu] thường chỉ đến bệnh lý nào?",
+        "choices": [
+            "nước thận đối diện gây ra bởi bệnh lao thận; tăng calci huyết vô căn ở trẻ em; bệnh lao niệu đạo và dương vật",
+            "viêm da rùa vàng",
+            "u quái tinh hoàn",
+            "khóa"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 90,
+        "question": "có bệnh gì có thể xuất hiện từ các triệu chứng của [chất lượng khu vực trú ẩn]?",
+        "choices": [
+            "u mô tế bào sợi ác tính của bộ phận sinh dục bên ngoài; sarcoma hoạt dịch sinh dục bên ngoài; fibrosarcoma sinh dục bên ngoài; khối u vàng mụn cóc sinh dục bên ngoài",
+            "bệnh dierlafuwa",
+            "tai liên kết",
+            "viêm phổi do virus cúm ở trẻ em"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 91,
+        "question": "những triệu chứng như [túi, ngứa] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "hài kịch nevus; phân tán viêm nang lông tái phát ở bộ phận phễu; mụn cóc da; hồng rêu hình hạt",
+            "bệnh dịch hạch phổi",
+            "bệnh lao niệu đạo",
+            "viêm phổi do lipid"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 92,
+        "question": "những bệnh lý nào có thể xuất hiện khi có các triệu chứng từ [paules, nốt ruồi]?",
+        "choices": [
+            "đau ung thư",
+            "viêm nang lông cứng dưới gối",
+            "nốt ruồi bã nhờn; u niêm mạc vỏ thần kinh; u lympho tế bào trung tâm nang da nguyên phát; ung thư lympho tế bào lớn dương tính cd30; tăng sản hạch bạch huyết tế bào b trên da; u bạch huyết da; bề mặt da lipoma nevus",
+            "bệnh tích tụ glycogen"
+        ],
+        "answer": 2
+    }
+]

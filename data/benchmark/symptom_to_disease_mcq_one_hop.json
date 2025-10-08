@@ -1,0 +1,761 @@
+[
+    {
+        "question_idx": 0,
+        "question": "những triệu chứng như [u nang phổi, dày lưỡi, ngọc bích, táo bón] có thể chỉ dấu hiệu của bệnh gì?",
+        "choices": [
+            "nhiễm tụ cầu khuẩn",
+            "cơ hoành",
+            "nevus xanh ác tính",
+            "viêm dạ dày mãn tính"
+        ],
+        "answer": 1
+    },
+    {
+        "question_idx": 1,
+        "question": "những triệu chứng như [buồn ngủ, ho, đau dữ dội, tăng áp lực nội sọ] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "viêm màng cứng liên quan đến vi khuẩn gram dương và gram âm",
+            "khóa",
+            "phòng sớm cho người già",
+            "u màng não góc cầu não"
+        ],
+        "answer": 3
+    },
+    {
+        "question_idx": 2,
+        "question": "những triệu chứng như [chuyển động tự trị, ataxia, tê tứ chi] thường gặp ở bệnh lý nào?",
+        "choices": [
+            "cơ hoành",
+            "bệnh thần kinh carcinoid",
+            "virus viêm gan e",
+            "nhiễm cmv"
+        ],
+        "answer": 1
+    },
+    {
+        "question_idx": 3,
+        "question": "những triệu chứng như [buồn nôn, thị giác sương mù, thị giác mống mắt] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "nhiễm tụ cầu khuẩn",
+            "sarcoma hoạt dịch sinh dục bên ngoài",
+            "bệnh nấm móng",
+            "tăng nhãn áp thứ phát kết hợp với viêm mống mắt"
+        ],
+        "answer": 3
+    },
+    {
+        "question_idx": 4,
+        "question": "những triệu chứng như [suy tim phải, mệt mỏi, bệnh van tim] thường dẫn đến bệnh gì?",
+        "choices": [
+            "dòng chảy ngược của đĩa ba lá",
+            "viêm huyết khối không do vi khuẩn",
+            "u lympho tế bào trung tâm nang da nguyên phát",
+            "huyết khối dưới màng cứng cấp tính"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 5,
+        "question": "những triệu chứng như [quá mẫn cảm với muối bismuth, khó thở, sưng nướu] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "viêm nang lông cứng dưới gối",
+            "ngộ độc bismuth",
+            "nevus xanh ác tính",
+            "nhiễm cmv"
+        ],
+        "answer": 1
+    },
+    {
+        "question_idx": 6,
+        "question": "những triệu chứng như [rối loạn trí tuệ, suy nhược, hay quên, thay đổi tính cách] thường gặp ở bệnh lý nào?",
+        "choices": [
+            "epipressure não úng thủy ở tuổi già",
+            "bệnh hemoglobin m",
+            "ung thư lympho tế bào lớn dương tính cd30",
+            "rối loạn tái tạo hồng cầu tinh khiết"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 7,
+        "question": "những triệu chứng như [phân tán máu mycobacterium tuberculosis, xâm nhập tủy sống, đổ mồ hôi ban đêm] có thể chỉ ra bệnh gì?",
+        "choices": [
+            "viêm họng herpetic",
+            "gãy xương xoắn hoặc gãy xương trục chấn thương",
+            "viêm cột sống lao",
+            "xơ gan"
+        ],
+        "answer": 2
+    },
+    {
+        "question_idx": 8,
+        "question": "những triệu chứng như [mụn, polyp, kích thích đốt cháy bộ phận sinh dục bên ngoài, nhiễm trùng thứ phát, ngứa] có thể chỉ ra bệnh gì?",
+        "choices": [
+            "sarcoma sinh dục ngoài kaposi",
+            "thụt niệu quản",
+            "bề mặt da lipoma nevus",
+            "viêm cột sống lao"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 9,
+        "question": "những triệu chứng như [lúa mạch tươi, rêu lưỡi dày, tay chân lạnh] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "viêm nang lông cứng dưới gối",
+            "tâm thần phân liệt",
+            "viêm dạ dày mãn tính",
+            "viêm dạ dày ở trẻ em khó thở"
+        ],
+        "answer": 3
+    },
+    {
+        "question_idx": 10,
+        "question": "những triệu chứng như [loét họng, tắc nghẽn cổ họng, đau nuốt] thường liên quan đến bệnh gì?",
+        "choices": [
+            "epipressure não úng thủy ở tuổi già",
+            "chuyển vị hoàn toàn động mạch chủ",
+            "viêm họng herpetic",
+            "nước thận đối diện gây ra bởi bệnh lao thận"
+        ],
+        "answer": 2
+    },
+    {
+        "question_idx": 11,
+        "question": "những bệnh lý nào có thể xuất hiện khi bạn cảm thấy [đau lưng dưới]?",
+        "choices": [
+            "phòng sớm cho người già",
+            "tổn thương thoái hóa đầu gối",
+            "đau ung thư",
+            "sarcoma sinh dục ngoài kaposi"
+        ],
+        "answer": 1
+    },
+    {
+        "question_idx": 12,
+        "question": "bệnh gì có thể gây ra các triệu chứng như [vảy máu, ngứa da mùa đông]?",
+        "choices": [
+            "các nốt vú",
+            "viêm tủy cấp tính",
+            "ngứa tóc",
+            "bệnh sán máng nội tạng"
+        ],
+        "answer": 2
+    },
+    {
+        "question_idx": 13,
+        "question": "những triệu chứng như [rối loạn vi tuần hoàn, hội chứng gan thận, suy gan, nevus nhện, cyan] có thể là dấu hiệu của bệnh nào?",
+        "choices": [
+            "xơ gan",
+            "các nốt vú",
+            "ngộ độc bismuth",
+            "nhiễm chlamydia pneumoniae"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 14,
+        "question": "những triệu chứng như [ho, hạ oxy máu, sốt, khó thở] thường dẫn đến bệnh gì?",
+        "choices": [
+            "bệnh dịch hạch phổi",
+            "rối loạn tái tạo hồng cầu tinh khiết",
+            "viêm phổi do lipid",
+            "tổn thương thoái hóa đầu gối"
+        ],
+        "answer": 2
+    },
+    {
+        "question_idx": 15,
+        "question": "những triệu chứng như [cảm giác bỏng, kích ứng và ngứa ở bộ phận sinh dục bên ngoài, cùng với loét] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "hội chứng lectin lạnh",
+            "các nốt vú",
+            "u mô tế bào sợi ác tính của bộ phận sinh dục bên ngoài",
+            "viêm âm đạo hỗn hợp"
+        ],
+        "answer": 3
+    },
+    {
+        "question_idx": 16,
+        "question": "những bệnh lý nào có thể xuất hiện khi có các triệu chứng như [dị tật đốt sống ngực, khối u cổ tiến triển]?",
+        "choices": [
+            "u lympho tế bào trung tâm nang da nguyên phát",
+            "ngứa tóc",
+            "trẻ em cổ xiên bẩm sinh",
+            "bề mặt da lipoma nevus"
+        ],
+        "answer": 2
+    },
+    {
+        "question_idx": 17,
+        "question": "những triệu chứng như [viêm vú, viêm màng ngoài tim, nhiễm trùng huyết] thường gặp ở bệnh nào?",
+        "choices": [
+            "nhiễm tụ cầu khuẩn",
+            "viêm dạ dày mãn tính",
+            "u mô tế bào sợi ác tính của bộ phận sinh dục bên ngoài",
+            "gãy xương xoắn hoặc gãy xương trục chấn thương"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 18,
+        "question": "những triệu chứng như [đau cổ, tê chân phải, hội chứng tim cổ] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "bệnh đốt sống cổ",
+            "ngộ độc bismuth",
+            "bệnh thận đa u tủy",
+            "tâm thần phân liệt"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 19,
+        "question": "bệnh gì có thể gây ra các triệu chứng như [suy tim, tím tái, thiếu oxy trong máu, khó thở do tim, run co thắt]?",
+        "choices": [
+            "hội chứng xé niêm mạc thực quản và tim",
+            "cơ hoành",
+            "tứ chứng fallot",
+            "nhiễm chlamydia pneumoniae"
+        ],
+        "answer": 2
+    },
+    {
+        "question_idx": 20,
+        "question": "những triệu chứng như [mụn nhọt, sẹo tăng sản, mụn mủ] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "loét khủng khiếp",
+            "bệnh đốt sống cổ",
+            "bệnh actinomycosis của nocardia",
+            "viêm nang lông cứng dưới gối"
+        ],
+        "answer": 3
+    },
+    {
+        "question_idx": 21,
+        "question": "những triệu chứng như [chảy máu đường tiêu hóa trên, đau bụng giữa trên, phân đen] thường chỉ định cho bệnh lý nào?",
+        "choices": [
+            "khối u bạch cầu eosinophilic thận",
+            "viêm dạ dày mãn tính",
+            "viêm dạ dày ở trẻ em khó thở",
+            "nước thận đối diện gây ra bởi bệnh lao thận"
+        ],
+        "answer": 1
+    },
+    {
+        "question_idx": 22,
+        "question": "bệnh lý nào có thể gây ra các triệu chứng như [xanh tím, suy hô hấp, tiểu máu, đau bụng]?",
+        "choices": [
+            "bệnh hồng cầu hình elip di truyền",
+            "viêm màng bồ đào ở trẻ em và thanh thiếu niên",
+            "tứ chứng fallot",
+            "ngộ độc paraquat"
+        ],
+        "answer": 3
+    },
+    {
+        "question_idx": 23,
+        "question": "những triệu chứng như [hoại tử tế bào gan lớn, hội chứng gan thận, tiêu chảy, nước trong bụng, đầy hơi] có thể chỉ ra bệnh gì?",
+        "choices": [
+            "virus viêm gan e",
+            "khối u cơ vân ác tính của bộ phận sinh dục bên ngoài",
+            "viêm tủy mãn tính",
+            "sarcoma hoạt dịch sinh dục bên ngoài"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 24,
+        "question": "những triệu chứng như [nhức đầu, sốt, đau họng, nghẹt mũi] thường liên quan đến bệnh gì?",
+        "choices": [
+            "phình động mạch cảnh",
+            "bệnh thận đa u tủy",
+            "lạnh thông thường",
+            "nhiễm chlamydia pneumoniae"
+        ],
+        "answer": 2
+    },
+    {
+        "question_idx": 25,
+        "question": "những triệu chứng như [run, khối u cổ, ngất xỉu, khó thở] thường dẫn đến bệnh gì?",
+        "choices": [
+            "tổn thương thoái hóa đầu gối",
+            "rối loạn tái tạo hồng cầu tinh khiết",
+            "phát ban cảm lạnh",
+            "phình động mạch cảnh"
+        ],
+        "answer": 3
+    },
+    {
+        "question_idx": 26,
+        "question": "những triệu chứng như [blunt-pain, oligouria, blood-uria] có thể chỉ ra bệnh gì?",
+        "choices": [
+            "khối u bạch cầu eosinophilic thận",
+            "nhiễm chlamydia pneumoniae",
+            "xơ gan",
+            "viêm màng cứng mycobacterium không điển hình"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 27,
+        "question": "những triệu chứng như [chức năng gan bất thường, tiêu chảy, đau bụng, cảm lạnh, buồn nôn] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "u vàng mặt phẳng khuếch tán",
+            "viêm huyết khối không do vi khuẩn",
+            "chuyển vị hoàn toàn động mạch chủ",
+            "bệnh erich"
+        ],
+        "answer": 3
+    },
+    {
+        "question_idx": 28,
+        "question": "những triệu chứng như [thắt lưng mềm đầu gối, chóng mặt, ù tai] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "động não",
+            "vô kinh vùng dưới đồi chức năng",
+            "bệnh đốt sống cổ",
+            "các nốt vú"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 29,
+        "question": "những triệu chứng như [gãy xương cổ và trật khớp, rối loạn nuốt, không thể xoay cổ] có thể chỉ ra bệnh gì?",
+        "choices": [
+            "tai liên kết",
+            "viêm tủy mãn tính",
+            "gãy xương xoắn hoặc gãy xương trục chấn thương",
+            "đau ung thư"
+        ],
+        "answer": 2
+    },
+    {
+        "question_idx": 30,
+        "question": "bệnh gì có thể gây ra các triệu chứng như [mụn đốm vàng, rối loạn thị giác, loãng xương]?",
+        "choices": [
+            "thiếu proline",
+            "viêm nang lông cứng dưới gối",
+            "bệnh lao niệu đạo",
+            "hội chứng lectin lạnh"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 31,
+        "question": "những triệu chứng như [wanpi, resident, gastrography, eat appetite, belfast] có thể chỉ ra bệnh lý nào?",
+        "choices": [
+            "đau ung thư",
+            "bệnh dịch hạch phổi",
+            "đầy đủ",
+            "viêm da rùa vàng"
+        ],
+        "answer": 2
+    },
+    {
+        "question_idx": 32,
+        "question": "những triệu chứng như [hạ đường huyết, suy nhược, nhiễm ketoacidosis] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "bệnh tích tụ glycogen",
+            "sarcoma hoạt dịch sinh dục bên ngoài",
+            "trẻ em cổ xiên bẩm sinh",
+            "nhiễm tụ cầu khuẩn"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 33,
+        "question": "bệnh lý nào có thể gây ra các triệu chứng như [suy nhược, nhiễm khuẩn, mệt mỏi, giảm sự thèm ăn, sốt thấp, chóng mặt, nhiễm trùng lặp đi lặp lại]?",
+        "choices": [
+            "viêm nang lông bào tử furfuria",
+            "epipressure não úng thủy ở tuổi già",
+            "các nốt vú - xét nghiệm",
+            "giảm bạch cầu và giảm bạch cầu hạt ở người già"
+        ],
+        "answer": 3
+    },
+    {
+        "question_idx": 34,
+        "question": "những triệu chứng như [đau tai, chảy máu tai, mất thính lực] thường chỉ đến bệnh gì?",
+        "choices": [
+            "nhiễm cmv",
+            "xơ gan",
+            "viêm tai giữa tiết",
+            "các nốt vú"
+        ],
+        "answer": 2
+    },
+    {
+        "question_idx": 35,
+        "question": "những triệu chứng như [tiếng thổi tim, độ nhớt cao, nhồi máu cơ tim] ở người già thường chỉ dấu hiệu của bệnh gì?",
+        "choices": [
+            "hồng rêu hình hạt",
+            "tổn thương thoái hóa đầu gối",
+            "nhiễm tụ cầu khuẩn",
+            "viêm huyết khối không do vi khuẩn"
+        ],
+        "answer": 3
+    },
+    {
+        "question_idx": 36,
+        "question": "những triệu chứng như [đau đầu, khó thở, mệt mỏi] có thể chỉ ra bệnh gì?",
+        "choices": [
+            "bệnh thận tiểu đường ở trẻ em",
+            "nhiễm cmv",
+            "bệnh sán máng nội tạng",
+            "tai liên kết"
+        ],
+        "answer": 1
+    },
+    {
+        "question_idx": 37,
+        "question": "những triệu chứng như [đau cùn, đau ngực, nhồi máu cơ tim] thường gặp ở bệnh lý nào?",
+        "choices": [
+            "kết nối lạc tĩnh mạch phổi một phần ở trẻ em",
+            "lạnh thông thường",
+            "viêm màng ngoài tim sau nhồi máu cơ tim",
+            "tăng sản hạch bạch huyết tế bào b trên da"
+        ],
+        "answer": 2
+    },
+    {
+        "question_idx": 38,
+        "question": "những triệu chứng như [ngựa, giọng khàn] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "các nốt vú - xét nghiệm",
+            "viêm họng herpetic",
+            "viêm màng cứng mycobacterium không điển hình",
+            "nhiễm chlamydia pneumoniae"
+        ],
+        "answer": 3
+    },
+    {
+        "question_idx": 39,
+        "question": "những triệu chứng như [đau ngực sau khi no, đau ngực hút thuốc, khó thở, tim đập nhanh] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "phình động mạch cảnh",
+            "bệnh tích tụ glycogen",
+            "khí phế thũng tự phát",
+            "khối u âm hộ kết hợp mang thai"
+        ],
+        "answer": 2
+    },
+    {
+        "question_idx": 40,
+        "question": "bệnh gì có thể gây ra các triệu chứng như [mất chức năng nhai lại, biến dạng khóa, biến dạng khuôn mặt]?",
+        "choices": [
+            "viêm cột sống lao",
+            "bệnh thận đa u tủy",
+            "khóa",
+            "thụt niệu quản"
+        ],
+        "answer": 2
+    },
+    {
+        "question_idx": 41,
+        "question": "những triệu chứng như [khó thở, bị chèn ép, ho ra máu] thường dẫn đến bệnh gì?",
+        "choices": [
+            "tổn thương khí quản khép kín",
+            "u màng não góc cầu não",
+            "nốt ruồi bã nhờn",
+            "shin-fi trước khi tách"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 42,
+        "question": "những triệu chứng như [nốt, chấn thương dây chằng tam giác, rách cơ ruột] có thể dẫn đến bệnh gì?",
+        "choices": [
+            "u mạch máu đại trực tràng",
+            "bệnh tích tụ glycogen",
+            "xơ gan",
+            "shin-fi trước khi tách"
+        ],
+        "answer": 3
+    },
+    {
+        "question_idx": 43,
+        "question": "những triệu chứng như [đi tiểu thường xuyên, ngứa, đau bụng kinh] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "dòng chảy ngược của đĩa ba lá",
+            "viêm màng bồ đào ở trẻ em và thanh thiếu niên",
+            "u nang nasser",
+            "tự phát vỡ bàng quang lao"
+        ],
+        "answer": 2
+    },
+    {
+        "question_idx": 44,
+        "question": "những triệu chứng như [mệt mỏi, đau bụng, táo bón, chảy máu phân] thường chỉ đến bệnh gì?",
+        "choices": [
+            "u mạch máu đại trực tràng",
+            "cát",
+            "u quái tinh hoàn",
+            "hậu môn nứt"
+        ],
+        "answer": 3
+    },
+    {
+        "question_idx": 45,
+        "question": "những triệu chứng như [tổn thương răng, suy giảm nướu, nghiến răng] có thể chỉ dấu hiệu của bệnh gì?",
+        "choices": [
+            "viêm túi mật sỏi cấp tính",
+            "khuyết tật nêm",
+            "virus viêm gan e",
+            "tăng nhãn áp thứ phát kết hợp với viêm mống mắt"
+        ],
+        "answer": 1
+    },
+    {
+        "question_idx": 46,
+        "question": "những triệu chứng như [khó thở, rối loạn thị lực, chóng mặt] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "nốt ruồi bã nhờn",
+            "tăng calci huyết vô căn ở trẻ em",
+            "máu dính",
+            "phát ban cảm lạnh"
+        ],
+        "answer": 2
+    },
+    {
+        "question_idx": 47,
+        "question": "những triệu chứng như [kêu ruột, tiểu máu, đau bụng, viêm phúc mạc] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "u nang nasser",
+            "tự phát vỡ bàng quang lao",
+            "thụt niệu quản",
+            "bệnh thần kinh carcinoid"
+        ],
+        "answer": 1
+    },
+    {
+        "question_idx": 48,
+        "question": "những triệu chứng như [xu hướng chảy máu, chảy máu mũi, chảy máu nướu] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "bệnh thận đa u tủy",
+            "phòng sớm cho người già",
+            "pemphigus thoái hóa",
+            "viêm dạ dày ở trẻ em khó thở"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 49,
+        "question": "những triệu chứng như [da giống như nổi mề đay, ngứa] thường dẫn đến bệnh gì?",
+        "choices": [
+            "phát ban cảm lạnh",
+            "tứ chứng fallot",
+            "shin-fi trước khi tách",
+            "khóa"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 50,
+        "question": "những triệu chứng như [ketoacidosis, giảm tốc độ lọc cầu thận, protein nước tiểu] có thể chỉ ra bệnh lý nào?",
+        "choices": [
+            "bệnh đốt sống cổ",
+            "u vàng mặt phẳng khuếch tán",
+            "viêm huyết khối không do vi khuẩn",
+            "bệnh thận tiểu đường ở trẻ em"
+        ],
+        "answer": 3
+    },
+    {
+        "question_idx": 51,
+        "question": "những triệu chứng như [khó thở, ho ra máu, đờm mủ] thường liên quan đến bệnh lý nào?",
+        "choices": [
+            "bệnh đốt sống cổ",
+            "bệnh hemoglobin m",
+            "thiếu proline",
+            "u nang phế quản phổi bẩm sinh"
+        ],
+        "answer": 3
+    },
+    {
+        "question_idx": 52,
+        "question": "những triệu chứng như [rối loạn khuyết tật, tiếng cười đột ngột, ảo giác, phản xạ ánh sáng chậm, suy nghĩ hướng nội] thường gặp ở bệnh lý nào?",
+        "choices": [
+            "rối loạn tái tạo hồng cầu tinh khiết",
+            "bệnh đốt sống cổ",
+            "tâm thần phân liệt",
+            "khối u vàng mụn cóc sinh dục bên ngoài"
+        ],
+        "answer": 2
+    },
+    {
+        "question_idx": 53,
+        "question": "những triệu chứng như [khối u, yếu, sốc, mạch yếu, suy tuần hoàn, khó thở, rối loạn nhịp tim] thường chỉ đến bệnh lý nào?",
+        "choices": [
+            "sốc tim",
+            "viêm phổi do lipid",
+            "bệnh đẳng bào tử",
+            "cơ hoành"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 54,
+        "question": "bệnh gì có thể gây ra các triệu chứng như [mụn đốm vàng, buồn ngủ, mê sảng, bồn chồn]?",
+        "choices": [
+            "cát",
+            "viêm túi mật sỏi cấp tính",
+            "xơ gan",
+            "các nốt vú - xét nghiệm"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 55,
+        "question": "những triệu chứng như [thiếu máu mãn tính, thiếu máu thiếu sắt, tiêu chảy cấp tính] có thể chỉ ra bệnh gì?",
+        "choices": [
+            "viêm màng cứng liên quan đến vi khuẩn gram dương và gram âm",
+            "u mạch máu đại trực tràng",
+            "bệnh đốt sống cổ",
+            "ngộ độc thực phẩm bacillus cereus"
+        ],
+        "answer": 1
+    },
+    {
+        "question_idx": 56,
+        "question": "những triệu chứng như [gan, xơ hóa thành túi mật, đau bụng trên bên phải đột ngột, sỏi canxi bilirubin] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "viêm túi mật sỏi cấp tính",
+            "bệnh lao niệu đạo",
+            "bệnh thận đa u tủy",
+            "phòng sớm cho người già"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 57,
+        "question": "những triệu chứng như [bồn chồn, mộng du, rối loạn giấc ngủ] thường gặp ở bệnh lý nào?",
+        "choices": [
+            "hội chứng mộng du",
+            "nhiễm cmv",
+            "loét khủng khiếp",
+            "bệnh tích tụ glycogen"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 58,
+        "question": "những triệu chứng như [gan, nhiễm trùng phổi, áp xe não, chán ăn] có thể chỉ ra bệnh lý nào?",
+        "choices": [
+            "bệnh actinomycosis của nocardia",
+            "lối thoát đôi tâm thất phải",
+            "u mạch máu đại trực tràng",
+            "pemphigus giống herpes"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 59,
+        "question": "những triệu chứng như [hôn mê do nhiễm trùng, hạ thân nhiệt, tăng áp lực nội sọ, rối loạn thị giác, hoại tử tuyến yên sau sinh] có thể chỉ ra bệnh gì?",
+        "choices": [
+            "khủng hoảng tuyến yên và đột quỵ tuyến yên",
+            "epipressure não úng thủy ở tuổi già",
+            "bệnh thận tiểu đường ở trẻ em",
+            "đau ung thư"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 60,
+        "question": "bệnh gì có thể gây ra các triệu chứng như [gan và lách to, suy hô hấp, tiêu chảy, khó thở, tím tái]?",
+        "choices": [
+            "máu dính",
+            "tự phát vỡ bàng quang lao",
+            "bệnh dịch hạch phổi",
+            "phình động mạch cảnh"
+        ],
+        "answer": 2
+    },
+    {
+        "question_idx": 61,
+        "question": "bệnh gì có thể gây ra các triệu chứng như [chảy máu từ đường tiêu hóa trên, teo lá gan, đầy hơi, tăng sinh tế bào sao gan, cứng gan]?",
+        "choices": [
+            "tự phát vỡ bàng quang lao",
+            "shin-fi trước khi tách",
+            "bệnh erich",
+            "xơ gan dược phẩm"
+        ],
+        "answer": 3
+    },
+    {
+        "question_idx": 62,
+        "question": "những triệu chứng như [mang thai giả, vô kinh thứ phát, chán ăn] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "shin-fi trước khi tách",
+            "gãy xương xoắn hoặc gãy xương trục chấn thương",
+            "u quái tinh hoàn",
+            "vô kinh vùng dưới đồi chức năng"
+        ],
+        "answer": 3
+    },
+    {
+        "question_idx": 63,
+        "question": "bệnh gì có thể gây ra các triệu chứng như [khối u, buồn nôn và nôn, chấn thương, khó thở, giảm lượng nước tiểu sau khi bị cháy nắng, bỏng giác mạc, nhịp tim nhanh hơn]?",
+        "choices": [
+            "sốc bỏng",
+            "bệnh dierlafuwa",
+            "bệnh hồng cầu hình elip di truyền",
+            "ngộ độc thực phẩm vibrio parahaemolytic"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 64,
+        "question": "những triệu chứng như [thiếu máu vĩnh viễn, đau lưỡi, đau dây thần kinh vòm họng] có thể là dấu hiệu của bệnh gì?",
+        "choices": [
+            "tê lưỡi trong kỳ kinh nguyệt",
+            "viêm tủy mãn tính",
+            "viêm âm đạo hỗn hợp",
+            "khí phế thũng tự phát"
+        ],
+        "answer": 0
+    },
+    {
+        "question_idx": 65,
+        "question": "những triệu chứng như [herpes, diarrhea, mụn cóc sinh dục] có thể chỉ ra bệnh gì?",
+        "choices": [
+            "huyết khối dưới màng cứng cấp tính",
+            "u nang nasser",
+            "bệnh sán máng nội tạng",
+            "tăng calci huyết vô căn ở trẻ em"
+        ],
+        "answer": 2
+    },
+    {
+        "question_idx": 66,
+        "question": "những triệu chứng như [rụng trứng, chảy máu tử cung bất thường, virilization] có thể chỉ ra bệnh gì?",
+        "choices": [
+            "kết nối lạc tĩnh mạch phổi một phần ở trẻ em",
+            "steroid huyết áp cao",
+            "nhiễm tụ cầu khuẩn",
+            "nhiễm e. coli xuất huyết đường ruột"
+        ],
+        "answer": 1
+    },
+    {
+        "question_idx": 67,
+        "question": "những triệu chứng như [ecg, mạch cổ, nhịp thất sớm, đau thắt ngực, rung tâm thất] có thể chỉ ra bệnh lý nào?",
+        "choices": [
+            "khủng hoảng tuyến yên và đột quỵ tuyến yên",
+            "phòng sớm cho người già",
+            "u quái tinh hoàn",
+            "viêm màng cứng liên quan đến vi khuẩn gram dương và gram âm"
+        ],
+        "answer": 1
+    },
+    {
+        "question_idx": 68,
+        "question": "những triệu chứng như [khối u, hôn mê sâu, rối loạn ý thức] thường gặp ở bệnh gì?",
+        "choices": [
+            "huyết khối dưới màng cứng cấp tính",
+            "nhiễm tụ cầu khuẩn",
+            "tâm thần phân liệt",
+            "epipressure não úng thủy ở tuổi già"
+        ],
+        "answer": 0
+    }
+]

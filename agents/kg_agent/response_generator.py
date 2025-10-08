@@ -1,28 +1,31 @@
 from typing import List, Dict, Optional
 from .cypher_query_llm import CypherQueryService
 from .context_filter import ContextFilterEmbedding
-from utils.llm_config import get_gemini_llm_2
+from utils.llm_config import get_gemini_llm_3
 from agents.patient_db_agent import PatientQueryEngine
 from agents.rag_agent.query_expander import QueryExpander
 from utils.config import Config
-from utils.prompt import medical_cot_prompt
+from utils.prompt import medical_cot_prompt, medical_mcq_evaluation_prompt
 import json
+import re
 
 config = Config()
 prompt = medical_cot_prompt
+mcq_prompt = medical_mcq_evaluation_prompt
 
 class ResponseGenerator:
     def __init__(self, patient_query_engine: PatientQueryEngine):
         self.cypher_query_llm = CypherQueryService()
         self.context_filter = ContextFilterEmbedding()
-        self.llm = get_gemini_llm_2(temperature=0.0)
+        self.llm = get_gemini_llm_3(temperature=0.0)
         self.patient_query_engine = patient_query_engine
         self.query_expander = QueryExpander(config)
         self.cached_kg_candidates = None
     
     def generate_response(self, question: str, patient_id: str, chat_history: Optional[List[Dict[str, str]]] = None):
         # patient profile
-        patient_profile = self.patient_query_engine.get_patient_profile(patient_id)
+        patient_profile = self.patient_query_engine.get_patient_profile(patient_id) 
+        
         # query expander
         expanded_result = self.query_expander.expand_query(question, patient_info=patient_profile, mode="kg", chat_history=chat_history)
         expanded_result = expanded_result["expanded_query"]
@@ -43,13 +46,12 @@ class ResponseGenerator:
             self.cached_kg_candidates = kg_candidates_json
             print("Updated KG cache with new context")
             
+        # Use cached context if KG retrieve failed 
+        elif self.cached_kg_candidates:
+            kg_candidates_json = self.cached_kg_candidates
+            print("Using cached KG context (retrieve failed)")
         else:
-            # Use cached context if KG retrieve failed
-            if self.cached_kg_candidates:
-                kg_candidates_json = self.cached_kg_candidates
-                print("Using cached KG context (retrieve failed)")
-            else:
-                return "Không có thông tin liên quan"
+            return "Không có thông tin liên quan"
         response = self.llm.invoke(prompt.format(
                                                 patient_context=patient_context,
                                                 kg_candidates=kg_candidates_json,
@@ -59,10 +61,9 @@ class ResponseGenerator:
         # Parse JSON response and extract content
         try:
             response_text = response.content.strip()
-            if response_text.startswith("```json"):
-                response_text = response_text[7:]  # Remove ```json
-            if response_text.endswith("```"):
-                response_text = response_text[:-3]  # Remove ```
+            match = re.search(r"```json\s*(\{.*?\})\s*```", response_text, re.DOTALL)
+            if match:
+                response_text = match.group(1)  # chỉ lấy phần { ... }
             
             response_json = json.loads(response_text)
             content = response_json.get("step3_action", {}).get("content", "không có thông tin liên quan")
@@ -77,3 +78,52 @@ class ResponseGenerator:
             "response": content + safety_disclaimer,
             "confidence": confidence
         }
+    
+    def evaluate_mcq(self, question: str, choices: List[str]) -> Dict:
+        
+        kg_context = self.cypher_query_llm.retrieve_context_from_kg(question)
+        
+        if kg_context:
+            filtered_context = self.context_filter.filter_context(kg_context, patient_context="", question=question)
+            kg_candidates_json = json.dumps(filtered_context, ensure_ascii=False)
+        else:
+            kg_candidates_json = json.dumps([], ensure_ascii=False)
+        
+        choices_formatted = "\n".join([f"{i}. {choice}" for i, choice in enumerate(choices)])
+        
+        response = self.llm.invoke(mcq_prompt.format(
+            kg_candidates=kg_candidates_json,
+            question=question,
+            choices=choices_formatted
+        ))
+        
+        try:
+            response_text = response.content.strip()
+            match = re.search(r"```json\s*(\{.*?\})\s*```", response_text, re.DOTALL)
+            if match:
+                response_text = match.group(1)  # chỉ lấy phần { ... }
+            
+            response_json = json.loads(response_text)
+            
+            # Extract decision từ JSON đơn giản (không có wrapper)
+            answer_index = response_json.get("answer_index")
+            not_enough_info_field = response_json.get("not_enough_info")
+            confidence = response_json.get("confidence", 0.0)
+            
+            # Xác định xem có đủ thông tin không
+            is_not_enough_info = (not_enough_info_field is not None) or (answer_index is None)
+            
+            return {
+                "answer_index": answer_index if not is_not_enough_info else None,
+                "not_enough_info": is_not_enough_info,
+                "confidence": confidence
+            }
+            
+        except (json.JSONDecodeError, KeyError) as e:
+            print(f"Error parsing JSON response: {e}")
+            print(f"Raw response: {response.content}")
+            return {
+                "answer_index": None,
+                "not_enough_info": True,
+                "confidence": 0.0
+            }
