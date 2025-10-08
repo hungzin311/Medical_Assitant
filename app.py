@@ -511,9 +511,9 @@ async def get_blood_pressure_report(patient_id: str = "6"):
         
         # Load appropriate CSV file
         if patient_id == "6":
-            csv_file = "blood_pressure_patient6_7days.csv"
+            csv_file = "data/csv/blood_pressure_patient6_7days.csv"
         else:
-            csv_file = "blood_pressure_5patients_circadian_style.csv"
+            csv_file = "data/csv/blood_pressure_5patients_circadian_style.csv"
         
         # Read CSV
         df = pd.read_csv(csv_file, parse_dates=['timestamp'])
@@ -741,9 +741,9 @@ async def generate_bp_medical_report(request: Request):
         
         # Load CSV for detailed analysis
         if patient_id == "6":
-            csv_file = "blood_pressure_patient6_7days.csv"
+            csv_file = "data/csv/blood_pressure_patient6_7days.csv"
         else:
-            csv_file = "blood_pressure_5patients_circadian_style.csv"
+            csv_file = "data/csv/blood_pressure_5patients_circadian_style.csv"
         
         df = pd.read_csv(csv_file, parse_dates=['timestamp'])
         df_patient = df[df['patient_id'] == int(patient_id)].copy()

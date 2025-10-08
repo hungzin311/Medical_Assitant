@@ -60,7 +60,7 @@ class KGManager:
             graph=self._graph,
             cypher_prompt=prompt,
             allow_dangerous_requests=True,
-            # verbose = True,
+            verbose = True,
             return_direct=True
         )
     
