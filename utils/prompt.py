@@ -133,7 +133,6 @@ WHERE d.name CONTAINS $disease_name
 WITH d
 OPTIONAL MATCH (d)-[:TREATED_BY]-(t:Treatment)
 OPTIONAL MATCH (d)-[:HAS_SYMPTOM]-(s:Symptom)
-OPTIONAL MATCH (d)-[:PRESCRIBED]-(m:Medication)
 OPTIONAL MATCH (d)-[:HAS_ADVICE]-(a:Advice)
 OPTIONAL MATCH (d)-[:ASSOCIATED_WITH]->(ad:Disease)
 
@@ -146,17 +145,13 @@ RETURN
   } AS disease,
   COLLECT(DISTINCT {
     method: t.method,
+    success_rate: t.success_rate,
     department: t.department
   }) AS treatments,
   COLLECT(DISTINCT {
     symptoms: s.symptoms,
     diagnosis: s.diagnosis
   }) AS symptoms,
-  COLLECT(DISTINCT {
-    common_drugs: m.common_drugs,
-    drug_info: m.drug_info,
-    recommended_drugs: m.recommended_drugs
-  }) AS medications,
   COLLECT(DISTINCT {
     foods_to_eat: a.foods_to_eat,
     foods_to_avoid: a.foods_to_avoid,
@@ -307,7 +302,6 @@ medical_cot_prompt = PromptTemplate(
           "disease": {{"name": ..., "description": ..., "category": ..., "cause": ...}},
           "symptoms": [...],
           "treatments": [...],
-          "medications": [...],
           "advice": [...],
           "associated_diseases": [...]
         }}
@@ -390,11 +384,16 @@ medical_mcq_evaluation_prompt = PromptTemplate(
           "disease": {{"name": ..., "description": ..., "category": ..., "cause": ...}},
           "symptoms": [...],
           "treatments": [...],
-          "medications": [...],
           "advice": [...],
           "associated_diseases": [...]
         }}
       }}
+    
+    **QUY TẮC QUAN TRỌNG NHẤT**: 
+    - **CHỈ DỰA VÀO** suy luận y khoa từ triệu chứng và cơ chế bệnh sinh
+    - **BẮT BUỘC NOT_ENOUGH_INFO** trong các trường hợp sau:
+      * Có ≥2 bệnh trong danh sách mà KHÔNG có triệu chứng then chốt để phân biệt
+      * Có ≥2 bệnh từ HỆ CƠ QUAN KHÁC NHAU (ví dụ: hệ tiêu hóa vs hệ hô hấp vs hệ tim mạch)
 
     PHÂN TÍCH THEO CHAIN OF THOUGHT:
 
@@ -414,7 +413,6 @@ medical_mcq_evaluation_prompt = PromptTemplate(
     
     - **Đánh giá độ đặc hiệu (Specificity)**:
       * Các triệu chứng trong câu hỏi có ĐẶC TRƯNG cho bệnh này không?
-      * Hay chỉ là triệu chứng chung chung có thể gặp ở nhiều bệnh?
       * Có triệu chứng then chốt (pathognomonic) nào không?
     
     - **So sánh với thông tin từ KG** (chỉ là tham khảo, KHÔNG phải quyết định):
@@ -428,42 +426,68 @@ medical_mcq_evaluation_prompt = PromptTemplate(
       * 0.0-0.4: Không hợp lý hoặc mâu thuẫn
     
     2B) So sánh chéo và suy luận phân biệt:
+    - **Đánh giá HỆ CƠ QUAN**: Các lựa chọn thuộc hệ cơ quan nào?
+      * Nếu có ≥2 lựa chọn từ hệ cơ quan KHÁC NHAU (tim mạch, hô hấp, tiêu hóa, thần kinh, v.v.) → **CẢNH BÁO**: Rất khó phân biệt nếu chỉ có triệu chứng chung chung
     - **Differential diagnosis**: Triệu chứng nào giúp phân biệt các lựa chọn?
     - **Red flags**: Có dấu hiệu loại trừ bệnh nào không?
     - **Tính nhất quán**: Tất cả triệu chứng có cùng hướng đến 1 bệnh không?
     - **Đánh giá độ tin cậy đáp án**: Đáp án có đầy đủ và chính xác không?
 
     ## BƯỚC 3: QUYẾT ĐỊNH DỰA TRÊN SUY LUẬN Y KHOA
-    3A) Tổng hợp suy luận:
-    - **ENOUGH_INFO** - Chỉ khi:
-      * Có 1 lựa chọn với clinical_plausibility ≥ 0.8 VÀ cao hơn các lựa chọn khác ít nhất 0.2 điểm
-      * Có suy luận y khoa vững chắc giải thích được TẤT CẢ triệu chứng chính
-      * Có thể loại trừ được các bệnh khác dựa trên cơ sở y khoa
-      * Đáp án hợp lý và đầy đủ (không thiếu thông tin quan trọng)
+    3A) Kiểm tra điều kiện BẮT BUỘC NOT_ENOUGH_INFO:
+    - **Đếm số bệnh**: Nếu có ≥2 bệnh trong danh sách:
+      * Các bệnh có thuộc CÙNG HỆ CƠ QUAN không?
+      * Nếu từ HỆ CƠ QUAN KHÁC NHAU → **BẮT BUỘC NOT_ENOUGH_INFO**
+      * Nếu cùng hệ cơ quan → Có triệu chứng then chốt để phân biệt không?
+        - Nếu KHÔNG có triệu chứng then chốt → **BẮT BUỘC NOT_ENOUGH_INFO**
+        - Nếu các bệnh có nguyên nhân và ảnh hưởng có bệnh khác nhau nhiều - nghĩa là có thể có nhiều bệnh khác nhau với các triệu chứng giống nhau → **BẮT BUỘC NOT_ENOUGH_INFO**
+        - Nếu có triệu chứng then chốt → Tiếp tục đánh giá
     
-    - **NOT_ENOUGH_INFO** - Khi:
-      * Nhiều lựa chọn có clinical_plausibility tương đương (chênh lệch < 0.2)
+    3B) Tổng hợp suy luận:
+    - **ENOUGH_INFO** - **CHỈ KHI TẤT CẢ** các điều kiện sau thỏa mãn:
+      * Có 1 lựa chọn với clinical_plausibility ≥ 0.85 (dựa trên SUY LUẬN Y KHOA, KHÔNG phải embedding score)
+      * Clinical_plausibility của lựa chọn này **CAO HƠN** tất cả các lựa chọn khác **ÍT NHẤT 0.25 điểm**
+      * Có suy luận y khoa vững chắc giải thích được **TẤT CẢ** triệu chứng trong câu hỏi
+      * Có thể **LOẠI TRỪ RÕ RÀNG** tất cả các bệnh khác dựa trên:
+        - Triệu chứng then chốt (pathognomonic) có trong câu hỏi
+        - Triệu chứng mâu thuẫn (các bệnh khác không giải thích được)
+        - Cơ chế bệnh sinh không phù hợp với các bệnh khác
+      * Đáp án hợp lý và đầy đủ (không thiếu thông tin quan trọng)
+      * **MỤC TIÊU**: Đưa ra kết quả chẩn đoán là **MỘT LOẠI BỆNH DUY NHẤT**
+    
+    - **NOT_ENOUGH_INFO** - Khi **BẤT KỲ** điều kiện nào sau đây xảy ra:
+      * **QUAN TRỌNG** Có ≥2 bệnh từ HỆ CƠ QUAN KHÁC NHAU trong danh sách
+      * Có ≥2 bệnh trong danh sách ứng viên mà **KHÔNG có triệu chứng then chốt** để phân biệt
+      * Nếu các bệnh đều cùng 1 loại bệnh nhưng lại do các nguyên nhân khác nhau → **BẮT BUỘC NOT_ENOUGH_INFO**
+      * Nhiều lựa chọn có clinical_plausibility tương đương (chênh lệch < 0.25 điểm)
       * Suy luận y khoa chưa vững chắc, còn nhiều khả năng khác
+      * **KHÔNG THỂ LOẠI TRỪ** được các bệnh khác một cách rõ ràng
       * Thiếu triệu chứng then chốt để phân biệt
+      * Triệu chứng trong câu hỏi quá chung chung, xuất hiện ở nhiều bệnh
       * Không tìm thấy đủ thông tin y khoa để kết luận
-      * Nghi ngờ đáp án có thể SAI hoặc KHÔNG ĐẦY ĐỦ
+      * Nghi ngờ đáp án có thể SAI hoặc KHÔNG ĐẦY ĐỦ  
+      
 
-    3B) Quyết định cuối cùng:
-    - Nếu ENOUGH_INFO: Chọn index của đáp án có suy luận y khoa vững nhất
+    3C) Quyết định cuối cùng:
+    - Nếu ENOUGH_INFO: Chọn index của đáp án có suy luận y khoa vững nhất (chỉ 1 bệnh duy nhất)
     - Nếu NOT_ENOUGH_INFO: Trả về "Not_enough_info"
+    - **MẶC ĐỊNH**: Khi còn nghi ngờ → chọn NOT_ENOUGH_INFO (an toàn hơn)
     
     **LƯU Ý QUAN TRỌNG**:
     - ƯU TIÊN SUY LUẬN Y KHOA hơn là match text với KG
-    - KHÔNG chọn đáp án chỉ vì tên bệnh xuất hiện trong KG
-    - Phải có GIẢI THÍCH Y KHOA rõ ràng tại sao chọn đáp án đó
+    - KHÔNG chọn đáp án chỉ vì tên bệnh xuất hiện trong KG hoặc có score cao
+    - Phải có GIẢI THÍCH Y KHOA rõ ràng TẠI SAO đáp án đó đúng VÀ TẠI SAO các đáp án khác sai
 
     NGUYÊN TẮC CHỌN ĐÁP ÁN:
-    - **ƯU TIÊN SUY LUẬN Y KHOA** (pathophysiology, clinical reasoning) HơN là text matching
+    - **CHỈ DỰA VÀO SUY LUẬN Y KHOA** (pathophysiology, clinical reasoning)
+    - **DỰA VÀO**: cơ chế bệnh sinh, triệu chứng then chốt, khả năng loại trừ các bệnh khác
     - KG chỉ là **THAM KHẢO**, không phải tiêu chí duy nhất
     - Phải giải thích được CƠ CHẾ BỆNH SINH giữa triệu chứng và bệnh
-    - Đánh giá CAO các triệu chứng ĐẶC HIỆU, THẤP các triệu chứng chung chung
-    - Nếu suy luận không vững chắc (clinical_plausibility < 0.8 hoặc nhiều đáp án tương đương), trả về "Not_enough_info"
-    - KHÔNG đoán mò, phải có cơ sở y khoa rõ ràng
+    - Đánh giá CAO các triệu chứng ĐẶC HIỆU (pathognomonic), THẤP các triệu chứng chung chung
+    - **QUAN TRỌNG**: Nếu có ≥2 bệnh mà không loại trừ được → BẮT BUỘC "Not_enough_info"
+    - Nếu suy luận không vững chắc (clinical_plausibility < 0.85), trả về "Not_enough_info"
+    - KHÔNG đoán mò, phải có cơ sở y khoa rõ ràng và vững chắc
+    - **ƯU TIÊN AN TOÀN**: Khi còn nghi ngờ → chọn "Not_enough_info"
 
     HÃY SUY LUẬN THEO CÁC BƯỚC TRÊN (trong tâm trí), sau đó TRẢ LỜI THEO FORMAT JSON GỌN:
     {{
@@ -476,6 +500,79 @@ medical_mcq_evaluation_prompt = PromptTemplate(
     """,
     input_variables=[
         "kg_candidates",
+        "question",
+        "choices"
+    ]
+)
+
+# Prompt cho đánh giá LLM base (không có KG data)
+llm_base_mcq_evaluation_prompt = PromptTemplate(
+  template="""Bạn là một bác sĩ chuyên khoa có nhiều năm kinh nghiệm lâm sàng. Nhiệm vụ của bạn là phân tích câu hỏi trắc nghiệm y khoa và chọn đáp án đúng nhất dựa trên kiến thức y khoa của mình.
+
+## HƯỚNG DẪN PHÂN TÍCH:
+
+### BƯỚC 1: PHÂN TÍCH CÂU HỎI VÀ TRIỆU CHỨNG
+1A) Trích xuất các triệu chứng chính từ câu hỏi
+1B) Xác định thông tin quan trọng (tuổi, giới, yếu tố nguy cơ nếu có)  
+1C) Xác định mục tiêu câu hỏi (tìm bệnh, thuốc, điều trị, triệu chứng?)
+
+### BƯỚC 2: SUY LUẬN Y KHOA CHO MỖI LỰA CHỌN
+Với MỖI lựa chọn, hãy thực hiện SUY LUẬN Y KHOA ĐỘC LẬP:
+
+2A) **Phân tích bệnh sinh lý (Pathophysiology)**:
+- Cơ chế bệnh có giải thích được các triệu chứng trong câu hỏi không?
+- Các triệu chứng có xuất hiện cùng nhau một cách hợp lý về mặt y khoa không?
+- Thời gian tiến triển, mức độ nghiêm trọng có phù hợp không?
+
+2B) **Đánh giá độ đặc hiệu (Specificity)**:
+- Các triệu chứng trong câu hỏi có ĐẶC TRƯNG cho bệnh này không?
+- Có triệu chứng then chốt (pathognomonic) nào không?
+
+2C) **Đánh giá tính hợp lý lâm sàng (Clinical Plausibility Score 0.0-1.0)**:
+- 0.8-1.0: Rất khớp về mặt y khoa, có bằng chứng vững chắc
+- 0.5-0.7: Có thể khớp, nhưng còn thiếu thông tin hoặc không đặc hiệu
+- 0.0-0.4: Không hợp lý hoặc mâu thuẫn
+
+### BƯỚC 3: SO SÁNH VÀ QUYẾT ĐỊNH
+3A) **Đánh giá HỆ CƠ QUAN**: Các lựa chọn thuộc hệ cơ quan nào?
+3B) **Differential diagnosis**: Triệu chứng nào giúp phân biệt các lựa chọn?
+3C) **Red flags**: Có dấu hiệu loại trừ bệnh nào không?
+3D) **Tính nhất quán**: Tất cả triệu chứng có cùng hướng đến 1 bệnh không?
+
+### BƯỚC 4: QUYẾT ĐỊNH CUỐI CÙNG
+**ENOUGH_INFO** - CHỈ KHI TẤT CẢ các điều kiện sau thỏa mãn:
+- Có 1 lựa chọn với clinical_plausibility ≥ 0.85
+- Clinical_plausibility của lựa chọn này CAO HƠN tất cả các lựa chọn khác ÍT NHẤT 0.25 điểm
+- Có suy luận y khoa vững chắc giải thích được TẤT CẢ triệu chứng trong câu hỏi
+- Có thể LOẠI TRỪ RÕ RÀNG tất cả các bệnh khác
+
+**NOT_ENOUGH_INFO** - Khi BẤT KỲ điều kiện nào sau đây xảy ra:
+- Có ≥2 bệnh từ HỆ CƠ QUAN KHÁC NHAU trong danh sách
+- Có ≥2 bệnh mà KHÔNG có triệu chứng then chốt để phân biệt
+- Nhiều lựa chọn có clinical_plausibility tương đương (chênh lệch < 0.25 điểm)
+- Suy luận y khoa chưa vững chắc, còn nhiều khả năng khác
+- Triệu chứng trong câu hỏi quá chung chung, xuất hiện ở nhiều bệnh
+
+## NGUYÊN TẮC CHỌN ĐÁP ÁN:
+- CHỈ DỰA VÀO SUY LUẬN Y KHOA (pathophysiology, clinical reasoning)
+- Phải giải thích được CƠ CHẾ BỆNH SINH giữa triệu chứng và bệnh
+- Đánh giá CAO các triệu chứng ĐẶC HIỆU (pathognomonic)
+- ƯU TIÊN AN TOÀN: Khi còn nghi ngờ → chọn "Not_enough_info"
+
+## CÂU HỎI CẦN PHÂN TÍCH:
+**Câu hỏi**: {question}
+
+**Các lựa chọn**:
+{choices}
+
+HÃY SUY LUẬN THEO CÁC BƯỚC TRÊN, sau đó TRẢ LỜI THEO FORMAT JSON:
+{{
+  "answer_index": 0,  // index của đáp án (0-based) hoặc null nếu NOT_ENOUGH_INFO
+  "not_enough_info": null,  // "Not_enough_info" nếu không đủ thông tin, null nếu có đáp án
+  "confidence": 0.0  // độ tự tin của quyết định (0.0-1.0)
+}}
+""",
+    input_variables=[
         "question",
         "choices"
     ]
