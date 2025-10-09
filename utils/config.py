@@ -1,7 +1,7 @@
 import os
 import threading
 from dotenv import load_dotenv
-from utils.llm_config import get_gemini_llm, get_gemini_vision_llm, get_fpt_embeddings
+from utils.llm_config import get_fpt_vietnamese_embedding, get_gemini_llm, get_gemini_vision_llm, get_fpt_embeddings
 
 load_dotenv()
 
@@ -28,7 +28,7 @@ class RAGConfig:
         self.collection_name = "medical_assistance_rag_vietnamese"
         self.chunk_size = 512
         self.chunk_overlap = 50
-        self.embedding_model = get_fpt_embeddings()
+        self.embedding_model = get_fpt_vietnamese_embedding()
         self.llm = get_gemini_llm(temperature=0.0)  
         self.top_k = 10
         self.vector_search_type = 'similarity'  # or 'mmr'

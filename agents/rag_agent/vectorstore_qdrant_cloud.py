@@ -68,19 +68,11 @@ class VectorStoreCloud:
         )
             
     def load_vectorstore(self) -> QdrantVectorStore:
-        """
-        Load existing cloud vectorstore for retrieval operations without ingesting new documents.
         
-        Returns:
-            QdrantVectorStore instance
-        """
-        # Check if collection exists
         if not self._does_collection_exist():
             self.logger.error(f"Cloud collection {self.collection_name} does not exist. Please ingest documents first.")
             raise ValueError(f"Cloud collection {self.collection_name} does not exist")
             
-        # Fall back to dense-only retrieval
-        self.logger.info("Loading vectorstore with dense embeddings")
         qdrant_vectorstore = QdrantVectorStore(
             client=self.client,
             collection_name=self.collection_name,
