@@ -149,7 +149,7 @@ def benchmark_rag_agent():
     })
     
     # Save results to file
-    with open(f"data/benchmark/rag_mcq_results_{int(time.time())}.json", "w", encoding="utf-8") as f:
+    with open(f"data/benchmark/rag_mcq_results_one_hop.json", "w", encoding="utf-8") as f:
         json.dump(result_list, f, ensure_ascii=False, indent=2)
     
 
