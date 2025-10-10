@@ -2,9 +2,9 @@ import logging
 import threading
 from qdrant_client import QdrantClient
 
+logging.getLogger("httpx").disabled = True
+
 class QdrantClientManager:
-    """Singleton class to manage Qdrant client connection and common operations."""
-    
     _instance = None
     _client = None
     _lock = threading.Lock()
@@ -31,10 +31,9 @@ class QdrantClientManager:
         
         # Initialize cloud client
         if not self.qdrant_url or not self.qdrant_api_key:
-            self.logger.error("Qdrant cloud URL or API key not provided. Check your environment variables.")
+            self.logger.error("Qdrant cloud URL or API key not provided. Check your configuration.")
             raise ValueError("Qdrant cloud URL or API key not provided")
             
-        self.logger.info(f"Connecting to Qdrant cloud at {self.qdrant_url}")
         self._client = QdrantClient(
             url=self.qdrant_url,
             api_key=self.qdrant_api_key
@@ -56,7 +55,7 @@ class QdrantClientManager:
             collection_names = [collection.name for collection in collection_info.collections]
             return collection_name in collection_names
         except Exception as e:
-            self.logger.error(f"Error checking for collection existence: {e}")
+            self.logger.error(f"Error checking collection existence: {e}")
             return False
     
     def create_collection(self, collection_name: str, vectors_config, optimizers_config=None):

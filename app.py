@@ -1,10 +1,17 @@
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("openai").setLevel(logging.WARNING)
+logging.getLogger("qdrant_client").setLevel(logging.WARNING)
+
 import os
 import uuid
 from typing import Optional, List
 import time
 import json
 import base64
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends, Request, Response, Cookie
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request, Response, Cookie
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -16,14 +23,9 @@ from agents.agent_decision import process_query, create_agent_graph
 from utils.proxy_setting import *
 from agents.patient_db_agent import PatientQueryEngine
 from agents.patient_db_agent.patient_form import PatientForm
-import logging
 
-logging.getLogger("httpx").disabled = True
-
-# Load configuration
 config = Config()
 
-# Default patient when no login/session available
 DEFAULT_PATIENT_ID = "PAT_001"
 
 #Set proxy 

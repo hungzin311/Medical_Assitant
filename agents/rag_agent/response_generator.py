@@ -86,15 +86,16 @@ HÃY PHÂN TÍCH:"""
         ) -> Dict[str, Any]:
     
         try:
-            mode = 'kg'
-            if mode == "kg": 
-                doc_texts = [f"[{doc['disease_name']}]({doc['description']}) \n {doc['cause']} \n {doc['symptom']}" for doc in retrieved_docs]
-            else:
-                doc_texts = [doc["content"] for doc in retrieved_docs]
+           
+            # Extract content from documents for context
+            doc_texts = [doc["content"] for doc in retrieved_docs]            
             context = "\n\n===DOCUMENT SECTION===\n\n".join(doc_texts)
-            prompt = self._build_prompt(query, context, patient_context, chat_history)
+            
+            # Build the prompt
+            prompt = self._build_prompt(query, context, patient_context, chat_history)            
             response = self.response_generator_model.invoke(prompt)
-
+            
+            # Parse JSON response and extract content (similar to KG agent)
             try:
                 if hasattr(response, 'content'):
                     response_text = response.content.strip()
@@ -107,6 +108,7 @@ HÃY PHÂN TÍCH:"""
                 
                 response_json = json.loads(response_text)
                 
+                # Extract content from step3_action (similar to KG agent)
                 content = response_json.get("step3_action", {}).get("content", "Không có thông tin liên quan từ tài liệu.")
                 confidence = response_json.get('step3_action', {}).get('confidence', 0.0)
                 
@@ -148,8 +150,6 @@ HÃY PHÂN TÍCH:"""
             
         except Exception as e:
             self.logger.error(f"Error generating response: {e}")
-            import traceback
-            self.logger.error(traceback.format_exc())
             return {
                 "response": "Tôi xin lỗi, nhưng tôi đã gặp lỗi khi tạo câu trả lời. Vui lòng thử diễn đạt lại câu hỏi của bạn.",
                 "sources": [],

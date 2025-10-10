@@ -70,7 +70,6 @@ class VectorStoreCloud:
     def load_vectorstore(self) -> QdrantVectorStore:
         
         if not self._does_collection_exist():
-            self.logger.error(f"Cloud collection {self.collection_name} does not exist. Please ingest documents first.")
             raise ValueError(f"Cloud collection {self.collection_name} does not exist")
             
         qdrant_vectorstore = QdrantVectorStore(
@@ -140,9 +139,7 @@ class VectorStoreCloud:
             for i in range(0, len(langchain_documents), BATCH_SIZE):
                 batch_docs = langchain_documents[i:i+BATCH_SIZE]
                 batch_ids = valid_doc_ids[i:i+BATCH_SIZE]
-                
-                self.logger.info(f"Processing batch {i//BATCH_SIZE + 1}/{(len(langchain_documents)-1)//BATCH_SIZE + 1} with {len(batch_docs)} documents")
-                
+                                
                 try:
                     # Process each document individually for maximum reliability
                     for j, (doc, doc_id) in enumerate(zip(batch_docs, batch_ids)):
@@ -155,9 +152,6 @@ class VectorStoreCloud:
                         
                 except Exception as batch_error:
                     self.logger.error(f"Error processing batch: {batch_error}")
-                    # Continue with next batch instead of failing completely
-            
-            self.logger.info(f"Completed processing all document batches")
             
         except Exception as e:
             self.logger.error(f"Error in batch processing: {e}")
@@ -305,9 +299,6 @@ class VectorStoreCloud:
         # Check if collection exists, create if it doesn't
         if not self._does_collection_exist():
             self._create_collection()
-            self.logger.info(f"Created new cloud collection: {self.collection_name}")
-        else:
-            self.logger.info(f"Cloud collection {self.collection_name} already exists, will upsert documents")
         
         qdrant_vectorstore = self.load_vectorstore()
         
@@ -333,7 +324,6 @@ class VectorStoreCloud:
                     self.logger.error(f"Error processing batch: {batch_error}")
                     # Continue with next batch instead of failing completely
             
-            self.logger.info(f"Completed processing all document batches")
             
         except Exception as e:
             self.logger.error(f"Error in batch processing: {e}")

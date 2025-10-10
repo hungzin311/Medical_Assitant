@@ -1,54 +1,46 @@
 {
-    "response": "Chào bạn,
+    "response": "Chào bạn, dựa trên tài liệu y tế được cung cấp, chảy máu mũi (chảy máu cam, xuất huyết mũi) thường không gây nguy hiểm nghiêm trọng, nhưng có một số điểm bạn cần lưu ý về các ảnh hưởng và khi nào cần quan tâm hơn:
 
-Dựa trên thông tin bạn cung cấp về các triệu chứng ho, chóng mặt, hoa mắt, choáng váng và các tài liệu y tế được truy xuất, tôi xin phân tích như sau:
+*   **Thường không nguy hiểm và ít phiền toái:** Mặc dù chảy máu mũi có thể khá đáng sợ, nhưng thường thì chúng chỉ gây ít phiền toái và không nguy hiểm.
+*   **Ảnh hưởng của huyết áp cao:** Thông thường, chảy máu mũi không phải là triệu chứng hay hậu quả của bệnh tăng huyết áp. Tuy nhiên, huyết áp tăng cao có thể khiến cho tình trạng chảy máu mũi của bạn kéo dài và nặng hơn.
+*   **Khi nào cần chú ý đặc biệt:**
+    *   **Chảy máu nhiều hoặc kéo dài:** Nếu chảy máu mũi nhiều hoặc kéo dài, bạn nên đến bệnh viện để được xử trí thích hợp.
+    *   **Chảy máu thường xuyên:** Chảy máu mũi được coi là thường xuyên khi xảy ra nhiều hơn 1 lần trong 1 tuần. Nếu tình trạng này xảy ra thường xuyên, dù có thể tự cầm, bạn cũng nên đến khám bác sĩ để tìm nguyên nhân chảy máu.
 
-**1. Về triệu chứng chóng mặt, hoa mắt, choáng váng:**
+Vì vậy, mặc dù đa số các trường hợp chảy máu mũi không đáng lo ngại, việc theo dõi tần suất, mức độ chảy máu và các yếu tố liên quan (như huyết áp) là quan trọng để xác định khi nào cần tìm kiếm sự hỗ trợ y tế.
 
-*   **Nguyên nhân có thể:** Theo tài liệu, chứng chóng mặt (bao gồm hoa mắt, choáng váng) có thể do một số nguyên nhân. Ví dụ, nếu bạn có cặn canxi ở tai trong, đây có thể là một nguyên nhân. Ngoài ra, đau nửa đầu đôi khi cũng có thể nghiêm trọng tới mức gây ra chứng chóng mặt.
-*   **Phương pháp điều trị chung:**
-    *   **Điều trị nguyên nhân:** Bác sĩ sẽ cố gắng điều trị trực tiếp các nguyên nhân gây chóng mặt. Chẳng hạn, nếu là do cặn canxi ở tai trong, bác sĩ có thể hướng dẫn bạn một bài tập di chuyển đầu theo một cách đặc biệt để sắp xếp chúng yên vị.
-    *   **Thuốc:** Bác sĩ cũng có thể kê các loại thuốc giúp giảm chóng mặt, buồn nôn và nôn.
-    *   **Phục hồi cân bằng:** Nếu chứng chóng mặt của bạn nghiêm trọng, một phương pháp điều trị gọi là “phục hồi cân bằng” có thể được đề nghị, trong đó bạn sẽ rèn luyện các bài tập để đối phó với chứng chóng mặt của mình.
-
-**2. Về triệu chứng ho:**
-
-*   **Thông tin còn thiếu:** Các tài liệu y tế được cung cấp không chứa thông tin về triệu chứng ho hoặc mối liên hệ giữa ho và chóng mặt. Do đó, tôi không thể phân tích nguyên nhân hay cách điều trị ho dựa trên các tài liệu này.
-
-**Khuyến nghị:**
-
-Vì bạn có nhiều triệu chứng kết hợp (ho và chóng mặt, hoa mắt, choáng váng) và các tài liệu chỉ cung cấp thông tin chung về chóng mặt mà không đề cập đến ho, điều quan trọng là bạn cần đến gặp bác sĩ để được thăm khám lâm sàng toàn diện. Bác sĩ sẽ có thể đánh giá chính xác tình trạng của bạn, tìm ra nguyên nhân cụ thể của cả ho và chóng mặt, và đưa ra phác đồ điều trị phù hợp nhất.
+⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp.
 
 ⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp.
 
 ##### Tài liệu nguồn:
-- [disease2.jsonl](jsonl_payload_1759207348.4839985_batch_3400)
-- [disease2.jsonl](jsonl_payload_1759207348.4839985_batch_4100)
-- [disease1.jsonl](jsonl_payload_1759206989.5755088_batch_7100)
 - [disease2.jsonl](jsonl_payload_1759207348.4839985_batch_2150)
-- [disease2.jsonl](jsonl_payload_1759207348.4839985_batch_4900)",
+- [disease2.jsonl](jsonl_payload_1759207348.4839985_batch_7950)
+- [disease2.jsonl](jsonl_payload_1759207348.4839985_batch_2850)
+- [disease2.jsonl](jsonl_payload_1759207348.4839985_batch_6250)
+- [disease1.jsonl](jsonl_payload_1759206989.5755088_batch_1350)",
     "sources": [
-        {
-            "title": "disease2.jsonl",
-            "path": "jsonl_payload_1759207348.4839985_batch_3400"
-        },
-        {
-            "title": "disease2.jsonl",
-            "path": "jsonl_payload_1759207348.4839985_batch_4100"
-        },
-        {
-            "title": "disease1.jsonl",
-            "path": "jsonl_payload_1759206989.5755088_batch_7100"
-        },
         {
             "title": "disease2.jsonl",
             "path": "jsonl_payload_1759207348.4839985_batch_2150"
         },
         {
             "title": "disease2.jsonl",
-            "path": "jsonl_payload_1759207348.4839985_batch_4900"
+            "path": "jsonl_payload_1759207348.4839985_batch_7950"
+        },
+        {
+            "title": "disease2.jsonl",
+            "path": "jsonl_payload_1759207348.4839985_batch_2850"
+        },
+        {
+            "title": "disease2.jsonl",
+            "path": "jsonl_payload_1759207348.4839985_batch_6250"
+        },
+        {
+            "title": "disease1.jsonl",
+            "path": "jsonl_payload_1759206989.5755088_batch_1350"
         }
     ],
-    "confidence": "0.7",
-    "processing_time": 39.157023668289185
+    "confidence": "1.0",
+    "processing_time": 18.463116884231567
 }

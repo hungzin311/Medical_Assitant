@@ -116,20 +116,20 @@ class MedicalRAG:
         
     def process_query(self, query: str, chat_history: Optional[List[Dict[str, str]]] = None) -> Dict[str, Any]:
         start_time = time.time()
+        self.logger.info(f"RAG Agent processing query: {query}")
         
         try:
             # Step 1: Expand query
-            self.logger.info(f"1. Expanding query: '{query}'")
             expansion_result = self.query_expander.expand_query(query, mode="rag", chat_history=chat_history)
             expanded_query = expansion_result["expanded_query"]
             self.logger.info(f"   Expanded: '{expanded_query}'")
             query = expanded_query
 
             # Step 2: Retrieval
-            self.logger.info(f"2. Retrieving relevant documents for the query: '{query}'")
+            vectorstore = self.vector_store.load_vectorstore()
             retrieved_documents = self.vector_store.retrieve_relevant_chunks(
                 query=query,
-                vectorstore=self.vectorstore,
+                vectorstore=vectorstore,
                 )
 
             self.logger.info(f"Retrieved {len(retrieved_documents)} relevant document chunks")
@@ -146,16 +146,14 @@ class MedicalRAG:
                 }
 
             # Step 3: Rerank the retrieved documents if we have a reranker and enough documents
-            self.logger.info(f"3. Reranking the retrieved documents")
             if self.reranker and len(retrieved_documents) > 1:
                 reranked_documents = self.reranker.rerank(query, retrieved_documents)
-                self.logger.info(f"   Reranked retrieved documents and chose top {len(reranked_documents)}")
+                self.logger.info(f"Reranked retrieved documents and chose top {len(reranked_documents)}")
             else:
-                self.logger.info(f"   Could not rerank the retrieved documents, falling back to original scores")
+                self.logger.info(f"Could not rerank the retrieved documents, falling back to original scores")
                 reranked_documents = retrieved_documents
 
             # Step 4: Generate response
-            self.logger.info("4. Generating response...")
             response = self.response_generator.generate_response(
                 query=query,
                 retrieved_docs=reranked_documents,
@@ -170,6 +168,7 @@ class MedicalRAG:
         
         except Exception as e:
             self.logger.error(f"Error processing query: {e}")
+            # Return error response
             return {
                 "response": f"I encountered an error while processing your query: {str(e)}",
                 "sources": [],

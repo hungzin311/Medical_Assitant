@@ -16,7 +16,6 @@ class MedicalImageSummarizer:
     
     def store_diagnosis(self, image_id: str, diagnosis_data: Dict[str, Any]) -> None:
         self.memory[image_id] = diagnosis_data
-        # self.logger.info(f"Stored diagnosis for image {image_id}")
     
     def get_stored_diagnosis(self, image_id: str) -> Optional[Dict[str, Any]]:
         return self.memory.get(image_id)

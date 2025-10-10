@@ -81,8 +81,6 @@ class DiseaseEvaluation:
         evaluation_type: str = "disease_progression"
     ) -> Dict[str, Any]:
         
-        # Simple version. Does not contain RAG. Like a demo, about 70% of the full version.
-        self.logger.info(f"Starting LLM-based {evaluation_type} evaluation")
         try:
             # Prepare patient data for analysis
             current_patient = self._format_patient_for_analysis(patient_record)
