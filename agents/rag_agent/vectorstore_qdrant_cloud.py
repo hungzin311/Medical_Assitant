@@ -208,6 +208,56 @@ class VectorStoreCloud:
             
         return retrieved_docs
 
+    def retrieve_kg_docs_chunks(
+            self,
+            query: str,
+            vectorstore: QdrantVectorStore,
+        ) -> List[Dict[str, Any]]:
+        try:
+        
+            results = vectorstore.similarity_search_with_score(
+                query=query,
+                k=self.retrieval_top_k
+            )
+        
+            retrieved_docs = []
+            
+            for chunk, score in results:
+                try:
+                    doc_content = chunk.page_content
+                    
+                    if not doc_content:
+                        self.logger.warning(f"Missing content in chunk")
+                        continue
+                    
+                    # Create document dict with KG-specific metadata
+                    doc_dict = {
+                        "id": chunk.metadata.get('doc_id', 'unknown'),
+                        "content": doc_content,
+                        "score": float(score),
+                        "disease_name": chunk.metadata.get('disease_name', ''),
+                        "description": chunk.metadata.get('description', ''),
+                        "cause": chunk.metadata.get('cause', ''),
+                        "symptom": chunk.metadata.get('symptom', ''),
+                    }
+                    
+                    # Add any additional metadata from the chunk
+                    for key, value in chunk.metadata.items():
+                        if key not in ['doc_id', 'disease_name', 'description', 'cause', 'symptom']:
+                            doc_dict[key] = value
+                            
+                    retrieved_docs.append(doc_dict)
+                except Exception as e:
+                    self.logger.error(f"Error processing KG document: {e}")
+                    continue
+            
+            self.logger.info(f"Retrieved {len(retrieved_docs)} KG documents for query: {query[:50]}...")
+            return retrieved_docs
+            
+        except Exception as e:
+            self.logger.error(f"Error in retrieve_kg_docs_chunks: {e}")
+            return []
+
     def create_vectorstore_with_metadata(
             self,
             document_chunks: List[str],

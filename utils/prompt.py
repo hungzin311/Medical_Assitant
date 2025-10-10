@@ -506,6 +506,81 @@ medical_mcq_evaluation_prompt = PromptTemplate(
 )
 
 # Prompt cho đánh giá LLM base (không có KG data)
+# Prompt cho đánh giá RAG với MCQ format
+rag_agent_mcq_evaluation_prompt = """Bạn là bác sĩ chuyên khoa. Hãy áp dụng tư duy lâm sàng từng bước để phân tích câu hỏi trắc nghiệm y khoa và chọn đáp án đúng nhất dựa trên TÀI LIỆU Y TẾ được truy xuất từ RAG system.
+
+## THÔNG TIN ĐẦU VÀO:
+
+**CÂU HỎI**: {question}
+
+**CÁC LỰA CHỌN**:
+{choices}
+
+**TÀI LIỆU Y TẾ ĐƯỢC TRUY XUẤT**:
+{context}
+
+## HƯỚNG DẪN PHÂN TÍCH:
+
+### BƯỚC 1: PHÂN TÍCH TÀI LIỆU & ĐỐI CHIẾU
+1A) Phân tích các tài liệu liên quan:
+- Xác định thông tin y tế có liên quan đến câu hỏi
+- Liệt kê các bệnh/tình trạng được đề cập trong tài liệu
+- Đối chiếu thông tin trong tài liệu với từng lựa chọn
+- Xác định mức độ tương đồng giữa câu hỏi và thông tin tài liệu
+
+1B) Đánh giá độ tin cậy tài liệu:
+- Mức độ phù hợp của thông tin với câu hỏi
+- Tính đầy đủ của thông tin để đưa ra kết luận
+- Các thông tin quan trọng còn thiếu
+
+### BƯỚC 2: SUY LUẬN Y KHOA CHO MỖI LỰA CHỌN
+Với MỖI lựa chọn, hãy thực hiện SUY LUẬN dựa trên TÀI LIỆU:
+
+2A) **Phân tích bằng chứng từ tài liệu**:
+- Tài liệu có đề cập đến lựa chọn này không?
+- Thông tin trong tài liệu có hỗ trợ lựa chọn này không?
+- Mức độ chi tiết và chính xác của thông tin
+
+2B) **Đánh giá độ khớp với câu hỏi**:
+- Thông tin từ tài liệu có trả lời trực tiếp câu hỏi không?
+- Có sự nhất quán giữa tài liệu và lựa chọn không?
+
+2C) **Đánh giá tính hợp lý (Document Support Score 0.0-1.0)**:
+- 0.8-1.0: Tài liệu hỗ trợ rõ ràng và chi tiết
+- 0.5-0.7: Tài liệu hỗ trợ một phần hoặc gián tiếp
+- 0.0-0.4: Tài liệu không hỗ trợ hoặc mâu thuẫn
+
+### BƯỚC 3: QUYẾT ĐỊNH DỰA TRÊN TÀI LIỆU
+**ENOUGH_INFO** - CHỈ KHI TẤT CẢ các điều kiện sau thỏa mãn:
+- Tài liệu cung cấp thông tin rõ ràng về câu hỏi
+- Có 1 lựa chọn được tài liệu hỗ trợ mạnh mẽ (Document Support Score ≥ 0.8)
+- Score của lựa chọn này CAO HƠN các lựa chọn khác ÍT NHẤT 0.25 điểm
+- Có thể LOẠI TRỪ các lựa chọn khác dựa trên thông tin trong tài liệu
+
+**NOT_ENOUGH_INFO** - Khi BẤT KỲ điều kiện nào sau đây xảy ra:
+- Tài liệu không đề cập đến câu hỏi hoặc các lựa chọn
+- Nhiều lựa chọn có Document Support Score tương đương (chênh lệch < 0.25 điểm)
+- Thông tin trong tài liệu không đủ để phân biệt các lựa chọn
+- Tài liệu mâu thuẫn hoặc không rõ ràng
+- Câu hỏi yêu cầu thông tin không có trong tài liệu
+
+## NGUYÊN TẮC QUAN TRỌNG:
+- **CHỈ DỰA VÀO** thông tin có trong tài liệu được truy xuất
+- **KHÔNG** sử dụng kiến thức bên ngoài tài liệu
+- **ƯU TIÊN** thông tin rõ ràng và trực tiếp từ tài liệu
+- **AN TOÀN**: Khi tài liệu không đủ thông tin → chọn "Not_enough_info"
+- **CHÍNH XÁC**: Đảm bảo đáp án có căn cứ rõ ràng từ tài liệu
+
+## HƯỚNG DẪN ĐỊNH DẠNG TRẢ LỜI:
+Trả lời theo format JSON sau:
+{{
+  "answer_index": 0,  // index của đáp án (0-based) hoặc null nếu NOT_ENOUGH_INFO
+  "not_enough_info": null,  // "Not_enough_info" nếu không đủ thông tin, null nếu có đáp án
+  "confidence": 0.0  // độ tự tin dựa trên chất lượng thông tin trong tài liệu (0.0-1.0)
+}}
+
+HÃY PHÂN TÍCH THEO CÁC BƯỚC TRÊN:"""
+
 llm_base_mcq_evaluation_prompt = PromptTemplate(
   template="""Bạn là một bác sĩ chuyên khoa có nhiều năm kinh nghiệm lâm sàng. Nhiệm vụ của bạn là phân tích câu hỏi trắc nghiệm y khoa và chọn đáp án đúng nhất dựa trên kiến thức y khoa của mình.
 

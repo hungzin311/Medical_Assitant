@@ -10,9 +10,6 @@ from .response_generator import ResponseGenerator
 logging.getLogger("httpx").disabled = True
 
 class MedicalRAG:
-    """
-    Medical Retrieval-Augmented Generation system that integrates all components.
-    """
     def __init__(self, config):
         self.logger = logging.getLogger(f"{self.__module__}")
         self.logger.info("Initializing Medical RAG system")
@@ -21,17 +18,9 @@ class MedicalRAG:
         self.reranker = Reranker(config)
         self.query_expander = QueryExpander(config)
         self.response_generator = ResponseGenerator(config)
+        self.vectorstore = self.vector_store.load_vectorstore()
     
     def ingest_directory(self, directory_path: str) -> Dict[str, Any]:
-        """
-        Ingest all files in a directory into the RAG system.
-        
-        Args:
-            directory_path: Path to the directory containing files to ingest
-            
-        Returns:
-            Dictionary with ingestion results
-        """
         start_time = time.time()
         self.logger.info(f"Ingesting files from directory: {directory_path}")
         
@@ -94,16 +83,6 @@ class MedicalRAG:
             }
     
     def ingest_file(self, document_path: str, document_chunks: List[str] = None) -> Dict[str, Any]:
-        """
-        Ingest a single file into the RAG system.
-        
-        Args:
-            document_path: Path to the file to ingest
-            document_chunks: Optional pre-processed document chunks to ingest directly
-            
-        Returns:
-            Dictionary with ingestion results
-        """
         start_time = time.time()
         self.logger.info(f"Ingesting file: {document_path}")
 
@@ -136,18 +115,7 @@ class MedicalRAG:
             }
         
     def process_query(self, query: str, chat_history: Optional[List[Dict[str, str]]] = None) -> Dict[str, Any]:
-        """
-        Process a query with the RAG system.
-        
-        Args:
-            query: The query string
-            chat_history: Optional chat history for context
-            
-        Returns:
-            Response dictionary
-        """
         start_time = time.time()
-        self.logger.info(f"RAG Agent processing query: {query}")
         
         try:
             # Step 1: Expand query
@@ -159,13 +127,12 @@ class MedicalRAG:
 
             # Step 2: Retrieval
             self.logger.info(f"2. Retrieving relevant documents for the query: '{query}'")
-            vectorstore = self.vector_store.load_vectorstore()
             retrieved_documents = self.vector_store.retrieve_relevant_chunks(
                 query=query,
-                vectorstore=vectorstore,
+                vectorstore=self.vectorstore,
                 )
 
-            self.logger.info(f"   Retrieved {len(retrieved_documents)} relevant document chunks")
+            self.logger.info(f"Retrieved {len(retrieved_documents)} relevant document chunks")
             
             # Check if we have any documents
             if not retrieved_documents:
@@ -203,12 +170,30 @@ class MedicalRAG:
         
         except Exception as e:
             self.logger.error(f"Error processing query: {e}")
-            import traceback
-            self.logger.error(traceback.format_exc())
-            # Return error response
             return {
                 "response": f"I encountered an error while processing your query: {str(e)}",
                 "sources": [],
                 "confidence": 0.0,
                 "processing_time": time.time() - start_time
+            }
+
+    def evaluate_mcq(self, question: str, choices: List[str]) -> Dict[str, Any]:
+        try:
+            expansion_result = self.query_expander.expand_query(question, mode="rag", chat_history=None)
+            expanded_query = expansion_result["expanded_query"]
+            
+            retrieved_documents = self.vector_store.retrieve_kg_docs_chunks(
+                query=expanded_query,
+                vectorstore=self.vectorstore,
+            )
+
+            reranked_documents = self.reranker.rerank(expanded_query, retrieved_documents)
+
+            return self.response_generator.generate_response_benchmark(expanded_query, choices, reranked_documents)
+        except Exception as e:
+            self.logger.error(f"Error evaluating MCQ: {e}")
+            return {
+                "answer_index": None,
+                "not_enough_info": True,
+                "confidence": 0.0
             }

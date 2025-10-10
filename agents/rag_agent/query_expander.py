@@ -1,16 +1,11 @@
 from typing import List, Dict, Any, Optional
 import json, re
 class QueryExpander:
-    """
-    Expands user queries with medical terminology to improve retrieval.
-    """
     def __init__(self, config):
         self.config = config
         self.model = config.rag.llm
         
     def expand_query(self, original_query: str, mode:str = "rag", patient_info:Dict =None, chat_history: Optional[List[Dict[str, str]]] = None) -> Dict[str, Any]:
-        print("Starting Expanding query")
-        # Generate expansions using chat history if available
         if mode == "rag":
             expanded_query = self._generate_expansions(original_query, chat_history)
             expanded_query = expanded_query.content
@@ -23,7 +18,6 @@ class QueryExpander:
         }
     
     def _generate_expansions(self, query: str, chat_history: Optional[List[Dict[str, str]]] = None) -> str:
-        """Use LLM to expand query with Vietnamese medical terminology for similarity-based embedding."""
         prompt = f"""
         Bạn là chuyên gia y tế giúp tạo ra các QUERY TÌM KIẾM mở rộng bằng tiếng Việt để tìm thông tin y tế chính xác.
         

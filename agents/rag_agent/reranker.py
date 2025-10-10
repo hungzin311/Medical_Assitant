@@ -1,5 +1,3 @@
-import os
-import re
 import logging
 from pathlib import Path
 from typing import List, Dict, Any, Union
@@ -24,34 +22,15 @@ class Reranker:
             if not documents:
                 return []
             
-            # Handle different document formats and ensure consistent structure
-            if documents:
-                # if the retrieved documents is just a list of strings, we add a default score
-                if isinstance(documents[0], str):
-                    docs_list = []
-                    for i, doc_text in enumerate(documents):
-                        docs_list.append({
-                            "id": i,
-                            "content": doc_text,
-                            "score": 1.0  # Default score
-                        })
-                    documents = docs_list
-                # if the retrieved documents is a list of dictionaries, we use the original score
-                elif isinstance(documents[0], dict):
-                    for i, doc in enumerate(documents):
-                        if "id" not in doc:
-                            doc["id"] = i
-                        if "score" not in doc:
-                            doc["score"] = 1.0
-                        if "content" not in doc:
-                            if "text" in doc:  # Some implementations might use "text" instead
-                                doc["content"] = doc["text"]
-                            else:
-                                doc["content"] = f"Document {i}"
-            
+            for i, doc in enumerate(documents):
+                if "id" not in doc:
+                    doc["id"] = i
+                if "score" not in doc:
+                    doc["score"] = 1.0
+                        
             # Create query-document pairs for scoring
             pairs = [(query, doc["content"]) for doc in documents]
-            scores = self.model.predict(pairs)
+            scores = self.model.predict(pairs, show_progress_bar=False)
             
             for i, score in enumerate(scores):
                 documents[i]["rerank_score"] = float(score)  # Store the new score from reranking

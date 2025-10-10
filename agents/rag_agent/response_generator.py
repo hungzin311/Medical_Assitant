@@ -1,12 +1,10 @@
 import logging
 import json
 import re
-from typing import List, Dict, Any, Optional, Union
+from typing import List, Dict, Any, Optional
+from utils.prompt import rag_agent_mcq_evaluation_prompt
 
 class ResponseGenerator:
-    """
-    Generates responses based on retrieved context and user query.
-    """
     def __init__(self, config):
         
         self.logger = logging.getLogger(__name__)
@@ -88,20 +86,15 @@ HÃY PHÂN TÍCH:"""
         ) -> Dict[str, Any]:
     
         try:
-           
-            # Extract content from documents for context
-            doc_texts = [doc["content"] for doc in retrieved_docs]
-            
-            # Combine retrieved documents into a single context
+            mode = 'kg'
+            if mode == "kg": 
+                doc_texts = [f"[{doc['disease_name']}]({doc['description']}) \n {doc['cause']} \n {doc['symptom']}" for doc in retrieved_docs]
+            else:
+                doc_texts = [doc["content"] for doc in retrieved_docs]
             context = "\n\n===DOCUMENT SECTION===\n\n".join(doc_texts)
-            
-            # Build the prompt
             prompt = self._build_prompt(query, context, patient_context, chat_history)
-            
-            # Generate response
             response = self.response_generator_model.invoke(prompt)
-            
-            # Parse JSON response and extract content (similar to KG agent)
+
             try:
                 if hasattr(response, 'content'):
                     response_text = response.content.strip()
@@ -114,7 +107,6 @@ HÃY PHÂN TÍCH:"""
                 
                 response_json = json.loads(response_text)
                 
-                # Extract content from step3_action (similar to KG agent)
                 content = response_json.get("step3_action", {}).get("content", "Không có thông tin liên quan từ tài liệu.")
                 confidence = response_json.get('step3_action', {}).get('confidence', 0.0)
                 
@@ -205,18 +197,42 @@ HÃY PHÂN TÍCH:"""
             
         return formatted_sources
 
-    def _calculate_confidence(self, documents: List[Dict[str, Any]]) -> float:
+    def generate_response_benchmark(
+            self,
+            question: str, 
+            choices: List[str],
+            retrieved_docs: List[Dict[str, Any]],
+        ) -> Dict[str, Any]:
     
-        if not documents:
-            return 0.0
+        try:
+            doc_texts = [f"[{doc['disease_name']}]({doc['description']}) \n {doc['cause']} \n {doc['symptom']}" for doc in retrieved_docs]
+            prompt = rag_agent_mcq_evaluation_prompt.format(question=question, choices=choices, context = doc_texts)
+            response = self.response_generator_model.invoke(prompt)
+
+            try:
+                response_text = response.content.strip()
+                
+                match = re.search(r"```json\s*(\{.*?\})\s*```", response_text, re.DOTALL)
+                if match:
+                    response_text = match.group(1)  
+                
+                response_json = json.loads(response_text)
+                
+            except (json.JSONDecodeError, KeyError, AttributeError) as e:
+                self.logger.warning(f"Error parsing JSON response: {e}")
+                return {
+                    "answer_index": None,
+                    "not_enough_info": True,
+                    "confidence": 0.0
+                }
             
-        # Use combined score (both reranker and cosine similarity) if available, otherwise use original score
-        if "combined_score" in documents[0]:
-            scores = [doc.get("combined_score", 0) for doc in documents[:3]]
-        elif "rerank_score" in documents[0]:
-            scores = [doc.get("rerank_score", 0) for doc in documents[:3]]
-        else:
-            scores = [doc.get("score", 0) for doc in documents[:3]]
+            return response_json
             
-        # Average of top 3 document scores or fewer if less than 3
-        return sum(scores) / len(scores) if scores else 0.0
+        except Exception as e:
+            self.logger.error(f"Error generating response: {e}")
+            
+            return {
+                "answer_index": None,
+                "not_enough_info": True,
+                "confidence": 0.0
+            }
