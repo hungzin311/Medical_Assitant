@@ -14,7 +14,8 @@
 \newcommand{\doctitle}{{{\Huge \textbf{\coursetitle}}}}
 \input{includes/packages}                                 
 \input{includes/custom-commands}   
-\input{includes/metadata}                                 \usepackage{tocloft}
+\input{includes/metadata}
+\usepackage{tocloft}
 \setlength{\cftbeforefigskip}{0.4ex} % Điều chỉnh khoảng cách cho Danh sách Hình vẽ
 % Nếu bạn cũng muốn áp dụng cho Danh sách Bảng biểu, thêm dòng:
 \setlength{\cftbeforetabskip}{0.4ex}
@@ -47,7 +48,6 @@
     \normalsize
     
 \justifying
-\begingroup
     \let\clearpage\relax
     \tableofcontents
     \listoftables
@@ -57,27 +57,29 @@
 \begin{center}
     \Large\bfseries Lời mở đầu
 \end{center}
-\vspace{0.5cm}
+\vspace{0.1cm}
 
-Trong bối cảnh nhu cầu chăm sóc sức khỏe ban đầu và tiếp cận thông tin y tế ngày càng tăng cao, việc phát triển các giải pháp hỗ trợ hiệu quả và đáng tin cậy trở thành ưu tiên hàng đầu. Tuy nhiên, người dân vẫn gặp nhiều khó khăn trong việc tiếp cận dịch vụ tư vấn y tế kịp thời, đặc biệt ở các khu vực ngoài đô thị, cùng với việc thiếu hiểu biết về các biện pháp chăm sóc sức khỏe cơ bản tại nhà.
+Trong kỷ nguyên số hóa y tế, nhu cầu tiếp cận thông tin sức khỏe chính xác, kịp thời và cá nhân hóa ngày càng cấp thiết. Người dân mong muốn có công cụ hỗ trợ thông minh giúp tự quản lý sức khỏe, nhận diện sớm nguy cơ và đưa ra quyết định y tế đúng đắn — trong khi khả năng tiếp cận dịch vụ chất lượng vẫn còn hạn chế, đặc biệt ở vùng thiếu nguồn lực.
 
-Đồng thời, sự phát triển mạnh mẽ của trí tuệ nhân tạo, đặc biệt là các hệ thống đa tác nhân (multi-agent) và AI đa phương thức (multimodal AI), đang mở ra những cơ hội to lớn trong lĩnh vực y tế số. Các công nghệ này có khả năng xử lý, phân tích và kết hợp nhiều dạng dữ liệu khác nhau như văn bản, hình ảnh, giúp cung cấp thông tin y khoa chính xác và cá nhân hóa cho từng người dùng.
+Sự phát triển mạnh mẽ của trí tuệ nhân tạo đa tác nhân (multi-agent) và đa phương thức (multimodal) mở ra cơ hội xây dựng giải pháp y tế số thông minh. Các công nghệ như MedGemma 27B, VietMedKG và RAG cho phép hệ thống hiểu và tư vấn y khoa với độ chính xác cao.
 
-Nhận thức được tiềm năng và thách thức này, báo cáo được thực hiện nhằm nghiên cứu và phát triển một hệ thống Multi-Agent trợ lý y tế ảo với khả năng phân tích triệu chứng đa phương thức và cung cấp thông tin y khoa đáng tin cậy. Hệ thống được thiết kế để hỗ trợ người dùng phổ thông trong việc nhận diện, hiểu và xử lý các vấn đề sức khỏe thường gặp một cách hiệu quả và an toàn.
+Dựa trên tiềm năng đó, nghiên cứu này phát triển Multi-Agent Medical Assistant – một hệ thống có khả năng phân tích triệu chứng đa phương thức, tư vấn y tế thông minh, và hỗ trợ theo dõi sức khỏe liên tục, hướng tới chăm sóc sức khỏe cá nhân hóa và y tế dự phòng trong tương lai.
 \begin{center}
     \Large\bfseries Tóm tắt nội dung và đóng góp
 \end{center}
-\vspace{0.5cm}
+\vspace{0.1cm}
 
-Báo cáo này trình bày nghiên cứu về việc phát triển hệ thống Multi-Agent trợ lý y tế ảo với khả năng phân tích triệu chứng đa phương thức, được cấu trúc qua ba phần chính với những nội dung và đóng góp cụ thể như sau:
+Báo cáo này trình bày một nghiên cứu toàn diện về việc phát triển hệ thống Multi-Agent Medical Assistant với khả năng phân tích triệu chứng đa phương thức và tư vấn y tế thông minh. Nghiên cứu được cấu trúc thành ba phần chính với những đóng góp khoa học và thực tiễn quan trọng:
 
 \begin{itemize}
-    \item \textbf{Giới thiệu đề tài:} Phần này phân tích bối cảnh thực tiễn về nhu cầu chăm sóc sức khỏe và những thách thức trong việc tiếp cận thông tin y tế. Đồng thời trình bày bối cảnh công nghệ với sự phát triển của AI đa tác nhân và đa phương thức trong lĩnh vực y tế. Đóng góp chính là xác định rõ mục tiêu xây dựng hệ thống trợ lý y tế ảo có khả năng hỗ trợ người dùng phổ thông trong việc nhận diện và xử lý các vấn đề sức khỏe thường gặp.
+    \item \textbf{Nền tảng lý thuyết và phương pháp tiếp cận:} Phần này xây dựng cơ sở lý thuyết vững chắc cho việc ứng dụng AI đa tác nhân trong y tế, phân tích sâu sắc các thách thức trong chăm sóc sức khỏe số và định hướng giải pháp công nghệ. \textit{Đóng góp chính} là việc đề xuất một framework tích hợp multi-hop QA, cho phép hệ thống thu thập thông tin lâm sàng một cách có hệ thống trước khi đưa ra chẩn đoán gợi ý, nâng cao đáng kể độ tin cậy và an toàn trong tư vấn y tế tự động.
 
-    \item \textbf{Giải pháp đề xuất và Kiến trúc hệ thống:} Phần này mô tả chi tiết kiến trúc Multi-Agent Medical Assistant gồm Vision Module và Text Module, cùng với các thành phần chuyên biệt như Decision Agent, RAG Agent, Web Search Agent và Normal Conversation Agent. Đóng góp quan trọng là thiết kế một kiến trúc mô-đun, linh hoạt và có khả năng mở rộng, tích hợp các công nghệ hiện đại để xử lý đa phương thức và đảm bảo độ tin cậy trong lĩnh vực y tế.
+    \item \textbf{Kiến trúc hệ thống và giải pháp kỹ thuật:} Phần này trình bày thiết kế kiến trúc đa tác nhân tiên tiến với khả năng xử lý song song RAG và Knowledge Graph, tích hợp Vision Module chuyên biệt và Patient Database Agent thông minh. (1) Kiến trúc điều phối đồ thị (LangGraph) cho phép quản lý luồng công việc phức tạp và duy trì ngữ cảnh; (2) Hệ thống theo dõi sức khỏe với khả năng sinh báo cáo y khoa tự động và cá nhân hóa ngưỡng cảnh báo; (3) Cơ chế guardrails và human-in-the-loop đảm bảo an toàn tối đa trong ứng dụng y tế.
 
-    \item \textbf{Triển khai công nghệ và Kết quả:} Phần cuối trình bày việc triển khai hệ thống sử dụng các công nghệ tiên tiến như LangGraph, Gemini 2.0 Flash, Qdrant và bộ dữ liệu VimedAQA. Kết quả thực nghiệm cho thấy hệ thống hoạt động ổn định với giao diện demo real-time và khả năng xử lý đa phương thức. Đóng góp chính là một hệ thống prototype hoàn chỉnh với tiềm năng ứng dụng cao trong thực tiễn chăm sóc sức khỏe số.
+    \item \textbf{Triển khai và đánh giá hiệu quả:} Phần này trình bày việc triển khai thành công hệ thống sử dụng các công nghệ tiên tiến nhất hiện có: MedGemma 27B cho xử lý ngôn ngữ y tế chuyên biệt, VietMedKG cho tri thức y khoa có cấu trúc, Gemini 2.0 Flash cho khả năng đa phương thức, và Qdrant cho truy xuất vector hiệu suất cao. \textit{Đóng góp thực tiễn} là một hệ thống hoàn chỉnh đã được kiểm chứng với khả năng xử lý chính xác các truy vấn y tế phức tạp, hỗ trợ phân tích hình ảnh y tế chuyên sâu, và cung cấp báo cáo sức khỏe chuyên nghiệp. Hệ thống thể hiện tiềm năng ứng dụng rộng rãi trong thực tiễn chăm sóc sức khỏe, từ tư vấn sơ cấp đến hỗ trợ chẩn đoán và theo dõi bệnh mãn tính.
 \end{itemize}
+
+\textbf{Tầm quan trọng và tác động:} Nghiên cứu này đóng góp vào việc xây dựng nền tảng cho thế hệ mới của các hệ thống y tế thông minh, có khả năng thu hẹp khoảng cách tiếp cận chăm sóc sức khỏe chất lượng, nâng cao hiệu quả y tế dự phòng, và hỗ trợ các chuyên gia y tế trong việc đưa ra quyết định lâm sàng chính xác hơn.
 
 \newpage
 \input{content}

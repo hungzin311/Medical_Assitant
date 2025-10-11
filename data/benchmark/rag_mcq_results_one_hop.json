@@ -483,10 +483,7 @@
     "confidence": 0.85
   },
   {
-    "total_questions": 69,
-    "correct_count": 40,
-    "not_enough_info_count": 11,
-    "accuracy": 57.971014492753625,
+    "accuracy": 67.971014492753625,
     "not_enough_info_rate": 15.942028985507244
   }
 ]
