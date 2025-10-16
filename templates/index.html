@@ -53,12 +53,14 @@
             border: 2px solid rgba(237, 27, 46, 0.1);
             border-radius: 24px;
             padding: 30px;
-            min-height: calc(100vh - 40px);
+            height: calc(100vh - 40px);
+            max-height: calc(100vh - 40px);
             display: flex;
             flex-direction: column;
             position: sticky;
             top: 20px;
             box-shadow: 0 10px 40px rgba(237, 27, 46, 0.08);
+            overflow-y: auto;
         }
 
         .sidebar-header {

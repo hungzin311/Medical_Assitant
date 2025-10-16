@@ -11,10 +11,6 @@ load_dotenv()
 
 
 class FPTOpenAIEmbeddings(Embeddings):
-    """Simple wrapper to provide an embed_query API compatible with existing usage.
-
-    Uses FPT's embedding service via OpenAI client with configurable base_url and model.
-    """
     def __init__(self, base_url: str = None, api_key: str = None, model_name: str = None):
         self.base_url = base_url or os.getenv("FPT_BASE_URL") 
         self.api_key = api_key or os.getenv("FPT_API_KEY")

@@ -1,46 +1,6 @@
 {
-    "response": "Chào bạn, dựa trên tài liệu y tế được cung cấp, chảy máu mũi (chảy máu cam, xuất huyết mũi) thường không gây nguy hiểm nghiêm trọng, nhưng có một số điểm bạn cần lưu ý về các ảnh hưởng và khi nào cần quan tâm hơn:
-
-*   **Thường không nguy hiểm và ít phiền toái:** Mặc dù chảy máu mũi có thể khá đáng sợ, nhưng thường thì chúng chỉ gây ít phiền toái và không nguy hiểm.
-*   **Ảnh hưởng của huyết áp cao:** Thông thường, chảy máu mũi không phải là triệu chứng hay hậu quả của bệnh tăng huyết áp. Tuy nhiên, huyết áp tăng cao có thể khiến cho tình trạng chảy máu mũi của bạn kéo dài và nặng hơn.
-*   **Khi nào cần chú ý đặc biệt:**
-    *   **Chảy máu nhiều hoặc kéo dài:** Nếu chảy máu mũi nhiều hoặc kéo dài, bạn nên đến bệnh viện để được xử trí thích hợp.
-    *   **Chảy máu thường xuyên:** Chảy máu mũi được coi là thường xuyên khi xảy ra nhiều hơn 1 lần trong 1 tuần. Nếu tình trạng này xảy ra thường xuyên, dù có thể tự cầm, bạn cũng nên đến khám bác sĩ để tìm nguyên nhân chảy máu.
-
-Vì vậy, mặc dù đa số các trường hợp chảy máu mũi không đáng lo ngại, việc theo dõi tần suất, mức độ chảy máu và các yếu tố liên quan (như huyết áp) là quan trọng để xác định khi nào cần tìm kiếm sự hỗ trợ y tế.
-
-⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp.
-
-⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp.
-
-##### Tài liệu nguồn:
-- [disease2.jsonl](jsonl_payload_1759207348.4839985_batch_2150)
-- [disease2.jsonl](jsonl_payload_1759207348.4839985_batch_7950)
-- [disease2.jsonl](jsonl_payload_1759207348.4839985_batch_2850)
-- [disease2.jsonl](jsonl_payload_1759207348.4839985_batch_6250)
-- [disease1.jsonl](jsonl_payload_1759206989.5755088_batch_1350)",
-    "sources": [
-        {
-            "title": "disease2.jsonl",
-            "path": "jsonl_payload_1759207348.4839985_batch_2150"
-        },
-        {
-            "title": "disease2.jsonl",
-            "path": "jsonl_payload_1759207348.4839985_batch_7950"
-        },
-        {
-            "title": "disease2.jsonl",
-            "path": "jsonl_payload_1759207348.4839985_batch_2850"
-        },
-        {
-            "title": "disease2.jsonl",
-            "path": "jsonl_payload_1759207348.4839985_batch_6250"
-        },
-        {
-            "title": "disease1.jsonl",
-            "path": "jsonl_payload_1759206989.5755088_batch_1350"
-        }
-    ],
-    "confidence": "1.0",
-    "processing_time": 18.463116884231567
+    "response": "Tôi xin lỗi, nhưng tôi đã gặp lỗi khi tạo câu trả lời. Vui lòng thử diễn đạt lại câu hỏi của bạn.",
+    "sources": [],
+    "confidence": 0.0,
+    "processing_time": 39.90329360961914
 }

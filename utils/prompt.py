@@ -328,7 +328,7 @@ medical_cot_prompt = PromptTemplate(
 
     ## BƯỚC 3: HÀNH ĐỘNG PHÙ HỢP
     - Nếu ENOUGH_INFO: đưa chẩn đoán DỰA TRÊN XÁC SUẤT (không khẳng định tuyệt đối), tư vấn điều trị, theo dõi
-    - Nếu NOT_ENOUGH_INFO: chọn 1 câu hỏi/triệu chứng quan trọng nhất cần xác nhận tiếp, giải thích tại sao, ưu tiên red flags
+    - Nếu NOT_ENOUGH_INFO: chọn 1 câu hỏi/triệu chứng quan trọng nhất cần xác nhận tiếp, giải thích tại sao, ưu tiên red flags, lưu ý rằng nếu là phụ nữ > 18 tuổi thì hãy hỏi có mang thai không.
 
     NGUYÊN TẮC AN TOÀN:
     - Ưu tiên hỏi/loại trừ triệu chứng báo động trước
@@ -650,5 +650,88 @@ HÃY SUY LUẬN THEO CÁC BƯỚC TRÊN, sau đó TRẢ LỜI THEO FORMAT JSON:
     input_variables=[
         "question",
         "choices"
+    ]
+)
+medical_direct_kg_prompt = PromptTemplate(
+    template="""
+    Bạn là bác sĩ chuyên khoa. Hãy trả lời trực tiếp câu hỏi của bệnh nhân dựa trên thông tin sau
+
+    THÔNG TIN BỆNH NHÂN:
+    {patient_context}
+
+    DANH SÁCH ỨNG VIÊN TỪ KNOWLEDGE GRAPH (JSON):
+    {kg_candidates}
+    lưu ý không quan tâm đến điểm score của các bệnh
+
+    CÂU HỎI/MIÊU TẢ TRIỆU CHỨNG CỦA BỆNH NHÂN: {user_query}
+
+    LỊCH SỬ HỘI THOẠI: {history}
+
+    HƯỚNG DẪN:
+    - Phân tích thông tin từ Knowledge Graph và đưa ra câu trả lời trực tiếp
+    - Sử dụng thông tin từ các bệnh ứng viên và khớp triệu chứng tốt nhất
+    - Đưa ra chẩn đoán khả năng cao nhất và tư vấn điều trị phù hợp
+    - Không cần trình bày quá trình suy luận chi tiết
+
+    NGUYÊN TẮC AN TOÀN:
+    - Sử dụng ngôn ngữ "có thể", "khả năng cao" thay vì khẳng định tuyệt đối
+    - Khuyến cáo khám bác sĩ khi cần thiết
+    - Phù hợp với tuổi, giới tính, tiền sử bệnh của bệnh nhân
+
+    TRẢ LỜI THEO FORMAT JSON:
+    {{
+      "step3_action": {{
+        "content": "Câu trả lời trực tiếp cho bệnh nhân với format đẹp, có cấu trúc rõ ràng",
+        "confidence": "0.0 - 1.0",
+        "follow_up_advice": "lời khuyên theo dõi"
+      }}
+    }}
+    """,
+    input_variables=[
+        "patient_context",
+        "kg_candidates",
+        "user_query",
+        "history"
+    ]
+)
+medical_direct_rag_prompt = PromptTemplate(
+    template="""
+    Bạn là bác sĩ chuyên khoa. Hãy trả lời trực tiếp câu hỏi của bệnh nhân dựa trên thông tin từ tài liệu y tế được truy xuất.
+
+    THÔNG TIN BỆNH NHÂN:
+    {patient_context}
+
+    TÀI LIỆU Y TẾ ĐƯỢC TRUY XUẤT:
+    {context}
+
+    CÂU HỎI/MIÊU TẢ TRIỆU CHỨNG CỦA BỆNH NHÂN: {query}
+
+    LỊCH SỬ HỘI THOẠI: {chat_history}
+
+    HƯỚNG DẪN:
+    - Phân tích thông tin từ tài liệu y tế và đưa ra câu trả lời trực tiếp
+    - Chỉ sử dụng thông tin có trong các tài liệu được truy xuất
+    - Đưa ra câu trả lời dựa trên thông tin tài liệu mà không cần trình bày quá trình suy luận chi tiết
+    - Tập trung vào việc cung cấp thông tin hữu ích và tư vấn phù hợp
+
+    NGUYÊN TẮC AN TOÀN:
+    - Chỉ dựa vào thông tin có trong tài liệu được truy xuất
+    - Sử dụng ngôn ngữ "có thể", "theo tài liệu", "dựa trên thông tin" thay vì khẳng định tuyệt đối
+    - Khuyến cáo khám bác sĩ khi cần thiết
+    - Đảm bảo thông tin chính xác và có nguồn gốc
+
+    TRẢ LỜI THEO FORMAT JSON:
+    {{
+      "step3_action": {{
+        "content": "Câu trả lời trực tiếp cho bệnh nhân với format đẹp, có cấu trúc rõ ràng",
+        "confidence": "0.0 - 1.0"
+      }}
+    }}
+    """,
+    input_variables=[
+        "patient_context",
+        "context", 
+        "query",
+        "chat_history"
     ]
 )

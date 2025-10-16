@@ -207,18 +207,83 @@ Một đóng góp quan trọng trong Polyp Segmentation Agent là việc phát t
 \subsubsection{Phương pháp tiếp cận}
 
 Quy trình bao gồm hai bước chính: đầu tiên, hệ thống sử dụng hàm ndimage.label để xác định các thành phần liên thông trong mask phân vùng, tách các vùng không phải nền thành các khu vực riêng biệt dựa trên tính liên thông trong đồ thị pixel. Tiếp theo, đối với các vùng đơn sắc (chỉ chứa một lớp), hệ thống giữ nguyên không thay đổi. Đối với các vùng đa sắc (chứa nhiều lớp), hệ thống xác định lớp thống trị bằng cách đếm số pixel của từng lớp, sau đó điền toàn bộ vùng với màu tương ứng với lớp thống trị.
+\newpage
+
+\subsubsection{Connected Component Analysis}
+
+\textbf{Mục tiêu:} Phân tách các vùng liên thông trong mặt nạ dự đoán nhằm xác định các đối tượng độc lập.
+
+\textbf{1. Xác định vùng quan tâm:}
+\[
+I(x, y) =
+\begin{cases}
+1, & \text{nếu pixel } (x, y) \text{ thuộc vùng cần xét (non-blue)} \\
+0, & \text{ngược lại}
+\end{cases}
+\]
+
+\textbf{2. Phân tích liên thông:}  
+Hai pixel \( p=(x_1, y_1) \) và \( q=(x_2, y_2) \) được xem là liên thông nếu:
+\[
+|x_1 - x_2| \le 1 \quad \text{và} \quad |y_1 - y_2| \le 1 \quad \text{và} \quad I(p) = I(q) = 1
+\]
+
+Tập hợp các pixel liên thông tạo thành một \textbf{thành phần liên thông}:
+\[
+\{R_i\}_{i=1}^{N} \quad \text{sao cho} \quad \forall (p, q) \in R_i, \; p \leftrightarrow q
+\]
+
+\textbf{3. Gán nhãn vùng:}
+\[
+L(x, y) = i \quad \text{nếu } (x, y) \in R_i
+\]
+
+trong đó \(L(x, y)\) là nhãn vùng tại vị trí pixel, và \(N\) là tổng số vùng liên thông.
+\subsubsection{Region-wise Color Dominance Refinement}
+
+\textbf{Mục tiêu:} Đảm bảo tính nhất quán về nhãn trong từng vùng bằng cách gán toàn bộ vùng theo màu chiếm ưu thế.
+
+\textbf{1. Đếm số lượng pixel theo từng lớp trong mỗi vùng:}
+\[
+C_k(R_i) = \sum_{(x,y) \in R_i} \mathbb{1}\big[M(x, y) = k\big]
+\]
+
+với:
+\begin{itemize}
+  \item \(M(x, y)\): nhãn màu gốc tại pixel \((x, y)\)
+  \item \(k \in \{\text{red}, \text{green}\}\)
+  \item \(\mathbb{1}[\cdot]\): hàm chỉ thị, nhận giá trị 1 nếu điều kiện đúng, ngược lại là 0
+\end{itemize}
+
+\textbf{2. Xác định màu chiếm ưu thế:}
+\[
+k^* = \arg\max_k C_k(R_i)
+\]
+
+\textbf{3. Cập nhật lại vùng:}
+\[
+M'(x, y) = k^*, \quad \forall (x, y) \in R_i
+\]
+
+Kết quả: mỗi vùng \(R_i\) được gán một nhãn thống nhất theo màu chiếm ưu thế, giúp loại bỏ nhiễu và tăng tính nhất quán trong mặt nạ phân đoạn.
 
 \subsubsection{Kết quả cải thiện}
 
 Kỹ thuật này đã được kiểm chứng trên dataset BKAI IGH NeoPolyp-Small với độ phân giải chuẩn hóa 512x512, cho thấy cải thiện đáng kể về độ chính xác Dice Score khoảng 3-4\% trên các mô hình khác nhau. Đặc biệt, mô hình DeepLabV3+ với backbone RegNetx320 đạt được kết quả tốt nhất với Dice Score 86.33\% sau khi áp dụng post-processing, so với 82.56\% khi không sử dụng kỹ thuật này. Sự cải thiện này chứng minh hiệu quả của việc loại bỏ nhiễu và tăng cường tính nhất quán trong các vùng phân đoạn, đặc biệt quan trọng trong ứng dụng lâm sàng nơi độ chính xác phân vùng là yếu tố then chốt.
 
 \subsection{Text Module}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/abctext.png}
+    \caption{Kiến trúc chi tiết của Text Module}
+    \label{fig:text-module}
+\end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{images/text_module.png}
+    \includegraphics[width=0.8\textwidth]{images/text_module.png}
     \caption{Kiến trúc chi tiết của Text Module với xử lý song song KG-RAG}
-    \label{fig:text-module}
+    \label{fig:kg-rag-module}
 \end{figure}
 
 \begin{figure}[H]
@@ -282,6 +347,8 @@ Conversational Agent chịu trách nhiệm xử lý các cuộc hội thoại t�
 Khi được kích hoạt bởi MedGemma Chain of Thought, Conversational Agent sử dụng các kỹ thuật hỏi đáp thông minh để thu thập từng phần thông tin cần thiết một cách tự nhiên và không gây áp lực cho người dùng. Agent này được trang bị khả năng duy trì ngữ cảnh cuộc hội thoại, tránh hỏi lại các thông tin đã có, và điều chỉnh phong cách giao tiếp phù hợp với từng đối tượng người dùng khác nhau.
 
 \subsection{Patient Database Agent - Hệ thống Theo dõi Sức khỏe}
+
+\textit{Note: Demo Use Case (for future improvement)}
 
 Patient Database Agent là một thành phần quan trọng của hệ thống, chuyên trách quản lý thông tin bệnh nhân và theo dõi các chỉ số sức khỏe theo thời gian. Agent này không chỉ lưu trữ dữ liệu mà còn có khả năng phân tích xu hướng, phát hiện bất thường và tạo ra các báo cáo y tế chuyên nghiệp.
 

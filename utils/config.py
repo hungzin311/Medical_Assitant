@@ -42,7 +42,7 @@ class RAGConfig:
 
         self.include_sources = True
 
-        self.min_retrieval_confidence = 0.80
+        self.min_retrieval_confidence = 0.70
 
         self.context_limit = 20     
 

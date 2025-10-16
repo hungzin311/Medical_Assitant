@@ -5,12 +5,12 @@ from utils.llm_config import get_gemini_llm_3
 from agents.patient_db_agent import PatientQueryEngine
 from agents.rag_agent.query_expander import QueryExpander
 from utils.config import Config
-from utils.prompt import medical_cot_prompt, medical_mcq_evaluation_prompt
+from utils.prompt import medical_cot_prompt, medical_direct_kg_prompt, medical_mcq_evaluation_prompt
 import json
 import re
 
 config = Config()
-prompt = medical_cot_prompt
+prompt = medical_cot_prompt 
 mcq_prompt = medical_mcq_evaluation_prompt
 
 class ResponseGenerator:
