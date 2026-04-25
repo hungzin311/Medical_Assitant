@@ -1,7 +1,6 @@
 import logging
 import cv2 
 import segmentation_models_pytorch as smp
-from torchgeometry.losses import one_hot
 import numpy as np
 from PIL import Image
 import imageio
