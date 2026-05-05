@@ -68,28 +68,6 @@ class MedicalImageSummarizer:
             
             Duy trì giọng điệu chuyên nghiệp, thông cảm và nhấn mạnh tầm quan trọng của việc tham khảo bác sĩ chuyên khoa tiêu hóa.
             """
-        elif analysis_type == "skin_lesion_segmentation":
-            summarizer_prompt = f"""
-            Bạn là một trợ lý y tế chuyên về da liễu và phân tích tổn thương da. Hãy tóm tắt kết quả phân vùng tổn thương da.
-            
-            LOẠI PHÂN TÍCH: Phân vùng tổn thương da
-            THÔNG TIN CHẨN ĐOÁN:
-            {diagnosis}
-            {f'CÂU HỎI CỦA NGƯỜI DÙNG: {user_query}' if user_query else ''}
-            {f'BỐI CẢNH CUỘC TRÒ CHUYỆN GẦN ĐÂY: {history_context}' if history_context else ''}
-            
-            Vui lòng cung cấp:
-            
-            1. **Tóm tắt kết quả phân vùng**: Mô tả ranh giới và đặc điểm của tổn thương
-            2. **Đánh giá hình thái**: Phân tích hình dạng, kích thước và đặc điểm bề mặt
-            3. **Khuyến nghị tiếp theo**: Cần thăm khám bác sĩ da liễu và các xét nghiệm bổ sung
-            4. **Dấu hiệu cảnh báo**: Các triệu chứng cần theo dõi
-            5. **Chăm sóc da**: Hướng dẫn bảo vệ và chăm sóc vùng da tổn thương
-            
-            Kết thúc bằng câu hỏi về việc cần thêm thông tin về chăm sóc da, lịch tái khám, hoặc biện pháp phòng ngừa.
-            
-            Duy trì giọng điệu chuyên nghiệp, thông cảm và nhấn mạnh tầm quan trọng của việc thăm khám bác sĩ da liễu.
-            """
         else:
             # Default general diagnosis prompt
             summarizer_prompt = f"""

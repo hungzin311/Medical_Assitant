@@ -1,5 +1,4 @@
 from .image_classifier import ImageClassifier
-from .skin_lesion_agent.skin_lesion_inference import SkinLesionSegmentation
 from .general_diagnosis_agent import GeneralMedicalDiagnosisAgent
 from .summarizer_agent import MedicalImageSummarizer
 from .polyp_seg_tool.polyp_seg_inference import PolypSegmentation
@@ -11,8 +10,6 @@ class ImageAnalysisAgent:
     
     def __init__(self, config):
         self.image_classifier = ImageClassifier(vision_model=config.medical_cv.llm)
-        self.skin_lesion_agent = SkinLesionSegmentation(model_path=config.medical_cv.skin_lesion_model_path)
-        self.skin_lesion_segmentation_output_path = config.medical_cv.skin_lesion_segmentation_output_path
         self.general_diagnosis_agent = GeneralMedicalDiagnosisAgent(vision_model=config.medical_cv.llm)
         self.summarizer = MedicalImageSummarizer(llm=config.medical_cv.summarizer_llm)
         self.polyp_seg_agent = PolypSegmentation(model_path=config.medical_cv.polyp_seg_model_path)
@@ -22,9 +19,6 @@ class ImageAnalysisAgent:
     def analyze_image(self, image_path: str, user_query: str = None) -> str:
         """Classifies images as medical or non-medical and determines their type."""
         return self.image_classifier.classify_image(image_path, user_query)
-    #skin segment
-    def segment_skin_lesion(self, image_path: str) -> str:
-        return self.skin_lesion_agent.predict(image_path, self.skin_lesion_segmentation_output_path)
     #polyp segmentation
     def segment_polyp(self, image_path: str) -> str:
         return self.polyp_seg_agent.predict(image_path, self.polyp_seg_output_path)

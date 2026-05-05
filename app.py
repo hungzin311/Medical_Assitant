@@ -59,14 +59,13 @@ app.add_middleware(LargeRequestMiddleware)
 # Set up directories
 UPLOAD_FOLDER = "uploads/backend"
 FRONTEND_UPLOAD_FOLDER = "uploads/frontend"
-SKIN_LESION_OUTPUT = "uploads/skin_lesion_output"
 POLYP_SEGMENTATION_OUTPUT = "uploads/polyp_seg_output"
 LOGS_DIR = "logs"
 LOGS_IMAGES_DIR = "logs/images"
 LOGS_REVIEWS_DIR = "logs/reviews"
 
 # Create all required directories if they don't exist
-for directory in [UPLOAD_FOLDER, FRONTEND_UPLOAD_FOLDER, SKIN_LESION_OUTPUT, 
+for directory in [UPLOAD_FOLDER, FRONTEND_UPLOAD_FOLDER, POLYP_SEGMENTATION_OUTPUT, 
                  LOGS_DIR, LOGS_IMAGES_DIR, LOGS_REVIEWS_DIR]:
     os.makedirs(directory, exist_ok=True)
 
@@ -271,20 +270,13 @@ async def upload_image(
         # Set session cookie
         response.set_cookie(key="session_id", value=session_id)
 
-        # Check if the agent is skin lesion segmentation and find the image path
+        # Check if the agent is polyp segmentation and find the image path
         result = {
             "status": "success",
             "response": response_text, 
             "agent": response_data["agent_name"]
         }
         
-        # If it's the skin lesion segmentation agent, check for output image
-        if response_data["agent_name"] == "SKIN_LESION_AGENT, HUMAN_VALIDATION":
-            segmentation_path = os.path.join(SKIN_LESION_OUTPUT, "segmentation_plot.png")
-            if os.path.exists(segmentation_path):
-                result["result_image"] = f"/uploads/skin_lesion_output/segmentation_plot.png"
-            else:
-                print("Skin Lesion Output path does not exist.")
         if response_data["agent_name"] == "POLYP_SEGMENTATION_AGENT, HUMAN_VALIDATION":
             segmentation_path = os.path.join(POLYP_SEGMENTATION_OUTPUT, "polyp_seg_image_output.jpg")
             if os.path.exists(segmentation_path):

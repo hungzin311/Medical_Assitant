@@ -485,53 +485,6 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
             "agent_name": "GENERAL_MEDICAL_IMAGE_AGENT"
         }
         
-    def run_skin_lesion_agent(state: AgentState) -> AgentState:
-
-        current_input = state["current_input"]
-        image_path = current_input.get("image", None)
-        messages = state["messages"]
-        
-        # Get user query if available
-        user_query = ""
-        if isinstance(current_input, dict) and "text" in current_input:
-            user_query = current_input.get("text", "")
-
-        print(f"Selected agent: SKIN_LESION_AGENT")
-
-        # Segment the skin lesion
-        predicted_mask = AgentConfig.image_analyzer.segment_skin_lesion(image_path)
-
-        if predicted_mask:
-            # Create a basic diagnosis result for the skin lesion
-            diagnosis_result = {
-                "diagnosis": "Hình ảnh cho thấy một tổn thương da đã được phân vùng để phân tích. Việc phân vùng làm nổi bật ranh giới của tổn thương, đây là một bước quan trọng trong việc xác định liệu nó có thể là lành tính hay ác tính. Cần tham khảo ý kiến bác sĩ da liễu để có chẩn đoán chính xác.",
-                "success": True,
-                "image_path": image_path,
-                "analysis_type": "skin_lesion_segmentation"
-            }
-            
-            # Summarize the diagnosis with the summarizer agent
-            summarized_result = AgentConfig.image_analyzer.summarize_diagnosis(
-                diagnosis_result=diagnosis_result,
-                chat_history=messages[-10:] if len(messages) > 0 else None,
-                user_query=user_query
-            )
-            
-            # Use the summarized content as the response
-            if summarized_result["success"]:
-                response = AIMessage(content=f"Dưới đây là kết quả phân vùng tổn thương da dựa trên ảnh đã được cung cấp:\n\n{summarized_result['summary']}", metadata={"image_id":summarized_result['image_id']})
-            else:
-                response = AIMessage(content="Dưới đây là kết quả phân vùng tổn thương da dựa trên ảnh đã được cung cấp:")
-        else:
-            response = AIMessage(content="Hình ảnh được tải lên không đủ rõ nét để có thể chẩn đoán hoặc hình ảnh này không phải là hình ảnh y tế.")
-
-        return {
-            **state,
-            "output": response,
-            "needs_human_validation": True,  # Medical diagnosis always needs validation
-            "agent_name": "SKIN_LESION_AGENT"
-        }
-
     def run_polyp_segmentation_agent(state: AgentState) -> AgentState:
 
         current_input = state["current_input"]
@@ -667,7 +620,6 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
     workflow.add_node("CONVERSATION_AGENT", run_conversation_agent)
     workflow.add_node('PARALLEL_KG_RAG_AGENT', run_kg_rag_parallel)
     workflow.add_node("WEB_SEARCH_PROCESSOR_AGENT", run_web_search_processor_agent)
-    workflow.add_node("SKIN_LESION_AGENT", run_skin_lesion_agent)
     workflow.add_node("POLYP_SEGMENTATION_AGENT", run_polyp_segmentation_agent)
     workflow.add_node("GENERAL_MEDICAL_IMAGE_AGENT", run_general_medical_image_agent)
     workflow.add_node("check_validation", handle_human_validation)
@@ -692,7 +644,6 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
             "CONVERSATION_AGENT": "CONVERSATION_AGENT",
             "PARALLEL_KG_RAG_AGENT": "PARALLEL_KG_RAG_AGENT",
             "WEB_SEARCH_PROCESSOR_AGENT": "WEB_SEARCH_PROCESSOR_AGENT",
-            "SKIN_LESION_AGENT": "SKIN_LESION_AGENT",
             "POLYP_SEGMENTATION_AGENT": "POLYP_SEGMENTATION_AGENT",
             "GENERAL_MEDICAL_IMAGE_AGENT": "GENERAL_MEDICAL_IMAGE_AGENT",
             "apply_guardrails": "apply_guardrails"  
@@ -712,7 +663,6 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
     workflow.add_edge("CONVERSATION_AGENT", "check_validation")
     workflow.add_edge("PARALLEL_KG_RAG_AGENT", "check_validation")
     workflow.add_edge("WEB_SEARCH_PROCESSOR_AGENT", "check_validation")
-    workflow.add_edge("SKIN_LESION_AGENT", "check_validation")
     workflow.add_edge("POLYP_SEGMENTATION_AGENT", "check_validation")
     workflow.add_edge("GENERAL_MEDICAL_IMAGE_AGENT", "check_validation")
     workflow.add_edge("human_validation", "apply_guardrails")

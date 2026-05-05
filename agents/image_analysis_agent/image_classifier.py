@@ -49,13 +49,11 @@ class ImageClassifier:
                     
                     **Các loại hình ảnh y tế:**
                     - 'POLYP SEGMENTATION': Hình ảnh nội soi đại tràng có polyp (colonoscopy images with polyps)
-                    - 'SKIN LESION SEGMENTATION': Hình ảnh tổn thương da (skin lesion images)  
                     - 'GENERAL MEDICAL IMAGE': Hình ảnh y tế khác (X-ray, CT, MRI, etc.)
                     - 'NON-MEDICAL': Không phải hình ảnh y tế
                     
                     **Hướng dẫn phân loại:**
                     - Nếu là ảnh nội soi đại tràng (màu hồng/đỏ, có cấu trúc ruột, có thể có polyp) → 'POLYP SEGMENTATION'
-                    - Nếu là ảnh da với tổn thương/nốt ruồi/vết bất thường → 'SKIN LESION SEGMENTATION'
                     - Nếu là ảnh y tế khác (X-ray, siêu âm, CT, MRI, etc.) → 'GENERAL MEDICAL IMAGE'
                     - Nếu không phải ảnh y tế → 'NON-MEDICAL'
                     
