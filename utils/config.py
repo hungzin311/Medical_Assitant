@@ -71,8 +71,6 @@ class PatientDBConfig:
 
 class MedicalCVConfig:
     def __init__(self):
-        self.skin_lesion_model_path = "./agents/image_analysis_agent/skin_lesion_agent/models/checkpointN25_.pth.tar"
-        self.skin_lesion_segmentation_output_path = "./uploads/skin_lesion_output/segmentation_plot.png"
         self.llm = get_gemini_vision_llm(temperature=0.1) 
         self.summarizer_llm = get_gemini_llm(temperature=0.3) 
         self.polyp_seg_model_path = "./agents/image_analysis_agent/polyp_seg_tool/models/deeplabv3_resnet50.pth"
@@ -84,7 +82,6 @@ class ValidationConfig:
             "CONVERSATION_AGENT": False,
             "RAG_AGENT": False,
             "WEB_SEARCH_AGENT": False,
-            "SKIN_LESION_AGENT": True,
             "POLYP_SEGMENTATION_AGENT": True,
             "GENERAL_MEDICAL_IMAGE_AGENT": True
         }

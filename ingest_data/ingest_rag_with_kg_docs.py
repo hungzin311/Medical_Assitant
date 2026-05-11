@@ -141,7 +141,6 @@ def process_document_batch(batch_data, qdrant_vectorstore):
             "documents_processed": len(doc_ids),
             "doc_ids": doc_ids
         }
-        time.sleep(1)
     except Exception as e:
         logger.error(f"Error processing batch starting at {batch_start_idx}: {e}")
         return {
@@ -151,7 +150,6 @@ def process_document_batch(batch_data, qdrant_vectorstore):
             "documents_processed": 0,
             "doc_ids": []
         }
-        time.sleep(3)
 
 def ingest_documents_to_qdrant(documents, config, collection_name="temp", batch_size=50, num_workers=8):
     try:
@@ -232,11 +230,11 @@ def ingest_documents_to_qdrant(documents, config, collection_name="temp", batch_
 
 def main():
     # Initialize parser
-    parser = argparse.ArgumentParser(description="Ingest JSONL with payload data to Qdrant Cloud.")
+    parser = argparse.ArgumentParser(description="Ingest csv with payload data to Qdrant Cloud.")
     
     # Add arguments
-    parser.add_argument("--file", type=str, help="Path to JSONL file to ingest")
-    parser.add_argument("--dir", type=str, help="Path to directory containing JSONL files to ingest")
+    parser.add_argument("--file", type=str, help="Path to csv file to ingest")
+    parser.add_argument("--dir", type=str, help="Path to directory containing csv files to ingest")
     parser.add_argument("--collection", type=str, help="Custom collection name (optional)")
     parser.add_argument("--batch-size", type=int, default=20, help="Batch size for processing (default: 50)")
     parser.add_argument("--workers", type=int, default=4, help="Number of concurrent workers (default: 4)")
@@ -258,10 +256,10 @@ def main():
         if args.file:
             file_path = args.file
             if not file_path.endswith('.csv'):
-                logger.error(f"File {file_path} is not a JSONL file")
+                logger.error(f"File {file_path} is not a csv file")
                 sys.exit(1)
                 
-            # Process the JSONL file to get documents with metadata
+            # Process the csv file to get documents with metadata
             documents = process_csv_with_payload(file_path)
             
             if documents:
@@ -272,21 +270,21 @@ def main():
                 logger.error(f"No valid documents found in {file_path}")
                 
         elif args.dir:
-            # Process all JSONL files in a directory
+            # Process all csv files in a directory
             dir_path = args.dir
             if not os.path.isdir(dir_path):
                 logger.error(f"Directory {dir_path} does not exist")
                 sys.exit(1)
                 
-            # Get all JSONL files in the directory
+            # Get all csv files in the directory
             jsonl_files = [os.path.join(dir_path, f) for f in os.listdir(dir_path) 
                          if f.endswith('.csv') and os.path.isfile(os.path.join(dir_path, f))]
             
             if not jsonl_files:
-                logger.error(f"No JSONL files found in directory {dir_path}")
+                logger.error(f"No csv files found in directory {dir_path}")
                 sys.exit(1)
                 
-            # Process each JSONL file
+            # Process each csv file
             all_documents = []
             for file_path in jsonl_files:
                 documents = process_csv_with_payload(file_path)

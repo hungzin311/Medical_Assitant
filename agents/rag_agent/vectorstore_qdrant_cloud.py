@@ -30,17 +30,9 @@ class VectorStoreCloud:
         self.client = self.client_manager.client
 
     def _clean_text(self, text: str) -> str:
-
-        # Replace problematic characters
-        text = re.sub(r'[\x00-\x1F\x7F-\x9F]', '', text)  # Remove control characters
-        
-        # Replace multiple spaces with single space
+        text = re.sub(r'[\x00-\x1F\x7F-\x9F]', '', text)  
         text = re.sub(r'\s+', ' ', text)
-        
-        # Remove very long words (often garbage or binary data)
         text = re.sub(r'\S{100,}', '[REMOVED_LONG_SEQUENCE]', text)
-        
-        # Remove empty lines
         text = re.sub(r'\n\s*\n', '\n', text)
         
         # Limit line length
@@ -251,82 +243,3 @@ class VectorStoreCloud:
         except Exception as e:
             self.logger.error(f"Error in retrieve_kg_docs_chunks: {e}")
             return []
-
-    def create_vectorstore_with_metadata(
-            self,
-            document_chunks: List[str],
-            metadatas: List[Dict[str, Any]],
-            document_path: str,
-        ) -> Tuple[QdrantVectorStore, List[str]]:
-        # Generate unique IDs for each chunk
-        doc_ids = [str(uuid4()) for _ in range(len(document_chunks))]
-        
-        # Create langchain documents with length limit
-        MAX_CHUNK_LENGTH = 8000  # Characters limit for embeddings
-        langchain_documents = []
-        valid_doc_ids = []
-        
-        for id_idx, (chunk, metadata) in enumerate(zip(document_chunks, metadatas)):
-            # Clean and truncate chunk if too long
-            chunk = self._clean_text(chunk)
-            
-            if len(chunk) > MAX_CHUNK_LENGTH:
-                self.logger.warning(f"Chunk {id_idx} exceeds max length. Truncating from {len(chunk)} to {MAX_CHUNK_LENGTH} characters.")
-                chunk = chunk[:MAX_CHUNK_LENGTH]
-                
-            try:
-                # Merge metadata with standard fields
-                combined_metadata = {
-                    "source": os.path.basename(document_path),
-                    "doc_id": doc_ids[id_idx],
-                    "source_path": document_path,
-                    "full_content": chunk  # Store full content in payload
-                }
-                # Add custom metadata
-                combined_metadata.update(metadata)
-                
-                langchain_documents.append(
-                    Document(
-                        page_content=chunk,  # This will be used for embedding
-                        metadata=combined_metadata
-                    )
-                )
-                valid_doc_ids.append(doc_ids[id_idx])
-            except Exception as e:
-                self.logger.error(f"Error creating document for chunk {id_idx}: {e}")
-                continue
-        
-        # Check if collection exists, create if it doesn't
-        if not self._does_collection_exist():
-            self._create_collection()
-        
-        qdrant_vectorstore = self.load_vectorstore()
-        
-        # Ingest documents into vector store with error handling
-        try:
-            # Process documents in smaller batches to avoid API limits
-            BATCH_SIZE = 100  # Reduced batch size for better reliability
-            for i in range(0, len(langchain_documents), BATCH_SIZE):
-                batch_docs = langchain_documents[i:i+BATCH_SIZE]
-                batch_ids = valid_doc_ids[i:i+BATCH_SIZE]
-                                
-                try:
-                    # Process each document individually for maximum reliability
-                    for j, (doc, doc_id) in enumerate(zip(batch_docs, batch_ids)):
-                        try:
-                            # Add document with full content in payload
-                            qdrant_vectorstore.add_documents(documents=[doc], ids=[doc_id])
-                        except Exception as doc_error:
-                            self.logger.error(f"Error adding document {i+j+1}: {doc_error}")
-                            continue
-                        
-                except Exception as batch_error:
-                    self.logger.error(f"Error processing batch: {batch_error}")
-                    # Continue with next batch instead of failing completely
-            
-            
-        except Exception as e:
-            self.logger.error(f"Error in batch processing: {e}")
-            raise e
-        
-        return qdrant_vectorstore, valid_doc_ids 
