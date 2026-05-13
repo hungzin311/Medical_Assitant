@@ -62,17 +62,6 @@ class PatientProfileStore:
         except Exception as e:
             self.logger.error(f"Error upserting profile: {e}")
 
-    def patch_profile(self, patient_id: str, patch: Dict[str, Any]):
-        """Partial update."""
-        try:
-            self.client.set_payload(
-                collection_name=self.collection_name,
-                payload=patch,
-                points_selector=[patient_id]
-            )
-        except Exception as e:
-            self.logger.error(f"Error patching profile: {e}")
-
     def get_profile(self, patient_id: str) -> Optional[Dict[str, Any]]:
         try:
             pts, _ = self.client.scroll(

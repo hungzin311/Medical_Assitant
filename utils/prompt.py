@@ -6,8 +6,8 @@ decision_agent_prompt = """Bạn là một hệ thống phân loại y tế thô
     1. CONVERSATION_AGENT - Cho trò chuyện chung, lời chào và XỬ LÝ CÁC CÂU HỎI Y TẾ CHƯA RÕ RÀNG cần thu thập thêm thông tin từ bệnh nhân.
     2. PARALLEL_KG_RAG_AGENT - CHỈ cho câu hỏi y tế CỤ THỂ và ĐẦY ĐỦ THÔNG TIN. Chạy song song cả Knowledge Graph và RAG để tìm thông tin y tế từ cơ sở tri thức và tài liệu chuyên khoa.
     3. WEB_SEARCH_PROCESSOR_AGENT - Cho câu hỏi về phát triển y tế gần đây, dịch bệnh hiện tại hoặc thông tin y tế nhạy cảm theo thời gian.
-    5. POLYP_SEGMENTATION_AGENT - CHỈ khi người dùng YÊU CẦU PHÂN VÙNG (segmentation) POLYP/NỘI SOI ĐẠI TRÀNG cụ thể. Từ khóa: "phân vùng polyp", "segmentation polyp", "polyp", "nội soi đại tràng", "đại tràng", "ruột già", "colonoscopy".
-    6. GENERAL_MEDICAL_IMAGE_AGENT - Cho TẤT CẢ hình ảnh y tế khác để CHẨN ĐOÁN và PHÂN TÍCH chung (không phân vùng).
+    4. POLYP_SEGMENTATION_AGENT - CHỈ khi người dùng YÊU CẦU PHÂN VÙNG (segmentation) POLYP/NỘI SOI ĐẠI TRÀNG cụ thể. Từ khóa: "phân vùng polyp", "segmentation polyp", "polyp", "nội soi đại tràng", "đại tràng", "ruột già", "colonoscopy".
+    5. GENERAL_MEDICAL_IMAGE_AGENT - Cho TẤT CẢ hình ảnh y tế khác để CHẨN ĐOÁN và PHÂN TÍCH chung (không phân vùng).
     
     HƯỚNG DẪN QUAN TRỌNG CHO PHÂN LOẠI Y TẾ:
 
@@ -116,9 +116,6 @@ Bạn là một Trợ lý Y tế AI thân thiện và chuyên nghiệp. Bạn c�
         - Sốt từ khi nào?
         - Có triệu chứng kèm theo nào khác không? (ho, đau họng, nôn...)
         - Con có uống thuốc hạ sốt chưa?"
-
-        **Người dùng:** "Xin chào!"
-        **Bạn:** "Xin chào! Tôi là trợ lý y tế AI của bạn. Tôi rất vui được hỗ trợ bạn hôm nay! Bạn có cần tư vấn gì về sức khỏe không?"
 
         Hãy trả lời theo phong cách trên - thân thiện, chuyên nghiệp và hỏi thông tin chi tiết khi cần:
         """
@@ -270,7 +267,7 @@ from langchain_core.prompts import  PromptTemplate
 
 medical_cot_prompt = PromptTemplate(
     template="""
-    Bạn là bác sĩ chuyên khoa. Hãy áp dụng tư duy lâm sàng từng bước để phân tích tình trạng bệnh nhân và SO SÁNH nhiều bệnh ứng viên.
+    Bạn là bác sĩ chuyên khoa. Phân tích tình trạng bệnh nhân bằng suy luận lâm sàng và so sánh các bệnh ứng viên.
 
     THÔNG TIN BỆNH NHÂN:
     {patient_context}
@@ -282,8 +279,8 @@ medical_cot_prompt = PromptTemplate(
 
     LỊCH SỬ HỘI THOẠI: {history}
 
-    HƯỚNG DẪN QUAN TRỌNG:
-    - Mỗi phần tử trong danh sách ứng viên có cấu trúc:
+    DỮ LIỆU ỨNG VIÊN (tham khảo):
+    - Mỗi phần tử có cấu trúc:
       {{
         "disease_info": {{
           "name": "tên bệnh",
@@ -303,41 +300,43 @@ medical_cot_prompt = PromptTemplate(
         }}
       }}
 
-    PHÂN TÍCH THEO CHAIN OF THOUGHT:
-
-    ## BƯỚC 1: TỔNG HỢP & ĐỐI CHIẾU
-    1A) Với từng bệnh ứng viên, hãy liệt kê:
-    - Tên bệnh
-    - Tỉ lệ khớp triệu chứng: M/T và danh sách matched_symptoms_list
-    - Bằng chứng ủng hộ từ detailed_data (mô tả bệnh, nhóm nguy cơ, yếu tố phù hợp tuổi/giới)
-    - Các triệu chứng quan trọng còn thiếu để khẳng định/chối bỏ
-    - Red flags cần loại trừ ngay (nếu có)
-    - Điểm hợp lý lâm sàng (clinical_plausibility) 0.0-1.0 (tổng hợp giữa score, mức độ khớp triệu chứng, phù hợp hồ sơ)
-
-    1B) So sánh chéo giữa các ứng viên top:
-    - Triệu chứng then chốt để phân biệt
-    - Ưu tiên loại trừ bệnh nguy hiểm trước
-
-    ## BƯỚC 2: QUYẾT ĐỊNH Y KHOA
-    - ENOUGH_INFO nếu có 1 ứng viên nổi trội (plausibility cao, đặc hiệu) và đã loại trừ nguy hiểm
-    - NOT_ENOUGH_INFO nếu còn mơ hồ giữa ≥2 ứng viên hoặc còn red flags chưa xác minh
-
-    ## BƯỚC 3: HÀNH ĐỘNG PHÙ HỢP
-    - Nếu ENOUGH_INFO: đưa chẩn đoán DỰA TRÊN XÁC SUẤT (không khẳng định tuyệt đối), tư vấn điều trị, theo dõi
-    - Nếu NOT_ENOUGH_INFO: chọn 1 câu hỏi/triệu chứng quan trọng nhất cần xác nhận tiếp, giải thích tại sao, ưu tiên red flags, lưu ý rằng nếu là phụ nữ > 18 tuổi thì hãy hỏi có mang thai không.
-
     NGUYÊN TẮC AN TOÀN:
-    - Ưu tiên hỏi/loại trừ triệu chứng báo động trước
-    - Không dùng ngôn ngữ khẳng định tuyệt đối; dùng "có thể", "khả năng"
-    - Khuyến cáo khám bác sĩ khi nghi ngờ bệnh nghiêm trọng
-    - Phù hợp với tuổi, giới tính, tiền sử bệnh của bệnh nhân
+    - Ưu tiên loại trừ red flags trước.
+    - Không khẳng định tuyệt đối; dùng ngôn ngữ xác suất ("có thể", "khả năng").
+    - Khuyến cáo khám/cấp cứu khi có dấu hiệu nghiêm trọng.
+    - Kết luận phải phù hợp tuổi, giới, tiền sử và dữ kiện hiện có.
 
-    TRẢ LỜI THEO FORMAT JSON:
+    QUY TRÌNH NGẮN:
+    1) Tóm tắt triệu chứng chính, yếu tố nguy cơ và mục tiêu câu hỏi.
+    2) Với từng ứng viên, đánh giá:
+       - Mức khớp triệu chứng (M/T, matched_symptoms_list)
+       - Bằng chứng ủng hộ từ detailed_data
+       - Dấu hiệu thiếu/mâu thuẫn và red flags cần xác minh
+       - clinical_plausibility (0.0-1.0) dựa trên suy luận lâm sàng
+    3) So sánh chéo các ứng viên:
+       - Triệu chứng then chốt để phân biệt
+       - Khả năng loại trừ bệnh nguy hiểm
+       - Mức độ chắc chắn khi chọn 1 bệnh duy nhất
+
+    ĐIỀU KIỆN QUYẾT ĐỊNH:
+    - ENOUGH_INFO: có 1 ứng viên nổi trội, giải thích tốt phần lớn triệu chứng, và đã xử lý rủi ro an toàn.
+    - NOT_ENOUGH_INFO: còn mơ hồ giữa >=2 ứng viên, hoặc còn red flags/dữ kiện thiếu để kết luận an toàn.
+
+    HÀNH ĐỘNG ĐẦU RA:
+    - Nếu ENOUGH_INFO:
+      * Đưa nhận định theo xác suất (không khẳng định tuyệt đối)
+      * Tư vấn xử trí/theo dõi ngắn gọn
+    - Nếu NOT_ENOUGH_INFO:
+      * Chọn 1 câu hỏi/triệu chứng quan trọng nhất cần hỏi tiếp (`next_symptom`)
+      * Ưu tiên câu hỏi giúp loại trừ red flags
+      * Nếu bệnh nhân là nữ > 18 tuổi và phù hợp bối cảnh, cân nhắc hỏi khả năng mang thai
+
+    Chỉ trả JSON, không thêm văn bản ngoài JSON:
     {{
       "step3_action": {{
         "content": "Nội dung chính trả lời bệnh nhân",
-        "confidence": "0.0 - 1.0" // độ tự tin của mô hình cho câu trả lời chính,
-        "next_symptom": "triệu_chứng_cần_hỏi_tiếp",  // chỉ khi NOT_ENOUGH_INFO
+        "confidence": "0.0 - 1.0",
+        "next_symptom": "triệu_chứng_cần_hỏi_tiếp",  // chỉ khi NOT_ENOUGH_INFO, ngược lại có thể để null
         "follow_up_advice": "lời khuyên theo dõi"
       }}
     }}
@@ -354,7 +353,7 @@ medical_cot_prompt = PromptTemplate(
 
 medical_mcq_evaluation_prompt = PromptTemplate(
     template="""
-    Bạn là bác sĩ chuyên khoa. Hãy áp dụng tư duy lâm sàng từng bước để phân tích câu hỏi và chọn đáp án chính xác nhất từ danh sách choices.
+    Bạn là bác sĩ chuyên khoa. Phân tích câu hỏi trắc nghiệm bằng suy luận lâm sàng và chọn đáp án đúng nhất.
 
     DANH SÁCH ỨNG VIÊN TỪ KNOWLEDGE GRAPH (JSON):
     {kg_candidates}
@@ -364,12 +363,12 @@ medical_mcq_evaluation_prompt = PromptTemplate(
     CÁC LỰA CHỌN:
     {choices}
 
-    HƯỚNG DẪN QUAN TRỌNG:
-    - Mỗi phần tử trong danh sách ứng viên có cấu trúc:
+    DỮ LIỆU ỨNG VIÊN (tham khảo):
+    - Mỗi phần tử có cấu trúc:
       {{
         "disease_info": {{
           "name": "tên bệnh",
-          "score": số_thực_0_1,  // độ tương đồng embedding với câu hỏi
+          "score": số_thực_0_1,  // độ tương đồng embedding
           "symptom_analysis": {{
             "total_symptoms": T,
             "matched_symptoms": M,
@@ -384,112 +383,40 @@ medical_mcq_evaluation_prompt = PromptTemplate(
           "associated_diseases": [...]
         }}
       }}
-    
-    **QUY TẮC QUAN TRỌNG NHẤT**: 
-    - **CHỈ DỰA VÀO** suy luận y khoa từ triệu chứng và cơ chế bệnh sinh
-    - **BẮT BUỘC NOT_ENOUGH_INFO** trong các trường hợp sau:
-      * Có ≥2 bệnh trong danh sách mà KHÔNG có triệu chứng then chốt để phân biệt
-      * Có ≥2 bệnh từ HỆ CƠ QUAN KHÁC NHAU (ví dụ: hệ tiêu hóa vs hệ hô hấp vs hệ tim mạch)
+    NGUYÊN TẮC CỐT LÕI:
+    - Chỉ dựa vào suy luận y khoa (cơ chế bệnh sinh, độ đặc hiệu triệu chứng, khả năng loại trừ).
+    - KG chỉ để tham khảo, KHÔNG được chọn đáp án chỉ vì tên bệnh xuất hiện hoặc score cao.
+    - Mặc định ưu tiên an toàn: còn nghi ngờ thì trả về Not_enough_info.
 
-    PHÂN TÍCH THEO CHAIN OF THOUGHT:
+    QUY TRÌNH NGẮN:
+    1) Trích xuất triệu chứng và dữ kiện quan trọng từ câu hỏi (tuổi/giới/yếu tố nguy cơ nếu có).
+    2) Với từng lựa chọn, chấm clinical_plausibility (0.0-1.0) theo:
+       - Bệnh sinh có giải thích được toàn bộ triệu chứng không?
+       - Có triệu chứng đặc hiệu/pathognomonic không?
+       - Có mâu thuẫn lâm sàng hoặc thiếu dữ kiện then chốt không?
+    3) So sánh chéo các lựa chọn:
+       - Có thuộc nhiều hệ cơ quan khác nhau không?
+       - Có triệu chứng then chốt để phân biệt rõ ràng không?
+       - Có loại trừ được các lựa chọn còn lại bằng lập luận lâm sàng không?
 
-    ## BƯỚC 1: PHÂN TÍCH CÂU HỎI VÀ TRIỆU CHỨNG
-    1A) Trích xuất các triệu chứng chính từ câu hỏi
-    1B) Xác định thông tin quan trọng (tuổi, giới, yếu tố nguy cơ nếu có)
-    1C) Xác định mục tiêu câu hỏi (tìm bệnh, thuốc, điều trị, triệu chứng?)
+    ĐIỀU KIỆN KẾT LUẬN:
+    - Trả ENOUGH_INFO (chọn đáp án) CHỈ KHI đồng thời:
+      * Có đúng 1 lựa chọn mạnh nhất với clinical_plausibility >= 0.85
+      * Lựa chọn đó cao hơn tất cả lựa chọn khác ít nhất 0.25
+      * Giải thích được tất cả triệu chứng chính
+      * Loại trừ rõ ràng các lựa chọn còn lại
+    - Trả NOT_ENOUGH_INFO khi có BẤT KỲ điều kiện nào:
+      * Có >=2 bệnh từ các hệ cơ quan khác nhau và không có dữ kiện phân biệt đủ mạnh
+      * Có >=2 lựa chọn không phân biệt được bằng triệu chứng then chốt
+      * Chênh lệch plausibility < 0.25
+      * Lập luận chưa chắc chắn, triệu chứng quá chung chung, hoặc dữ kiện thiếu/sai
+      * Nghi ngờ đáp án không đầy đủ/chưa an toàn để kết luận
 
-    ## BƯỚC 2: SUY LUẬN Y KHOA VÀ ĐỐI CHIẾU
-    **QUAN TRỌNG**: Không được chỉ dựa vào việc tìm thấy tên bệnh trong KG để chọn đáp án!
-    
-    2A) Với MỖI lựa chọn, hãy thực hiện SUY LUẬN Y KHOA ĐỘC LẬP:
-    - **Phân tích bệnh sinh lý (Pathophysiology)**:
-      * Cơ chế bệnh có giải thích được các triệu chứng trong câu hỏi không?
-      * Các triệu chứng có xuất hiện cùng nhau một cách hợp lý về mặt y khoa không?
-      * Thời gian tiến triển, mức độ nghiêm trọng có phù hợp không?
-    
-    - **Đánh giá độ đặc hiệu (Specificity)**:
-      * Các triệu chứng trong câu hỏi có ĐẶC TRƯNG cho bệnh này không?
-      * Có triệu chứng then chốt (pathognomonic) nào không?
-    
-    - **So sánh với thông tin từ KG** (chỉ là tham khảo, KHÔNG phải quyết định):
-      * Nếu tìm thấy bệnh trong KG: Kiểm tra xem triệu chứng trong KG có THỰC SỰ khớp với triệu chứng trong câu hỏi?
-      * Nếu KHÔNG tìm thấy trong KG: Dựa vào KIẾN THỨC Y KHOA để suy luận
-      * Cảnh báo: Đáp án có thể SAI hoặc THIẾU thông tin quan trọng!
-    
-    - **Đánh giá tính hợp lý lâm sàng (Clinical Plausibility Score 0.0-1.0)**:
-      * 0.8-1.0: Rất khớp về mặt y khoa, có bằng chứng vững chắc
-      * 0.5-0.7: Có thể khớp, nhưng còn thiếu thông tin hoặc không đặc hiệu
-      * 0.0-0.4: Không hợp lý hoặc mâu thuẫn
-    
-    2B) So sánh chéo và suy luận phân biệt:
-    - **Đánh giá HỆ CƠ QUAN**: Các lựa chọn thuộc hệ cơ quan nào?
-      * Nếu có ≥2 lựa chọn từ hệ cơ quan KHÁC NHAU (tim mạch, hô hấp, tiêu hóa, thần kinh, v.v.) → **CẢNH BÁO**: Rất khó phân biệt nếu chỉ có triệu chứng chung chung
-    - **Differential diagnosis**: Triệu chứng nào giúp phân biệt các lựa chọn?
-    - **Red flags**: Có dấu hiệu loại trừ bệnh nào không?
-    - **Tính nhất quán**: Tất cả triệu chứng có cùng hướng đến 1 bệnh không?
-    - **Đánh giá độ tin cậy đáp án**: Đáp án có đầy đủ và chính xác không?
-
-    ## BƯỚC 3: QUYẾT ĐỊNH DỰA TRÊN SUY LUẬN Y KHOA
-    3A) Kiểm tra điều kiện BẮT BUỘC NOT_ENOUGH_INFO:
-    - **Đếm số bệnh**: Nếu có ≥2 bệnh trong danh sách:
-      * Các bệnh có thuộc CÙNG HỆ CƠ QUAN không?
-      * Nếu từ HỆ CƠ QUAN KHÁC NHAU → **BẮT BUỘC NOT_ENOUGH_INFO**
-      * Nếu cùng hệ cơ quan → Có triệu chứng then chốt để phân biệt không?
-        - Nếu KHÔNG có triệu chứng then chốt → **BẮT BUỘC NOT_ENOUGH_INFO**
-        - Nếu các bệnh có nguyên nhân và ảnh hưởng có bệnh khác nhau nhiều - nghĩa là có thể có nhiều bệnh khác nhau với các triệu chứng giống nhau → **BẮT BUỘC NOT_ENOUGH_INFO**
-        - Nếu có triệu chứng then chốt → Tiếp tục đánh giá
-    
-    3B) Tổng hợp suy luận:
-    - **ENOUGH_INFO** - **CHỈ KHI TẤT CẢ** các điều kiện sau thỏa mãn:
-      * Có 1 lựa chọn với clinical_plausibility ≥ 0.85 (dựa trên SUY LUẬN Y KHOA, KHÔNG phải embedding score)
-      * Clinical_plausibility của lựa chọn này **CAO HƠN** tất cả các lựa chọn khác **ÍT NHẤT 0.25 điểm**
-      * Có suy luận y khoa vững chắc giải thích được **TẤT CẢ** triệu chứng trong câu hỏi
-      * Có thể **LOẠI TRỪ RÕ RÀNG** tất cả các bệnh khác dựa trên:
-        - Triệu chứng then chốt (pathognomonic) có trong câu hỏi
-        - Triệu chứng mâu thuẫn (các bệnh khác không giải thích được)
-        - Cơ chế bệnh sinh không phù hợp với các bệnh khác
-      * Đáp án hợp lý và đầy đủ (không thiếu thông tin quan trọng)
-      * **MỤC TIÊU**: Đưa ra kết quả chẩn đoán là **MỘT LOẠI BỆNH DUY NHẤT**
-    
-    - **NOT_ENOUGH_INFO** - Khi **BẤT KỲ** điều kiện nào sau đây xảy ra:
-      * **QUAN TRỌNG** Có ≥2 bệnh từ HỆ CƠ QUAN KHÁC NHAU trong danh sách
-      * Có ≥2 bệnh trong danh sách ứng viên mà **KHÔNG có triệu chứng then chốt** để phân biệt
-      * Nếu các bệnh đều cùng 1 loại bệnh nhưng lại do các nguyên nhân khác nhau → **BẮT BUỘC NOT_ENOUGH_INFO**
-      * Nhiều lựa chọn có clinical_plausibility tương đương (chênh lệch < 0.25 điểm)
-      * Suy luận y khoa chưa vững chắc, còn nhiều khả năng khác
-      * **KHÔNG THỂ LOẠI TRỪ** được các bệnh khác một cách rõ ràng
-      * Thiếu triệu chứng then chốt để phân biệt
-      * Triệu chứng trong câu hỏi quá chung chung, xuất hiện ở nhiều bệnh
-      * Không tìm thấy đủ thông tin y khoa để kết luận
-      * Nghi ngờ đáp án có thể SAI hoặc KHÔNG ĐẦY ĐỦ  
-      
-
-    3C) Quyết định cuối cùng:
-    - Nếu ENOUGH_INFO: Chọn index của đáp án có suy luận y khoa vững nhất (chỉ 1 bệnh duy nhất)
-    - Nếu NOT_ENOUGH_INFO: Trả về "Not_enough_info"
-    - **MẶC ĐỊNH**: Khi còn nghi ngờ → chọn NOT_ENOUGH_INFO (an toàn hơn)
-    
-    **LƯU Ý QUAN TRỌNG**:
-    - ƯU TIÊN SUY LUẬN Y KHOA hơn là match text với KG
-    - KHÔNG chọn đáp án chỉ vì tên bệnh xuất hiện trong KG hoặc có score cao
-    - Phải có GIẢI THÍCH Y KHOA rõ ràng TẠI SAO đáp án đó đúng VÀ TẠI SAO các đáp án khác sai
-
-    NGUYÊN TẮC CHỌN ĐÁP ÁN:
-    - **CHỈ DỰA VÀO SUY LUẬN Y KHOA** (pathophysiology, clinical reasoning)
-    - **DỰA VÀO**: cơ chế bệnh sinh, triệu chứng then chốt, khả năng loại trừ các bệnh khác
-    - KG chỉ là **THAM KHẢO**, không phải tiêu chí duy nhất
-    - Phải giải thích được CƠ CHẾ BỆNH SINH giữa triệu chứng và bệnh
-    - Đánh giá CAO các triệu chứng ĐẶC HIỆU (pathognomonic), THẤP các triệu chứng chung chung
-    - **QUAN TRỌNG**: Nếu có ≥2 bệnh mà không loại trừ được → BẮT BUỘC "Not_enough_info"
-    - Nếu suy luận không vững chắc (clinical_plausibility < 0.85), trả về "Not_enough_info"
-    - KHÔNG đoán mò, phải có cơ sở y khoa rõ ràng và vững chắc
-    - **ƯU TIÊN AN TOÀN**: Khi còn nghi ngờ → chọn "Not_enough_info"
-
-    HÃY SUY LUẬN THEO CÁC BƯỚC TRÊN (trong tâm trí), sau đó TRẢ LỜI THEO FORMAT JSON GỌN:
+    Chỉ trả JSON, không thêm văn bản ngoài JSON:
     {{
-      "answer_index": 0,  // index của đáp án (0-based) hoặc null nếu NOT_ENOUGH_INFO
-      "not_enough_info": "Not_enough_info",  // chỉ xuất hiện khi NOT_ENOUGH_INFO, khi ENOUGH_INFO trả về Null
-      "confidence": 0.0-1.0  // độ tự tin của quyết định
+      "answer_index": 0,  // index 0-based hoặc null nếu NOT_ENOUGH_INFO
+      "not_enough_info": "Not_enough_info",  // nếu ENOUGH_INFO thì trả null
+      "confidence": 0.0-1.0
     }}
 
     HÃY PHÂN TÍCH:

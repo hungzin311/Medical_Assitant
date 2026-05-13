@@ -25,6 +25,7 @@ langsmith
 openai
 google-generativeai
 together
+mem0ai[nlp]
 
 # Vector Database
 qdrant-client

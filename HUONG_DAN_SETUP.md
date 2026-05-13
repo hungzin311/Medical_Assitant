@@ -223,29 +223,22 @@ Thư mục `uploads/`, `logs/` sẽ được tạo tự động nếu chưa có 
 
 ## 12. Dịch vụ Patient Memory (tuỳ chọn)
 
-Service Mem0 nằm trong `services/patient_memory_service/`. **Mặc định chưa được mount vào `app.py`**; chạy riêng khi cần.
+Service Mem0 nằm trong `agents/services/patient_memory_service/`. **Mặc định chưa được mount vào `app.py`**; chạy riêng khi cần.
 
-1. Cài Mem0 (một trong hai cách):
+1. Cài Mem0:
 
 ```powershell
 pip install "mem0ai[nlp]"
 pip install posthog
 ```
 
-Hoặc nếu có submodule/repo local `./mem0`:
-
-```powershell
-pip install -e ./mem0[nlp]
-pip install posthog
-```
-
 2. Chạy API:
 
 ```powershell
-uvicorn services.patient_memory_service.api:app --host 127.0.0.1 --port 3010
+uvicorn agents.services.patient_memory_service.api:app --host 127.0.0.1 --port 3010
 ```
 
-Chi tiết endpoint và biến môi trường bổ sung: xem `services/patient_memory_service/README.md`.
+Chi tiết endpoint và biến môi trường bổ sung: xem `agents/services/patient_memory_service/README.md`.
 
 ---
 
@@ -269,7 +262,7 @@ Thư mục `benchmark/` có các script kiểm thử RAG, KG, LLM. Chạy trực
 
 - `README.md` — giới thiệu ngắn và quick start.
 - `Report.pdf` — mô tả kiến trúc/hệ thống (nếu có trong repo).
-- `services/patient_memory_service/README.md` — memory service.
+- `agents/services/patient_memory_service/README.md` — memory service.
 
 ---
 
@@ -287,3 +280,4 @@ Thư mục `benchmark/` có các script kiểm thử RAG, KG, LLM. Chạy trực
 ---
 
 *Tài liệu được tạo dựa trên cấu trúc và cấu hình trong repository tại thời điểm viết. Nếu team thay đổi cổng, collection, hoặc luồng khởi động, hãy cập nhật song song file này.*
+
