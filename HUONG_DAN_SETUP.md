@@ -91,7 +91,7 @@ Tạo file **`.env`** ở thư mục gốc project (cùng cấp với `app.py`).
 | `TAVILY_API_KEY` | Web search qua Tavily (`langchain_community`) |
 | `TOGETHER_API_KEY` | Nếu bạn dùng Together embeddings ở đâu đó trong pipeline |
 | `HUGGINGFACE_TOKEN` | Tải model private từ Hugging Face (nếu cần) |
-| `FPT_LLM_COMPLETION` | Base URL cho `get_fpt_llm` (MedGemma qua FPT) — chỉ khi bạn gọi luồng đó |
+| `FPT_LLM_COMPLETION` | Base URL cho `get_llm` (MedGemma qua FPT) — chỉ khi bạn gọi luồng đó |
 
 ### 5.3. Ví dụ khung `.env` (thay giá trị thật)
 

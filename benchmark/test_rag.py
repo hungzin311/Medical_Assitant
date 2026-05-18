@@ -5,7 +5,7 @@ import re
 import json 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from utils.llm_config import get_fpt_llm
+from utils.llm_config import get_llm
 import sys
 import logging
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 logging.getLogger("httpx").disabled = True
 
-llm = get_fpt_llm()
+llm = get_llm()
 
 config = Config()
 config.rag.llm = llm

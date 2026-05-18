@@ -148,7 +148,7 @@ def process_document_batch(batch_data, qdrant_vectorstore, document_path):
             )
         
         # Add documents directly to the shared vectorstore
-        qdrant_vectorstore.add_documents(documents=langchain_documents, ids=doc_ids)
+        qdrant_vectorstore.aadd_documents(documents=langchain_documents, ids=doc_ids)
         
         return {
             "success": True,

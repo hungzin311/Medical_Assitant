@@ -76,7 +76,7 @@ Return only concise memory facts.
         local_qdrant_path=local_qdrant_path,
         qdrant_url=os.getenv("PATIENT_MEMORY_QDRANT_URL") or os.getenv("QDRANT_URL"),
         qdrant_api_key=os.getenv("PATIENT_MEMORY_QDRANT_API_KEY") or os.getenv("QDRANT_API_KEY"),
-        embedding_dims=int(os.getenv("PATIENT_MEMORY_EMBEDDING_DIMS", "1024")),
+        embedding_dims=int(os.getenv("PATIENT_MEMORY_EMBEDDING_DIMS", "768")),
         agent_id=os.getenv("PATIENT_MEMORY_AGENT_ID", "medical_assistant_patient_memory"),
         llm_temperature=float(os.getenv("PATIENT_MEMORY_LLM_TEMPERATURE", "0.1")),
         llm_max_tokens=int(os.getenv("PATIENT_MEMORY_LLM_MAX_TOKENS", "2000")),

@@ -6,7 +6,7 @@ kg_manager = get_kg_manager()
 
 def embed_text(text: str) -> List[float]:
     try:
-        return kg_manager.embedding_model.embed_query(text)
+        return kg_manager.embedding_model.aembed_query(text)
     except Exception as e:
         print(f"Error embedding text: {e}")
         return []

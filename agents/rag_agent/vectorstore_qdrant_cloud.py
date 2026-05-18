@@ -45,28 +45,31 @@ class VectorStoreCloud:
         
         return '\n'.join(lines).strip()
 
-    def _does_collection_exist(self) -> bool:
-        return self.client_manager.does_collection_exist(self.collection_name)
+    def _does_collection_exist(self, collection_name: str) -> bool:
+        return self.client_manager.does_collection_exist(collection_name)
 
-    def _create_collection(self):
+    def _create_collection(self, collection_name: str):
+        if self._does_collection_exist(collection_name):
+            self.logger.info(f"Collection {collection_name} already exists")
+            return
         vectors_config = {"dense": VectorParams(size=self.embedding_dim, distance=Distance.COSINE)}
         optimizers_config = OptimizersConfigDiff(
             indexing_threshold=0,  # Build index immediately
         )
         self.client_manager.create_collection(
-            collection_name=self.collection_name,
+            collection_name=collection_name,
             vectors_config=vectors_config,
             optimizers_config=optimizers_config
         )
             
-    def load_vectorstore(self) -> QdrantVectorStore:
+    def load_vectorstore(self, collection_name: str) -> QdrantVectorStore:
         
-        if not self._does_collection_exist():
-            raise ValueError(f"Cloud collection {self.collection_name} does not exist")
+        if not self._does_collection_exist(collection_name):
+            self._create_collection(collection_name)
             
         qdrant_vectorstore = QdrantVectorStore(
             client=self.client,
-            collection_name=self.collection_name,
+            collection_name=collection_name,
             embedding=self.embedding_model,
             retrieval_mode=RetrievalMode.DENSE,
             vector_name="dense",
@@ -122,28 +125,32 @@ class VectorStoreCloud:
         else:
             self.logger.info(f"Cloud collection {self.collection_name} already exists, will upsert documents")
         
-        qdrant_vectorstore = self.load_vectorstore()
+        qdrant_vectorstore = self.load_vectorstore(self.collection_name)
         
-        # Ingest documents into vector store with error handling
+        # Ingest documents in batches so embeddings and Qdrant upserts are not
+        # forced into one network request per chunk.
         try:
-            # Process documents in smaller batches to avoid API limits
-            BATCH_SIZE = 1  # Reduced batch size for better reliability
-            for i in range(0, len(langchain_documents), BATCH_SIZE):
-                batch_docs = langchain_documents[i:i+BATCH_SIZE]
-                batch_ids = valid_doc_ids[i:i+BATCH_SIZE]
+            batch_size = 100
+            for i in range(0, len(langchain_documents), batch_size):
+                batch_docs = langchain_documents[i:i+batch_size]
+                batch_ids = valid_doc_ids[i:i+batch_size]
                                 
                 try:
-                    # Process each document individually for maximum reliability
+                    qdrant_vectorstore.aadd_documents(documents=batch_docs, ids=batch_ids)
+                    self.logger.info(
+                        f"Ingested batch {i // batch_size + 1}: {len(batch_docs)} documents"
+                    )
+                except Exception as batch_error:
+                    self.logger.error(
+                        f"Error processing batch starting at document {i+1}: {batch_error}"
+                    )
+                    self.logger.info("Retrying failed batch document-by-document")
                     for j, (doc, doc_id) in enumerate(zip(batch_docs, batch_ids)):
                         try:
-                            # Add document with full content in payload
-                            qdrant_vectorstore.add_documents(documents=[doc], ids=[doc_id])
+                            qdrant_vectorstore.aadd_documents(documents=[doc], ids=[doc_id])
                         except Exception as doc_error:
                             self.logger.error(f"Error adding document {i+j+1}: {doc_error}")
                             continue
-                        
-                except Exception as batch_error:
-                    self.logger.error(f"Error processing batch: {batch_error}")
             
         except Exception as e:
             self.logger.error(f"Error in batch processing: {e}")

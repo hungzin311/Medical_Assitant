@@ -64,7 +64,7 @@ class PatientMemoryService:
         Path(self.settings.local_qdrant_path).mkdir(parents=True, exist_ok=True)
 
     def _build_mem0_config(self) -> Dict[str, Any]:
-        from utils.llm_config import get_fpt_vietnamese_embedding, get_gemini_llm
+        from utils.llm_config import get_embedding, get_gemini_llm
 
         return {
             "vector_store": {
@@ -82,7 +82,7 @@ class PatientMemoryService:
             "embedder": {
                 "provider": "langchain",
                 "config": {
-                    "model": get_fpt_vietnamese_embedding(),
+                    "model": get_embedding(),
                     "embedding_dims": self.settings.embedding_dims,
                 },
             },

@@ -11,7 +11,7 @@ from utils.llm_config import *
 URI = "neo4j://127.0.0.1:7687"
 AUTH = ("neo4j", "Hung31102004")
 
-embedding_model = get_fpt_vietnamese_embedding()
+embedding_model = get_embedding()
 
 def to_lowercase(text):
     if isinstance(text, str):
@@ -103,7 +103,7 @@ def create_disease_embedding(name, description):
             return None
             
         # Create embedding using Vietnamese_Embedding model
-        embedding = embedding_model.embed_query(combined_text)
+        embedding = embedding_model.aembed_query(combined_text)
         
         # Validate embedding
         if embedding and len(embedding) > 0:

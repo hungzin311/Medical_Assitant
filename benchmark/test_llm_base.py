@@ -1,4 +1,4 @@
-from utils.llm_config import get_fpt_llm
+from utils.llm_config import get_llm
 from utils.proxy_setting import * 
 from utils.prompt import llm_base_mcq_evaluation_prompt
 import json
@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
 
 set_proxy()
-llm = get_fpt_llm()
+llm = get_llm()
 
 def parse_llm_response(response_text):
     try:

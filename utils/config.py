@@ -1,7 +1,7 @@
 import os
 import threading
 from dotenv import load_dotenv
-from utils.llm_config import get_fpt_vietnamese_embedding, get_gemini_llm, get_gemini_vision_llm, get_fpt_embeddings
+from utils.llm_config import get_embedding, get_gemini_llm, get_gemini_vision_llm
 
 load_dotenv()
 
@@ -20,7 +20,7 @@ class WebSearchConfig:
 class RAGConfig:
     def __init__(self):
         self.vector_db_type = "qdrant"
-        self.embedding_dim = 1024  
+        self.embedding_dim = 768  
         self.distance_metric = "Cosine"
         self.use_local = False
         self.url = os.getenv("QDRANT_URL")
@@ -28,7 +28,7 @@ class RAGConfig:
         self.collection_name = "medical_assistance_rag_vietnamese"
         self.chunk_size = 512
         self.chunk_overlap = 50
-        self.embedding_model = get_fpt_vietnamese_embedding()
+        self.embedding_model = get_embedding()
         self.llm = get_gemini_llm(temperature=0.0)  
         self.top_k = 10
         self.vector_search_type = 'similarity'  # or 'mmr'
@@ -50,15 +50,15 @@ class RAGConfig:
 class PatientDBConfig:
     def __init__(self):
         self.vector_db_type = "qdrant"
-        self.embedding_dim = 1024  # Together AI m2-bert embedding dimension
+        self.embedding_dim = 768  
         self.distance_metric = "Cosine"
         self.use_local = False
         self.url = os.getenv("QDRANT_URL")
         self.api_key = os.getenv("QDRANT_API_KEY")
-        self.collection_name = "medical_records"  # Patient database collection
-        self.embedding_model = get_fpt_embeddings()
+        self.collection_name = "medical_records"  
+        self.embedding_model = get_embedding()
         self.top_k = 50  
-        self.llm = get_gemini_llm(temperature=0.1)  # Slightly creative but factual
+        self.llm = get_gemini_llm(temperature=0.1) 
         self.max_age_range_default = 10  
         self.min_cases_for_confidence = 5  
         self.outbreak_threshold = 5  

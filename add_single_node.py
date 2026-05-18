@@ -6,7 +6,7 @@ import sys
 from utils.proxy_setting import set_proxy
 # Add parent directory to path to import utils
 sys.path.append(str(Path(__file__).parent))
-from utils.llm_config import get_fpt_vietnamese_embedding
+from utils.llm_config import get_embedding
 
 # Neo4j connection settings
 URI = "neo4j://127.0.0.1:7687"
@@ -15,7 +15,7 @@ AUTH = ("neo4j", "Hung31102004")
 # Initialize embedding model
 set_proxy()
 
-embedding_model = get_fpt_vietnamese_embedding()
+embedding_model = get_embedding()
 
 def to_lowercase(text):
     """Convert text to lowercase if it's a string."""
@@ -52,7 +52,7 @@ def parse_list_field(field_value):
 def create_disease_embedding(disease_name, disease_description):
     try:
         combined_text = f"{disease_name} {disease_description}"
-        embedding = embedding_model.embed_query(combined_text)
+        embedding = embedding_model.aembed_query(combined_text)
         return embedding
     except Exception as e:
         print(f"❌ Lỗi tạo embedding: {e}")
