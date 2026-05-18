@@ -22,12 +22,7 @@ load_dotenv()
 config = Config()
 memory = MemorySaver()
 thread_config = {"configurable": {"thread_id": "1"}}
-
-class AgentConfig:
-    DECISION_MODEL = "gemini-2.5-flash"
-    VISION_MODEL = "gemini-2.5-flash"
-    CONFIDENCE_THRESHOLD = 0.85
-    image_analyzer = ImageAnalysisAgent(config=config)
+image_analyzer = ImageAnalysisAgent(config=config)
 
 class AgentState(MessagesState):
     """State maintained across the workflow."""
@@ -82,7 +77,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         if isinstance(current_input, dict) and "image" in current_input:
             has_image = True
             image_path = current_input.get("image", None)
-            image_type_response = AgentConfig.image_analyzer.analyze_image(image_path, input_text)
+            image_type_response = image_analyzer.analyze_image(image_path, input_text)
             image_type = image_type_response['image_type']
             print("ANALYZED IMAGE TYPE: ", image_type)
         
@@ -208,7 +203,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
             if image_id:
                 try:
                     print(f"Found image_id: {image_id}, generating follow-up response")
-                    follow_up_response = AgentConfig.image_analyzer.generate_followup_response(image_id, input_text)
+                    follow_up_response = image_analyzer.generate_followup_response(image_id, input_text)
                     return {
                         **state,
                         "output": AIMessage(content=follow_up_response),
@@ -451,7 +446,6 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
 
         current_input = state["current_input"]
         image_path = current_input.get("image", None)
-        messages = state["messages"]
         
         # Get user query if available
         user_query = ""
@@ -459,22 +453,10 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
             user_query = current_input.get("text", "")
         
         # Process the image with the general medical image agent
-        diagnosis_result = AgentConfig.image_analyzer.diagnose_general_medical_image(image_path, user_query)
+        diagnosis_result = image_analyzer.diagnose_general_medical_image(image_path, user_query)
         
-        # Summarize the diagnosis with the summarizer agent
         if diagnosis_result["success"]:
-            # Pass the diagnosis result, chat history, and user query to the summarizer
-            summarized_result = AgentConfig.image_analyzer.summarize_diagnosis(
-                diagnosis_result=diagnosis_result,
-                chat_history=messages[-10:] if len(messages) > 0 else None,  # Pass last 10 messages as context
-                user_query=user_query
-            )
-            
-            # Use the summarized content as the response
-            if summarized_result["success"]:
-                response = AIMessage(content=summarized_result["summary"], metadata={"image_id":summarized_result['image_id']})
-            else:
-                response = AIMessage(content=diagnosis_result["diagnosis"])
+            response = AIMessage(content=diagnosis_result["diagnosis"])                
         else:
             response = AIMessage(content="Tôi đã gặp lỗi khi phân tích hình ảnh y tế này. Vui lòng thử lại hoặc tham khảo ý kiến bác sĩ chuyên khoa.")
 
@@ -500,7 +482,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
 
         # Segment the polyp
         try:
-            AgentConfig.image_analyzer.segment_polyp(image_path)
+            image_analyzer.segment_polyp(image_path)
             segmentation_success = True
         except Exception as e:
             print(f"Error in polyp segmentation: {e}")
@@ -519,7 +501,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
             }
             
             # Summarize the diagnosis with the summarizer agent
-            summarized_result = AgentConfig.image_analyzer.summarize_diagnosis(
+            summarized_result = image_analyzer.summarize_diagnosis(
                 diagnosis_result=diagnosis_result,
                 chat_history=messages[-10:] if len(messages) > 0 else None,
                 user_query=user_query

@@ -13,9 +13,13 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 logger = logging.getLogger(__name__)
 logging.getLogger("httpx").disabled = True
 
+sys.path.append(str(Path(__file__).parent.parent))
+
 # Import components
 from utils.config import Config
 from agents.rag_agent.vectorstore_qdrant_cloud import VectorStoreCloud
+from utils.proxy_setting import set_proxy
+set_proxy()
 
 def process_jsonl_with_payload(file_path):
     logger.info(f"Processing JSONL file with payload: {file_path}")
@@ -163,7 +167,94 @@ def process_document_batch(batch_data, qdrant_vectorstore, document_path):
             "doc_ids": []
         }
 
-def ingest_documents_to_qdrant(documents, config, collection_name=None, batch_size=50, num_workers=8):
+def save_failed_batches_to_jsonl(failed_batches, output_path):
+    """Write permanently failed chunks to JSONL for manual re-ingest."""
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    count = 0
+    with open(output_path, "w", encoding="utf-8") as f:
+        for batch_contents, batch_metadatas, batch_start_idx in failed_batches:
+            for content, metadata in zip(batch_contents, batch_metadatas):
+                record = {"context": content, "batch_start_idx": batch_start_idx, **metadata}
+                f.write(json.dumps(record, ensure_ascii=False) + "\n")
+                count += 1
+    logger.info(f"Saved {count} failed documents to {output_path}")
+    return str(output_path)
+
+def run_batches_with_retry(batches, qdrant_vectorstore, document_path, num_workers, max_retries=3, retry_delay=2.0):
+    """Process batches concurrently; retry failures with exponential backoff."""
+    all_doc_ids = []
+    successful_batches = 0
+    pending = list(batches)
+
+    for attempt in range(max_retries + 1):
+        if not pending:
+            break
+
+        if attempt > 0:
+            delay = retry_delay * (2 ** (attempt - 1))
+            logger.info(
+                f"Retry {attempt}/{max_retries}: {len(pending)} failed batches "
+                f"(waiting {delay:.1f}s before retry)..."
+            )
+            time.sleep(delay)
+            # Fewer workers on retry to reduce rate-limit / overload errors
+            workers = max(1, num_workers // 2)
+        else:
+            workers = num_workers
+            logger.info(f"Processing {len(pending)} batches with {workers} workers")
+
+        failed_this_round = []
+        completed = 0
+
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            future_to_batch = {
+                executor.submit(process_document_batch, batch, qdrant_vectorstore, document_path): batch
+                for batch in pending
+            }
+            for future in as_completed(future_to_batch):
+                batch = future_to_batch[future]
+                batch_start_idx = batch[2]
+                try:
+                    result = future.result()
+                    if result["success"]:
+                        successful_batches += 1
+                        all_doc_ids.extend(result["doc_ids"])
+                        logger.info(
+                            f"Batch {result['batch_start_idx']} completed: "
+                            f"{result['documents_processed']} documents"
+                        )
+                    else:
+                        failed_this_round.append(batch)
+                        logger.error(
+                            f"Batch {result['batch_start_idx']} failed: "
+                            f"{result.get('error', 'Unknown error')}"
+                        )
+                except Exception as e:
+                    failed_this_round.append(batch)
+                    logger.error(f"Batch {batch_start_idx} failed with exception: {e}")
+
+                completed += 1
+                if completed % 10 == 0 or completed == len(pending):
+                    logger.info(
+                        f"Round {attempt}: {completed}/{len(pending)} batches done "
+                        f"({len(failed_this_round)} failed so far)"
+                    )
+
+        pending = failed_this_round
+
+    return all_doc_ids, successful_batches, pending
+
+def ingest_documents_to_qdrant(
+    documents,
+    config,
+    collection_name=None,
+    batch_size=50,
+    num_workers=8,
+    max_retries=3,
+    retry_delay=2.0,
+    failed_output_path=None,
+):
     try:
         # Use custom collection name if provided
         if collection_name:
@@ -189,7 +280,7 @@ def ingest_documents_to_qdrant(documents, config, collection_name=None, batch_si
         document_path = f"jsonl_payload_{start_time}"
         
         # Initialize shared vectorstore once
-        qdrant_vectorstore = vector_store.load_vectorstore()
+        qdrant_vectorstore = vector_store.load_vectorstore(collection_name)
         logger.info("Shared vectorstore initialized successfully")
         
         # Prepare batches for concurrent processing
@@ -199,39 +290,30 @@ def ingest_documents_to_qdrant(documents, config, collection_name=None, batch_si
             batch_metadatas = metadatas[i:i+batch_size]
             batches.append((batch_contents, batch_metadatas, i))
         
-        logger.info(f"Processing {len(batches)} batches with batch size {batch_size}")
-        
-        # Process batches concurrently
-        all_doc_ids = []
-        successful_batches = 0
-        failed_batches = 0
-        
-        with ThreadPoolExecutor(max_workers=num_workers) as executor:
-            # Submit all batch processing tasks with shared vectorstore
-            futures = [executor.submit(process_document_batch, batch, qdrant_vectorstore, document_path) 
-                      for batch in batches]
-            
-            # Process completed futures
-            for future in as_completed(futures):
-                try:
-                    result = future.result()
-                    if result["success"]:
-                        successful_batches += 1
-                        all_doc_ids.extend(result["doc_ids"])
-                        logger.info(f"Batch {result['batch_start_idx']} completed: {result['documents_processed']} documents processed")
-                    else:
-                        failed_batches += 1
-                        logger.error(f"Batch {result['batch_start_idx']} failed: {result.get('error', 'Unknown error')}")
-                    
-                    # Progress update
-                    total_completed = successful_batches + failed_batches
-                    if total_completed % 10 == 0 or total_completed == len(batches):
-                        logger.info(f"Progress: {total_completed}/{len(batches)} batches completed ({successful_batches} successful, {failed_batches} failed)")
-                        
-                except Exception as e:
-                    failed_batches += 1
-                    logger.error(f"Error processing batch future: {e}")
-        
+        logger.info(
+            f"Processing {len(batches)} batches (batch_size={batch_size}, "
+            f"max_retries={max_retries})"
+        )
+
+        all_doc_ids, successful_batches, permanently_failed = run_batches_with_retry(
+            batches,
+            qdrant_vectorstore,
+            document_path,
+            num_workers,
+            max_retries=max_retries,
+            retry_delay=retry_delay,
+        )
+
+        failed_batches = len(permanently_failed)
+        failed_output_file = None
+        if permanently_failed:
+            out_path = failed_output_path or f"failed_ingest_{int(start_time)}.jsonl"
+            failed_output_file = save_failed_batches_to_jsonl(permanently_failed, out_path)
+            logger.warning(
+                f"{failed_batches} batch(es) still failed after {max_retries} retries. "
+                f"Re-ingest with: --file {failed_output_file}"
+            )
+
         # Restore original collection name if changed
         if collection_name and hasattr(config.rag, 'collection_name'):
             config.rag.collection_name = original_collection_name
@@ -240,11 +322,13 @@ def ingest_documents_to_qdrant(documents, config, collection_name=None, batch_si
         logger.info(f"Concurrent ingestion completed in {total_time:.2f}s: {len(all_doc_ids)} documents ingested successfully")
             
         return {
-            "success": successful_batches > 0,
+            "success": failed_batches == 0 and len(all_doc_ids) > 0,
             "documents_ingested": len(all_doc_ids),
             "failed_batches": failed_batches,
             "total_batches": len(batches),
-            "processing_time": total_time
+            "successful_batches": successful_batches,
+            "processing_time": total_time,
+            "failed_output_file": failed_output_file,
         }
         
     except Exception as e:
@@ -264,8 +348,11 @@ def main():
     parser.add_argument("--file", type=str, help="Path to JSONL file to ingest")
     parser.add_argument("--dir", type=str, help="Path to directory containing JSONL files to ingest")
     parser.add_argument("--collection", type=str, help="Custom collection name (optional)")
-    parser.add_argument("--batch-size", type=int, default=50, help="Batch size for processing (default: 50)")
-    parser.add_argument("--workers", type=int, default=8, help="Number of concurrent workers (default: 4)")
+    parser.add_argument("--batch-size", type=int, default=100, help="Batch size for processing (default: 100)")
+    parser.add_argument("--workers", type=int, default=8, help="Number of concurrent workers (default: 8)")
+    parser.add_argument("--max-retries", type=int, default=3, help="Max retry rounds for failed batches (default: 3)")
+    parser.add_argument("--retry-delay", type=float, default=1.0, help="Base delay in seconds between retries (default: 2.0)")
+    parser.add_argument("--failed-output", type=str, default=None, help="Path to save permanently failed chunks as JSONL")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     
     # Parse arguments
@@ -305,8 +392,16 @@ def main():
             if documents:
                 # Ingest the documents
                 logger.info(f"Ingesting {len(documents)} documents from {file_path} with batch_size={args.batch_size}, workers={args.workers}")
-                result = ingest_documents_to_qdrant(documents, config, collection_name, 
-                                                  batch_size=args.batch_size, num_workers=args.workers)
+                result = ingest_documents_to_qdrant(
+                    documents,
+                    config,
+                    collection_name,
+                    batch_size=args.batch_size,
+                    num_workers=args.workers,
+                    max_retries=args.max_retries,
+                    retry_delay=args.retry_delay,
+                    failed_output_path=args.failed_output,
+                )
                 print("Ingestion result:", json.dumps(result, indent=2))
             else:
                 logger.error(f"No valid documents found in {file_path}")
@@ -339,8 +434,16 @@ def main():
             # Ingest all documents together
             if all_documents:
                 logger.info(f"Ingesting {len(all_documents)} total documents from {len(jsonl_files)} files with batch_size={args.batch_size}, workers={args.workers}")
-                result = ingest_documents_to_qdrant(all_documents, config, collection_name,
-                                                  batch_size=args.batch_size, num_workers=args.workers)
+                result = ingest_documents_to_qdrant(
+                    all_documents,
+                    config,
+                    collection_name,
+                    batch_size=args.batch_size,
+                    num_workers=args.workers,
+                    max_retries=args.max_retries,
+                    retry_delay=args.retry_delay,
+                    failed_output_path=args.failed_output,
+                )
                 print("Ingestion result:", json.dumps(result, indent=2))
             else:
                 logger.error("No valid documents found in any files")
