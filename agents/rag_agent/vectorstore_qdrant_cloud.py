@@ -220,7 +220,7 @@ class VectorStoreCloud:
         ) -> List[Dict[str, Any]]:
         try:
         
-            results = vectorstore.similarity_search_with_score(
+            results = vectorstore.asimilarity_search_with_score(
                 query=query,
                 k=self.retrieval_top_k
             )

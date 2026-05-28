@@ -6,6 +6,7 @@ from langgraph.graph import MessagesState, StateGraph
 from langgraph.constants import END
 from dotenv import load_dotenv
 from agents.rag_agent import MedicalRAG
+from agents.medlineplus_agent import MedlinePlusAgent
 from agents.web_search_processor_agent import WebSearchProcessorAgent
 from agents.image_analysis_agent import ImageAnalysisAgent
 from langgraph.checkpoint.memory import MemorySaver
@@ -63,6 +64,8 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
     kg_agent = KGQueryEngine(patient_query_engine)
 
     rag_agent = MedicalRAG(config)
+
+    medlineplus_agent = MedlinePlusAgent(config)
     
     def analyze_input(state: AgentState) -> AgentState:
         """Analyze the input to detect images and determine input type."""
@@ -287,7 +290,8 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
                 'response': response_text,
                 'confidence': confidence,
                 'insufficient_info': insufficient_info,
-                'agent_name': 'KG_AGENT'
+                'agent_name': 'KG_AGENT',
+                'sources': []
             }
         
         def run_rag_only(): 
@@ -331,25 +335,82 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
                 "agent_name": "RAG_AGENT",
                 "sources": response.get("sources", [])
             }
+
+        def run_medlineplus_only():
+            chat_history = []
+            medlineplus_context_limit = config.medlineplus.context_limit
+            response = {}
+            for msg in messages[-medlineplus_context_limit:]:
+                if isinstance(msg, HumanMessage):
+                    chat_history.append({"role": "user", "content": msg.content})
+                elif isinstance(msg, AIMessage):
+                    chat_history.append({"role": "assistant", "content": msg.content})
+            try:
+                response = medlineplus_agent.process_query(query, chat_history=chat_history)
+                response_text = response.get("response", "Tôi không có đủ thông tin")
+                confidence = float(response.get("confidence", 0.0))
+
+                import json
+                with open("medlineplus_response.json", "w", encoding="utf-8") as f:
+                    json_text = json.dumps(response, ensure_ascii=False, indent=4)
+                    json_text = json_text.replace("\\n", "\n")
+                    f.write(json_text)
+            except Exception as e:
+                print(f"Error in MedlinePlus agent: {e}")
+                response_text = "Tôi không có đủ thông tin"
+                confidence = 0.0
+
+            if confidence < config.medlineplus.min_retrieval_confidence:
+                insufficient_info = True
+                response_text = "Tôi không có đủ thông tin"
+            else:
+                insufficient_info = (
+                    "Tôi không có đủ thông tin" in response_text or
+                    "không đủ thông tin" in response_text.lower() or
+                    "thông tin không đầy đủ" in response_text.lower() or
+                    "không thể trả lời" in response_text.lower() or
+                    "không trả lời được" in response_text.lower() or
+                    "không tìm thấy thông tin phù hợp" in response_text.lower()
+                )
+
+            return {
+                "response": response_text,
+                "confidence": confidence,
+                "insufficient_info": insufficient_info,
+                "agent_name": "MEDLINEPLUS_AGENT",
+                "sources": response.get("sources", [])
+            }
             
-        with concurrent.futures.ThreadPoolExecutor(max_workers = 2) as executor: 
+        with concurrent.futures.ThreadPoolExecutor(max_workers = 3) as executor: 
             kg_future = executor.submit(run_kg_only)
             rag_future = executor.submit(run_rag_only)
+            medlineplus_future = executor.submit(run_medlineplus_only)
 
             kg_result = kg_future.result()
             rag_result = rag_future.result()
+            medlineplus_result = medlineplus_future.result()
             
         kg_insufficient = kg_result['insufficient_info']
         rag_insufficient = rag_result['insufficient_info']
+        medlineplus_insufficient = medlineplus_result['insufficient_info']
         
         print(f"KG insufficient_info: {kg_insufficient}")
         print(f"RAG insufficient_info: {rag_insufficient}")
+        print(f"MedlinePlus insufficient_info: {medlineplus_insufficient}")
         print(f"RAG confidence: {rag_result.get('confidence', 0.0)}")
+        print(f"MedlinePlus confidence: {medlineplus_result.get('confidence', 0.0)}")
         print(f"RAG sources count: {len(rag_result.get('sources', []))}")
+        print(f"MedlinePlus sources count: {len(medlineplus_result.get('sources', []))}")
         
-        # Case 1: Both have insufficient info -> Go to web search
-        if kg_insufficient and rag_insufficient:
-            print("Both KG and RAG have insufficient info -> Routing to Web Search")
+        all_results = [kg_result, rag_result, medlineplus_result]
+        sufficient_results = [
+            result for result in all_results
+            if not result.get("insufficient_info", True)
+        ]
+
+        # Case 1: All have insufficient info -> Go to web search
+        if not sufficient_results:
+            print("KG, RAG, and MedlinePlus all have insufficient info -> Routing to Web Search")
             return {
                 **state,
                 "output": AIMessage(content=""),
@@ -357,52 +418,28 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
                 "agent_name": "PARALLEL_KG_RAG_AGENT",
                 "next": "WEB_SEARCH_PROCESSOR_AGENT",
                 "kg_result": kg_result,
-                "rag_result": rag_result
+                "rag_result": rag_result,
+                "medlineplus_result": medlineplus_result
             }
         
-        # Case 2: Only KG has sufficient info
-        elif not kg_insufficient and rag_insufficient:
-            print("Using KG result (RAG insufficient)")
-            return {
-                **state,
-                "output": AIMessage(content=kg_result['response']),
-                "needs_human_validation": False,
-                "agent_name": "KG_AGENT",
-                "next": "check_validation"
-            }
-        
-        # Case 3: Only RAG has sufficient info
-        elif kg_insufficient and not rag_insufficient:
-            print("Using RAG result (KG insufficient)")
-            return {
-                **state,
-                "output": AIMessage(content=rag_result['response']),
-                "needs_human_validation": False,
-                "agent_name": "RAG_AGENT",
-                "next": "check_validation",
-                "retrieval_confidence": rag_result['confidence']
-            }
-        
-        # Case 4: Both have sufficient info -> Combine or choose best
-        else:
-            print("Both agents have sufficient info -> Combining results")
-            
-            if rag_result.get('confidence', 0.0) > kg_result.get('confidence', 0.0) + 0.05:
-                chosen_response = rag_result['response']
-                chosen_agent = "RAG_AGENT"
-            else:
-                chosen_response = kg_result['response']
-                chosen_agent = "KG_AGENT"
-            
-            return {
-                **state,
-                "output": AIMessage(content=chosen_response),
-                "needs_human_validation": False,
-                "agent_name": chosen_agent,
-                "next": "check_validation",
-                "kg_result": kg_result,
-                "rag_result": rag_result
-            }
+        chosen_result = max(
+            sufficient_results,
+            key=lambda result: float(result.get("confidence", 0.0))
+        )
+        chosen_agent = chosen_result.get("agent_name", "PARALLEL_KG_RAG_AGENT")
+        print(f"Using best sufficient result from {chosen_agent}")
+
+        return {
+            **state,
+            "output": AIMessage(content=chosen_result["response"]),
+            "needs_human_validation": False,
+            "agent_name": chosen_agent,
+            "next": "check_validation",
+            "retrieval_confidence": chosen_result.get("confidence", 0.0),
+            "kg_result": kg_result,
+            "rag_result": rag_result,
+            "medlineplus_result": medlineplus_result
+        }
         
     # Web Search Processor Node
     def run_web_search_processor_agent(state: AgentState) -> AgentState:

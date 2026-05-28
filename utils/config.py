@@ -47,6 +47,25 @@ class RAGConfig:
         self.context_limit = 20     
 
 
+class MedlinePlusConfig:
+    def __init__(self):
+        self.collection_name = os.getenv("MEDLINEPLUS_COLLECTION_NAME", "medlineplus_kb")
+        self.data_dir = os.getenv(
+            "MEDLINEPLUS_DATA_DIR",
+            "/home/hung/Coding/VectorDB/data/medlineplus",
+        )
+        self.embedding_model = get_embedding()
+        self.llm = get_gemini_llm(temperature=0.0)
+        self.top_k = int(os.getenv("MEDLINEPLUS_TOP_K", "8"))
+        self.qdrant_url = os.getenv("QDRANT_URL")
+        self.qdrant_api_key = os.getenv("QDRANT_API_KEY")
+        self.vector_name = os.getenv("MEDLINEPLUS_VECTOR_NAME", "dense")
+        self.include_relations = os.getenv("MEDLINEPLUS_INCLUDE_RELATIONS", "true").lower() == "true"
+        self.max_relations = int(os.getenv("MEDLINEPLUS_MAX_RELATIONS", "20"))
+        self.min_retrieval_confidence = float(os.getenv("MEDLINEPLUS_MIN_RETRIEVAL_CONFIDENCE", "0.70"))
+        self.context_limit = int(os.getenv("MEDLINEPLUS_CONTEXT_LIMIT", "20"))
+
+
 class PatientDBConfig:
     def __init__(self):
         self.vector_db_type = "qdrant"
@@ -82,6 +101,7 @@ class ValidationConfig:
             "CONVERSATION_AGENT": False,
             "RAG_AGENT": False,
             "WEB_SEARCH_AGENT": False,
+            "MEDLINEPLUS_AGENT": False,
             "POLYP_SEGMENTATION_AGENT": True,
             "GENERAL_MEDICAL_IMAGE_AGENT": True
         }
@@ -119,6 +139,7 @@ class Config:
         self.agent_decision = AgentDecisoinConfig()
         self.conversation = ConversationConfig()
         self.rag = RAGConfig()
+        self.medlineplus = MedlinePlusConfig()
         self.patient_db = PatientDBConfig()  # Add patient database configuration
         self.medical_cv = MedicalCVConfig()
         self.web_search = WebSearchConfig()
