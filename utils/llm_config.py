@@ -11,7 +11,7 @@ load_dotenv()
 class OpenAIEmbeddings(Embeddings):
     def __init__(self, base_url: str = None, api_key: str = None, model_name: str = None):
         self.base_url = base_url or os.getenv("EMBEDDING_BASE_URL") 
-        self.api_key = ""
+        self.api_key = "empty"
         self.model_name = model_name or os.getenv("EMBEDDING_MODEL")
         self.client = OpenAI(api_key=self.api_key, base_url=self.base_url)
         self.async_client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url)
@@ -90,7 +90,7 @@ def get_embedding():
 def get_llm(temperature=0.2):
     client = Client(verify=False)
     return ChatOpenAI(
-        model="google/medgemma-27b-text-it",
+        model="google/medgemma-27b-it",
         openai_api_base= os.getenv('LLM_BASE_URL'),
         openai_api_key="empty",
         http_client=client,  

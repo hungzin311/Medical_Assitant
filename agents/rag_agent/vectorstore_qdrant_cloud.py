@@ -1,4 +1,5 @@
 import os
+import asyncio
 import re
 import logging
 from uuid import uuid4
@@ -83,6 +84,17 @@ class VectorStoreCloud:
             document_chunks: List[str],
             document_path: str,
         ) -> Tuple[QdrantVectorStore, List[str]]:
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            return asyncio.run(self.acreate_vectorstore(document_chunks, document_path))
+        raise RuntimeError("create_vectorstore() was called inside an event loop; use await acreate_vectorstore() instead")
+
+    async def acreate_vectorstore(
+            self,
+            document_chunks: List[str],
+            document_path: str,
+        ) -> Tuple[QdrantVectorStore, List[str]]:
         
         # Generate unique IDs for each chunk
         doc_ids = [str(uuid4()) for _ in range(len(document_chunks))]
@@ -119,8 +131,8 @@ class VectorStoreCloud:
                 continue
         
         # Check if collection exists, create if it doesn't
-        if not self._does_collection_exist():
-            self._create_collection()
+        if not self._does_collection_exist(self.collection_name):
+            self._create_collection(self.collection_name)
             self.logger.info(f"Created new cloud collection: {self.collection_name}")
         else:
             self.logger.info(f"Cloud collection {self.collection_name} already exists, will upsert documents")
@@ -136,7 +148,7 @@ class VectorStoreCloud:
                 batch_ids = valid_doc_ids[i:i+batch_size]
                                 
                 try:
-                    qdrant_vectorstore.aadd_documents(documents=batch_docs, ids=batch_ids)
+                    await qdrant_vectorstore.aadd_documents(documents=batch_docs, ids=batch_ids)
                     self.logger.info(
                         f"Ingested batch {i // batch_size + 1}: {len(batch_docs)} documents"
                     )
@@ -147,7 +159,7 @@ class VectorStoreCloud:
                     self.logger.info("Retrying failed batch document-by-document")
                     for j, (doc, doc_id) in enumerate(zip(batch_docs, batch_ids)):
                         try:
-                            qdrant_vectorstore.aadd_documents(documents=[doc], ids=[doc_id])
+                            await qdrant_vectorstore.aadd_documents(documents=[doc], ids=[doc_id])
                         except Exception as doc_error:
                             self.logger.error(f"Error adding document {i+j+1}: {doc_error}")
                             continue

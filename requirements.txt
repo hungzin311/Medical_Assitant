@@ -7,23 +7,22 @@ jinja2
 starlette
 
 # LangChain Ecosystem
-langchain
-langchain-community
-langchain-core
-langchain-openai
-langchain-qdrant
-langchain-text-splitters
-langchain-google-genai
-langchain-together
-langgraph
-langgraph-checkpoint
-langgraph-prebuilt
-langgraph-sdk
+langchain>=0.3,<0.4
+langchain-community>=0.3,<0.4
+langchain-core>=0.3,<1.0
+langchain-openai>=0.3,<1.0
+langchain-qdrant>=0.2,<1.0
+langchain-text-splitters>=0.3,<1.0
+langchain-google-genai>=2.0,<3.0
+langchain-together>=0.3,<0.4
+langgraph>=0.6,<1.0
+langgraph-checkpoint>=2.0,<3.0
+langgraph-prebuilt>=0.6,<1.0
+langgraph-sdk>=0.2,<0.3
 langsmith
 
 # LLM & AI Services
 openai
-google-generativeai
 together
 mem0ai[nlp]
 
@@ -55,7 +54,7 @@ imageio
 matplotlib
 
 # Graph Database
-langchain-neo4j
+langchain-neo4j>=0.4,<0.5
 
 # Document Processing
 docling
@@ -69,7 +68,7 @@ openpyxl
 
 # Data Processing
 pandas
-numpy
+numpy>=1.26,<2
 scipy
 scikit-learn
 
