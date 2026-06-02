@@ -2,6 +2,7 @@ import os
 from .web_search_agent import WebSearchAgent
 from typing import Dict, List, Optional
 from dotenv import load_dotenv
+from utils.streaming import invoke_with_streaming
 
 load_dotenv()
 
@@ -44,7 +45,7 @@ class WebSearchProcessor:
         )
         
         # Invoke the LLM to process the results
-        response = self.llm.invoke(llm_prompt)
+        response = invoke_with_streaming(self.llm, llm_prompt)
         
         # Add safety disclaimer to web search response
         safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."

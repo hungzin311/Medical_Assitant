@@ -6,6 +6,7 @@ from agents.patient_db_agent import PatientQueryEngine
 from agents.rag_agent.query_expander import QueryExpander
 from utils.config import Config
 from utils.prompt import medical_cot_prompt, medical_direct_kg_prompt, medical_mcq_evaluation_prompt
+from utils.streaming import invoke_with_streaming
 import json
 import re
 
@@ -52,11 +53,15 @@ class ResponseGenerator:
             print("Using cached KG context (retrieve failed)")
         else:
             return "Không có thông tin liên quan"
-        response = self.llm.invoke(prompt.format(
-                                                patient_context=patient_context,
-                                                kg_candidates=kg_candidates_json,
-                                                user_query=question,
-                                                history=chat_history))
+        response = invoke_with_streaming(
+            self.llm,
+            prompt.format(
+                patient_context=patient_context,
+                kg_candidates=kg_candidates_json,
+                user_query=question,
+                history=chat_history,
+            ),
+        )
 
         # Parse JSON response and extract content
         try:

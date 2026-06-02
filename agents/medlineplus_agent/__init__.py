@@ -5,6 +5,7 @@ import time
 from typing import Any, Dict, List, Optional
 
 from .retriever import MedlinePlusRetriever
+from utils.streaming import invoke_with_streaming
 
 
 class MedlinePlusAgent:
@@ -53,7 +54,7 @@ class MedlinePlusAgent:
                 expanded_relations=retrieval_result.get("expanded_relations", []),
                 chat_history=chat_history,
             )
-            response = self.llm.invoke(prompt)
+            response = invoke_with_streaming(self.llm, prompt)
             response_text = getattr(response, "content", str(response))
 
             return {

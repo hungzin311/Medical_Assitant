@@ -51,14 +51,16 @@ def get_gemini_llm(temperature=0.7):
         model="gemini-3.1-flash-lite",
         google_api_key=os.getenv("GOOGLE_API_KEY"),
         temperature=temperature,
-        convert_system_message_to_human=False
+        convert_system_message_to_human=False,
+        streaming=True,
     )
 def get_gemini_llm_2(temperature=0.7):
     return ChatGoogleGenerativeAI(
         model="gemini-3.1-flash-lite",
         google_api_key=os.getenv("GOOGLE_API_KEY_2"),
         temperature=temperature,
-        convert_system_message_to_human=False
+        convert_system_message_to_human=False,
+        streaming=True,
     )
 
 def get_gemini_llm_3(temperature=0.7):
@@ -66,7 +68,8 @@ def get_gemini_llm_3(temperature=0.7):
         model="gemini-3.1-flash-lite",
         google_api_key=os.getenv("GOOGLE_API_KEY_3"),
         temperature=temperature,
-        convert_system_message_to_human=False
+        convert_system_message_to_human=False,
+        streaming=True,
     )
 
 def get_gemini_vision_llm(temperature=0.2):
@@ -75,7 +78,8 @@ def get_gemini_vision_llm(temperature=0.2):
         google_api_key=os.getenv("GOOGLE_API_KEY"),
         temperature=temperature,
         convert_system_message_to_human=False,
-        max_output_tokens=256  
+        max_output_tokens=256,
+        streaming=True,
     )
 
 def get_graph_db():
@@ -93,5 +97,6 @@ def get_llm(temperature=0.2):
         model="google/medgemma-27b-it",
         openai_api_base= os.getenv('LLM_BASE_URL'),
         openai_api_key="empty",
-        http_client=client,  
+        http_client=client,
+        streaming=True,
     )

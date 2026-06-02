@@ -3,6 +3,7 @@ import json
 import re
 from typing import List, Dict, Any, Optional
 from utils.prompt import rag_agent_mcq_evaluation_prompt
+from utils.streaming import invoke_with_streaming
 
 class ResponseGenerator:
     def __init__(self, config):
@@ -93,7 +94,7 @@ HÃY PHÂN TÍCH:"""
             
             # Build the prompt
             prompt = self._build_prompt(query, context, patient_context, chat_history)            
-            response = self.response_generator_model.invoke(prompt)
+            response = invoke_with_streaming(self.response_generator_model, prompt)
             
             # Parse JSON response and extract content (similar to KG agent)
             try:

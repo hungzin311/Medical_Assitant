@@ -15,6 +15,7 @@ from agents.patient_db_agent import PatientQueryEngine
 from utils.proxy_setting import *
 from utils.prompt import decision_agent_prompt, conversation_agent_prompt
 from utils.config import Config
+from utils.streaming import current_stream_callback, emit_stream_event, invoke_with_streaming
 import concurrent.futures
 
 #Set proxy  
@@ -24,6 +25,19 @@ config = Config()
 memory = MemorySaver()
 thread_config = {"configurable": {"thread_id": "1"}}
 image_analyzer = ImageAnalysisAgent(config=config)
+
+def get_agent_status_message(agent_name: str) -> str:
+    messages = {
+        "CONVERSATION_AGENT": "Processing your conversation request...",
+        "PARALLEL_KG_RAG_AGENT": "Searching KG, RAG, and MedlinePlus in parallel...",
+        "KG_AGENT": "Searching the medical knowledge graph...",
+        "RAG_AGENT": "Searching the medical knowledge database...",
+        "MEDLINEPLUS_AGENT": "Searching MedlinePlus knowledge base...",
+        "WEB_SEARCH_PROCESSOR_AGENT": "Searching the web for latest medical information...",
+        "POLYP_SEGMENTATION_AGENT": "Analyzing polyp image...",
+        "GENERAL_MEDICAL_IMAGE_AGENT": "Analyzing medical image...",
+    }
+    return messages.get(agent_name, "Processing your medical query...")
 
 class AgentState(MessagesState):
     """State maintained across the workflow."""
@@ -142,6 +156,11 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
 
         # Decided agent
         print(f"Decision: {decision['agent']}")
+        emit_stream_event("agent", {
+            "agent": decision["agent"],
+            "message": get_agent_status_message(decision["agent"]),
+            "transition": True,
+        })
         
         # Update state with decision
         updated_state = {
@@ -156,6 +175,11 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
     def run_conversation_agent(state: AgentState) -> AgentState:
 
         print(f"Selected agent: CONVERSATION_AGENT")
+        emit_stream_event("agent", {
+            "agent": "CONVERSATION_AGENT",
+            "message": "Processing your conversation request...",
+            "transition": False,
+        })
 
         messages = state["messages"]
         current_input = state["current_input"]
@@ -230,7 +254,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         {conversation_agent_prompt}
         """
 
-        response = config.conversation.llm.invoke(conversation_prompt)
+        response = invoke_with_streaming(config.conversation.llm, conversation_prompt)
 
         return {
             **state,
@@ -240,6 +264,11 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
     
     def run_kg_rag_parallel(state: AgentState) -> AgentState:
         print(f"Selected agent: PARALLEL_KG_RAG_AGENT")
+        emit_stream_event("agent", {
+            "agent": "PARALLEL_KG_RAG_AGENT",
+            "message": "Searching KG, RAG, and MedlinePlus in parallel...",
+            "transition": False,
+        })
         
         messages = state["messages"]
         query = state["current_input"]
@@ -411,6 +440,11 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         # Case 1: All have insufficient info -> Go to web search
         if not sufficient_results:
             print("KG, RAG, and MedlinePlus all have insufficient info -> Routing to Web Search")
+            emit_stream_event("agent", {
+                "agent": "WEB_SEARCH_PROCESSOR_AGENT",
+                "message": "KG/RAG did not have enough information. Switching to web search...",
+                "transition": True,
+            })
             return {
                 **state,
                 "output": AIMessage(content=""),
@@ -428,6 +462,20 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         )
         chosen_agent = chosen_result.get("agent_name", "PARALLEL_KG_RAG_AGENT")
         print(f"Using best sufficient result from {chosen_agent}")
+        emit_stream_event("agent", {
+            "agent": chosen_agent,
+            "message": get_agent_status_message(chosen_agent),
+            "transition": True,
+        })
+
+        if current_stream_callback.get() is not None:
+            print(f"Streaming final response from {chosen_agent}")
+            if chosen_agent == "KG_AGENT":
+                chosen_result = run_kg_only()
+            elif chosen_agent == "RAG_AGENT":
+                chosen_result = run_rag_only()
+            elif chosen_agent == "MEDLINEPLUS_AGENT":
+                chosen_result = run_medlineplus_only()
 
         return {
             **state,
@@ -444,6 +492,11 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
     # Web Search Processor Node
     def run_web_search_processor_agent(state: AgentState) -> AgentState:
         print(f"Selected agent: WEB_SEARCH_PROCESSOR_AGENT")
+        emit_stream_event("agent", {
+            "agent": "WEB_SEARCH_PROCESSOR_AGENT",
+            "message": "Searching the web for latest medical information...",
+            "transition": True,
+        })
         
         messages = state["messages"]
         web_search_context_limit = config.web_search.context_limit

@@ -1,0 +1,395 @@
+{
+    "response": "Chào bạn, đau chân là một vấn đề phổ biến có thể xuất phát từ nhiều nguyên nhân khác nhau liên quan đến xương, cơ, gân, dây chằng, mạch máu hoặc các bệnh lý tiềm ẩn.
+
+Dưới đây là một số thông tin tổng quan từ MedlinePlus:
+
+*   **Nguyên nhân phổ biến:** Đau chân có thể do chấn thương (bong gân, căng cơ, gãy xương), đi giày không phù hợp, thừa cân, hoặc các bệnh lý như viêm khớp, bệnh mạch máu (suy tĩnh mạch, huyết khối tĩnh mạch sâu), hoặc các vấn đề về thần kinh [3], [6].
+*   **Đau do thần kinh:** Nếu bạn cảm thấy đau, tê, ngứa ran hoặc yếu chân, đó có thể là dấu hiệu của bệnh tiểu đường hoặc đau thần kinh tọa (thường bắt đầu từ lưng dưới lan xuống chân) [1], [4], [5].
+*   **Các vấn đề cụ thể:** Đau có thể tập trung ở gót chân (viêm cân gan chân, viêm gân), ngón chân (gout, móng chọc thịt, biến dạng ngón chân) hoặc do các vấn đề về dáng đi [2], [5], [8].
+
+**Lời khuyên:**
+Vì đau chân có thể là dấu hiệu của nhiều tình trạng sức khỏe khác nhau, tôi không thể chẩn đoán chính xác nguyên nhân cho bạn. Bạn nên theo dõi các triệu chứng của mình và **trao đổi trực tiếp với bác sĩ** để được thăm khám, chẩn đoán và có phương pháp điều trị phù hợp.
+
+Hãy đi khám ngay nếu bạn gặp các dấu hiệu nghiêm trọng như: vết thương không lành, da đỏ/nóng/đau, hoặc các dấu hiệu nhiễm trùng [4].
+
+Nguồn: [1], [2], [3], [4], [5], [6], [8]",
+    "sources": [
+        {
+            "title": "Foot Health",
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/foothealth.html"
+        },
+        {
+            "title": "Heel Injuries and Disorders",
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/heelinjuriesanddisorders.html"
+        },
+        {
+            "title": "Leg Injuries and Disorders",
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/leginjuriesanddisorders.html"
+        },
+        {
+            "title": "Diabetic Foot",
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/diabeticfoot.html"
+        },
+        {
+            "title": "Sciatica",
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/sciatica.html"
+        },
+        {
+            "title": "Walking Problems",
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/walkingproblems.html"
+        },
+        {
+            "title": "Foot Injuries and Disorders",
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/footinjuriesanddisorders.html"
+        },
+        {
+            "title": "Toe Injuries and Disorders",
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/toeinjuriesanddisorders.html"
+        }
+    ],
+    "confidence": 0.45709464,
+    "retrieval": {
+        "query": "tôi đang bị đau chân, bạn có thể tư vấn chi tiết cho vấn đề của tôi được không ?",
+        "intent": "general",
+        "linked_entities": [],
+        "expanded_relations": [],
+        "documents": [
+            {
+                "id": "topic:1327:summary",
+                "content": "Health topic: Foot Health
+Also called: Foot Health, Shoes
+Groups: Bones, Joints and Muscles
+Have you been taking good care of your feet? Learn how to select the right footwear and how to practice healthy foot care on the Foot Health topic.
+Each step you take involves a complex network of bones, muscles, tendons, and ligaments. This, combined with all of the weight they carry, explains why feet can have problems. To keep your feet healthy: Examine your feet regularly Wear comfortable shoes that fit Wash your feet daily with soap and lukewarm water Trim your toenails straight across and not too short Your foot health can be a clue to your overall health. For example, joint stiffness could mean arthritis. Tingling or numbness could be a sign of diabetes. Swelling might indicate kidney disease, heart disease, or high blood pressure. Good foot care and regular foot checks are an important part of your health care. If you have foot problems, be sure to talk to your doctor. NIH: National Institute on Aging",
+                "score": 0.45709464,
+                "source": "MedlinePlus",
+                "source_path": "https://medlineplus.gov/foothealth.html",
+                "title": "Foot Health",
+                "doc_type": "health_topic_summary",
+                "entity_id": "1327",
+                "entity_type": "health_topic",
+                "section_type": "summary",
+                "metadata": {
+                    "entity_id": "1327",
+                    "entity_type": "health_topic",
+                    "title": "Foot Health",
+                    "aliases": [
+                        "Foot Health",
+                        "Shoes"
+                    ],
+                    "groups": [
+                        "Bones, Joints and Muscles"
+                    ],
+                    "section_type": "summary",
+                    "related_topic_ids": [
+                        "151",
+                        "1341",
+                        "508",
+                        "3650",
+                        "532",
+                        "3648"
+                    ],
+                    "related_lab_test_ids": [],
+                    "source_url": "https://medlineplus.gov/foothealth.html",
+                    "doc_type": "health_topic_summary"
+                }
+            },
+            {
+                "id": "topic:3650:summary",
+                "content": "Health topic: Heel Injuries and Disorders
+Also called: Heel Injuries and Disorders, Achilles Tendon Injuries, Plantar Fasciitis
+Groups: Bones, Joints and Muscles, Injuries and Wounds
+Heel problems are common and painful. What causes heel pain? Read more about causes and conditions that can result from heel problems.
+Heel problems are common and can be painful. Often, they result from too much stress on your heel bone and the tissues that surround it. That stress can come from: Injuries Bruises that you get walking, running or jumping Wearing shoes that don't fit or aren't made well Being overweight These can lead to tendinitis, bursitis, and fasciitis, which are all types of inflammation of the tissues that surround your heel. Over time the stress can cause bone spurs and deformities. Certain diseases, such as rheumatoid arthritis and gout, can also lead to heel problems. Treatments for heel problems might include rest, medicines, exercises, taping, and special shoes. Surgery is rarely needed.",
+                "score": 0.43884313,
+                "source": "MedlinePlus",
+                "source_path": "https://medlineplus.gov/heelinjuriesanddisorders.html",
+                "title": "Heel Injuries and Disorders",
+                "doc_type": "health_topic_summary",
+                "entity_id": "3650",
+                "entity_type": "health_topic",
+                "section_type": "summary",
+                "metadata": {
+                    "entity_id": "3650",
+                    "entity_type": "health_topic",
+                    "title": "Heel Injuries and Disorders",
+                    "aliases": [
+                        "Heel Injuries and Disorders",
+                        "Achilles Tendon Injuries",
+                        "Plantar Fasciitis"
+                    ],
+                    "groups": [
+                        "Bones, Joints and Muscles",
+                        "Injuries and Wounds"
+                    ],
+                    "section_type": "summary",
+                    "related_topic_ids": [
+                        "1327",
+                        "508"
+                    ],
+                    "related_lab_test_ids": [],
+                    "source_url": "https://medlineplus.gov/heelinjuriesanddisorders.html",
+                    "doc_type": "health_topic_summary"
+                }
+            },
+            {
+                "id": "topic:509:summary",
+                "content": "Health topic: Leg Injuries and Disorders
+Also called: Leg Injuries and Disorders, Claudication, Intermittent Claudication, Leg Cramps, Ulcer, Leg
+Groups: Bones, Joints and Muscles, Injuries and Wounds
+Leg injuries and leg disorders can affect the whole leg or just one part. Read about common leg injuries such as sprains, strains, and fractures.
+Your legs are made up of bones, blood vessels, muscles, and other connective tissue. They are important for motion and standing. Playing sports, running, falling, or having an accident can damage your legs. Common leg injuries include sprains and strains , joint dislocations , and fractures (broken bones). These injuries can affect the entire leg, or just the foot , ankle , knee , or hip . Certain diseases also lead to leg problems. For example, knee osteoarthritis, common in older people, can cause pain and limited motion. Problems in your veins in your legs can lead to varicose veins or deep vein thrombosis .",
+                "score": 0.4301026,
+                "source": "MedlinePlus",
+                "source_path": "https://medlineplus.gov/leginjuriesanddisorders.html",
+                "title": "Leg Injuries and Disorders",
+                "doc_type": "health_topic_summary",
+                "entity_id": "509",
+                "entity_type": "health_topic",
+                "section_type": "summary",
+                "metadata": {
+                    "entity_id": "509",
+                    "entity_type": "health_topic",
+                    "title": "Leg Injuries and Disorders",
+                    "aliases": [
+                        "Leg Injuries and Disorders",
+                        "Claudication",
+                        "Intermittent Claudication",
+                        "Leg Cramps",
+                        "Ulcer, Leg"
+                    ],
+                    "groups": [
+                        "Bones, Joints and Muscles",
+                        "Injuries and Wounds"
+                    ],
+                    "section_type": "summary",
+                    "related_topic_ids": [
+                        "1612",
+                        "1683",
+                        "508",
+                        "287",
+                        "304",
+                        "384",
+                        "540",
+                        "533",
+                        "5673"
+                    ],
+                    "related_lab_test_ids": [],
+                    "source_url": "https://medlineplus.gov/leginjuriesanddisorders.html",
+                    "doc_type": "health_topic_summary"
+                }
+            },
+            {
+                "id": "topic:1341:summary",
+                "content": "Health topic: Diabetic Foot
+Also called: Diabetic Foot
+Groups: Blood, Heart and Circulation, Bones, Joints and Muscles, Brain and Nerves, Endocrine System, Diabetes Mellitus
+Over time, high blood sugar from diabetes can damage your nerves or blood vessels. This can lead to foot problems. Know how to care for diabetic feet.
+What is diabetes? Diabetes is a disease in which your blood glucose, or blood sugar , levels are too high. Glucose comes from foods you eat. The cells of your body need glucose for energy. A hormone called insulin helps the glucose get into your cells. With type 1 diabetes , your body doesn't make insulin. With type 2 diabetes , your body doesn't make or use insulin well. Without enough insulin, glucose can't get into your cells as quickly as usual. The glucose builds up in your blood and causes high blood sugar levels. How does diabetes cause foot problems? Foot problems are common in people with diabetes. They can happen over time when high blood sugar damages the nerves and blood vessels in the feet. The nerve damage, called diabetic neuropathy , can cause numbness, tingling, pain, or a loss of feeling in your feet. If you can't feel pain, you may not know when you have a cut, blister , or ulcer (open sore) on your foot. A wound like that could get infected. The infection may not heal well because the damaged blood vessels can cause poor blood flow in your feet. Having an infection and poor blood flow can lead to gangrene . That means the muscle, skin, and other tissues start to die. If you have gangrene or a foot ulcer that does not get better with treatment, you may need an amputation . This is a surgery to cut off your damaged toe, foot, or part of your leg. It may prevent a bad infection from spreading and could save your life. But there's a lot you can do to prevent a foot wound from becoming a major health problem. How can I protect my feet if I have diabetes? The best way to protect your feet is by controlling your blood sugar levels every day. This will help keep nerve and blood vessel damage from getting worse. The next step is to keep the skin of your feet healthy. Good foot care for people with diabetes includes: Checking your feet every day. Look for cuts, redness, and other changes in the skin and toenails, including warts or other spots that your shoes could rub. Make sure to check the bottoms of your feet too. Washing your feet every day. Use warm water and soap. Don't soak your feet because that can dry out your skin. After you dry your feet, you can use talcum powder or cornstarch between your toes. They soak up moisture that can cause infection. If you use lotion, don't apply it between your toes. Asking your doctor how to remove corns and calluses safely. Thick skin on your feet can rub and lead to sores. But removing it the wrong way could damage your skin. So you don't want to cut the skin or use medicated pads or liquid removers. Trimming your toenails straight across with a clipper. If it's hard for you to trim your own toenails, or if they're thick or curve into the skin, have a podiatrist (foot doctor) do it for you. Always wearing well-fitting shoes and socks or slippers to protect your feet when walking. You don't want to walk barefoot, even indoors. And be sure your shoes are smooth inside. A seam or pebble could rub your skin raw. Protecting your feet from heat and cold. Use sunscreen on exposed skin and don't walk barefoot at the beach. In cold weather, wear warm socks instead of warming your feet near a heater or fireplace. Keeping the blood flowing in your feet. Put your feet up when you're sitting. Wiggle your toes and circle your feet throughout the day. Don't wear tight socks. And get plenty of activity that's not too hard on the feet, such as walking. Getting your feet checked at your health care visits. Even if you haven't noticed a problem, it's good to have your health care provider look at your feet. When should I see my health care provider about diabetic foot problems? Serious foot problems can develop quickly. See your health care provider right away if you notice: A cut, blister, or bruise on your feet that doesn't start to heal in a few days Red, warm, or painful skin on your feet A callus with dried blood inside A foot infection that becomes black and smells bad that could be gangrene Remember, controlling your blood sugar and caring for your feet every day are the best steps you can take to prevent serious diabetic foot problems. NIH: National Institute of Diabetes and Digestive and Kidney Diseases",
+                "score": 0.43000245,
+                "source": "MedlinePlus",
+                "source_path": "https://medlineplus.gov/diabeticfoot.html",
+                "title": "Diabetic Foot",
+                "doc_type": "health_topic_summary",
+                "entity_id": "1341",
+                "entity_type": "health_topic",
+                "section_type": "summary",
+                "metadata": {
+                    "entity_id": "1341",
+                    "entity_type": "health_topic",
+                    "title": "Diabetic Foot",
+                    "aliases": [
+                        "Diabetic Foot"
+                    ],
+                    "groups": [
+                        "Blood, Heart and Circulation",
+                        "Bones, Joints and Muscles",
+                        "Brain and Nerves",
+                        "Endocrine System",
+                        "Diabetes Mellitus"
+                    ],
+                    "section_type": "summary",
+                    "related_topic_ids": [
+                        "4",
+                        "4567",
+                        "1465",
+                        "1327",
+                        "508"
+                    ],
+                    "related_lab_test_ids": [],
+                    "source_url": "https://medlineplus.gov/diabeticfoot.html",
+                    "doc_type": "health_topic_summary"
+                }
+            },
+            {
+                "id": "topic:1532:summary",
+                "content": "Health topic: Sciatica
+Also called: Sciatica
+Groups: Bones, Joints and Muscles, Brain and Nerves, Symptoms
+Sciatica is a symptom of a problem with the sciatic nerve causing pain, weakness, numbness, or tingling. Read about causes, tests, and treatment.
+Sciatica is a symptom of a problem with the sciatic nerve, the largest nerve in the body. It controls muscles in the back of your knee and lower leg and provides feeling to the back of your thigh, part of your lower leg, and the sole of your foot. When you have sciatica, you have pain, weakness, numbness, or tingling. It can start in the lower back and extend down your leg to your calf, foot, or even your toes. It's usually on only one side of your body. Causes of sciatica include: A ruptured intervertebral disk Narrowing of the spinal canal that puts pressure on the nerve, called spinal stenosis An injury such as a pelvic fracture. In many cases no cause can be found. Sometimes sciatica goes away on its own. Treatment, if needed, depends on the cause of the problem. It may include exercises, medicines, and surgery.",
+                "score": 0.42968944,
+                "source": "MedlinePlus",
+                "source_path": "https://medlineplus.gov/sciatica.html",
+                "title": "Sciatica",
+                "doc_type": "health_topic_summary",
+                "entity_id": "1532",
+                "entity_type": "health_topic",
+                "section_type": "summary",
+                "metadata": {
+                    "entity_id": "1532",
+                    "entity_type": "health_topic",
+                    "title": "Sciatica",
+                    "aliases": [
+                        "Sciatica"
+                    ],
+                    "groups": [
+                        "Bones, Joints and Muscles",
+                        "Brain and Nerves",
+                        "Symptoms"
+                    ],
+                    "section_type": "summary",
+                    "related_topic_ids": [
+                        "157",
+                        "284",
+                        "1095"
+                    ],
+                    "related_lab_test_ids": [],
+                    "source_url": "https://medlineplus.gov/sciatica.html",
+                    "doc_type": "health_topic_summary"
+                }
+            },
+            {
+                "id": "topic:5673:summary",
+                "content": "Health topic: Walking Problems
+Also called: Walking Problems, Gait Abnormalities
+Groups: Bones, Joints and Muscles, Brain and Nerves
+The term \"gait\" refers to how a person walks. An abnormal gait might be caused by an underlying physical condition, disease or injury. Read more here.
+What are walking problems? If you are like most people, you walk thousands of steps each day. You walk to do your daily activities, get around, and exercise. It's something that you usually don't think about. But for those people who have a problem with walking, daily life can be more difficult. Walking problems may cause you to: Walk with your head and neck bent over Drag, drop, or shuffle your feet Have irregular, jerky movements when walking Take smaller steps Waddle Walk more slowly or stiffly What causes walking problems? The pattern of how you walk is called your gait. Many different diseases and conditions can affect your gait and lead to problems with walking. They include: Abnormal development of the muscles or bones of your legs or feet Arthritis of the hips, knees, ankles, or feet Cerebellar disorders , which are disorders of the area of the brain that controls coordination and balance Foot problems, including corns and calluses , sores, and warts Infections Injuries, such as fractures (broken bones), sprains , and tendinitis Movement disorders , such as Parkinson's disease Neurologic diseases , including multiple sclerosis and peripheral nerve disorders Vision problems How is the cause of a walking problem diagnosed? To make a diagnosis, your health care provider will ask about your medical history and do a physical exam. This will include checking your bones and muscles and doing a neurological exam . In some cases, you may have other tests, such as lab or imaging tests . What are the treatments for walking problems? Treatment of walking problems depends on the cause. If the cause is a medical condition, treating that condition often improves your walking. Some common types of treatments for walking problems may include: Medicines Mobility aids such as walkers and canes Physical therapy Special shoes, insoles, splints, or braces Surgery",
+                "score": 0.42416137,
+                "source": "MedlinePlus",
+                "source_path": "https://medlineplus.gov/walkingproblems.html",
+                "title": "Walking Problems",
+                "doc_type": "health_topic_summary",
+                "entity_id": "5673",
+                "entity_type": "health_topic",
+                "section_type": "summary",
+                "metadata": {
+                    "entity_id": "5673",
+                    "entity_type": "health_topic",
+                    "title": "Walking Problems",
+                    "aliases": [
+                        "Walking Problems",
+                        "Gait Abnormalities"
+                    ],
+                    "groups": [
+                        "Bones, Joints and Muscles",
+                        "Brain and Nerves"
+                    ],
+                    "section_type": "summary",
+                    "related_topic_ids": [
+                        "1612",
+                        "5953",
+                        "1661",
+                        "508",
+                        "287",
+                        "304",
+                        "509",
+                        "520"
+                    ],
+                    "related_lab_test_ids": [],
+                    "source_url": "https://medlineplus.gov/walkingproblems.html",
+                    "doc_type": "health_topic_summary"
+                }
+            },
+            {
+                "id": "health_topic:508:relations",
+                "content": "Foot Injuries and Disorders related_from_topic Ankle Injuries and Disorders; Foot Injuries and Disorders related_from_topic Diabetic Foot; Foot Injuries and Disorders related_from_topic Foot Health; Foot Injuries and Disorders related_to_topic Ankle Injuries and Disorders; Foot Injuries and Disorders related_to_topic Diabetic Foot; Foot Injuries and Disorders related_to_topic Foot Health; Foot Injuries and Disorders related_to_topic Heel Injuries and Disorders; Foot Injuries and Disorders related_to_topic Leg Injuries and Disorders; Foot Injuries and Disorders related_to_topic Toe Injuries and Disorders; Foot Injuries and Disorders belongs_to_group Bones, Joints and Muscles; Foot Injuries and Disorders belongs_to_group Injuries and Wounds; Foot Injuries and Disorders mapped_to_mesh_heading Foot Diseases; Foot Injuries and Disorders mapped_to_mesh_heading Foot Injuries; Foot Injuries and Disorders related_from_topic Fractures; Foot Injuries and Disorders related_from_topic Heel Injuries and Disorders; Foot Injuries and Disorders related_from_topic Leg Injuries and Disorders; Foot Injuries and Disorders related_from_topic Sports Injuries; Foot Injuries and Disorders related_from_topic Toe Injuries and Disorders; Foot Injuries and Disorders related_from_topic Walking Problems",
+                "score": 0.4228711,
+                "source": "MedlinePlus",
+                "source_path": "https://medlineplus.gov/footinjuriesanddisorders.html",
+                "title": "Foot Injuries and Disorders",
+                "doc_type": "relation_summary",
+                "entity_id": "508",
+                "entity_type": "health_topic",
+                "section_type": "relations",
+                "metadata": {
+                    "entity_id": "508",
+                    "entity_type": "health_topic",
+                    "title": "Foot Injuries and Disorders",
+                    "aliases": [
+                        "Foot Injuries and Disorders",
+                        "Morton's Neuroma"
+                    ],
+                    "groups": [
+                        "Bones, Joints and Muscles",
+                        "Injuries and Wounds"
+                    ],
+                    "section_type": "relations",
+                    "related_topic_ids": [
+                        "1612",
+                        "1341",
+                        "1327",
+                        "3650",
+                        "509",
+                        "3648",
+                        "257",
+                        "620",
+                        "5673"
+                    ],
+                    "related_lab_test_ids": [],
+                    "source_url": "https://medlineplus.gov/footinjuriesanddisorders.html",
+                    "doc_type": "relation_summary"
+                }
+            },
+            {
+                "id": "topic:3648:summary",
+                "content": "Health topic: Toe Injuries and Disorders
+Also called: Toe Injuries and Disorders, Bunions, Hammer Toe
+Groups: Bones, Joints and Muscles, Injuries and Wounds
+Toe injuries and disorders include turf toe, bunions, sprains, fractures, and ingrown toenails. Read up on what causes toe pain and what can treat it.
+Fourteen of the 26 bones in your feet are in your toes. The toes, particularly your big toe, help you move and keep your balance. Playing sports, running, stubbing your toe, and dropping something on your foot can damage your toes. Wearing shoes that are too loose or too tight can also cause toe problems. Certain diseases, such as severe arthritis, can cause toe problems and pain. Gout often causes pain in the big toe. Common toe problems include : Corns and bunions Ingrown toenails Sprains and dislocations Fractures (broken bones) Treatments for toe injuries and disorders vary. They might include shoe inserts or special shoes, padding, taping, medicines, rest, and in severe cases, surgery.",
+                "score": 0.41760695,
+                "source": "MedlinePlus",
+                "source_path": "https://medlineplus.gov/toeinjuriesanddisorders.html",
+                "title": "Toe Injuries and Disorders",
+                "doc_type": "health_topic_summary",
+                "entity_id": "3648",
+                "entity_type": "health_topic",
+                "section_type": "summary",
+                "metadata": {
+                    "entity_id": "3648",
+                    "entity_type": "health_topic",
+                    "title": "Toe Injuries and Disorders",
+                    "aliases": [
+                        "Toe Injuries and Disorders",
+                        "Bunions",
+                        "Hammer Toe"
+                    ],
+                    "groups": [
+                        "Bones, Joints and Muscles",
+                        "Injuries and Wounds"
+                    ],
+                    "section_type": "summary",
+                    "related_topic_ids": [
+                        "5833",
+                        "1327",
+                        "508"
+                    ],
+                    "related_lab_test_ids": [],
+                    "source_url": "https://medlineplus.gov/toeinjuriesanddisorders.html",
+                    "doc_type": "health_topic_summary"
+                }
+            }
+        ]
+    },
+    "processing_time": 3.665114641189575
+}
