@@ -105,12 +105,12 @@ async def list_patient_diseases(patient_id: Optional[str] = None):
 @app.get("/")
 async def root(request: Request):
     """Render the dashboard interface"""
-    return templates.TemplateResponse("dashboard.html", {"request": request})
+    return templates.TemplateResponse(request, "dashboard.html")
 
 @app.get("/chat")
 async def chat_interface(request: Request):
     """Render the AI chat interface"""
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request, "index.html")
 
 @app.post("/api/patient-intake")
 async def patient_intake(request: Request):

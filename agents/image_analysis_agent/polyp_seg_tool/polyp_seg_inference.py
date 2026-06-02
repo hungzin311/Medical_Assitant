@@ -22,7 +22,7 @@ class PolypSegmentation:
         """Load the trained DeepLabV3+ model."""
         model = smp.DeepLabV3Plus(
             encoder_name="resnet50",        
-            encoder_weights="imagenet",     
+            encoder_weights=None,
             in_channels=3,                  
             classes=3     
         )

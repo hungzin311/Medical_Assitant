@@ -1,6 +1,9 @@
 from py2neo import Graph, Node, Relationship
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import asyncio
+import inspect
+import os
 
 from pathlib import Path
 import sys
@@ -8,8 +11,14 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from utils.llm_config import *
 
-URI = "neo4j://127.0.0.1:7687"
-AUTH = ("neo4j", "Hung31102004")
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+CSV_PATH = PROJECT_ROOT / "data" / "csv" / "data_translated.csv"
+
+URI = os.getenv("NEO4J_URI", "neo4j://127.0.0.1:7687")
+AUTH = (
+    os.getenv("NEO4J_USER") or os.getenv("NEO4J_USERNAME", "neo4j"),
+    os.getenv("NEO4J_PASSWORD", "Hung31102004"),
+)
 
 embedding_model = get_embedding()
 
@@ -102,8 +111,13 @@ def create_disease_embedding(name, description):
             print(f"Empty text after truncation for disease: {name}")
             return None
             
-        # Create embedding using Vietnamese_Embedding model
-        embedding = embedding_model.aembed_query(combined_text)
+        # Create embedding using Vietnamese_Embedding model.
+        if hasattr(embedding_model, "embed_query"):
+            embedding = embedding_model.embed_query(combined_text)
+        else:
+            embedding = embedding_model.aembed_query(combined_text)
+            if inspect.isawaitable(embedding):
+                embedding = asyncio.run(embedding)
         
         # Validate embedding
         if embedding and len(embedding) > 0:
@@ -302,7 +316,7 @@ if __name__ == "__main__":
     
     clear_graph(graph)
     create_unique_constraints(graph)
-    df_cn = pd.read_csv(r'data_translated.csv', encoding="utf-8")    
+    df_cn = pd.read_csv(CSV_PATH, encoding="utf-8")
     num_workers = 8    
     # Process each row in parallel using ThreadPoolExecutor
     with ThreadPoolExecutor(max_workers=num_workers) as executor:

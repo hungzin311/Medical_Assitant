@@ -18,7 +18,7 @@ class MedicalRAG:
         self.reranker = Reranker(config)
         self.query_expander = QueryExpander(config)
         self.response_generator = ResponseGenerator(config)
-        self.vectorstore = self.vector_store.load_vectorstore()
+        self.vectorstore = self.vector_store.load_vectorstore(config.rag.collection_name)
     
     def ingest_directory(self, directory_path: str) -> Dict[str, Any]:
         start_time = time.time()
