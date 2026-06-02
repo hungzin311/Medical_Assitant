@@ -254,12 +254,16 @@ async def upload_image(
             "agent": response_data["agent_name"]
         }
         
-        if response_data["agent_name"] == "POLYP_SEGMENTATION_AGENT, HUMAN_VALIDATION":
-            segmentation_path = os.path.join(POLYP_SEGMENTATION_OUTPUT, "polyp_seg_image_output.jpg")
+        if response_data["agent_name"].startswith("POLYP_SEGMENTATION_AGENT"):
+            segmentation_path = response_data.get("polyp_segmentation_path") or os.path.join(POLYP_SEGMENTATION_OUTPUT, "polyp_seg_image_output.jpg")
             if os.path.exists(segmentation_path):
-                result["result_image"] = f"/uploads/polyp_seg_output/polyp_seg_image_output.jpg"
+                result["result_image"] = f"/uploads/polyp_seg_output/{os.path.basename(segmentation_path)}"
             else:
                 print("Polyp Segmentation Output path does not exist.")
+        elif response_data["agent_name"].startswith("POLYP_VQA_AGENT"):
+            segmentation_path = response_data.get("polyp_segmentation_path")
+            if segmentation_path and os.path.exists(segmentation_path):
+                result["result_image"] = f"/uploads/polyp_seg_output/{os.path.basename(segmentation_path)}"
                 
         return result
     except Exception as e:

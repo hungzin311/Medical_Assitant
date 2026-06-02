@@ -35,6 +35,7 @@ def get_agent_status_message(agent_name: str) -> str:
         "MEDLINEPLUS_AGENT": "Searching MedlinePlus knowledge base...",
         "WEB_SEARCH_PROCESSOR_AGENT": "Searching the web for latest medical information...",
         "POLYP_SEGMENTATION_AGENT": "Analyzing polyp image...",
+        "POLYP_VQA_AGENT": "Answering your polyp image question...",
         "GENERAL_MEDICAL_IMAGE_AGENT": "Analyzing medical image...",
     }
     return messages.get(agent_name, "Processing your medical query...")
@@ -51,6 +52,7 @@ class AgentState(MessagesState):
     retrieval_confidence: float  # Confidence in retrieval (for RAG agent)
     bypass_routing: bool  # Flag to bypass agent routing for guardrails
     patient_id: Optional[str]  # Patient ID for KG and patient database queries
+    polyp_segmentation_path: Optional[str]  # Segmentation overlay path for polyp VQA
 
 
 class AgentDecision(TypedDict):
@@ -80,6 +82,20 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
     rag_agent = MedicalRAG(config)
 
     medlineplus_agent = MedlinePlusAgent(config)
+
+    def is_polyp_segmentation_request(input_text: str) -> bool:
+        input_text = (input_text or "").lower()
+        segmentation_keywords = [
+            "phân vùng",
+            "phan vung",
+            "segment",
+            "segmentation",
+            "mask",
+            "overlay",
+            "vùng polyp",
+            "vung polyp",
+        ]
+        return any(keyword in input_text for keyword in segmentation_keywords)
     
     def analyze_input(state: AgentState) -> AgentState:
         """Analyze the input to detect images and determine input type."""
@@ -129,6 +145,23 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         
         # Prepare input for decision model
         input_text = current_input if isinstance(current_input, str) else current_input.get("text", "")
+
+        if has_image and image_type == "POLYP SEGMENTATION":
+            selected_agent = (
+                "POLYP_SEGMENTATION_AGENT"
+                if not input_text.strip() or is_polyp_segmentation_request(input_text)
+                else "POLYP_VQA_AGENT"
+            )
+            emit_stream_event("agent", {
+                "agent": selected_agent,
+                "message": get_agent_status_message(selected_agent),
+                "transition": True,
+            })
+            updated_state = {
+                **state,
+                "agent_name": selected_agent,
+            }
+            return {"agent_state": updated_state, "next": selected_agent}
         
         # Create context from recent conversation history (last 3 messages)
         recent_context = ""
@@ -572,11 +605,12 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
 
         # Segment the polyp
         try:
-            image_analyzer.segment_polyp(image_path)
+            segmentation_path = image_analyzer.segment_polyp(image_path, config.medical_cv.polyp_seg_output_path)
             segmentation_success = True
         except Exception as e:
             print(f"Error in polyp segmentation: {e}")
             segmentation_success = False
+            segmentation_path = None
 
         if segmentation_success:
             # Create a diagnosis result for the polyp segmentation
@@ -609,7 +643,49 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
             **state,
             "output": response,
             "needs_human_validation": True,  # Medical diagnosis always needs validation
-            "agent_name": "POLYP_SEGMENTATION_AGENT"
+            "agent_name": "POLYP_SEGMENTATION_AGENT",
+            "polyp_segmentation_path": segmentation_path
+        }
+
+    def run_polyp_vqa_agent(state: AgentState) -> AgentState:
+        print(f"Selected agent: POLYP_VQA_AGENT")
+        emit_stream_event("agent", {
+            "agent": "POLYP_VQA_AGENT",
+            "message": "Answering your polyp image question...",
+            "transition": False,
+        })
+
+        current_input = state["current_input"]
+        image_path = current_input.get("image", None)
+        user_query = current_input.get("text", "") if isinstance(current_input, dict) else ""
+
+        try:
+            segmentation_path = image_analyzer.segment_polyp(image_path)
+            vqa_result = image_analyzer.answer_polyp_vqa(
+                image_path=image_path,
+                segmentation_image_path=segmentation_path,
+                user_query=user_query,
+            )
+        except Exception as e:
+            print(f"Error in polyp VQA agent: {e}")
+            segmentation_path = None
+            vqa_result = {
+                "success": False,
+                "answer": "Tôi đã gặp lỗi khi phân tích VQA polyp. Vui lòng thử lại hoặc tham khảo bác sĩ chuyên khoa.",
+                "error": str(e),
+            }
+
+        if vqa_result["success"]:
+            response = AIMessage(content=vqa_result["answer"])
+        else:
+            response = AIMessage(content=vqa_result["answer"])
+
+        return {
+            **state,
+            "output": response,
+            "needs_human_validation": True,
+            "agent_name": "POLYP_VQA_AGENT",
+            "polyp_segmentation_path": segmentation_path
         }
     
     def handle_human_validation(state: AgentState) -> Dict:
@@ -693,6 +769,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
     workflow.add_node('PARALLEL_KG_RAG_AGENT', run_kg_rag_parallel)
     workflow.add_node("WEB_SEARCH_PROCESSOR_AGENT", run_web_search_processor_agent)
     workflow.add_node("POLYP_SEGMENTATION_AGENT", run_polyp_segmentation_agent)
+    workflow.add_node("POLYP_VQA_AGENT", run_polyp_vqa_agent)
     workflow.add_node("GENERAL_MEDICAL_IMAGE_AGENT", run_general_medical_image_agent)
     workflow.add_node("check_validation", handle_human_validation)
     workflow.add_node("human_validation", perform_human_validation)
@@ -717,6 +794,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
             "PARALLEL_KG_RAG_AGENT": "PARALLEL_KG_RAG_AGENT",
             "WEB_SEARCH_PROCESSOR_AGENT": "WEB_SEARCH_PROCESSOR_AGENT",
             "POLYP_SEGMENTATION_AGENT": "POLYP_SEGMENTATION_AGENT",
+            "POLYP_VQA_AGENT": "POLYP_VQA_AGENT",
             "GENERAL_MEDICAL_IMAGE_AGENT": "GENERAL_MEDICAL_IMAGE_AGENT",
             "apply_guardrails": "apply_guardrails"  
             # "needs_validation": "RAG_AGENT"
@@ -736,6 +814,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
     workflow.add_edge("PARALLEL_KG_RAG_AGENT", "check_validation")
     workflow.add_edge("WEB_SEARCH_PROCESSOR_AGENT", "check_validation")
     workflow.add_edge("POLYP_SEGMENTATION_AGENT", "check_validation")
+    workflow.add_edge("POLYP_VQA_AGENT", "check_validation")
     workflow.add_edge("GENERAL_MEDICAL_IMAGE_AGENT", "check_validation")
     workflow.add_edge("human_validation", "apply_guardrails")
     workflow.add_edge("apply_guardrails", END)
@@ -764,7 +843,9 @@ def init_agent_state() -> AgentState:
         "output": None,
         "needs_human_validation": False,
         "retrieval_confidence": 0.0,
-        "bypass_routing": False
+        "bypass_routing": False,
+        "patient_id": None,
+        "polyp_segmentation_path": None
     }
 
 

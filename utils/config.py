@@ -1,7 +1,7 @@
 import os
 import threading
 from dotenv import load_dotenv
-from utils.llm_config import get_embedding, get_gemini_llm, get_gemini_vision_llm
+from utils.llm_config import get_embedding, get_gemini_llm, get_gemini_vision_llm, get_polyp_vqa_llm
 
 load_dotenv()
 
@@ -91,9 +91,11 @@ class PatientDBConfig:
 class MedicalCVConfig:
     def __init__(self):
         self.llm = get_gemini_vision_llm(temperature=0.1) 
+        self.polyp_vqa_llm = get_polyp_vqa_llm(temperature=0.1)
         self.summarizer_llm = get_gemini_llm(temperature=0.3) 
         self.polyp_seg_model_path = "./agents/image_analysis_agent/polyp_seg_tool/models/deeplabv3_resnet50.pth"
         self.polyp_seg_output_path = "./uploads/polyp_seg_output/polyp_seg_image_output.jpg"
+        self.polyp_seg_output_dir = "./uploads/polyp_seg_output"
 
 class ValidationConfig:
     def __init__(self):
@@ -103,6 +105,7 @@ class ValidationConfig:
             "WEB_SEARCH_AGENT": False,
             "MEDLINEPLUS_AGENT": False,
             "POLYP_SEGMENTATION_AGENT": True,
+            "POLYP_VQA_AGENT": True,
             "GENERAL_MEDICAL_IMAGE_AGENT": True
         }
         self.validation_timeout = 300

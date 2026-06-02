@@ -68,6 +68,7 @@ class PolypSegmentation:
         self.process_regions(output_path)
 
         self.overlay_mask(image_path, output_path, output_path)
+        return output_path
 
     
     def overlay_mask(self, image_path, mask_path, output_path):

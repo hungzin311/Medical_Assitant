@@ -82,6 +82,24 @@ def get_gemini_vision_llm(temperature=0.2):
         streaming=True,
     )
 
+def get_polyp_vqa_llm(temperature=0.1):
+    model = os.getenv("POLYP_VQA_MODEL")
+    base_url = os.getenv("POLYP_VQA_BASE_URL")
+    api_key = os.getenv("POLYP_VQA_API_KEY", "empty")
+
+    if model and base_url:
+        client = Client(verify=False)
+        return ChatOpenAI(
+            model=model,
+            openai_api_base=base_url,
+            openai_api_key=api_key,
+            http_client=client,
+            temperature=temperature,
+            streaming=True,
+        )
+
+    return get_gemini_vision_llm(temperature=temperature)
+
 def get_graph_db():
     uri = os.getenv("NEO4J_URI")
     user = os.getenv("NEO4J_USER")

@@ -106,9 +106,9 @@ class QueryExpander:
         8. Câu văn phải đầy đủ, tự nhiên bằng tiếng Việt.
 
         ────────────────────────────────
-        NHIỆM VỤ 2 – MÔ TẢ BỆNH NHÂN
+        NHIỆM VỤ 2 - MÔ TẢ BỆNH NHÂN
         ────────────────────────────────
-        Tóm tắt thành 1–2 câu ngắn gọn, chỉ dùng thông tin có thật:
+        Tóm tắt thành 1-2 câu ngắn gọn, chỉ dùng thông tin có thật:
         - Tuổi / giới tính (nếu biết),
         - Tiền sử bệnh, tình trạng hiện tại, triệu chứng chính (bao gồm cả phủ định quan trọng nếu có).
 
