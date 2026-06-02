@@ -13,7 +13,7 @@ import time
 import json
 import base64
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request, Response, Cookie
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -24,12 +24,9 @@ from agents.agent_decision import process_query, create_agent_graph
 from utils.proxy_setting import *
 from utils.streaming import current_stream_callback
 from agents.patient_db_agent import PatientQueryEngine
-from agents.patient_db_agent.patient_form import PatientForm
 from langchain_core.callbacks import BaseCallbackHandler
 
 config = Config()
-
-DEFAULT_PATIENT_ID = "PAT_001"
 
 #Set proxy 
 set_proxy()
@@ -61,19 +58,16 @@ app.add_middleware(LargeRequestMiddleware)
 
 # Set up directories
 UPLOAD_FOLDER = "uploads/backend"
-FRONTEND_UPLOAD_FOLDER = "uploads/frontend"
 POLYP_SEGMENTATION_OUTPUT = "uploads/polyp_seg_output"
 LOGS_DIR = "logs"
 LOGS_IMAGES_DIR = "logs/images"
 LOGS_REVIEWS_DIR = "logs/reviews"
 
 # Create all required directories if they don't exist
-for directory in [UPLOAD_FOLDER, FRONTEND_UPLOAD_FOLDER, POLYP_SEGMENTATION_OUTPUT, 
-                 LOGS_DIR, LOGS_IMAGES_DIR, LOGS_REVIEWS_DIR]:
+for directory in [UPLOAD_FOLDER, POLYP_SEGMENTATION_OUTPUT, LOGS_DIR, LOGS_IMAGES_DIR, LOGS_REVIEWS_DIR]:
     os.makedirs(directory, exist_ok=True)
 
 # Mount static files directory
-app.mount("/data", StaticFiles(directory="data"), name="data")
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # Set up templates
@@ -127,104 +121,15 @@ class QueueStreamingCallback(BaseCallbackHandler):
         )
 
 
-@app.get("/api/profile")
-async def get_profile(patient_id: Optional[str] = None):
-    pid = patient_id or DEFAULT_PATIENT_ID
-    try:
-        profile = patient_query_engine.get_patient_profile(pid)
-        return {"status": "success", "patient_id": pid, "profile": profile or {}}
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
-
-
-@app.get("/api/patient/diseases")
-async def list_patient_diseases(patient_id: Optional[str] = None):
-    pid = patient_id or DEFAULT_PATIENT_ID
-    try:
-        diseases = patient_query_engine.get_patient_diseases(pid)
-        return {"status": "success", "patient_id": pid, "diseases": diseases}
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
-
-
 @app.get("/")
-async def root(request: Request):
-    """Render the dashboard interface"""
-    return templates.TemplateResponse(request, "dashboard.html")
+async def root():
+    """Redirect unused dashboard entrypoint to the chat interface."""
+    return RedirectResponse(url="/chat")
 
 @app.get("/chat")
 async def chat_interface(request: Request):
     """Render the AI chat interface"""
     return templates.TemplateResponse(request, "index.html")
-
-@app.post("/api/patient-intake")
-async def patient_intake(request: Request):
-    print("=== Patient Intake Endpoint Called ===")
-    try:
-        # Get raw JSON data first
-        raw_data = await request.json()
-
-        # Default patient id when not provided
-        if not raw_data.get('patient_id'):
-            raw_data['patient_id'] = DEFAULT_PATIENT_ID
-        # Try to validate with Pydantic model
-        try:
-            patient_data = PatientForm(**raw_data)
-            print(f"✅ Disease tracking form validated successfully for patient: {patient_data.patient_id}")
-            
-        except Exception as validation_error:
-            return JSONResponse(
-                status_code=422,
-                content={
-                    "status": "validation_error",
-                    "message": "Dữ liệu không hợp lệ",
-                    "error": str(validation_error),
-                    "received_data": raw_data
-                }
-            )
-        # Ingest patient form
-        patient_query_engine.ingest_patient_form(patient_data)
-        # Update profile diseases
-        if patient_data.primary_disease:
-            try:
-                patient_query_engine.add_diseases_to_profile(patient_data.patient_id, patient_data.primary_disease)
-            except Exception as e:
-                print(f"Failed to update profile diseases: {str(e)}")
-        
-        # Ensure patient_id present
-        if not patient_data.patient_id:
-            patient_data.patient_id = DEFAULT_PATIENT_ID
-
-        red_flags_present = {}
-        if patient_data.red_flags and isinstance(patient_data.red_flags, list):
-            for flag in patient_data.red_flags:
-                red_flags_present[flag] = True
-        
-        if red_flags_present:
-            print(f"⚠️ RED FLAGS DETECTED: {', '.join(red_flags_present)}")
-        
-        return {
-            "status": "success",
-            "message": "Thông tin theo dõi bệnh đã được ghi nhận thành công",
-            "patient_id": patient_data.patient_id,
-            "visit_type": patient_data.visit_type,
-            "disease_status": patient_data.disease_status,
-            "red_flags_detected": list(red_flags_present.keys()),
-        }
-        
-    except Exception as e:
-        print(f"Error processing patient intake: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        
-        return JSONResponse(
-            status_code=500,
-            content={
-                "status": "error",
-                "message": "Có lỗi xảy ra khi xử lý thông tin bệnh nhân",
-                "error": str(e)
-            }
-        )
 
 @app.post("/api/chat/stream")
 async def chat_stream(request: QueryRequest):

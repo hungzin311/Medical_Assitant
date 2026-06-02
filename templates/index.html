@@ -856,16 +856,23 @@
 
         // Helper function to get agent display name
         function getAgentDisplayName(agentName) {
+            if (!agentName || typeof agentName !== 'string' || !agentName.trim()) {
+                return "Medical Assistant";
+            }
+
             const agentDisplayNames = {
                 "CONVERSATION_AGENT": "Conversation Agent",
+                "PARALLEL_KG_RAG_AGENT": "Parallel KG/RAG Agent",
+                "KG_AGENT": "KG Agent",
                 "RAG_AGENT": "RAG Agent",
+                "MEDLINEPLUS_AGENT": "MedlinePlus Agent",
                 "WEB_SEARCH_PROCESSOR_AGENT": "Web Search Agent",
                 "POLYP_SEGMENTATION_AGENT": "Polyp Segmentation Agent",
                 "GENERAL_MEDICAL_IMAGE_AGENT": "General Medical Image Agent",
                 "HUMAN_VALIDATION": "Human Validation",
                 "Analyzing...": "AI Assistant",
             };
-            return agentDisplayNames[agentName] || agentName;
+            return agentDisplayNames[agentName] || agentName.replace(/_/g, ' ');
         }
 
         // Function to reset agent tracking state
@@ -1116,6 +1123,140 @@
                     </div>
                 `;
             });
+
+            async function streamTextChat(message, thinkingElement) {
+                const response = await fetch('/api/chat/stream', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        conversation_history: displayMessages.filter(msg => msg.role === 'user' || msg.role === 'assistant')
+                    }),
+                    credentials: 'include'
+                });
+
+                if (!response.ok || !response.body) {
+                    throw new Error(`Streaming request failed: ${response.status}`);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                let rawResponse = '';
+                let finalData = {
+                    status: 'success',
+                    agent: 'ASSISTANT',
+                    response: ''
+                };
+                let assistantMessageElement = null;
+                let agentNameElement = null;
+                let responseElement = null;
+
+                function ensureAssistantMessage() {
+                    if (assistantMessageElement) return;
+
+                    if (thinkingElement.parentNode) {
+                        chatBody.removeChild(thinkingElement);
+                    }
+                    currentThinkingElement = null;
+                    resetAgentTracking();
+
+                    assistantMessageElement = document.createElement('div');
+                    assistantMessageElement.className = 'message assistant-message';
+                    assistantMessageElement.innerHTML = `
+                        <div class="agent-tag">
+                            <i class="fas fa-robot"></i>
+                            <span class="stream-agent-name">${getAgentDisplayName(finalData.agent)}</span>
+                        </div>
+                        <div class="message-content">
+                            <div class="stream-response"></div>
+                        </div>
+                    `;
+                    chatBody.appendChild(assistantMessageElement);
+                    agentNameElement = assistantMessageElement.querySelector('.stream-agent-name');
+                    responseElement = assistantMessageElement.querySelector('.stream-response');
+                }
+
+                function handleSseBlock(block) {
+                    const lines = block.split('\n');
+                    let eventName = 'message';
+                    let dataText = '';
+
+                    for (const line of lines) {
+                        if (line.startsWith('event:')) {
+                            eventName = line.slice(6).trim();
+                        } else if (line.startsWith('data:')) {
+                            dataText += line.slice(5).trim();
+                        }
+                    }
+
+                    if (!dataText) return;
+                    const payload = JSON.parse(dataText);
+
+                    if (eventName === 'token') {
+                        ensureAssistantMessage();
+                        rawResponse += payload.text || '';
+                        responseElement.innerHTML = marked.parse(rawResponse, {
+                            sanitize: false,
+                            breaks: true
+                        });
+                    } else if (eventName === 'metadata') {
+                        finalData.agent = payload.agent || finalData.agent;
+                        if (agentNameElement) {
+                            agentNameElement.textContent = getAgentDisplayName(finalData.agent);
+                        }
+                    } else if (eventName === 'agent') {
+                        finalData.agent = payload.agent || finalData.agent;
+                        updateThinkingIndicator(
+                            finalData.agent,
+                            payload.message || getAgentMessage(finalData.agent),
+                            Boolean(payload.transition)
+                        );
+                    } else if (eventName === 'status') {
+                        updateThinkingIndicator(
+                            finalData.agent,
+                            payload.message || getAgentMessage(finalData.agent)
+                        );
+                    } else if (eventName === 'done') {
+                        finalData = payload;
+                        rawResponse = payload.response || rawResponse;
+                        ensureAssistantMessage();
+                        agentNameElement.textContent = getAgentDisplayName(payload.agent);
+                        responseElement.innerHTML = marked.parse(rawResponse, {
+                            sanitize: false,
+                            breaks: true
+                        });
+                    } else if (eventName === 'error') {
+                        finalData = payload;
+                        rawResponse = payload.response || 'Sorry, there was an error processing your request.';
+                        ensureAssistantMessage();
+                        agentNameElement.textContent = getAgentDisplayName(payload.agent || 'System');
+                        responseElement.innerHTML = `<p style="color: #dc3545;">${rawResponse}</p>`;
+                    }
+
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                }
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const blocks = buffer.split('\n\n');
+                    buffer = blocks.pop() || '';
+                    for (const block of blocks) {
+                        handleSseBlock(block);
+                    }
+                }
+
+                if (buffer.trim()) {
+                    handleSseBlock(buffer);
+                }
+
+                return finalData;
+            }
             
             // Handle form submission
             chatForm.addEventListener('submit', async function(e) {
@@ -1178,6 +1319,8 @@
                 try {
                     let response;
                     let data;
+                    let assistantAlreadyRendered = false;
+                    let thinkingRemoved = false;
                     
                     // First, get agent status for better UX
                     let initialAgent = null;
@@ -1204,27 +1347,20 @@
                         // Update thinking indicator for text processing
                         updateThinkingIndicator("Medical Assistant", "Processing your medical query...");
                         
-                        // Text-only query using the /api/chat endpoint with JSON
-                        response = await fetch('/api/chat', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                message: message,
-                                conversation_history: displayMessages.filter(msg => msg.role === 'user' || msg.role === 'assistant')
-                            }),
-                            credentials: 'include' // Important for cookie handling
-                        });
-                        data = await response.json();
+                        data = await streamTextChat(message, thinkingElement);
+                        assistantAlreadyRendered = true;
+                        thinkingRemoved = true;
                     }
                     
                     // Remove thinking indicator
-                    chatBody.removeChild(thinkingElement);
+                    if (!thinkingRemoved && thinkingElement.parentNode) {
+                        chatBody.removeChild(thinkingElement);
+                    }
                     currentThinkingElement = null; // Reset current thinking element
                     resetAgentTracking(); // Reset agent tracking state
                     
                     // Add response to chat
+                    if (!assistantAlreadyRendered) {
                     const assistantMessageElement = document.createElement('div');
                     assistantMessageElement.className = 'message assistant-message';
                     
@@ -1233,7 +1369,7 @@
                         <div class="agent-tag">
                             <i class="fas fa-robot"></i>
                             ${getAgentDisplayName(data.agent)}
-                            ${data.agent.includes(',') ? '<i class="fas fa-arrow-right ms-1" title="Agent transition occurred"></i>' : ''}
+                            ${data.agent && data.agent.includes(',') ? '<i class="fas fa-arrow-right ms-1" title="Agent transition occurred"></i>' : ''}
                         </div>
                         <div class="message-content">
                     `;
@@ -1320,6 +1456,7 @@
                     assistantHtml += `</div>`;
                     assistantMessageElement.innerHTML = assistantHtml;
                     chatBody.appendChild(assistantMessageElement);
+                    }
                     
                     // Store messages for display purposes only
                     displayMessages.push({
@@ -1342,7 +1479,9 @@
                 } catch (error) {
                     console.error("Error:", error);
                     // Remove thinking indicator
-                    chatBody.removeChild(thinkingElement);
+                    if (thinkingElement.parentNode) {
+                        chatBody.removeChild(thinkingElement);
+                    }
                     currentThinkingElement = null; // Reset current thinking element
                     resetAgentTracking(); // Reset agent tracking state
                     
