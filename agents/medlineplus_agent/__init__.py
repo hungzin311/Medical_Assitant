@@ -21,11 +21,7 @@ class MedlinePlusAgent:
         chat_history: Optional[List[Dict[str, str]]] = None,
         top_k: Optional[int] = None,
     ) -> Dict[str, Any]:
-        try:
-            asyncio.get_running_loop()
-        except RuntimeError:
-            return asyncio.run(self.aprocess_query(query=query, chat_history=chat_history, top_k=top_k))
-        raise RuntimeError("process_query() was called inside an event loop; use await aprocess_query() instead")
+        return self._process_query_sync(query=query, chat_history=chat_history, top_k=top_k)
 
     async def aprocess_query(
         self,
@@ -33,9 +29,17 @@ class MedlinePlusAgent:
         chat_history: Optional[List[Dict[str, str]]] = None,
         top_k: Optional[int] = None,
     ) -> Dict[str, Any]:
+        return await asyncio.to_thread(self._process_query_sync, query, chat_history, top_k)
+
+    def _process_query_sync(
+        self,
+        query: str,
+        chat_history: Optional[List[Dict[str, str]]] = None,
+        top_k: Optional[int] = None,
+    ) -> Dict[str, Any]:
         start_time = time.time()
         try:
-            retrieval_result = await self.retriever.aretrieve(query=query, top_k=top_k)
+            retrieval_result = self.retriever.retrieve(query=query, top_k=top_k)
             documents = retrieval_result["documents"]
 
             if not documents:

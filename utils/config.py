@@ -62,7 +62,7 @@ class MedlinePlusConfig:
         self.vector_name = os.getenv("MEDLINEPLUS_VECTOR_NAME", "dense")
         self.include_relations = os.getenv("MEDLINEPLUS_INCLUDE_RELATIONS", "true").lower() == "true"
         self.max_relations = int(os.getenv("MEDLINEPLUS_MAX_RELATIONS", "20"))
-        self.min_retrieval_confidence = float(os.getenv("MEDLINEPLUS_MIN_RETRIEVAL_CONFIDENCE", "0.70"))
+        self.min_retrieval_confidence = float(os.getenv("MEDLINEPLUS_MIN_RETRIEVAL_CONFIDENCE", "0.50"))
         self.context_limit = int(os.getenv("MEDLINEPLUS_CONTEXT_LIMIT", "20"))
 
 

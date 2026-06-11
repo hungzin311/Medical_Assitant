@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from qdrant_client import AsyncQdrantClient
+from qdrant_client import QdrantClient
 
 
 def _normalize(value: str) -> str:
@@ -29,28 +29,21 @@ class MedlinePlusRetriever:
         self.vector_name = config.vector_name
         self.include_relations = config.include_relations
         self.max_relations = config.max_relations
-        self.client = AsyncQdrantClient(
+        self.client = QdrantClient(
             url=config.qdrant_url,
             api_key=config.qdrant_api_key,
         )
 
     def retrieve(self, query: str, top_k: Optional[int] = None) -> Dict[str, Any]:
-        try:
-            asyncio.get_running_loop()
-        except RuntimeError:
-            return asyncio.run(self.aretrieve(query=query, top_k=top_k))
-        raise RuntimeError("retrieve() was called inside an event loop; use await aretrieve() instead")
-
-    async def aretrieve(self, query: str, top_k: Optional[int] = None) -> Dict[str, Any]:
         if not query or not query.strip():
             raise ValueError("query must not be empty")
 
         top_k = top_k or self.top_k
         linked_entities = self._link_entities_from_json(query)
         intent = self._infer_intent(query)
-        query_vector = [float(value) for value in await self.embedding_model.aembed_query(query)]
+        query_vector = [float(value) for value in self.embedding_model.embed_query(query)]
 
-        response = await self.client.query_points(
+        response = self.client.query_points(
             collection_name=self.collection_name,
             query=query_vector,
             using=self.vector_name,
@@ -76,6 +69,9 @@ class MedlinePlusRetriever:
             "expanded_relations": self._expand_relations(linked_entities) if self.include_relations else [],
             "documents": documents,
         }
+
+    async def aretrieve(self, query: str, top_k: Optional[int] = None) -> Dict[str, Any]:
+        return await asyncio.to_thread(self.retrieve, query, top_k)
 
     def _load_json(self, path_name: str) -> Any:
         path = self.data_dir / path_name
