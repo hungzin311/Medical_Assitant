@@ -1,0 +1,92 @@
+% !TeX spellcheck = en_US
+\documentclass[12pt, a4paper]{article}
+\usepackage[utf8]{vietnam}
+\usepackage[english,vietnamese]{babel}
+\usepackage{float}
+\usepackage{adjustbox}
+\setlength{\belowcaptionskip}{-10pt}
+\setlength{\intextsep}{10pt plus 2pt minus 2pt}
+\setlength{\parskip}{0.5\baselineskip}%
+\setlength{\parindent}{0pt}%
+\usepackage{ragged2e}
+\usepackage{titlesec}
+% Set the title of the current document to be produced.
+\newcommand{\doctitle}{{{\Huge \textbf{\coursetitle}}}}
+\input{includes/packages}                                 
+\input{includes/custom-commands}   
+\input{includes/metadata}
+\usepackage{tocloft}
+\setlength{\cftbeforefigskip}{0.4ex} % Điều chỉnh khoảng cách cho Danh sách Hình vẽ
+% Nếu bạn cũng muốn áp dụng cho Danh sách Bảng biểu, thêm dòng:
+\setlength{\cftbeforetabskip}{0.4ex}
+\hypersetup{hidelinks}
+
+
+
+
+\begin{document} 
+
+\titlespacing{\section}{0pt}{10pt}{6pt}       % Giảm từ 12pt (trên) và 9pt (dưới)
+\titlespacing{\subsection}{0pt}{8pt}{4pt}     % Khoảng cách cho subsection
+\titlespacing{\subsubsection}{0pt}{6pt}{3pt}  % Khoảng cách cho subsubsection
+\setlength{\parskip}{3pt} % Đặt khoảng cách giữa các đoạn văn, bạn có thể thử 0pt
+\setlength{\parindent}{15pt} % Nếu parskip là 0, bạn có thể muốn thụt đầu dòng
+
+\setlist{noitemsep, topsep=0pt, partopsep=0pt}
+\selectlanguage{vietnamese}
+    \raggedbottom
+    \clearpage
+    \pagenumbering{arabic}
+    \thispagestyle{empty}
+    %-------------------------------------------------------------
+    %-- Make the header of the document                          |
+    %------>------>------>------>------>------>------>------>--> |
+    \input{includes/document-header}
+    \selectlanguage{vietnamese}
+    %\hrule width0.3\textwidth
+    \begingroup
+    \normalsize
+    
+\justifying
+    \let\clearpage\relax
+    \tableofcontents
+    \listoftables
+    \listoffigures
+\endgroup
+\newpage
+\begin{center}
+    \Large\bfseries Preface
+\end{center}
+\vspace{0.1cm}
+
+The increasing demand for reliable, accessible, and personalized medical information motivates the development of intelligent medical assistant systems. Users often describe symptoms in incomplete or informal language, search for medical information from sources of uneven quality, and may need support across multiple interactions rather than a single isolated conversation.
+
+Recent advances in large language models, retrieval-augmented generation, knowledge graphs, multimodal models, and agent orchestration provide an opportunity to build medical AI systems that are more grounded, modular, and context-aware. However, medical AI also introduces safety challenges, including hallucination, incomplete clinical context, uncertain visual interpretation, and the need for human feedback.
+
+This report presents a Multi-Agent Medical Assistant that integrates text-based medical reasoning, medical image analysis, long-term memory, and human-in-the-loop validation. The work focuses on AI techniques and system-level reasoning rather than user interface or backend implementation details.
+
+\begin{center}
+    \Large\bfseries Summary of Content and Contributions
+\end{center}
+\vspace{0.1cm}
+
+This report studies a multi-agent medical assistant designed around four main technical pillars:
+
+\begin{itemize}
+    \item \textbf{Text-based medical reasoning:} The system combines Multi-hop Question Answering, Retrieval-Augmented Generation, Knowledge Graph reasoning, and Web Search fallback to produce more grounded and cautious medical responses.
+
+    \item \textbf{Vision-based medical reasoning:} The Vision Module supports general medical image interpretation, colonoscopy polyp segmentation, and Polyp Visual Question Answering. The Polyp VQA component uses a LoRA fine-tuned Vision-Language Model and compares original-image reasoning with segmentation-grounded reasoning.
+
+    \item \textbf{Long-term memory for agent continuity:} Mem0 is integrated as a memory layer that stores clinically useful patient-reported facts across sessions, helping agents maintain continuity while avoiding unsupported diagnostic claims.
+
+    \item \textbf{Human-in-the-loop validation:} The system includes a validation mechanism for collecting user feedback and supporting safer review of generated responses.
+\end{itemize}
+
+The main contribution of this work is an AI-centered architecture that combines specialized agents, structured and unstructured knowledge retrieval, visual grounding, long-term memory, and validation-oriented safety mechanisms for medical assistance.
+
+\newpage
+\input{content}
+
+\input{references}
+
+\end{document} 

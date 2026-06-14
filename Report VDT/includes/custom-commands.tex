@@ -1,0 +1,20 @@
+% Custom commands and settings
+
+% Define custom colors
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{darkestred}{RGB}{139,0,0}
+
+% Custom commands
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\emphasis}[1]{\textbf{\textit{#1}}}
+
+% Simple rule commands
+\newcommand{\customhrule}[1]{\rule[1.4pt]{\linewidth}{#1}}
+\newcommand{\doublerule}[1][.4pt]{
+    \noindent
+    \makebox[0pt][l]{\rule[.7ex]{\linewidth}{#1}}%
+    \rule[1pt]{\linewidth}{#1}\par
+} 

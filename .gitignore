@@ -195,5 +195,4 @@ Neo4j-5c664649-Created-2025-09-08.txt
 *.ipynb
 kg_response.json
 rag_response.json
-/Report VDT
 template_do_an_medical_assistant.md

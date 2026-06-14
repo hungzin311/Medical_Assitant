@@ -1,0 +1,14 @@
+\babel@toc {vietnamese}{}\relax 
+\babel@toc {vietnamese}{}\relax 
+\babel@toc {vietnamese}{}\relax 
+\babel@toc {vietnamese}{}\relax 
+\contentsline {figure}{\numberline {1}{\ignorespaces Overall architecture of the Multi-Agent Medical Assistant}}{13}{figure.caption.1}%
+\contentsline {figure}{\numberline {2}{\ignorespaces Detailed agent workflow and module coordination}}{14}{figure.caption.2}%
+\contentsline {figure}{\numberline {3}{\ignorespaces Text Module architecture for medical knowledge retrieval}}{17}{figure.caption.3}%
+\contentsline {figure}{\numberline {4}{\ignorespaces Parallel KG-RAG processing in the Text Module}}{18}{figure.caption.4}%
+\contentsline {figure}{\numberline {5}{\ignorespaces Medical chain-of-thought and information sufficiency flow}}{19}{figure.caption.5}%
+\contentsline {figure}{\numberline {6}{\ignorespaces Vision Module workflow for medical image analysis}}{21}{figure.caption.6}%
+\contentsline {figure}{\numberline {7}{\ignorespaces DeepLabV3+ encoder-decoder architecture with Atrous Spatial Pyramid Pooling}}{23}{figure.caption.7}%
+\contentsline {figure}{\numberline {8}{\ignorespaces Visualization of raw and post-processed polyp segmentation masks}}{26}{figure.caption.8}%
+\contentsline {figure}{\numberline {9}{\ignorespaces Medical QA dataset overview used for retrieval-oriented experiments}}{30}{figure.caption.9}%
+\contentsline {figure}{\numberline {10}{\ignorespaces Overview of the VietMedKG data source used by the Knowledge Graph Agent}}{30}{figure.caption.10}%

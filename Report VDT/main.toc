@@ -1,0 +1,81 @@
+\babel@toc {vietnamese}{}\relax 
+\babel@toc {vietnamese}{}\relax 
+\babel@toc {vietnamese}{}\relax 
+\babel@toc {vietnamese}{}\relax 
+\contentsline {section}{\numberline {1}Chapter 1. Introduction}{6}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Motivation}{6}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Problem Statement}{6}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Technical Challenges}{6}{subsection.1.3}%
+\contentsline {subsection}{\numberline {1.4}Objectives}{7}{subsection.1.4}%
+\contentsline {subsection}{\numberline {1.5}Contributions}{7}{subsection.1.5}%
+\contentsline {subsection}{\numberline {1.6}Research Questions}{7}{subsection.1.6}%
+\contentsline {subsection}{\numberline {1.7}Scope of the Thesis}{8}{subsection.1.7}%
+\contentsline {section}{\numberline {2}Chapter 2. Background and Related Work}{8}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Large Language and Vision-Language Models in Healthcare}{8}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Medical Question Answering and Multi-hop Reasoning}{9}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Retrieval-Augmented Generation for Medical QA}{9}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Medical Knowledge Graphs}{10}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}Multi-agent AI Systems}{10}{subsection.2.5}%
+\contentsline {subsection}{\numberline {2.6}LoRA and Parameter-Efficient Fine-tuning}{11}{subsection.2.6}%
+\contentsline {subsection}{\numberline {2.7}Polyp Segmentation and Neoplasm Characterization}{11}{subsection.2.7}%
+\contentsline {subsection}{\numberline {2.8}Long-Term Memory for AI Agents}{12}{subsection.2.8}%
+\contentsline {subsection}{\numberline {2.9}Human-in-the-loop for Medical AI}{13}{subsection.2.9}%
+\contentsline {section}{\numberline {3}Chapter 3. Proposed Multi-Agent Medical Assistant Architecture}{13}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Overall Architecture}{13}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}LangGraph-based Agent Orchestration}{13}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Decision Agent}{14}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Knowledge and Context Sources}{14}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.5}Safety and Human-in-the-loop Validation}{15}{subsection.3.5}%
+\contentsline {section}{\numberline {4}Chapter 4. Text Module: Medical Knowledge Retrieval and Reasoning}{15}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Role and Processing Flow of the Text Module}{15}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Conversation Agent and Multi-hop QA}{16}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Information Sufficiency Assessment}{16}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}Medical Knowledge Retrieval with RAG and Knowledge Graph}{17}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.5}Parallel Reasoning and Fallback Strategy}{19}{subsection.4.5}%
+\contentsline {subsection}{\numberline {4.6}Safe Medical Response Generation}{19}{subsection.4.6}%
+\contentsline {section}{\numberline {5}Chapter 5. Vision Module: General Medical Image Analysis, Polyp Segmentation, and Polyp VQA}{20}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Role and Processing Flow of the Vision Module}{20}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Image Routing and Visual Task Classification}{21}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}General Medical Image Agent}{21}{subsection.5.3}%
+\contentsline {subsection}{\numberline {5.4}Polyp Segmentation Agent}{22}{subsection.5.4}%
+\contentsline {subsection}{\numberline {5.5}DeepLabV3+ for Polyp Segmentation}{22}{subsection.5.5}%
+\contentsline {subsection}{\numberline {5.6}Post-processing and Overlay Mask}{24}{subsection.5.6}%
+\contentsline {subsection}{\numberline {5.7}Polyp VQA Agent and LoRA Fine-tuned VLM}{27}{subsection.5.7}%
+\contentsline {subsection}{\numberline {5.8}Two Polyp VQA Settings and Visual Grounding}{27}{subsection.5.8}%
+\contentsline {section}{\numberline {6}Chapter 6. Memory Layer: Long-Term Context for Medical Agents}{28}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Role of the Memory Layer}{28}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Integration Architecture}{28}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}Technical Pipeline}{28}{subsection.6.3}%
+\contentsline {subsection}{\numberline {6.4}Impact on Agent Reasoning}{29}{subsection.6.4}%
+\contentsline {subsection}{\numberline {6.5}Safety Constraints and Limitations}{29}{subsection.6.5}%
+\contentsline {section}{\numberline {7}Chapter 7. Data and Experimental Setup}{29}{section.7}%
+\contentsline {subsection}{\numberline {7.1}VimedAQA Dataset}{29}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}VietMedKG}{30}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}BKAI-IGH NeoPolyp-Small Dataset}{31}{subsection.7.3}%
+\contentsline {subsection}{\numberline {7.4}Kvasir-VQA-X1 Dataset}{31}{subsection.7.4}%
+\contentsline {subsection}{\numberline {7.5}Polyp VQA Fine-tuning Setup}{31}{subsection.7.5}%
+\contentsline {subsection}{\numberline {7.6}Memory Evaluation Scenarios}{32}{subsection.7.6}%
+\contentsline {subsection}{\numberline {7.7}Evaluation Metrics}{32}{subsection.7.7}%
+\contentsline {subsection}{\numberline {7.8}Experimental Protocol}{32}{subsection.7.8}%
+\contentsline {section}{\numberline {8}Chapter 8. Results and Analysis}{33}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Text Module Results}{33}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}Text Reasoning Analysis}{33}{subsection.8.2}%
+\contentsline {subsection}{\numberline {8.3}Polyp Segmentation Results}{33}{subsection.8.3}%
+\contentsline {subsection}{\numberline {8.4}Post-processing Impact Analysis}{34}{subsection.8.4}%
+\contentsline {subsection}{\numberline {8.5}General Medical Image Agent Qualitative Analysis}{35}{subsection.8.5}%
+\contentsline {subsection}{\numberline {8.6}Polyp VQA Fine-tuning Results on Kvasir-VQA-X1}{35}{subsection.8.6}%
+\contentsline {subsection}{\numberline {8.7}Original Image VQA vs Visual Grounding}{36}{subsection.8.7}%
+\contentsline {subsection}{\numberline {8.8}Memory Layer Impact Analysis}{36}{subsection.8.8}%
+\contentsline {subsection}{\numberline {8.9}Human-in-the-loop Validation Analysis}{37}{subsection.8.9}%
+\contentsline {subsection}{\numberline {8.10}Case Studies}{37}{subsection.8.10}%
+\contentsline {section}{\numberline {9}Chapter 9. Overall Discussion and Limitations}{37}{section.9}%
+\contentsline {subsection}{\numberline {9.1}Strengths of the Proposed System}{37}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}Text Module Limitations}{38}{subsection.9.2}%
+\contentsline {subsection}{\numberline {9.3}Vision Module Limitations}{38}{subsection.9.3}%
+\contentsline {subsection}{\numberline {9.4}Kvasir-VQA-X1 Limitations and Domain Transfer}{38}{subsection.9.4}%
+\contentsline {subsection}{\numberline {9.5}Memory Layer Limitations}{39}{subsection.9.5}%
+\contentsline {subsection}{\numberline {9.6}Evaluation and Safety Limitations}{39}{subsection.9.6}%
+\contentsline {section}{\numberline {10}Chapter 10. Conclusion and Future Work}{39}{section.10}%
+\contentsline {subsection}{\numberline {10.1}Summary of Achievements}{39}{subsection.10.1}%
+\contentsline {subsection}{\numberline {10.2}Technical Contributions}{40}{subsection.10.2}%
+\contentsline {subsection}{\numberline {10.3}Future Work}{40}{subsection.10.3}%
