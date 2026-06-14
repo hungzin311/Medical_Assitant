@@ -21,6 +21,7 @@ import uvicorn
 from werkzeug.utils import secure_filename
 from utils.config import Config
 from agents.agent_decision import process_query, create_agent_graph
+from agents.patient_memory_service.api import router as patient_memory_router
 from utils.proxy_setting import *
 from utils.streaming import current_stream_callback
 from agents.patient_db_agent import PatientQueryEngine
@@ -41,6 +42,7 @@ app = FastAPI(
     title="Multi-Agent Medical Chatbot", 
     version="2.0"
 )
+app.include_router(patient_memory_router)
 
 # Increase payload size limits
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
@@ -77,6 +79,8 @@ class QueryRequest(BaseModel):
     message: str
     image_data: Optional[str] = None
     conversation_history: List = []
+    patient_id: Optional[str] = "PAT_001"
+    memory_enabled: bool = True
 
 def extract_chat_response(response_data: dict) -> tuple[str, str]:
     response_text = ""
@@ -132,8 +136,15 @@ async def chat_interface(request: Request):
     return templates.TemplateResponse(request, "index.html")
 
 @app.post("/api/chat/stream")
-async def chat_stream(request: QueryRequest):
+async def chat_stream(
+    request: QueryRequest,
+    response: Response,
+    session_id: Optional[str] = Cookie(None),
+):
     """Process a chat message and stream LLM tokens to the browser."""
+    if not session_id:
+        session_id = str(uuid.uuid4())
+
     async def generate():
         queue: asyncio.Queue = asyncio.Queue()
         loop = asyncio.get_running_loop()
@@ -143,7 +154,13 @@ async def chat_stream(request: QueryRequest):
         def run_query():
             token = current_stream_callback.set(callback)
             try:
-                response_data = process_query(request.message, graph=graph)
+                response_data = process_query(
+                    request.message,
+                    graph=graph,
+                    patient_id=request.patient_id or "PAT_001",
+                    session_id=session_id,
+                    memory_enabled=request.memory_enabled,
+                )
                 response_text, agent_name = extract_chat_response(response_data)
                 loop.call_soon_threadsafe(
                     queue.put_nowait,
@@ -206,7 +223,9 @@ async def chat_stream(request: QueryRequest):
         except asyncio.CancelledError:
             raise
 
-    return StreamingResponse(generate(), media_type="text/event-stream")
+    stream_response = StreamingResponse(generate(), media_type="text/event-stream")
+    stream_response.set_cookie(key="session_id", value=session_id)
+    return stream_response
 
 @app.post("/upload")
 async def upload_image(
@@ -241,7 +260,13 @@ async def upload_image(
     
     try:
         query = {"text": text, "image": file_path}
-        response_data = process_query(query, graph=graph)
+        response_data = process_query(
+            query,
+            graph=graph,
+            patient_id="PAT_001",
+            session_id=session_id,
+            memory_enabled=True,
+        )
         response_text = response_data['messages'][-1].content
 
         # Set session cookie
@@ -420,7 +445,13 @@ async def validate_medical_output(
         if comments:
             validation_query += f" Comments: {comments}"
         
-        response_data = process_query(validation_query, graph=graph)
+        response_data = process_query(
+            validation_query,
+            graph=graph,
+            patient_id="PAT_001",
+            session_id=session_id,
+            memory_enabled=True,
+        )
         
         # Get response from output or messages
         response_text = ""

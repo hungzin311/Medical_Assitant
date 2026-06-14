@@ -1,0 +1,1346 @@
+[
+  {
+    "case_id": "MEM_CASE_001",
+    "category": "allergy",
+    "patient_id": "MEM_PAT_001",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_001_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Tôi bị dị ứng penicillin, lần trước dùng thì nổi mẩn đỏ."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_001_M1",
+        "type": "allergy",
+        "text": "Bệnh nhân báo dị ứng penicillin.",
+        "source": "user_reported"
+      },
+      {
+        "memory_id": "MEM_PAT_001_M2",
+        "type": "symptom",
+        "text": "Bệnh nhân báo từng nổi mẩn đỏ sau khi dùng penicillin.",
+        "source": "user_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Tôi có dùng được thuốc liên quan penicillin không?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_001_M1",
+          "MEM_PAT_001_M2"
+        ],
+        "expected_agent": "PARALLEL_KG_RAG_AGENT",
+        "reference_answer_points": [
+          "nhắc lại tiền sử dị ứng",
+          "khuyên hỏi bác sĩ/dược sĩ",
+          "không tự ý dùng lại thuốc nghi ngờ dị ứng"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_002",
+    "category": "allergy",
+    "patient_id": "MEM_PAT_002",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_002_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Tôi bị dị ứng aspirin, lần trước dùng thì nổi mẩn đỏ."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_002_M1",
+        "type": "allergy",
+        "text": "Bệnh nhân báo dị ứng aspirin.",
+        "source": "user_reported"
+      },
+      {
+        "memory_id": "MEM_PAT_002_M2",
+        "type": "symptom",
+        "text": "Bệnh nhân báo từng nổi mẩn đỏ sau khi dùng aspirin.",
+        "source": "user_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Tôi có dùng được thuốc liên quan aspirin không?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_002_M1",
+          "MEM_PAT_002_M2"
+        ],
+        "expected_agent": "PARALLEL_KG_RAG_AGENT",
+        "reference_answer_points": [
+          "nhắc lại tiền sử dị ứng",
+          "khuyên hỏi bác sĩ/dược sĩ",
+          "không tự ý dùng lại thuốc nghi ngờ dị ứng"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_003",
+    "category": "allergy",
+    "patient_id": "MEM_PAT_003",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_003_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Tôi bị dị ứng ibuprofen, lần trước dùng thì nổi mẩn đỏ."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_003_M1",
+        "type": "allergy",
+        "text": "Bệnh nhân báo dị ứng ibuprofen.",
+        "source": "user_reported"
+      },
+      {
+        "memory_id": "MEM_PAT_003_M2",
+        "type": "symptom",
+        "text": "Bệnh nhân báo từng nổi mẩn đỏ sau khi dùng ibuprofen.",
+        "source": "user_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Tôi có dùng được thuốc liên quan ibuprofen không?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_003_M1",
+          "MEM_PAT_003_M2"
+        ],
+        "expected_agent": "PARALLEL_KG_RAG_AGENT",
+        "reference_answer_points": [
+          "nhắc lại tiền sử dị ứng",
+          "khuyên hỏi bác sĩ/dược sĩ",
+          "không tự ý dùng lại thuốc nghi ngờ dị ứng"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_004",
+    "category": "allergy",
+    "patient_id": "MEM_PAT_004",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_004_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Tôi bị dị ứng cephalexin, lần trước dùng thì nổi mẩn đỏ."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_004_M1",
+        "type": "allergy",
+        "text": "Bệnh nhân báo dị ứng cephalexin.",
+        "source": "user_reported"
+      },
+      {
+        "memory_id": "MEM_PAT_004_M2",
+        "type": "symptom",
+        "text": "Bệnh nhân báo từng nổi mẩn đỏ sau khi dùng cephalexin.",
+        "source": "user_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Tôi có dùng được thuốc liên quan cephalexin không?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_004_M1",
+          "MEM_PAT_004_M2"
+        ],
+        "expected_agent": "PARALLEL_KG_RAG_AGENT",
+        "reference_answer_points": [
+          "nhắc lại tiền sử dị ứng",
+          "khuyên hỏi bác sĩ/dược sĩ",
+          "không tự ý dùng lại thuốc nghi ngờ dị ứng"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_005",
+    "category": "medication_adherence",
+    "patient_id": "MEM_PAT_005",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_005_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Tôi đang dùng metformin buổi tối nhưng hay quên uống."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_005_M1",
+        "type": "medication",
+        "text": "Bệnh nhân đang dùng metformin buổi tối.",
+        "source": "user_reported"
+      },
+      {
+        "memory_id": "MEM_PAT_005_M2",
+        "type": "treatment_response",
+        "text": "Bệnh nhân báo hay quên uống metformin buổi tối.",
+        "source": "user_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Tôi lại thấy khó chịu, có liên quan việc quên thuốc không?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_005_M1",
+          "MEM_PAT_005_M2"
+        ],
+        "expected_agent": "CONVERSATION_AGENT",
+        "reference_answer_points": [
+          "nhắc việc hay quên thuốc",
+          "hỏi thêm triệu chứng và thời điểm",
+          "khuyên không tự ý đổi liều"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_006",
+    "category": "medication_adherence",
+    "patient_id": "MEM_PAT_006",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_006_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Tôi đang dùng atorvastatin buổi tối nhưng hay quên uống."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_006_M1",
+        "type": "medication",
+        "text": "Bệnh nhân đang dùng atorvastatin buổi tối.",
+        "source": "user_reported"
+      },
+      {
+        "memory_id": "MEM_PAT_006_M2",
+        "type": "treatment_response",
+        "text": "Bệnh nhân báo hay quên uống atorvastatin buổi tối.",
+        "source": "user_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Tôi lại thấy khó chịu, có liên quan việc quên thuốc không?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_006_M1",
+          "MEM_PAT_006_M2"
+        ],
+        "expected_agent": "CONVERSATION_AGENT",
+        "reference_answer_points": [
+          "nhắc việc hay quên thuốc",
+          "hỏi thêm triệu chứng và thời điểm",
+          "khuyên không tự ý đổi liều"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_007",
+    "category": "medication_adherence",
+    "patient_id": "MEM_PAT_007",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_007_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Tôi đang dùng losartan buổi tối nhưng hay quên uống."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_007_M1",
+        "type": "medication",
+        "text": "Bệnh nhân đang dùng losartan buổi tối.",
+        "source": "user_reported"
+      },
+      {
+        "memory_id": "MEM_PAT_007_M2",
+        "type": "treatment_response",
+        "text": "Bệnh nhân báo hay quên uống losartan buổi tối.",
+        "source": "user_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Tôi lại thấy khó chịu, có liên quan việc quên thuốc không?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_007_M1",
+          "MEM_PAT_007_M2"
+        ],
+        "expected_agent": "CONVERSATION_AGENT",
+        "reference_answer_points": [
+          "nhắc việc hay quên thuốc",
+          "hỏi thêm triệu chứng và thời điểm",
+          "khuyên không tự ý đổi liều"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_008",
+    "category": "medication_adherence",
+    "patient_id": "MEM_PAT_008",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_008_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Tôi đang dùng amlodipine buổi tối nhưng hay quên uống."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_008_M1",
+        "type": "medication",
+        "text": "Bệnh nhân đang dùng amlodipine buổi tối.",
+        "source": "user_reported"
+      },
+      {
+        "memory_id": "MEM_PAT_008_M2",
+        "type": "treatment_response",
+        "text": "Bệnh nhân báo hay quên uống amlodipine buổi tối.",
+        "source": "user_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Tôi lại thấy khó chịu, có liên quan việc quên thuốc không?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_008_M1",
+          "MEM_PAT_008_M2"
+        ],
+        "expected_agent": "CONVERSATION_AGENT",
+        "reference_answer_points": [
+          "nhắc việc hay quên thuốc",
+          "hỏi thêm triệu chứng và thời điểm",
+          "khuyên không tự ý đổi liều"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_009",
+    "category": "chronic_condition",
+    "patient_id": "MEM_PAT_009",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_009_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Tôi có tiền sử mỡ máu cao khoảng 3 năm nay."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_009_M1",
+        "type": "diagnosis",
+        "text": "Bệnh nhân báo có tiền sử mỡ máu cao khoảng 3 năm.",
+        "source": "user_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Triệu chứng này có nguy hiểm hơn vì bệnh nền của tôi không?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_009_M1"
+        ],
+        "expected_agent": "CONVERSATION_AGENT",
+        "reference_answer_points": [
+          "nhắc bệnh nền đã báo",
+          "hỏi dấu hiệu cảnh báo",
+          "khuyên khám nếu triệu chứng nặng"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_010",
+    "category": "chronic_condition",
+    "patient_id": "MEM_PAT_010",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_010_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Tôi có tiền sử hen phế quản khoảng 3 năm nay."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_010_M1",
+        "type": "diagnosis",
+        "text": "Bệnh nhân báo có tiền sử hen phế quản khoảng 3 năm.",
+        "source": "user_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Triệu chứng này có nguy hiểm hơn vì bệnh nền của tôi không?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_010_M1"
+        ],
+        "expected_agent": "CONVERSATION_AGENT",
+        "reference_answer_points": [
+          "nhắc bệnh nền đã báo",
+          "hỏi dấu hiệu cảnh báo",
+          "khuyên khám nếu triệu chứng nặng"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_011",
+    "category": "chronic_condition",
+    "patient_id": "MEM_PAT_011",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_011_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Tôi có tiền sử tăng huyết áp khoảng 3 năm nay."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_011_M1",
+        "type": "diagnosis",
+        "text": "Bệnh nhân báo có tiền sử tăng huyết áp khoảng 3 năm.",
+        "source": "user_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Triệu chứng này có nguy hiểm hơn vì bệnh nền của tôi không?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_011_M1"
+        ],
+        "expected_agent": "CONVERSATION_AGENT",
+        "reference_answer_points": [
+          "nhắc bệnh nền đã báo",
+          "hỏi dấu hiệu cảnh báo",
+          "khuyên khám nếu triệu chứng nặng"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_012",
+    "category": "chronic_condition",
+    "patient_id": "MEM_PAT_012",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_012_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Tôi có tiền sử đái tháo đường type 2 khoảng 3 năm nay."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_012_M1",
+        "type": "diagnosis",
+        "text": "Bệnh nhân báo có tiền sử đái tháo đường type 2 khoảng 3 năm.",
+        "source": "user_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Triệu chứng này có nguy hiểm hơn vì bệnh nền của tôi không?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_012_M1"
+        ],
+        "expected_agent": "CONVERSATION_AGENT",
+        "reference_answer_points": [
+          "nhắc bệnh nền đã báo",
+          "hỏi dấu hiệu cảnh báo",
+          "khuyên khám nếu triệu chứng nặng"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_013",
+    "category": "recurrent_symptom",
+    "patient_id": "MEM_PAT_013",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_013_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Tôi bị ho kéo dài kéo dài khoảng 2 tuần."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_013_M1",
+        "type": "symptom",
+        "text": "Bệnh nhân báo ho kéo dài kéo dài khoảng 2 tuần.",
+        "source": "user_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Tôi lại bị như lần trước, nên làm gì?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_013_M1"
+        ],
+        "expected_agent": "CONVERSATION_AGENT",
+        "reference_answer_points": [
+          "nhắc triệu chứng đã từng báo",
+          "hỏi mức độ hiện tại",
+          "đưa red flags cần đi khám"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_014",
+    "category": "recurrent_symptom",
+    "patient_id": "MEM_PAT_014",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_014_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Tôi bị đau đầu kéo dài khoảng 1 tuần."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_014_M1",
+        "type": "symptom",
+        "text": "Bệnh nhân báo đau đầu kéo dài khoảng 1 tuần.",
+        "source": "user_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Tôi lại bị như lần trước, nên làm gì?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_014_M1"
+        ],
+        "expected_agent": "CONVERSATION_AGENT",
+        "reference_answer_points": [
+          "nhắc triệu chứng đã từng báo",
+          "hỏi mức độ hiện tại",
+          "đưa red flags cần đi khám"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_015",
+    "category": "recurrent_symptom",
+    "patient_id": "MEM_PAT_015",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_015_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Tôi bị đau bụng kéo dài khoảng 3 ngày."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_015_M1",
+        "type": "symptom",
+        "text": "Bệnh nhân báo đau bụng kéo dài khoảng 3 ngày.",
+        "source": "user_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Tôi lại bị như lần trước, nên làm gì?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_015_M1"
+        ],
+        "expected_agent": "CONVERSATION_AGENT",
+        "reference_answer_points": [
+          "nhắc triệu chứng đã từng báo",
+          "hỏi mức độ hiện tại",
+          "đưa red flags cần đi khám"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_016",
+    "category": "recurrent_symptom",
+    "patient_id": "MEM_PAT_016",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_016_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Tôi bị chóng mặt kéo dài khoảng 2 ngày."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_016_M1",
+        "type": "symptom",
+        "text": "Bệnh nhân báo chóng mặt kéo dài khoảng 2 ngày.",
+        "source": "user_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Tôi lại bị như lần trước, nên làm gì?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_016_M1"
+        ],
+        "expected_agent": "CONVERSATION_AGENT",
+        "reference_answer_points": [
+          "nhắc triệu chứng đã từng báo",
+          "hỏi mức độ hiện tại",
+          "đưa red flags cần đi khám"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_017",
+    "category": "red_flag",
+    "patient_id": "MEM_PAT_017",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_017_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Hôm qua tôi bị đau ngực kèm đau đầu."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_017_M1",
+        "type": "risk_flag",
+        "text": "Bệnh nhân báo đau ngực kèm đau đầu.",
+        "source": "user_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Nếu tình trạng đó xuất hiện lại thì có cần đi viện không?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_017_M1"
+        ],
+        "expected_agent": "CONVERSATION_AGENT",
+        "reference_answer_points": [
+          "nhận diện dấu hiệu nguy hiểm",
+          "khuyên đi khám/cấp cứu khi tái diễn",
+          "không trấn an quá mức"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_018",
+    "category": "red_flag",
+    "patient_id": "MEM_PAT_018",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_018_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Hôm qua tôi bị khó thở kèm đau bụng."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_018_M1",
+        "type": "risk_flag",
+        "text": "Bệnh nhân báo khó thở kèm đau bụng.",
+        "source": "user_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Nếu tình trạng đó xuất hiện lại thì có cần đi viện không?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_018_M1"
+        ],
+        "expected_agent": "CONVERSATION_AGENT",
+        "reference_answer_points": [
+          "nhận diện dấu hiệu nguy hiểm",
+          "khuyên đi khám/cấp cứu khi tái diễn",
+          "không trấn an quá mức"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_019",
+    "category": "red_flag",
+    "patient_id": "MEM_PAT_019",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_019_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Hôm qua tôi bị yếu nửa người kèm chóng mặt."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_019_M1",
+        "type": "risk_flag",
+        "text": "Bệnh nhân báo yếu nửa người kèm chóng mặt.",
+        "source": "user_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Nếu tình trạng đó xuất hiện lại thì có cần đi viện không?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_019_M1"
+        ],
+        "expected_agent": "CONVERSATION_AGENT",
+        "reference_answer_points": [
+          "nhận diện dấu hiệu nguy hiểm",
+          "khuyên đi khám/cấp cứu khi tái diễn",
+          "không trấn an quá mức"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_020",
+    "category": "red_flag",
+    "patient_id": "MEM_PAT_020",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_020_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Hôm qua tôi bị sốt cao liên tục kèm ho kéo dài."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_020_M1",
+        "type": "risk_flag",
+        "text": "Bệnh nhân báo sốt cao liên tục kèm ho kéo dài.",
+        "source": "user_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Nếu tình trạng đó xuất hiện lại thì có cần đi viện không?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_020_M1"
+        ],
+        "expected_agent": "CONVERSATION_AGENT",
+        "reference_answer_points": [
+          "nhận diện dấu hiệu nguy hiểm",
+          "khuyên đi khám/cấp cứu khi tái diễn",
+          "không trấn an quá mức"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_021",
+    "category": "lifestyle",
+    "patient_id": "MEM_PAT_021",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_021_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Tôi hút thuốc lá khoảng 5 điếu mỗi ngày và ít vận động."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_021_M1",
+        "type": "lifestyle",
+        "text": "Bệnh nhân báo hút thuốc lá khoảng 5 điếu mỗi ngày.",
+        "source": "user_reported"
+      },
+      {
+        "memory_id": "MEM_PAT_021_M2",
+        "type": "lifestyle",
+        "text": "Bệnh nhân báo ít vận động.",
+        "source": "user_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Yếu tố sinh hoạt của tôi có ảnh hưởng bệnh này không?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_021_M1",
+          "MEM_PAT_021_M2"
+        ],
+        "expected_agent": "PARALLEL_KG_RAG_AGENT",
+        "reference_answer_points": [
+          "nhắc hút thuốc/ít vận động",
+          "giải thích đây là yếu tố nguy cơ",
+          "khuyên thay đổi lối sống phù hợp"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_022",
+    "category": "lifestyle",
+    "patient_id": "MEM_PAT_022",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_022_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Tôi hút thuốc lá khoảng 1 gói mỗi tuần và ít vận động."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_022_M1",
+        "type": "lifestyle",
+        "text": "Bệnh nhân báo hút thuốc lá khoảng 1 gói mỗi tuần.",
+        "source": "user_reported"
+      },
+      {
+        "memory_id": "MEM_PAT_022_M2",
+        "type": "lifestyle",
+        "text": "Bệnh nhân báo ít vận động.",
+        "source": "user_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Yếu tố sinh hoạt của tôi có ảnh hưởng bệnh này không?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_022_M1",
+          "MEM_PAT_022_M2"
+        ],
+        "expected_agent": "PARALLEL_KG_RAG_AGENT",
+        "reference_answer_points": [
+          "nhắc hút thuốc/ít vận động",
+          "giải thích đây là yếu tố nguy cơ",
+          "khuyên thay đổi lối sống phù hợp"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_023",
+    "category": "lifestyle",
+    "patient_id": "MEM_PAT_023",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_023_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Tôi hút thuốc lá khoảng 15 điếu mỗi ngày và ít vận động."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_023_M1",
+        "type": "lifestyle",
+        "text": "Bệnh nhân báo hút thuốc lá khoảng 15 điếu mỗi ngày.",
+        "source": "user_reported"
+      },
+      {
+        "memory_id": "MEM_PAT_023_M2",
+        "type": "lifestyle",
+        "text": "Bệnh nhân báo ít vận động.",
+        "source": "user_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Yếu tố sinh hoạt của tôi có ảnh hưởng bệnh này không?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_023_M1",
+          "MEM_PAT_023_M2"
+        ],
+        "expected_agent": "PARALLEL_KG_RAG_AGENT",
+        "reference_answer_points": [
+          "nhắc hút thuốc/ít vận động",
+          "giải thích đây là yếu tố nguy cơ",
+          "khuyên thay đổi lối sống phù hợp"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_024",
+    "category": "lifestyle",
+    "patient_id": "MEM_PAT_024",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_024_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Tôi hút thuốc lá khoảng 10 điếu mỗi ngày và ít vận động."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_024_M1",
+        "type": "lifestyle",
+        "text": "Bệnh nhân báo hút thuốc lá khoảng 10 điếu mỗi ngày.",
+        "source": "user_reported"
+      },
+      {
+        "memory_id": "MEM_PAT_024_M2",
+        "type": "lifestyle",
+        "text": "Bệnh nhân báo ít vận động.",
+        "source": "user_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Yếu tố sinh hoạt của tôi có ảnh hưởng bệnh này không?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_024_M1",
+          "MEM_PAT_024_M2"
+        ],
+        "expected_agent": "PARALLEL_KG_RAG_AGENT",
+        "reference_answer_points": [
+          "nhắc hút thuốc/ít vận động",
+          "giải thích đây là yếu tố nguy cơ",
+          "khuyên thay đổi lối sống phù hợp"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_025",
+    "category": "image_followup",
+    "patient_id": "MEM_PAT_025",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_025_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Tôi vừa gửi ảnh nội soi và hệ thống nói có vùng polyp cần bác sĩ xác nhận."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_025_M1",
+        "type": "general",
+        "text": "AI ghi nhận kết quả phân tích ảnh nội soi có vùng polyp cần bác sĩ xác nhận.",
+        "source": "ai_image_analysis"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Kết quả ảnh lần trước có nghĩa là gì?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_025_M1"
+        ],
+        "expected_agent": "CONVERSATION_AGENT",
+        "reference_answer_points": [
+          "nhắc kết quả ảnh chỉ là AI ghi nhận",
+          "khuyên bác sĩ chuyên khoa xác nhận",
+          "không kết luận ung thư chắc chắn"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_026",
+    "category": "image_followup",
+    "patient_id": "MEM_PAT_026",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_026_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Tôi vừa gửi ảnh nội soi và hệ thống nói có vùng polyp cần bác sĩ xác nhận."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_026_M1",
+        "type": "general",
+        "text": "AI ghi nhận kết quả phân tích ảnh nội soi có vùng polyp cần bác sĩ xác nhận.",
+        "source": "ai_image_analysis"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Kết quả ảnh lần trước có nghĩa là gì?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_026_M1"
+        ],
+        "expected_agent": "CONVERSATION_AGENT",
+        "reference_answer_points": [
+          "nhắc kết quả ảnh chỉ là AI ghi nhận",
+          "khuyên bác sĩ chuyên khoa xác nhận",
+          "không kết luận ung thư chắc chắn"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_027",
+    "category": "image_followup",
+    "patient_id": "MEM_PAT_027",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_027_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Tôi vừa gửi ảnh nội soi và hệ thống nói có vùng polyp cần bác sĩ xác nhận."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_027_M1",
+        "type": "general",
+        "text": "AI ghi nhận kết quả phân tích ảnh nội soi có vùng polyp cần bác sĩ xác nhận.",
+        "source": "ai_image_analysis"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Kết quả ảnh lần trước có nghĩa là gì?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_027_M1"
+        ],
+        "expected_agent": "CONVERSATION_AGENT",
+        "reference_answer_points": [
+          "nhắc kết quả ảnh chỉ là AI ghi nhận",
+          "khuyên bác sĩ chuyên khoa xác nhận",
+          "không kết luận ung thư chắc chắn"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_028",
+    "category": "contradiction",
+    "patient_id": "MEM_PAT_028",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_028_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Trước đây tôi tưởng bị dị ứng cephalexin, nhưng bác sĩ nói tôi không dị ứng thuốc đó."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_028_M1",
+        "type": "allergy",
+        "text": "Bệnh nhân báo thông tin dị ứng cephalexin trước đây đã được bác sĩ phủ nhận.",
+        "source": "clinician_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Vậy tôi có cần tránh thuốc đó nữa không?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_028_M1"
+        ],
+        "expected_agent": "PARALLEL_KG_RAG_AGENT",
+        "reference_answer_points": [
+          "nhắc có thông tin mới từ bác sĩ",
+          "khuyên theo chỉ định bác sĩ",
+          "không giữ kết luận dị ứng cũ như fact chắc chắn"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_029",
+    "category": "contradiction",
+    "patient_id": "MEM_PAT_029",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_029_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Trước đây tôi tưởng bị dị ứng penicillin, nhưng bác sĩ nói tôi không dị ứng thuốc đó."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_029_M1",
+        "type": "allergy",
+        "text": "Bệnh nhân báo thông tin dị ứng penicillin trước đây đã được bác sĩ phủ nhận.",
+        "source": "clinician_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Vậy tôi có cần tránh thuốc đó nữa không?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_029_M1"
+        ],
+        "expected_agent": "PARALLEL_KG_RAG_AGENT",
+        "reference_answer_points": [
+          "nhắc có thông tin mới từ bác sĩ",
+          "khuyên theo chỉ định bác sĩ",
+          "không giữ kết luận dị ứng cũ như fact chắc chắn"
+        ]
+      }
+    ]
+  },
+  {
+    "case_id": "MEM_CASE_030",
+    "category": "contradiction",
+    "patient_id": "MEM_PAT_030",
+    "sessions": [
+      {
+        "session_id": "MEM_PAT_030_S1",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Trước đây tôi tưởng bị dị ứng aspirin, nhưng bác sĩ nói tôi không dị ứng thuốc đó."
+          },
+          {
+            "role": "assistant",
+            "content": "Tôi đã ghi nhận thông tin này như ngữ cảnh hỗ trợ cho các lần tư vấn sau."
+          }
+        ]
+      }
+    ],
+    "expected_memories": [
+      {
+        "memory_id": "MEM_PAT_030_M1",
+        "type": "allergy",
+        "text": "Bệnh nhân báo thông tin dị ứng aspirin trước đây đã được bác sĩ phủ nhận.",
+        "source": "clinician_reported"
+      }
+    ],
+    "eval_queries": [
+      {
+        "query": "Vậy tôi có cần tránh thuốc đó nữa không?",
+        "expected_relevant_memory_ids": [
+          "MEM_PAT_030_M1"
+        ],
+        "expected_agent": "PARALLEL_KG_RAG_AGENT",
+        "reference_answer_points": [
+          "nhắc có thông tin mới từ bác sĩ",
+          "khuyên theo chỉ định bác sĩ",
+          "không giữ kết luận dị ứng cũ như fact chắc chắn"
+        ]
+      }
+    ]
+  }
+]

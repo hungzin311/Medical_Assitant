@@ -1,4 +1,6 @@
-from typing import Dict, List, Optional, TypedDict, Union
+import logging
+import time
+from typing import Any, Dict, List, Optional, TypedDict, Union
 from langchain_core.messages import HumanMessage, AIMessage, BaseMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
@@ -23,8 +25,8 @@ set_proxy()
 load_dotenv()
 config = Config()
 memory = MemorySaver()
-thread_config = {"configurable": {"thread_id": "1"}}
 image_analyzer = ImageAnalysisAgent(config=config)
+logger = logging.getLogger(__name__)
 
 def get_agent_status_message(agent_name: str) -> str:
     messages = {
@@ -52,6 +54,10 @@ class AgentState(MessagesState):
     retrieval_confidence: float  # Confidence in retrieval (for RAG agent)
     bypass_routing: bool  # Flag to bypass agent routing for guardrails
     patient_id: Optional[str]  # Patient ID for KG and patient database queries
+    session_id: Optional[str]  # Session ID for LangGraph checkpoint and Mem0 run scope
+    patient_memory_context: Optional[str]  # Retrieved long-term memory context
+    patient_memory_items: List[Dict[str, Any]]  # Raw normalized Mem0 search results
+    memory_enabled: bool  # Whether long-term memory is enabled for this run
     polyp_segmentation_path: Optional[str]  # Segmentation overlay path for polyp VQA
 
 
@@ -60,6 +66,58 @@ class AgentDecision(TypedDict):
     agent: str
     reasoning: str
     confidence: float
+
+
+def _input_to_text(current_input: Union[str, Dict, None], include_image_hint: bool = False) -> str:
+    if isinstance(current_input, dict):
+        text = current_input.get("text", "") or ""
+        if include_image_hint and current_input.get("image"):
+            text = f"{text}, user uploaded an image for diagnosis.".strip(", ")
+        return text
+    return current_input or ""
+
+
+def _shorten_text(text: str, max_chars: int = 1200) -> str:
+    text = (text or "").strip()
+    if len(text) <= max_chars:
+        return text
+    return text[: max_chars - 3].rstrip() + "..."
+
+
+def _format_patient_memory_context(memory_items: List[Dict[str, Any]]) -> str:
+    if not memory_items:
+        return ""
+
+    lines = []
+    for index, item in enumerate(memory_items[:5], start=1):
+        memory_text = item.get("memory") or item.get("text") or ""
+        metadata = item.get("metadata") or {}
+        source = metadata.get("source") or metadata.get("memory_kind") or "memory"
+        score = item.get("score")
+
+        if source in {"ai_image_analysis", "assistant", "ai"}:
+            prefix = "AI ghi nhận chưa xác nhận"
+        else:
+            prefix = "Bệnh nhân báo"
+
+        score_text = f", score={score:.3f}" if isinstance(score, (int, float)) else ""
+        lines.append(f"{index}. {prefix}: {_shorten_text(memory_text, 300)} (source={source}{score_text})")
+
+    return "\n".join(lines)
+
+
+def _memory_context_message(patient_memory_context: Optional[str]) -> List[Dict[str, str]]:
+    if not patient_memory_context:
+        return []
+    return [
+        {
+            "role": "system",
+            "content": (
+                "LONG-TERM PATIENT MEMORY (supporting context only, not a confirmed diagnosis):\n"
+                f"{patient_memory_context}"
+            ),
+        }
+    ]
 
 
 def create_agent_graph(patient_query_engine: PatientQueryEngine):
@@ -104,7 +162,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         image_type = None
         
         # Get the text from the input
-        input_text = current_input if isinstance(current_input, str) else current_input.get("text", "")
+        input_text = _input_to_text(current_input)
         
         # Original image processing code
         if isinstance(current_input, dict) and "image" in current_input:
@@ -120,6 +178,57 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
             "image_type": image_type,
             "bypass_routing": False  # Set to False to ensure normal routing
         }
+
+    def retrieve_patient_memory(state: AgentState) -> AgentState:
+        """Retrieve durable patient memory before routing and answer generation."""
+        if not state.get("memory_enabled", True):
+            return {
+                **state,
+                "patient_memory_context": "",
+                "patient_memory_items": [],
+            }
+
+        patient_id = state.get("patient_id") or "PAT_001"
+        query = _input_to_text(state.get("current_input"), include_image_hint=True)
+        if not query.strip():
+            return {
+                **state,
+                "patient_memory_context": "",
+                "patient_memory_items": [],
+            }
+
+        try:
+            from agents.patient_memory_service.memory_service import get_patient_memory_service
+            from agents.patient_memory_service.schemas import PatientMemorySearchRequest
+
+            service = get_patient_memory_service()
+            search_result = service.search(
+                PatientMemorySearchRequest(
+                    patient_id=patient_id,
+                    query=query,
+                    top_k=5,
+                    threshold=0.1,
+                )
+            )
+            memory_items = [
+                item.model_dump() if hasattr(item, "model_dump") else dict(item)
+                for item in search_result.get("results", [])
+            ]
+            memory_context = _format_patient_memory_context(memory_items)
+            if memory_context:
+                emit_stream_event("status", {"message": "Retrieved relevant patient memory..."})
+            return {
+                **state,
+                "patient_memory_context": memory_context,
+                "patient_memory_items": memory_items,
+            }
+        except Exception as exc:
+            logger.warning("Patient memory retrieval skipped: %s", exc)
+            return {
+                **state,
+                "patient_memory_context": "",
+                "patient_memory_items": [],
+            }
     
     def check_if_bypassing(state: AgentState) -> str:
         """Check if we should bypass normal routing due to guardrails."""
@@ -129,6 +238,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         """Make decision about which agent should handle the query."""
         messages = state["messages"]
         current_input = state["current_input"]
+        patient_memory_context = state.get("patient_memory_context") or ""
         has_image = state["has_image"]
         image_type = state["image_type"]
 
@@ -144,7 +254,8 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
                     "next": "apply_guardrails"}
         
         # Prepare input for decision model
-        input_text = current_input if isinstance(current_input, str) else current_input.get("text", "")
+        input_text = _input_to_text(current_input)
+        patient_memory_context = state.get("patient_memory_context") or ""
 
         if has_image and image_type == "POLYP SEGMENTATION":
             selected_agent = (
@@ -177,6 +288,9 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
 
         Recent conversation context:
         {recent_context}
+
+        Relevant long-term patient memory:
+        {patient_memory_context if patient_memory_context else 'None'}
 
         Has image: {has_image}
         Image type: {image_type if has_image else 'None'}
@@ -218,11 +332,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         current_input = state["current_input"]
         
         # Prepare input for decision model
-        input_text = ""
-        if isinstance(current_input, str):
-            input_text = current_input
-        elif isinstance(current_input, dict):
-            input_text = current_input.get("text", "")
+        input_text = _input_to_text(current_input)
         
         follow_up_keywords = [
             # Từ khóa về chẩn đoán trước đó
@@ -287,6 +397,12 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         {conversation_agent_prompt}
         """
 
+        if patient_memory_context:
+            conversation_prompt += (
+                "\nLong-term patient memory (supporting context only, not a confirmed diagnosis):\n"
+                f"{patient_memory_context}\n"
+            )
+
         response = invoke_with_streaming(config.conversation.llm, conversation_prompt)
 
         return {
@@ -308,11 +424,12 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         kg_context_limit = config.rag.context_limit 
         rag_context_limit = config.rag.context_limit
         patient_id = state.get('patient_id', 'PAT_001')
+        patient_memory_messages = _memory_context_message(state.get("patient_memory_context"))
 
         print(f"Patient ID: {patient_id}")
 
         def run_kg_only(): 
-            chat_history = [] 
+            chat_history = list(patient_memory_messages)
             for msg in messages[-kg_context_limit:]:
                 if isinstance(msg, HumanMessage): 
                     chat_history.append({"role": "user", "content": msg.content})
@@ -357,7 +474,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
             }
         
         def run_rag_only(): 
-            chat_history = [] 
+            chat_history = list(patient_memory_messages)
             for msg in messages[-rag_context_limit:]:
                 if isinstance(msg, HumanMessage): 
                     chat_history.append({"role": "user", "content": msg.content})
@@ -399,7 +516,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
             }
 
         def run_medlineplus_only():
-            chat_history = []
+            chat_history = list(patient_memory_messages)
             medlineplus_context_limit = config.medlineplus.context_limit
             response = {}
             for msg in messages[-medlineplus_context_limit:]:
@@ -535,6 +652,11 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         web_search_context_limit = config.web_search.context_limit
 
         recent_context = ""
+        if state.get("patient_memory_context"):
+            recent_context += (
+                "Long-term patient memory (supporting context only, not a confirmed diagnosis):\n"
+                f"{state.get('patient_memory_context')}\n"
+            )
         for msg in messages[-web_search_context_limit:]: # limit controlled from utils.config
             if isinstance(msg, HumanMessage):
                 recent_context += f"User: {msg.content}\n"
@@ -574,6 +696,11 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         user_query = ""
         if isinstance(current_input, dict) and "text" in current_input:
             user_query = current_input.get("text", "")
+        if state.get("patient_memory_context"):
+            user_query = (
+                f"{user_query}\n\nLong-term patient memory (supporting context only, not a confirmed diagnosis):\n"
+                f"{state.get('patient_memory_context')}"
+            ).strip()
         
         # Process the image with the general medical image agent
         diagnosis_result = image_analyzer.diagnose_general_medical_image(image_path, user_query)
@@ -600,6 +727,11 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         user_query = ""
         if isinstance(current_input, dict) and "text" in current_input:
             user_query = current_input.get("text", "")
+        if state.get("patient_memory_context"):
+            user_query = (
+                f"{user_query}\n\nLong-term patient memory (supporting context only, not a confirmed diagnosis):\n"
+                f"{state.get('patient_memory_context')}"
+            ).strip()
 
         print(f"Selected agent: POLYP_SEGMENTATION_AGENT")
 
@@ -658,6 +790,11 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         current_input = state["current_input"]
         image_path = current_input.get("image", None)
         user_query = current_input.get("text", "") if isinstance(current_input, dict) else ""
+        if state.get("patient_memory_context"):
+            user_query = (
+                f"{user_query}\n\nLong-term patient memory (supporting context only, not a confirmed diagnosis):\n"
+                f"{state.get('patient_memory_context')}"
+            ).strip()
 
         try:
             segmentation_path = image_analyzer.segment_polyp(image_path)
@@ -759,11 +896,85 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
             "output": sanitized_message
         }
 
+    def write_patient_memory(state: AgentState) -> AgentState:
+        """Persist selected long-term patient facts after response generation."""
+        if not state.get("memory_enabled", True):
+            return state
+
+        patient_id = state.get("patient_id") or "PAT_001"
+        session_id = state.get("session_id")
+        current_input = state.get("current_input")
+        input_text = _input_to_text(current_input)
+        output = state.get("output")
+        output_text = output.content if hasattr(output, "content") else str(output or "")
+
+        if not input_text.strip() and not output_text.strip():
+            return state
+        if state.get("agent_name") == "NON_MEDICAL_FILTER":
+            return state
+
+        try:
+            from agents.patient_memory_service.memory_service import get_patient_memory_service
+            from agents.patient_memory_service.schemas import (
+                MemoryMessage,
+                PatientConditionCreate,
+                PatientConversationMemoryCreate,
+            )
+
+            service = get_patient_memory_service()
+            is_image_request = isinstance(current_input, dict) and bool(current_input.get("image"))
+            is_validation = input_text.lower().startswith("validation result:")
+
+            if is_image_request and output_text.strip():
+                service.add_condition(
+                    PatientConditionCreate(
+                        patient_id=patient_id,
+                        condition_text=(
+                            "AI ghi nhận kết quả phân tích ảnh y tế sau đây, cần bác sĩ xác nhận: "
+                            f"{_shorten_text(output_text, 900)}"
+                        ),
+                        condition_type="general",
+                        run_id=session_id,
+                        metadata={
+                            "source": "ai_image_analysis",
+                            "validated": False,
+                            "stored_by": "langgraph_write_patient_memory",
+                        },
+                    )
+                )
+                return state
+
+            metadata = {
+                "source": "human_validation" if is_validation else "chat",
+                "stored_by": "langgraph_write_patient_memory",
+            }
+            messages_to_store = []
+            if input_text.strip():
+                messages_to_store.append(MemoryMessage(role="user", content=_shorten_text(input_text, 1500)))
+            if output_text.strip() and not is_validation:
+                messages_to_store.append(MemoryMessage(role="assistant", content=_shorten_text(output_text, 1500)))
+
+            if messages_to_store:
+                service.add_conversation(
+                    PatientConversationMemoryCreate(
+                        patient_id=patient_id,
+                        run_id=session_id,
+                        infer=True,
+                        messages=messages_to_store,
+                        metadata=metadata,
+                    )
+                )
+        except Exception as exc:
+            logger.warning("Patient memory write skipped: %s", exc)
+
+        return state
+
     # Create the workflow graph
     workflow = StateGraph(AgentState)
     
     # Add nodes for each step
     workflow.add_node("analyze_input", analyze_input)
+    workflow.add_node("retrieve_patient_memory", retrieve_patient_memory)
     workflow.add_node("route_to_agent", route_to_agent)
     workflow.add_node("CONVERSATION_AGENT", run_conversation_agent)
     workflow.add_node('PARALLEL_KG_RAG_AGENT', run_kg_rag_parallel)
@@ -774,6 +985,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
     workflow.add_node("check_validation", handle_human_validation)
     workflow.add_node("human_validation", perform_human_validation)
     workflow.add_node("apply_guardrails", apply_output_guardrails)
+    workflow.add_node("write_patient_memory", write_patient_memory)
     
     workflow.set_entry_point("analyze_input")
     workflow.add_conditional_edges(
@@ -781,9 +993,10 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         check_if_bypassing,
         {
             "apply_guardrails": "apply_guardrails",
-            "route_to_agent": "route_to_agent"
+            "route_to_agent": "retrieve_patient_memory"
         }
     )
+    workflow.add_edge("retrieve_patient_memory", "route_to_agent")
     
     # Connect decision router to agents
     workflow.add_conditional_edges(
@@ -817,7 +1030,8 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
     workflow.add_edge("POLYP_VQA_AGENT", "check_validation")
     workflow.add_edge("GENERAL_MEDICAL_IMAGE_AGENT", "check_validation")
     workflow.add_edge("human_validation", "apply_guardrails")
-    workflow.add_edge("apply_guardrails", END)
+    workflow.add_edge("apply_guardrails", "write_patient_memory")
+    workflow.add_edge("write_patient_memory", END)
     
     workflow.add_conditional_edges(
         "check_validation",
@@ -845,25 +1059,41 @@ def init_agent_state() -> AgentState:
         "retrieval_confidence": 0.0,
         "bypass_routing": False,
         "patient_id": None,
+        "session_id": None,
+        "patient_memory_context": "",
+        "patient_memory_items": [],
+        "memory_enabled": True,
         "polyp_segmentation_path": None
     }
 
 
-def process_query(query: Union[str, Dict], conversation_history: List[BaseMessage] = None, graph: StateGraph = None) -> Dict:
+def process_query(
+    query: Union[str, Dict],
+    conversation_history: List[BaseMessage] = None,
+    graph: StateGraph = None,
+    patient_id: str = "PAT_001",
+    session_id: Optional[str] = None,
+    memory_enabled: bool = True,
+) -> Dict:
     state = init_agent_state()
     
     if conversation_history:
         state["messages"] = conversation_history
     
     state["current_input"] = query
+    state["patient_id"] = patient_id or "PAT_001"
+    state["session_id"] = session_id
+    state["memory_enabled"] = memory_enabled
 
     if isinstance(query, dict):
-        query = query.get("text", "") + ", user uploaded an image for diagnosis."
+        query = _input_to_text(query, include_image_hint=True)
     
     if not conversation_history:
         state["messages"] = [HumanMessage(content=query)]
 
-    result = graph.invoke(state, thread_config)
+    thread_id = f"{state['patient_id']}:{session_id}" if session_id else state["patient_id"]
+    dynamic_thread_config = {"configurable": {"thread_id": thread_id}}
+    result = graph.invoke(state, dynamic_thread_config)
 
     if len(result["messages"]) > config.max_conversation_history:
         result["messages"] = result["messages"][-config.max_conversation_history:]
