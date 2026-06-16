@@ -1,0 +1,16 @@
+{
+    "total_samples": 305,
+    "valid_samples": 305,
+    "failed_samples": 0,
+    "avg_factual_accuracy": 4.4951,
+    "avg_completeness": 4.5016,
+    "avg_clinical_relevance": 4.9246,
+    "avg_hallucination": 4.8393,
+    "avg_weighted_score": 4.5751,
+    "score_distribution": {
+        "1.0-2.0": 8,
+        "2.0-3.0": 8,
+        "3.0-4.0": 34,
+        "4.0-5.0": 255
+    }
+}
