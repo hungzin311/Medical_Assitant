@@ -122,23 +122,16 @@ def _memory_context_message(patient_memory_context: Optional[str]) -> List[Dict[
 
 def create_agent_graph(patient_query_engine: PatientQueryEngine):
     """Create and configure the LangGraph for agent orchestration."""
-    # LLM
     decision_model = config.agent_decision.llm
-    
-    # Initialize the output parser
     json_parser = JsonOutputParser(pydantic_object=AgentDecision)
     
     # Create the decision prompt
     decision_prompt = ChatPromptTemplate.from_messages([
     ("human", f"System: {decision_agent_prompt}\n\nUser: {{input}}")])
-
-    # Create the decision chain
     decision_chain = decision_prompt | decision_model | json_parser
 
     kg_agent = KGQueryEngine(patient_query_engine)
-
     rag_agent = MedicalRAG(config)
-
     medlineplus_agent = MedlinePlusAgent(config)
 
     def is_polyp_segmentation_request(input_text: str) -> bool:
@@ -618,14 +611,10 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
             "transition": True,
         })
 
-        if current_stream_callback.get() is not None:
-            print(f"Streaming final response from {chosen_agent}")
-            if chosen_agent == "KG_AGENT":
-                chosen_result = run_kg_only()
-            elif chosen_agent == "RAG_AGENT":
-                chosen_result = run_rag_only()
-            elif chosen_agent == "MEDLINEPLUS_AGENT":
-                chosen_result = run_medlineplus_only()
+        stream_callback = current_stream_callback.get()
+        if stream_callback is not None:
+            print(f"Streaming cached final response from {chosen_agent}")
+            stream_callback.on_llm_new_token(chosen_result["response"])
 
         return {
             **state,
@@ -1024,7 +1013,6 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
     )
     # Connect agent outputs to validation check
     workflow.add_edge("CONVERSATION_AGENT", "check_validation")
-    workflow.add_edge("PARALLEL_KG_RAG_AGENT", "check_validation")
     workflow.add_edge("WEB_SEARCH_PROCESSOR_AGENT", "check_validation")
     workflow.add_edge("POLYP_SEGMENTATION_AGENT", "check_validation")
     workflow.add_edge("POLYP_VQA_AGENT", "check_validation")

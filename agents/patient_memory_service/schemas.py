@@ -41,9 +41,13 @@ class PatientConditionCreate(PatientScopedModel):
     model_config = ConfigDict(use_enum_values=True)
     condition_text: str = Field(..., min_length=2, description="Clinical fact to remember.")
     condition_type: ConditionType = Field(ConditionType.GENERAL, description="Type of patient condition.")
+    status: str = Field("active", description="Condition status, for example active or resolved.")
+    source: str = Field("user_reported", description="Source of the remembered fact.")
     run_id: Optional[str] = Field(None, description="Optional session/run identifier.")
     primary_disease: Optional[List[str]] = Field(None, description="Related active diseases.")
     severity: Optional[float] = Field(None, ge=0, le=10, description="0-10 severity when available.")
+    confidence: Optional[float] = Field(None, ge=0, le=1, description="Confidence in the remembered fact.")
+    tags: List[str] = Field(default_factory=list, description="Optional non-sensitive tags.")
     observed_at: Optional[datetime] = Field(None, description="When this condition was observed/reported.")
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional non-sensitive metadata.")
 
@@ -69,6 +73,7 @@ class PatientMemorySearchRequest(PatientScopedModel):
     threshold: float = Field(0.1, ge=0, le=1, description="Minimum semantic relevance.")
     run_id: Optional[str] = Field(None, description="Restrict search to a session/run.")
     condition_types: Optional[List[ConditionType]] = Field(None, description="Restrict to condition types.")
+    status: Optional[str] = Field(None, description="Restrict to a condition status.")
     metadata_filter: Dict[str, Any] = Field(default_factory=dict, description="Extra Mem0 metadata filters.")
 
 
@@ -76,6 +81,7 @@ class PatientMemoryListRequest(PatientScopedModel):
     top_k: int = Field(50, ge=1, le=500, description="Maximum returned memories.")
     run_id: Optional[str] = Field(None, description="Restrict list to a session/run.")
     condition_types: Optional[List[ConditionType]] = Field(None, description="Restrict to condition types.")
+    status: Optional[str] = Field(None, description="Restrict to a condition status.")
     metadata_filter: Dict[str, Any] = Field(default_factory=dict, description="Extra Mem0 metadata filters.")
 
 
@@ -119,4 +125,3 @@ class PatientMemoryDeleteResponse(BaseModel):
 
 def utc_now() -> datetime:
     return datetime.now(timezone.utc)
-

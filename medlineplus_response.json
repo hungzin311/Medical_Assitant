@@ -1,0 +1,379 @@
+{
+    "response": "Dựa trên các tài liệu MedlinePlus được cung cấp, không có thông tin nào giải thích về việc liệu bệnh mỡ máu cao có làm cho các triệu chứng của bạn trở nên nguy hiểm hơn hay không.
+
+Vì ngữ cảnh hiện tại không đủ thông tin để đánh giá tình trạng sức khỏe cụ thể của bạn, bạn nên trao đổi trực tiếp với bác sĩ để được tư vấn và giải đáp chính xác về mối liên quan giữa bệnh nền và các triệu chứng bạn đang gặp phải.",
+    "sources": [
+        {
+            "title": "Yeast Infection Tests",
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/lab-tests/yeast-infection-tests/"
+        },
+        {
+            "title": "Differential Diagnosis",
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/lab-tests/differential-diagnosis/"
+        },
+        {
+            "title": "Panic Disorder Test",
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/lab-tests/panic-disorder-test/"
+        },
+        {
+            "title": "Immunoglobulins Blood Test",
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/lab-tests/immunoglobulins-blood-test/"
+        },
+        {
+            "title": "Myasthenia Gravis Tests",
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/lab-tests/myasthenia-gravis-tests/"
+        },
+        {
+            "title": "Heart Disease Risk Assessment",
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/lab-tests/heart-disease-risk-assessment/"
+        },
+        {
+            "title": "Antibody Serology Tests",
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/lab-tests/antibody-serology-tests/"
+        },
+        {
+            "title": "Dengue Fever Test",
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/lab-tests/dengue-fever-test/"
+        }
+    ],
+    "confidence": 0.38879815,
+    "retrieval": {
+        "query": "Triệu chứng này có nguy hiểm hơn vì bệnh nền của tôi không?",
+        "intent": "general",
+        "linked_entities": [],
+        "expanded_relations": [],
+        "documents": [
+            {
+                "id": "lab:yeast-infection-tests:section:are-there-any-risks-to-the-test",
+                "content": "Lab test: Yeast Infection Tests
+Section: Are there any risks to the test?
+
+There is no known risk to having a yeast test.",
+                "score": 0.38879815,
+                "source": "MedlinePlus",
+                "source_path": "https://medlineplus.gov/lab-tests/yeast-infection-tests/",
+                "title": "Yeast Infection Tests",
+                "doc_type": "lab_test_section",
+                "entity_id": "yeast-infection-tests",
+                "entity_type": "lab_test",
+                "section_type": "risk",
+                "metadata": {
+                    "entity_id": "yeast-infection-tests",
+                    "entity_type": "lab_test",
+                    "title": "Yeast Infection Tests",
+                    "aliases": [
+                        "Yeast Infection Tests",
+                        "Yeast Infections",
+                        "Candidiasis",
+                        "Moniliasis",
+                        "Thrush",
+                        "Vaginal Yeast Infection"
+                    ],
+                    "groups": [
+                        "Infections",
+                        "Mouth and Teeth",
+                        "Female Reproductive System"
+                    ],
+                    "section_type": "risk",
+                    "related_topic_ids": [
+                        "1255"
+                    ],
+                    "related_lab_test_ids": [],
+                    "source_url": "https://medlineplus.gov/lab-tests/yeast-infection-tests/",
+                    "doc_type": "lab_test_section"
+                }
+            },
+            {
+                "id": "lab_test:differential-diagnosis:relations",
+                "content": "Differential Diagnosis related_to_topic Laboratory Tests",
+                "score": 0.38035038,
+                "source": "MedlinePlus",
+                "source_path": "https://medlineplus.gov/lab-tests/differential-diagnosis/",
+                "title": "Differential Diagnosis",
+                "doc_type": "relation_summary",
+                "entity_id": "differential-diagnosis",
+                "entity_type": "lab_test",
+                "section_type": "relations",
+                "metadata": {
+                    "entity_id": "differential-diagnosis",
+                    "entity_type": "lab_test",
+                    "title": "Differential Diagnosis",
+                    "aliases": [
+                        "Differential Diagnosis",
+                        "Laboratory Tests",
+                        "Blood Tests"
+                    ],
+                    "groups": [
+                        "Diagnostic Tests"
+                    ],
+                    "section_type": "relations",
+                    "related_topic_ids": [
+                        "210"
+                    ],
+                    "related_lab_test_ids": [],
+                    "source_url": "https://medlineplus.gov/lab-tests/differential-diagnosis/",
+                    "doc_type": "relation_summary"
+                }
+            },
+            {
+                "id": "lab_test:panic-disorder-test:relations",
+                "content": "Panic Disorder Test related_to_topic Panic Disorder",
+                "score": 0.37024078,
+                "source": "MedlinePlus",
+                "source_path": "https://medlineplus.gov/lab-tests/panic-disorder-test/",
+                "title": "Panic Disorder Test",
+                "doc_type": "relation_summary",
+                "entity_id": "panic-disorder-test",
+                "entity_type": "lab_test",
+                "section_type": "relations",
+                "metadata": {
+                    "entity_id": "panic-disorder-test",
+                    "entity_type": "lab_test",
+                    "title": "Panic Disorder Test",
+                    "aliases": [
+                        "Panic Disorder Test",
+                        "Panic Disorder"
+                    ],
+                    "groups": [
+                        "Mental Health and Behavior"
+                    ],
+                    "section_type": "relations",
+                    "related_topic_ids": [
+                        "601"
+                    ],
+                    "related_lab_test_ids": [],
+                    "source_url": "https://medlineplus.gov/lab-tests/panic-disorder-test/",
+                    "doc_type": "relation_summary"
+                }
+            },
+            {
+                "id": "lab:immunoglobulins-blood-test:section:are-there-any-risks-to-the-test",
+                "content": "Lab test: Immunoglobulins Blood Test
+Section: Are there any risks to the test?
+
+There is very little risk to having a blood test. You may have slight pain or bruising at the spot where the needle was put in, but most symptoms go away quickly.",
+                "score": 0.36343056,
+                "source": "MedlinePlus",
+                "source_path": "https://medlineplus.gov/lab-tests/immunoglobulins-blood-test/",
+                "title": "Immunoglobulins Blood Test",
+                "doc_type": "lab_test_section",
+                "entity_id": "immunoglobulins-blood-test",
+                "entity_type": "lab_test",
+                "section_type": "risk",
+                "metadata": {
+                    "entity_id": "immunoglobulins-blood-test",
+                    "entity_type": "lab_test",
+                    "title": "Immunoglobulins Blood Test",
+                    "aliases": [
+                        "Immunoglobulins Blood Test",
+                        "Autoimmune Diseases",
+                        "Autoinflammatory Diseases",
+                        "Bacterial Infections",
+                        "Flesh-Eating Bacteria",
+                        "Infections, Bacterial",
+                        "Necrotizing Fasciitis",
+                        "Q Fever",
+                        "Viral Infections",
+                        "Adenovirus Infections",
+                        "Coxsackievirus Infections",
+                        "Enterovirus",
+                        "Hand, Foot, and Mouth Disease",
+                        "Infections, Viral",
+                        "Roseola"
+                    ],
+                    "groups": [
+                        "Immune System",
+                        "Infections"
+                    ],
+                    "section_type": "risk",
+                    "related_topic_ids": [
+                        "154",
+                        "158",
+                        "454"
+                    ],
+                    "related_lab_test_ids": [],
+                    "source_url": "https://medlineplus.gov/lab-tests/immunoglobulins-blood-test/",
+                    "doc_type": "lab_test_section"
+                }
+            },
+            {
+                "id": "lab_test:myasthenia-gravis-tests:relations",
+                "content": "Myasthenia Gravis Tests related_to_topic Myasthenia Gravis",
+                "score": 0.35909253,
+                "source": "MedlinePlus",
+                "source_path": "https://medlineplus.gov/lab-tests/myasthenia-gravis-tests/",
+                "title": "Myasthenia Gravis Tests",
+                "doc_type": "relation_summary",
+                "entity_id": "myasthenia-gravis-tests",
+                "entity_type": "lab_test",
+                "section_type": "relations",
+                "metadata": {
+                    "entity_id": "myasthenia-gravis-tests",
+                    "entity_type": "lab_test",
+                    "title": "Myasthenia Gravis Tests",
+                    "aliases": [
+                        "Myasthenia Gravis Tests",
+                        "Myasthenia Gravis"
+                    ],
+                    "groups": [
+                        "Brain and Nerves"
+                    ],
+                    "section_type": "relations",
+                    "related_topic_ids": [
+                        "336"
+                    ],
+                    "related_lab_test_ids": [],
+                    "source_url": "https://medlineplus.gov/lab-tests/myasthenia-gravis-tests/",
+                    "doc_type": "relation_summary"
+                }
+            },
+            {
+                "id": "lab_test:heart-disease-risk-assessment:relations",
+                "content": "Heart Disease Risk Assessment related_to_topic Heart Diseases",
+                "score": 0.35558742,
+                "source": "MedlinePlus",
+                "source_path": "https://medlineplus.gov/lab-tests/heart-disease-risk-assessment/",
+                "title": "Heart Disease Risk Assessment",
+                "doc_type": "relation_summary",
+                "entity_id": "heart-disease-risk-assessment",
+                "entity_type": "lab_test",
+                "section_type": "relations",
+                "metadata": {
+                    "entity_id": "heart-disease-risk-assessment",
+                    "entity_type": "lab_test",
+                    "title": "Heart Disease Risk Assessment",
+                    "aliases": [
+                        "Heart Disease Risk Assessment",
+                        "Heart Diseases",
+                        "Cardiac diseases",
+                        "Cardiac Diseases",
+                        "Cardiovascular Diseases"
+                    ],
+                    "groups": [
+                        "Older Adults",
+                        "Blood, Heart and Circulation"
+                    ],
+                    "section_type": "relations",
+                    "related_topic_ids": [
+                        "277"
+                    ],
+                    "related_lab_test_ids": [],
+                    "source_url": "https://medlineplus.gov/lab-tests/heart-disease-risk-assessment/",
+                    "doc_type": "relation_summary"
+                }
+            },
+            {
+                "id": "lab:antibody-serology-tests:section:are-there-any-risks-to-this-test",
+                "content": "Lab test: Antibody Serology Tests
+Section: Are there any risks to this test?
+
+There is very little risk to having a blood test. There may be slight pain or bruising at the spot where the needle was put in, but most symptoms go away quickly.",
+                "score": 0.35389638,
+                "source": "MedlinePlus",
+                "source_path": "https://medlineplus.gov/lab-tests/antibody-serology-tests/",
+                "title": "Antibody Serology Tests",
+                "doc_type": "lab_test_section",
+                "entity_id": "antibody-serology-tests",
+                "entity_type": "lab_test",
+                "section_type": "risk",
+                "metadata": {
+                    "entity_id": "antibody-serology-tests",
+                    "entity_type": "lab_test",
+                    "title": "Antibody Serology Tests",
+                    "aliases": [
+                        "Antibody Serology Tests",
+                        "Chickenpox",
+                        "Varicella",
+                        "Varicella-Zoster Virus",
+                        "COVID-19 Testing",
+                        "COVID-19 Antibody Test",
+                        "COVID-19 Viral Test",
+                        "SARS-CoV-2 Testing",
+                        "Hepatitis",
+                        "Viral Hepatitis",
+                        "Infectious Mononucleosis",
+                        "Glandular fever",
+                        "Kissing disease",
+                        "Mono",
+                        "Mononucleosis",
+                        "EBV Infections",
+                        "Epstein-Barr Virus Infections",
+                        "Glandular Fever",
+                        "Shingles",
+                        "Herpes zoster",
+                        "Postherpetic neuralgia",
+                        "Herpes Zoster",
+                        "Post-herpetic Neuralgia"
+                    ],
+                    "groups": [
+                        "Children and Teenagers",
+                        "Infections",
+                        "Skin, Hair and Nails",
+                        "Diagnostic Tests",
+                        "Digestive System",
+                        "Immune System",
+                        "Older Adults",
+                        "Brain and Nerves"
+                    ],
+                    "section_type": "risk",
+                    "related_topic_ids": [
+                        "182",
+                        "7627",
+                        "109",
+                        "298",
+                        "90"
+                    ],
+                    "related_lab_test_ids": [],
+                    "source_url": "https://medlineplus.gov/lab-tests/antibody-serology-tests/",
+                    "doc_type": "lab_test_section"
+                }
+            },
+            {
+                "id": "lab:dengue-fever-test:section:are-there-any-risks-to-the-test",
+                "content": "Lab test: Dengue Fever Test
+Section: Are there any risks to the test?
+
+There is very little risk to having a blood test. You may have slight pain or bruising at the spot where the needle was put in, but most symptoms go away quickly.",
+                "score": 0.35349014,
+                "source": "MedlinePlus",
+                "source_path": "https://medlineplus.gov/lab-tests/dengue-fever-test/",
+                "title": "Dengue Fever Test",
+                "doc_type": "lab_test_section",
+                "entity_id": "dengue-fever-test",
+                "entity_type": "lab_test",
+                "section_type": "risk",
+                "metadata": {
+                    "entity_id": "dengue-fever-test",
+                    "entity_type": "lab_test",
+                    "title": "Dengue Fever Test",
+                    "aliases": [
+                        "Dengue Fever Test",
+                        "Dengue",
+                        "Break-bone fever",
+                        "Dengue fever",
+                        "Break-bone Fever"
+                    ],
+                    "groups": [
+                        "Infections"
+                    ],
+                    "section_type": "risk",
+                    "related_topic_ids": [
+                        "3104"
+                    ],
+                    "related_lab_test_ids": [],
+                    "source_url": "https://medlineplus.gov/lab-tests/dengue-fever-test/",
+                    "doc_type": "lab_test_section"
+                }
+            }
+        ]
+    },
+    "processing_time": 2.1276042461395264
+}
