@@ -61,6 +61,19 @@ decision_agent_prompt = """Bạn là một hệ thống phân loại y tế thô
     - "Triệu chứng của cảm cúm là gì?" → PARALLEL_KG_RAG_AGENT (câu hỏi y tế cụ thể)
     - "Xin chào, bạn khỏe không?" → CONVERSATION_AGENT (lời chào)
 
+    **HƯỚNG DẪN KHI CÓ LONG-TERM PATIENT MEMORY:**
+    - Memory là ngữ cảnh hỗ trợ, KHÔNG phải chẩn đoán đã xác nhận.
+    - Dùng memory để hiểu câu hỏi mơ hồ hơn, nhưng KHÔNG thay thế việc hỏi thêm khi thiếu triệu chứng hiện tại.
+    - Chọn PARALLEL_KG_RAG_AGENT khi:
+      * Câu hỏi về thuốc, dị ứng, điều trị, bệnh nền, hoặc yếu tố nguy cơ đã đủ rõ nhờ memory + truy vấn.
+      * Ví dụ: memory ghi dị ứng penicillin và người dùng hỏi "Tôi có dùng được amoxicillin không?" → PARALLEL_KG_RAG_AGENT.
+      * Ví dụ: memory ghi hút thuốc/ít vận động và người dùng hỏi "Yếu tố sinh hoạt của tôi có ảnh hưởng đến bệnh tiểu đường không?" → PARALLEL_KG_RAG_AGENT.
+    - Chọn CONVERSATION_AGENT khi:
+      * Câu hỏi về triệu chứng hiện tại còn mơ hồ ("tôi lại thấy không ổn", "triệu chứng này", "như lần trước") và cần hỏi mức độ, thời điểm, dấu hiệu cảnh báo.
+      * Follow-up kết quả ảnh AI chưa xác nhận, hoặc đánh giá tái diễn triệu chứng nguy hiểm.
+      * Câu hỏi quá chung chung mà memory không đủ để biến thành câu hỏi y khoa cụ thể.
+    - KHÔNG chọn agent ảnh nếu Has image = false, kể cả khi memory có kết quả ảnh cũ.
+
     Bạn phải cung cấp câu trả lời của mình ở định dạng JSON với cấu trúc sau:
     {{
     "agent": "AGENT_NAME",

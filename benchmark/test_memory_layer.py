@@ -14,6 +14,7 @@ from agents.patient_memory_service.memory_service import get_patient_memory_serv
 from agents.patient_memory_service.schemas import (
     PatientConditionCreate,
     PatientConversationMemoryCreate,
+    PatientMemoryListRequest,
     PatientMemorySearchRequest,
     MemoryMessage,
 )
@@ -42,7 +43,7 @@ def overlap_score(left: str, right: str) -> float:
     return len(left_tokens & right_tokens) / len(left_tokens)
 
 
-def is_match(expected_text: str, actual_text: str, threshold: float = 0.45) -> bool:
+def is_match(expected_text: str, actual_text: str, threshold: float = 0.5) -> bool:
     expected_norm = normalize(expected_text)
     actual_norm = normalize(actual_text)
     return expected_norm in actual_norm or overlap_score(expected_norm, actual_norm) >= threshold
@@ -119,6 +120,19 @@ def retrieve(service, case: Dict[str, Any], query: str, top_k: int) -> Tuple[Lis
     return results, latency
 
 
+def list_all_memories(service, case: Dict[str, Any], top_k: int = 20) -> List[Dict[str, Any]]:
+    response = service.list_conditions(
+        PatientMemoryListRequest(
+            patient_id=case["patient_id"],
+            top_k=top_k,
+        )
+    )
+    return [
+        item.model_dump() if hasattr(item, "model_dump") else dict(item)
+        for item in response.get("results", [])
+    ]
+
+
 def extraction_scores(expected: List[Dict[str, Any]], actual: List[Dict[str, Any]]) -> Tuple[float, float]:
     actual_texts = [item.get("memory", "") for item in actual]
     matched_expected = sum(
@@ -132,26 +146,64 @@ def extraction_scores(expected: List[Dict[str, Any]], actual: List[Dict[str, Any
     return precision, recall
 
 
-def retrieval_recall_at_k(expected: List[Dict[str, Any]], retrieved: List[Dict[str, Any]], k: int) -> float:
+def retrieval_recall_at_k(
+    expected: List[Dict[str, Any]],
+    retrieved: List[Dict[str, Any]],
+    k: int,
+    expected_ids: Optional[List[str]] = None,
+) -> float:
+    if not expected:
+        return 0.0
+
+    if expected_ids:
+        retrieved_ids = set()
+        for item in retrieved[:k]:
+            metadata = item.get("metadata") or {}
+            if metadata.get("expected_memory_id"):
+                retrieved_ids.add(metadata["expected_memory_id"])
+        matched = sum(1 for memory_id in expected_ids if memory_id in retrieved_ids)
+        if matched:
+            return matched / len(expected_ids)
+
     top_texts = [item.get("memory", "") for item in retrieved[:k]]
     matched = sum(
         1 for expected_item in expected if any(is_match(expected_item["text"], text) for text in top_texts)
     )
-    return matched / len(expected) if expected else 0.0
+    return matched / len(expected)
 
 
-def heuristic_route(query: str, retrieved: List[Dict[str, Any]]) -> str:
-    context = normalize(query + " " + " ".join(item.get("memory", "") for item in retrieved))
-    if any(keyword in context for keyword in ["ảnh", "hình", "nội soi", "kết quả lần trước", "lần trước"]):
-        return "CONVERSATION_AGENT"
-    if any(keyword in context for keyword in ["lại", "tái diễn", "khó chịu", "nguy hiểm hơn", "đi viện"]):
-        return "CONVERSATION_AGENT"
-    return "PARALLEL_KG_RAG_AGENT"
+def repeated_question_avoided(
+    expected: List[Dict[str, Any]],
+    retrieved: List[Dict[str, Any]],
+    expected_ids: Optional[List[str]] = None,
+) -> bool:
+    if expected_ids:
+        retrieved_ids = {
+            (item.get("metadata") or {}).get("expected_memory_id")
+            for item in retrieved
+        }
+        if any(memory_id in retrieved_ids for memory_id in expected_ids):
+            return True
 
-
-def repeated_question_avoided(expected: List[Dict[str, Any]], retrieved: List[Dict[str, Any]]) -> bool:
     retrieved_text = " ".join(item.get("memory", "") for item in retrieved)
     return any(is_match(expected_item["text"], retrieved_text) for expected_item in expected)
+
+
+def predict_route(
+    query: str,
+    case: Dict[str, Any],
+    memory_enabled: bool,
+) -> Tuple[str, float, str]:
+    from agents.agent_decision import decide_agent_route
+
+    started_at = time.time()
+    route_result = decide_agent_route(
+        query,
+        patient_id=case["patient_id"],
+        memory_enabled=memory_enabled,
+    )
+    latency = time.time() - started_at
+    return route_result["agent"], latency, route_result.get("reasoning", "")
 
 
 def run_full_system_answer(
@@ -159,7 +211,7 @@ def run_full_system_answer(
     case: Dict[str, Any],
     memory_enabled: bool,
     graph,
-) -> str:
+) -> Tuple[str, Optional[str]]:
     from agents.agent_decision import process_query
 
     result = process_query(
@@ -171,16 +223,16 @@ def run_full_system_answer(
     )
     output = result.get("output")
     if hasattr(output, "content"):
-        return output.content
-    if isinstance(output, str):
-        return output
-    messages = result.get("messages") or []
-    if messages and hasattr(messages[-1], "content"):
-        return messages[-1].content
-    return ""
+        answer = output.content
+    elif isinstance(output, str):
+        answer = output
+    else:
+        messages = result.get("messages") or []
+        answer = messages[-1].content if messages and hasattr(messages[-1], "content") else ""
+    return answer, result.get("routing_agent")
 
 
-def judge_answer_quality(answer: str, case: Dict[str, Any], query: str) -> Optional[float]:
+def judge_answer_quality(answer: str, eval_query: Dict[str, Any], query: str) -> Optional[float]:
     if not answer:
         return None
     if not os.getenv("GOOGLE_API_KEY"):
@@ -188,7 +240,7 @@ def judge_answer_quality(answer: str, case: Dict[str, Any], query: str) -> Optio
 
     from utils.llm_config import get_gemini_llm
 
-    reference_points = "\n".join(f"- {point}" for point in case["eval_queries"][0]["reference_answer_points"])
+    reference_points = "\n".join(f"- {point}" for point in eval_query["reference_answer_points"])
     prompt = f"""
 You are judging a Vietnamese medical assistant answer.
 Score from 1 to 5 using this rubric:
@@ -222,6 +274,7 @@ Return only JSON: {{"score": <number>, "reason": "<short reason>"}}
 def evaluate_mode(mode: str, cases: List[Dict[str, Any]], args, graph=None) -> Dict[str, Any]:
     service = get_patient_memory_service() if mode != "M0" else None
     records = []
+    memory_enabled = mode != "M0"
 
     for case in cases:
         if service is not None:
@@ -231,47 +284,101 @@ def evaluate_mode(mode: str, cases: List[Dict[str, Any]], args, graph=None) -> D
         elif mode == "M2" and service is not None:
             write_conversation_memories(service, case)
 
-        query = case["eval_queries"][0]["query"]
         expected = case["expected_memories"]
-        started_at = time.time()
-        retrieved, retrieval_latency = ([], 0.0)
-        if mode != "M0" and service is not None:
-            retrieved, retrieval_latency = retrieve(service, case, query, top_k=5)
 
-        precision, recall = extraction_scores(expected, retrieved)
-        route = heuristic_route(query, retrieved)
-        expected_agent = case["eval_queries"][0]["expected_agent"]
-        answer = ""
-        answer_quality = None
+        for eval_query in case["eval_queries"]:
+            query = eval_query["query"]
+            if mode == "M0":
+                expected_agent = eval_query.get(
+                    "expected_agent_without_memory",
+                    eval_query["expected_agent"],
+                )
+            else:
+                expected_agent = eval_query["expected_agent"]
+            expected_ids = eval_query.get("expected_relevant_memory_ids", [])
+            started_at = time.time()
 
-        if args.full_system:
-            answer = run_full_system_answer(query, case, memory_enabled=(mode != "M0"), graph=graph)
-            if args.llm_judge:
-                answer_quality = judge_answer_quality(answer, case, query)
+            retrieved, retrieval_latency = ([], 0.0)
+            stored_memories: List[Dict[str, Any]] = []
+            if mode != "M0" and service is not None:
+                retrieved, retrieval_latency = retrieve(service, case, query, top_k=5)
+                if mode == "M2":
+                    stored_memories = list_all_memories(service, case)
 
-        latency = time.time() - started_at
-        records.append(
-            {
-                "mode": mode,
-                "case_id": case["case_id"],
-                "category": case["category"],
-                "patient_id": case["patient_id"],
-                "query": query,
-                "retrieved": retrieved,
-                "memory_extraction_precision": precision,
-                "memory_extraction_recall": recall,
-                "memory_retrieval_recall_at_3": retrieval_recall_at_k(expected, retrieved, 3),
-                "memory_retrieval_recall_at_5": retrieval_recall_at_k(expected, retrieved, 5),
-                "expected_agent": expected_agent,
-                "predicted_agent": route,
-                "routing_correct": route == expected_agent,
-                "repeated_question_avoided": repeated_question_avoided(expected, retrieved),
-                "answer": answer,
-                "answer_quality_score": answer_quality,
-                "retrieval_latency": retrieval_latency,
-                "latency": latency,
-            }
-        )
+            extraction_source = stored_memories if mode == "M2" else retrieved
+            precision, recall = extraction_scores(expected, extraction_source)
+
+            predicted_agent, routing_latency, routing_reason = predict_route(
+                query,
+                case,
+                memory_enabled=memory_enabled,
+            )
+
+            baseline_agent = None
+            baseline_correct = None
+            memory_routing_lift = False
+            if eval_query.get("expected_agent_without_memory") is not None:
+                if mode == "M0":
+                    baseline_agent = predicted_agent
+                    baseline_correct = predicted_agent == eval_query["expected_agent_without_memory"]
+                else:
+                    baseline_agent, _, _ = predict_route(
+                        query,
+                        case,
+                        memory_enabled=False,
+                    )
+                    baseline_correct = baseline_agent == eval_query["expected_agent_without_memory"]
+                    memory_routing_lift = (
+                        predicted_agent == expected_agent
+                        and baseline_agent != expected_agent
+                    )
+
+            answer = ""
+            answer_quality = None
+            executed_routing_agent = None
+            if args.full_system:
+                answer, executed_routing_agent = run_full_system_answer(
+                    query,
+                    case,
+                    memory_enabled=memory_enabled,
+                    graph=graph,
+                )
+                if args.llm_judge:
+                    answer_quality = judge_answer_quality(answer, eval_query, query)
+
+            latency = time.time() - started_at
+            records.append(
+                {
+                    "mode": mode,
+                    "case_id": case["case_id"],
+                    "query_id": eval_query.get("query_id", "q1"),
+                    "category": case["category"],
+                    "difficulty": case.get("difficulty", "medium"),
+                    "patient_id": case["patient_id"],
+                    "query": query,
+                    "retrieved": retrieved,
+                    "stored_memories": stored_memories,
+                    "memory_extraction_precision": precision,
+                    "memory_extraction_recall": recall,
+                    "memory_retrieval_recall_at_3": retrieval_recall_at_k(expected, retrieved, 3, expected_ids),
+                    "memory_retrieval_recall_at_5": retrieval_recall_at_k(expected, retrieved, 5, expected_ids),
+                    "expected_agent": expected_agent,
+                    "predicted_agent": predicted_agent,
+                    "routing_reason": routing_reason,
+                    "routing_correct": predicted_agent == expected_agent,
+                    "baseline_agent_without_memory": baseline_agent,
+                    "baseline_routing_correct": baseline_correct,
+                    "memory_routing_lift": memory_routing_lift,
+                    "requires_memory": eval_query.get("requires_memory", False),
+                    "repeated_question_avoided": repeated_question_avoided(expected, retrieved, expected_ids),
+                    "answer": answer,
+                    "executed_routing_agent": executed_routing_agent,
+                    "answer_quality_score": answer_quality,
+                    "retrieval_latency": retrieval_latency,
+                    "routing_latency": routing_latency,
+                    "latency": latency,
+                }
+            )
 
     return {
         "mode": mode,
@@ -287,17 +394,31 @@ def avg(values: List[Optional[float]]) -> Optional[float]:
 
 def summarize(records: List[Dict[str, Any]]) -> Dict[str, Any]:
     total = len(records)
+    memory_required = [record for record in records if record.get("requires_memory")]
+    baseline_records = [record for record in records if record.get("baseline_agent_without_memory") is not None]
+    hard_records = [record for record in records if record.get("difficulty") == "hard"]
+
+    def rate(items: List[Dict[str, Any]], key: str) -> Optional[float]:
+        if not items:
+            return None
+        return sum(1 for item in items if item.get(key)) / len(items)
+
     return {
         "total_cases": total,
         "memory_extraction_precision": avg([record["memory_extraction_precision"] for record in records]),
         "memory_extraction_recall": avg([record["memory_extraction_recall"] for record in records]),
         "memory_retrieval_recall_at_3": avg([record["memory_retrieval_recall_at_3"] for record in records]),
         "memory_retrieval_recall_at_5": avg([record["memory_retrieval_recall_at_5"] for record in records]),
-        "routing_accuracy": sum(1 for record in records if record["routing_correct"]) / total if total else 0.0,
-        "repeated_question_avoidance_rate": sum(1 for record in records if record["repeated_question_avoided"]) / total if total else 0.0,
+        "routing_accuracy": rate(records, "routing_correct"),
+        "routing_accuracy_hard": rate(hard_records, "routing_correct"),
+        "routing_accuracy_memory_required": rate(memory_required, "routing_correct"),
+        "baseline_routing_accuracy": rate(baseline_records, "baseline_routing_correct"),
+        "memory_routing_lift_rate": rate(records, "memory_routing_lift"),
+        "repeated_question_avoidance_rate": rate(records, "repeated_question_avoided"),
         "answer_quality_score": avg([record["answer_quality_score"] for record in records]),
         "avg_latency": avg([record["latency"] for record in records]),
         "avg_retrieval_latency": avg([record["retrieval_latency"] for record in records]),
+        "avg_routing_latency": avg([record["routing_latency"] for record in records]),
     }
 
 

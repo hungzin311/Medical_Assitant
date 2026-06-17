@@ -58,6 +58,7 @@ class AgentState(MessagesState):
     patient_memory_context: Optional[str]  # Retrieved long-term memory context
     patient_memory_items: List[Dict[str, Any]]  # Raw normalized Mem0 search results
     memory_enabled: bool  # Whether long-term memory is enabled for this run
+    routing_agent: Optional[str]  # Agent selected at routing time (preserved for evaluation)
     polyp_segmentation_path: Optional[str]  # Segmentation overlay path for polyp VQA
 
 
@@ -82,6 +83,130 @@ def _shorten_text(text: str, max_chars: int = 1200) -> str:
     if len(text) <= max_chars:
         return text
     return text[: max_chars - 3].rstrip() + "..."
+
+
+_decision_chain = None
+
+
+def get_decision_chain():
+    """Return the shared Decision Agent chain used by LangGraph routing."""
+    global _decision_chain
+    if _decision_chain is None:
+        decision_model = config.agent_decision.llm
+        json_parser = JsonOutputParser(pydantic_object=AgentDecision)
+        decision_prompt = ChatPromptTemplate.from_messages([
+            ("human", f"System: {decision_agent_prompt}\n\nUser: {{input}}"),
+        ])
+        _decision_chain = decision_prompt | decision_model | json_parser
+    return _decision_chain
+
+
+def retrieve_patient_memory_for_query(
+    patient_id: str,
+    query: str,
+    *,
+    memory_enabled: bool = True,
+    top_k: int = 5,
+    threshold: float = 0.1,
+) -> Dict[str, Any]:
+    """Retrieve durable patient memory for routing or answer generation."""
+    if not memory_enabled or not query.strip():
+        return {
+            "patient_memory_context": "",
+            "patient_memory_items": [],
+        }
+
+    try:
+        from agents.patient_memory_service.memory_service import get_patient_memory_service
+        from agents.patient_memory_service.schemas import PatientMemorySearchRequest
+
+        service = get_patient_memory_service()
+        search_result = service.search(
+            PatientMemorySearchRequest(
+                patient_id=patient_id,
+                query=query,
+                top_k=top_k,
+                threshold=threshold,
+            )
+        )
+        memory_items = [
+            item.model_dump() if hasattr(item, "model_dump") else dict(item)
+            for item in search_result.get("results", [])
+        ]
+        return {
+            "patient_memory_context": _format_patient_memory_context(memory_items),
+            "patient_memory_items": memory_items,
+        }
+    except Exception as exc:
+        logger.warning("Patient memory retrieval skipped: %s", exc)
+        return {
+            "patient_memory_context": "",
+            "patient_memory_items": [],
+        }
+
+
+def _build_decision_input(
+    query: str,
+    *,
+    conversation_history: Optional[List[BaseMessage]] = None,
+    patient_memory_context: str = "",
+    has_image: bool = False,
+    image_type: Optional[str] = None,
+) -> str:
+    recent_context = ""
+    for message in (conversation_history or [])[-6:]:
+        if isinstance(message, HumanMessage):
+            recent_context += f"User: {message.content}\n"
+        elif isinstance(message, AIMessage):
+            recent_context += f"Assistant: {message.content}\n"
+
+    return f"""
+        User query: {query}
+
+        Recent conversation context:
+        {recent_context or 'None'}
+
+        Relevant long-term patient memory:
+        {patient_memory_context if patient_memory_context else 'None'}
+
+        Has image: {has_image}
+        Image type: {image_type if has_image else 'None'}
+
+        Based on this information, which agent should handle this query?
+        """
+
+
+def decide_agent_route(
+    query: Union[str, Dict],
+    *,
+    patient_id: str = "PAT_001",
+    conversation_history: Optional[List[BaseMessage]] = None,
+    memory_enabled: bool = True,
+    has_image: bool = False,
+    image_type: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Run the real Decision Agent routing logic for benchmarking or tooling."""
+    input_text = _input_to_text(query)
+    memory_result = retrieve_patient_memory_for_query(
+        patient_id,
+        input_text,
+        memory_enabled=memory_enabled,
+    )
+    decision_input = _build_decision_input(
+        input_text,
+        conversation_history=conversation_history,
+        patient_memory_context=memory_result["patient_memory_context"],
+        has_image=has_image,
+        image_type=image_type,
+    )
+    decision = get_decision_chain().invoke({"input": decision_input})
+    return {
+        "agent": decision["agent"],
+        "reasoning": decision.get("reasoning", ""),
+        "confidence": decision.get("confidence"),
+        "patient_memory_context": memory_result["patient_memory_context"],
+        "patient_memory_items": memory_result["patient_memory_items"],
+    }
 
 
 def _format_patient_memory_context(memory_items: List[Dict[str, Any]]) -> str:
@@ -122,13 +247,7 @@ def _memory_context_message(patient_memory_context: Optional[str]) -> List[Dict[
 
 def create_agent_graph(patient_query_engine: PatientQueryEngine):
     """Create and configure the LangGraph for agent orchestration."""
-    decision_model = config.agent_decision.llm
-    json_parser = JsonOutputParser(pydantic_object=AgentDecision)
-    
-    # Create the decision prompt
-    decision_prompt = ChatPromptTemplate.from_messages([
-    ("human", f"System: {decision_agent_prompt}\n\nUser: {{input}}")])
-    decision_chain = decision_prompt | decision_model | json_parser
+    decision_chain = get_decision_chain()
 
     kg_agent = KGQueryEngine(patient_query_engine)
     rag_agent = MedicalRAG(config)
@@ -174,54 +293,19 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
 
     def retrieve_patient_memory(state: AgentState) -> AgentState:
         """Retrieve durable patient memory before routing and answer generation."""
-        if not state.get("memory_enabled", True):
-            return {
-                **state,
-                "patient_memory_context": "",
-                "patient_memory_items": [],
-            }
-
         patient_id = state.get("patient_id") or "PAT_001"
         query = _input_to_text(state.get("current_input"), include_image_hint=True)
-        if not query.strip():
-            return {
-                **state,
-                "patient_memory_context": "",
-                "patient_memory_items": [],
-            }
-
-        try:
-            from agents.patient_memory_service.memory_service import get_patient_memory_service
-            from agents.patient_memory_service.schemas import PatientMemorySearchRequest
-
-            service = get_patient_memory_service()
-            search_result = service.search(
-                PatientMemorySearchRequest(
-                    patient_id=patient_id,
-                    query=query,
-                    top_k=5,
-                    threshold=0.1,
-                )
-            )
-            memory_items = [
-                item.model_dump() if hasattr(item, "model_dump") else dict(item)
-                for item in search_result.get("results", [])
-            ]
-            memory_context = _format_patient_memory_context(memory_items)
-            if memory_context:
-                emit_stream_event("status", {"message": "Retrieved relevant patient memory..."})
-            return {
-                **state,
-                "patient_memory_context": memory_context,
-                "patient_memory_items": memory_items,
-            }
-        except Exception as exc:
-            logger.warning("Patient memory retrieval skipped: %s", exc)
-            return {
-                **state,
-                "patient_memory_context": "",
-                "patient_memory_items": [],
-            }
+        memory_result = retrieve_patient_memory_for_query(
+            patient_id,
+            query,
+            memory_enabled=state.get("memory_enabled", True),
+        )
+        if memory_result["patient_memory_context"]:
+            emit_stream_event("status", {"message": "Retrieved relevant patient memory..."})
+        return {
+            **state,
+            **memory_result,
+        }
     
     def check_if_bypassing(state: AgentState) -> str:
         """Check if we should bypass normal routing due to guardrails."""
@@ -264,32 +348,17 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
             updated_state = {
                 **state,
                 "agent_name": selected_agent,
+                "routing_agent": selected_agent,
             }
             return {"agent_state": updated_state, "next": selected_agent}
-        
-        # Create context from recent conversation history (last 3 messages)
-        recent_context = ""
-        for msg in messages[-6:]:  # Get last 3 exchanges (6 messages)
-            if isinstance(msg, HumanMessage):
-                recent_context += f"User: {msg.content}\n"
-            elif isinstance(msg, AIMessage):
-                recent_context += f"Assistant: {msg.content}\n"
-        
-        # Combine everything for the decision input
-        decision_input = f"""
-        User query: {input_text}
 
-        Recent conversation context:
-        {recent_context}
-
-        Relevant long-term patient memory:
-        {patient_memory_context if patient_memory_context else 'None'}
-
-        Has image: {has_image}
-        Image type: {image_type if has_image else 'None'}
-
-        Based on this information, which agent should handle this query?
-        """
+        decision_input = _build_decision_input(
+            input_text,
+            conversation_history=messages,
+            patient_memory_context=patient_memory_context,
+            has_image=has_image,
+            image_type=image_type,
+        )
 
         # Make the decision
         decision = decision_chain.invoke({"input": decision_input})
@@ -306,8 +375,9 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         updated_state = {
             **state,
             "agent_name": decision["agent"],
+            "routing_agent": decision["agent"],
         }
-        
+
         # if decision["confidence"] < AgentConfig.CONFIDENCE_THRESHOLD:
         #     return {"agent_state": updated_state, "next": "needs_validation"}
         return {"agent_state": updated_state, "next": decision["agent"]}
@@ -1051,6 +1121,7 @@ def init_agent_state() -> AgentState:
         "patient_memory_context": "",
         "patient_memory_items": [],
         "memory_enabled": True,
+        "routing_agent": None,
         "polyp_segmentation_path": None
     }
 
