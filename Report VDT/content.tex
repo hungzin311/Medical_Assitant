@@ -69,7 +69,7 @@ The main contributions of this thesis are:
 
 \subsection{Research Questions}
 
-This thesis is guided by five research questions. First, how can a medical assistant combine conversational reasoning, RAG, Knowledge Graph reasoning, and Web Search to reduce unsupported medical responses? Second, how can information sufficiency assessment improve safety in symptom-based consultation? Third, can segmentation masks improve Polyp VQA by providing visual grounding for a fine-tuned VLM? Fourth, how can long-term memory support personalization without turning patient-reported facts into verified diagnoses? Finally, what trade-offs appear between modularity, response quality, latency, and safety in a multi-agent medical assistant?
+This thesis is guided by five research questions. First, how can a medical assistant combine conversational reasoning, RAG, Knowledge Graph reasoning, and Web Search to reduce unsupported medical responses? Second, how can information sufficiency assessment inside the MedGemma CoT workflow improve safety in symptom-based consultation? Third, can segmentation masks improve Polyp VQA by providing visual grounding for a fine-tuned VLM? Fourth, how can long-term memory support personalization without turning patient-reported facts into verified diagnoses? Finally, what trade-offs appear between modularity, response quality, latency, and safety in a multi-agent medical assistant?
 
 These questions connect the architecture with the evaluation methodology. The report therefore evaluates the system as a reasoning architecture and not as a clinical product ready for deployment.
 
@@ -89,7 +89,7 @@ Medical vision-language models extend this trend from text-only reasoning to ima
 
 However, current LLMs and VLMs still have important limitations for medical assistants. They can generate fluent but unsupported answers, especially when the user question lacks clinical context or when the model relies only on parametric memory \cite{llm_hallucination_survey}. Many models also operate without explicit retrieval, Knowledge Graph evidence, segmentation grounding, or human validation. For VLMs, correct-looking answers may come from dataset priors or textual shortcuts rather than from the relevant image region, which is risky in endoscopy because lesion interpretation depends on local boundary, texture, morphology, and color patterns.
 
-This thesis therefore treats LLMs and VLMs as components inside a larger safety-aware architecture. The proposed system combines model generation with routing, information sufficiency assessment, RAG, Knowledge Graph reasoning, memory, segmentation-based visual grounding, and human validation. In the Polyp VQA setting, MedGemma-4B-it and Qwen3.5-4B are adapted with LoRA and evaluated under both original-image and segmentation-grounded inputs. This design directly addresses the limitation of standalone models by testing whether external evidence and visual grounding improve reasoning reliability rather than only answer fluency.
+This thesis therefore treats LLMs and VLMs as components inside a larger safety-aware architecture. The proposed system combines model generation with routing, RAG, Knowledge Graph reasoning, MedGemma CoT-based information sufficiency assessment, memory, segmentation-based visual grounding, and human validation. In the Polyp VQA setting, MedGemma-4B-it and Qwen3.5-4B are adapted with LoRA and evaluated under both original-image and segmentation-grounded inputs. This design directly addresses the limitation of standalone models by testing whether external evidence and visual grounding improve reasoning reliability rather than only answer fluency.
 
 \subsection{Medical Question Answering and Multi-hop Reasoning}
 
@@ -227,7 +227,7 @@ Figure \ref{fig:detailed-agent-workflow} makes the advantages of the multi-agent
 \hline
 \textbf{Functional decomposition} & User input is routed from the Agent Core to specialized text and vision branches. This means heterogeneous medical tasks can be handled by agents with suitable tools instead of forcing one model to perform retrieval, reasoning, segmentation, and VQA at the same time. \\
 \textbf{Evidence specialization} & KG, RAG, Web Search, shared memory, and segmentation masks appear as separate evidence channels. The system can therefore combine structured relations, explanatory documents, updated web evidence, patient context, and visual grounding without collapsing them into one opaque prompt. \\
-\textbf{Graceful fallback} & Information Assessment routes successful cases to MedGemma CoT and weak-evidence cases to Web Search or conversational handling. This helps avoid premature answers when internal evidence is missing, uncertain, or clinically underspecified. \\
+\textbf{Graceful fallback} & MedGemma CoT evaluates the selected KG/RAG context and routes weak-evidence cases to Web Search or conversational handling. This helps avoid premature answers when internal evidence is missing, uncertain, or clinically underspecified. \\
 \textbf{Cross-modal continuity} & Vision outputs and text reasoning interact through shared memory and workflow state. A user can upload an image, receive an initial interpretation, and then continue asking follow-up questions that reuse the image-derived context. \\
 \textbf{Observability and evaluation} & Intermediate modules such as routing, query expansion, KG/RAG retrieval, segmentation, and response generation are explicit. Errors can therefore be traced to a specific stage, and the system can be evaluated beyond the final generated answer. \\
 \hline\hline
@@ -243,7 +243,7 @@ This table also clarifies why the proposed system is not merely a collection of 
 
 A key characteristic of the proposed system is that agents cooperate through shared workflow state, memory, and intermediate evidence objects. In this design, the output of one agent can become a structured input for another agent. This is important because many medical-assistant tasks require more than one capability: a system may need to detect the modality of the request, retrieve medical evidence, localize a visual region, ask follow-up questions, and synthesize a cautious response in the same interaction.
 
-The first cooperation pattern appears inside the Text Module. The Conversation Agent, Query Expansion component, KG Agent, RAG Agent, Web Search Agent, and response generator form a coordinated reasoning pipeline. The Conversation Agent determines whether the user has provided enough clinical context. If the request is medical and sufficiently specified, Query Expansion reformulates the query into medically useful terms. The KG Agent then provides structured relations such as symptom--disease links, while the RAG Agent retrieves explanatory documents from the vector database. Information Assessment evaluates whether these sources are sufficient; if not, the Web Search Agent is activated as a fallback. The final answer is therefore not produced from a single source, but from a controlled cooperation among agents with complementary evidence roles.
+The first cooperation pattern appears inside the Text Module. The Conversation Agent, Query Expansion component, KG Agent, RAG Agent, Web Search Agent, and response generator form a coordinated reasoning pipeline. The Conversation Agent determines whether the user has provided enough clinical context. If the request is medical and sufficiently specified, Query Expansion reformulates the query into medically useful terms. The KG Agent then provides structured relations such as symptom--disease links, while the RAG Agent retrieves explanatory documents from the vector database. These context sources are then passed into MedGemma CoT, where information sufficiency and medical decision branching are evaluated. If the context is weak, the Web Search Agent or follow-up questioning can be activated. The final answer is therefore not produced from a single source, but from controlled cooperation among context-selection agents and a reasoning component.
 
 The second cooperation pattern appears between the Vision Module and the Polyp VQA Agent. The Polyp Segmentation Agent produces a mask that localizes clinically relevant regions in a colonoscopy image. This mask is not only a final segmentation output; it also becomes a visual grounding signal for the Polyp VQA Agent. The VQA Agent can then answer natural-language questions by using both the original image and the segmentation overlay. This cooperation combines the precision of pixel-level localization with the reasoning ability of a fine-tuned vision-language model. The experimental comparison between original-image VQA and segmentation-grounded VQA evaluates whether this cooperation improves answer quality, rather than assuming that agent collaboration is beneficial without evidence.
 
@@ -292,6 +292,15 @@ Human validation is placed after the AI response rather than inside every intern
 
 The Text Module is responsible for medical reasoning over user-provided language. It handles questions about symptoms, diseases, drugs, medical concepts, and follow-up concerns. Its main goal is to produce responses that are grounded, cautious, and aware of missing clinical information.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.82\textwidth]{images/abctext.png}
+    \caption{Text Module architecture for medical knowledge retrieval}
+    \label{fig:text-module-architecture}
+\end{figure}
+
+Figure \ref{fig:text-module-architecture} provides the high-level view of the Text Module. It shows that text reasoning begins with user input classification, then branches into conversational handling, KG/RAG evidence retrieval, MedGemma CoT assessment, fallback search, and final response generation. Although the workflow diagram may visualize assessment as a separate decision node, this node should be interpreted as a logical step inside MedGemma CoT rather than as an independent agent. This figure is therefore introduced at the beginning of the chapter before the individual agents are discussed in detail.
+
 The general processing flow is:
 
 \begin{enumerate}
@@ -307,7 +316,7 @@ This flow is designed to make the Text Module cautious by default. The module do
 
 The Text Module therefore acts as the main reasoning layer for non-image medical queries. It must handle two very different types of user input. The first type is educational, such as asking what a disease is or how a medication works. The second type is consultation-oriented, such as describing symptoms and asking what might be happening. The second type requires stricter information sufficiency checks because the same symptom can have different meanings depending on duration, severity, age, medical history, and associated signs.
 
-The workflow in Figure \ref{fig:detailed-agent-workflow} also shows that text reasoning is not reduced to document retrieval alone. The Text Module combines conversational intake, KG/RAG reasoning, information assessment, web fallback, and final medical response generation. This layered structure is important because the main risk in medical QA is not only whether the system knows a fact, but whether it knows when a fact is insufficient for a patient-specific conclusion.
+The workflow in Figure \ref{fig:detailed-agent-workflow} also shows that text reasoning is not reduced to document retrieval alone. The Text Module combines conversational intake, KG/RAG context selection, MedGemma CoT reasoning, web fallback, and final medical response generation. This layered structure is important because the main risk in medical QA is not only whether the system can retrieve facts, but whether the reasoning component knows when the available context is insufficient for a patient-specific conclusion.
 
 \subsection{Text Query Types and Routing Behavior}
 
@@ -321,7 +330,7 @@ The Text Module is designed around the observation that medical text queries are
 \textbf{Query type} & \textbf{Main agent behavior} & \textbf{Reasoning requirement} \\
 \hline
 \textbf{Medical education} & Use RAG and/or KG to retrieve reliable medical knowledge. & Provide grounded explanation without over-personalizing the answer. \\
-\textbf{Symptom consultation} & Assess information sufficiency and ask follow-up questions if needed. & Avoid premature diagnosis when onset, severity, duration, risk factors, or warning signs are missing. \\
+\textbf{Symptom consultation} & Pass user context to MedGemma CoT for sufficiency assessment and ask follow-up questions if needed. & Avoid premature diagnosis when onset, severity, duration, risk factors, or warning signs are missing. \\
 \textbf{Structured relation query} & Route to KG reasoning and use RAG for explanation when needed. & Connect entities such as symptoms, diseases, drugs, body parts, and risk factors. \\
 \textbf{Medication or treatment question} & Use retrieval cautiously and consider patient context such as allergies or chronic diseases when available. & Avoid unsafe recommendations and encourage professional consultation for dosage or treatment decisions. \\
 \textbf{Missing or non-medical input} & Use the conversational agent or request clarification. & Prevent irrelevant retrieval and keep the system aligned with user intent. \\
@@ -346,6 +355,34 @@ This behavior improves usability because the system does not overwhelm the user 
 
 The multi-hop design also improves traceability. Each follow-up question corresponds to a missing clinical variable. This makes it possible to analyze whether the agent is asking useful questions or merely extending the conversation. In evaluation, this behavior is reflected by Multi-Hop Awareness Score, which rewards the system for recognizing when additional information is needed.
 
+\subsubsection{Single-turn Limitation versus Multi-hop Clarification}
+
+The difference between a traditional single-turn response and the proposed multi-hop QA behavior is illustrated in Figures \ref{fig:traditional-single-turn-limitation} and \ref{fig:medical-multihop-qa-benefit}. These two examples use the same general symptom scenario, but the response strategies are different.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{images/disavantage_of_traditional_approach.jpg}
+    \caption{Traditional single-turn approach with limited clinical context}
+    \label{fig:traditional-single-turn-limitation}
+\end{figure}
+
+Figure \ref{fig:traditional-single-turn-limitation} shows the main weakness of a traditional single-turn medical assistant. The user provides a short symptom description, such as headache and nausea, but the system immediately produces a relatively strong medical interpretation. Even if the response includes disclaimers, the reasoning is still based on an incomplete clinical picture. Important variables such as current blood pressure, onset time, severity, neurological symptoms, medication adherence, and warning signs are not yet available. As a result, the model may overcommit to one hypothesis or provide advice that is not sufficiently adapted to the actual situation.
+
+This failure mode is particularly important in medical AI because symptoms are rarely specific by themselves. Headache and nausea can be associated with many conditions, ranging from mild fatigue or migraine to hypertensive urgency, infection, medication side effects, or neurological emergencies. A single-turn answer may sound helpful because it is detailed, but detail does not guarantee clinical appropriateness. The core problem is that the model is answering before it has enough discriminative information.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{images/benefit-of-medical-multihop-qa.jpg}
+    \caption{Multi-hop QA approach with iterative clarification and safer response refinement}
+    \label{fig:medical-multihop-qa-benefit}
+\end{figure}
+
+Figure \ref{fig:medical-multihop-qa-benefit} demonstrates the advantage of the multi-hop QA workflow. Instead of producing a final answer immediately, the system first identifies missing clinical information and asks a focused follow-up question. When the user provides additional context, such as a blood pressure value or the absence of severe neurological symptoms, the system updates its interpretation. The answer then becomes more specific: it can distinguish between hypertensive emergency, hypertensive urgency, and a high but not immediately life-threatening blood pressure state.
+
+This iterative process improves the response in three ways. First, it improves \textbf{clinical specificity} because the system can condition its answer on newly provided variables. Second, it improves \textbf{safety} because red flags are checked before giving ordinary advice. Third, it improves \textbf{explainability} because each follow-up question corresponds to a missing piece of information that affects the final decision. In this sense, multi-hop QA is not only a conversational feature; it is a safety mechanism for controlling when the system is allowed to answer.
+
+The comparison also clarifies the role of the Conversation Agent. Its purpose is not to ask many questions for their own sake, but to ask the next question that most reduces clinical uncertainty. A good follow-up question should be short, relevant, and oriented toward high-impact variables such as red flags, vital signs, duration, severity, medication use, and patient history. Once sufficient information is available, the system can move from clarification to evidence retrieval and response generation.
+
 \subsubsection{Illustrative Multi-hop Consultation Flow}
 
 An illustrative symptom consultation demonstrates why multi-hop behavior is needed. Suppose the user writes: ``I have stomach pain and nausea. What disease could it be?'' A single-turn chatbot may immediately list gastritis, food poisoning, reflux, or appendicitis. However, this answer is clinically weak because the initial input lacks duration, pain location, severity, fever, vomiting, stool changes, medication use, pregnancy status, and warning signs.
@@ -354,11 +391,13 @@ In the proposed workflow, the Conversation Agent first treats the query as under
 
 This example illustrates the difference between answer generation and consultation support. The goal of the Conversation Agent is not to prolong the dialogue, but to determine whether the current evidence is sufficient for the next safe action. The final response may still include possible causes, but it should clearly separate likely explanations, missing information, warning signs, and next steps.
 
-\subsection{Information Sufficiency Assessment}
+\subsection{Clinical Context Requirements before MedGemma CoT}
 
-Information sufficiency is the mechanism that decides whether the system has enough context to answer. If the available information is not enough, the system should ask for additional details. If the information is sufficient, it can proceed to retrieval and response generation.
+Information sufficiency is not implemented as a standalone agent in the proposed workflow. It is a decision step inside MedGemma CoT. Before that step can operate effectively, the upstream Text Module must provide two kinds of input: the user's clinical context and high-quality evidence retrieved by KG/RAG agents.
 
-This mechanism is important because many medical questions should not be answered directly. A safe assistant should distinguish between:
+This separation of responsibility is important. KG and RAG agents are responsible for selecting useful context data: structured graph relations, candidate diseases, matched symptoms, and explanatory medical passages. MedGemma CoT is then responsible for deciding whether that context is sufficient for a safe response, whether red flags are present, and whether the system should answer, ask a follow-up question, or trigger fallback search.
+
+Many medical questions should not be answered directly. A safe assistant should distinguish between:
 
 \begin{itemize}
     \item general medical education questions that can be answered from knowledge sources;
@@ -367,11 +406,11 @@ This mechanism is important because many medical questions should not be answere
     \item out-of-scope or non-medical queries.
 \end{itemize}
 
-Information sufficiency is also connected to evaluation. A model that refuses to conclude when the evidence is incomplete may appear less decisive, but it is safer in medical reasoning. Therefore, this thesis uses Multi-Hop Awareness Score to measure whether the model can recognize insufficient information rather than forcing an answer.
+Information sufficiency is also connected to evaluation. A model that refuses to conclude when the evidence is incomplete may appear less decisive, but it is safer in medical reasoning. Therefore, this thesis uses Multi-Hop Awareness Score to measure whether MedGemma CoT can recognize insufficient information rather than forcing an answer.
 
 In implementation, information sufficiency should be interpreted as a decision boundary rather than a fixed checklist. Some questions can be answered with little personal context because they are general medical education questions. Other questions require more detail because they imply patient-specific advice. For example, explaining what gastritis is does not require a full intake dialogue, but advising a user with severe abdominal pain requires caution, red-flag screening, and possibly urgent-care guidance.
 
-An important insight is that information sufficiency is an architectural control point, not only a prompt instruction. In the workflow, the result of this assessment changes the route of execution: the system may continue to MedGemma-based synthesis, ask the conversational agent to collect missing details, or invoke Web Search when internal evidence is weak. This makes the Text Module more similar to a clinical triage workflow than to a single-turn QA model.
+An important insight is that information sufficiency is an architectural control point inside MedGemma CoT, not only a prompt instruction. The result of this assessment changes the route of execution: the system may continue to response synthesis, ask the conversational agent to collect missing details, or invoke Web Search when KG/RAG context is weak. This makes the Text Module more similar to a clinical triage workflow than to a single-turn QA model.
 
 The information sufficiency step also prevents a common failure mode of retrieval-augmented systems. A retrieved passage can make a response appear grounded even when the original user question is incomplete. For example, if the user says only ``I have chest pain,'' RAG may retrieve documents about angina, reflux, anxiety, or muscle pain. These documents are medically relevant, but they do not solve the missing-context problem. The system must first identify urgent warning signs and ask about onset, severity, radiation, shortness of breath, sweating, and cardiovascular history. Therefore, evidence availability and clinical sufficiency are related but not identical.
 
@@ -383,13 +422,6 @@ The system uses both RAG and Knowledge Graph retrieval because they provide comp
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.82\textwidth]{images/abctext.png}
-    \caption{Text Module architecture for medical knowledge retrieval}
-    \label{fig:text-module-architecture}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
     \includegraphics[width=0.82\textwidth]{images/text_module.png}
     \caption{Parallel KG-RAG processing in the Text Module}
     \label{fig:parallel-kg-rag}
@@ -397,19 +429,39 @@ The system uses both RAG and Knowledge Graph retrieval because they provide comp
 
 The parallel design in Figure \ref{fig:parallel-kg-rag} reflects a central assumption of this thesis: unstructured and structured medical knowledge are complementary. RAG is strong when the system needs explanatory evidence, while KG reasoning is strong when the question depends on explicit relations between entities such as symptoms, diseases, drugs, and body parts. Running these branches in parallel allows the system to compare different evidence forms before generating an answer.
 
+\subsubsection{Data Retrieval Layer}
+
+The data retrieval layer is responsible for collecting candidate evidence before medical reasoning begins. In the proposed Text Module, retrieval is not limited to one database. The RAG branch retrieves unstructured medical documents from the Qdrant vector database, while the KG branch retrieves structured disease and symptom relations from Neo4j. This dual-source design allows the system to use both semantic similarity and explicit medical relations.
+
+Before retrieval, Query Expansion reformulates the user question by adding related medical terms, synonyms, anatomical terms, and possible disease names. This is especially important for Vietnamese medical queries because users may describe symptoms in informal language, while the data source may use more formal medical terminology. For example, a user may say ``đau bao tử'', while relevant documents may use terms such as epigastric pain, gastritis, reflux, or stomach pain.
+
+The vector retrieval branch uses dense embedding search. In the implementation, documents are embedded with \texttt{google/embeddinggemma-300m} and stored in Qdrant using cosine similarity. Dense retrieval is useful because it can match semantically related expressions even when the exact keywords differ. The retrieval design can also be extended with hybrid search, where dense vector search is combined with keyword-based retrieval such as BM25. This is useful in medical QA because some terms, drug names, disease names, and abbreviations require exact lexical matching, while symptom descriptions often benefit from semantic matching.
+
+After candidate documents are retrieved, a reranker reorders them according to query-document relevance. This step is important because initial vector similarity may return documents that are semantically close but clinically less useful. The reranker helps prioritize documents that better match the actual user question before MedGemma CoT receives the selected context.
+
 \textbf{RAG} is effective when the answer requires explanatory medical text. It retrieves semantically relevant documents from the vector store and provides them as context for response generation. This is useful for disease descriptions, medication explanations, and general medical education.
 
 \textbf{Knowledge Graph retrieval} is effective when the query involves structured relationships. For example, questions about which symptoms are associated with a disease, or which diseases may be linked to a set of symptoms, can benefit from explicit graph relations.
 
-Query expansion and context filtering are used to improve retrieval quality. Query expansion adds related medical terms and reformulates the query, while context filtering reduces irrelevant or noisy retrieved results.
+\subsubsection{KG Agent}
 
-The RAG and KG components also support different explanation styles. RAG is better suited for patient-friendly paragraphs because it retrieves natural-language medical content. KG is better suited for compact relational evidence because it retrieves structured connections. A robust medical answer can use both: graph relations for reasoning and retrieved documents for explanation.
+The KG Agent retrieves structured medical knowledge from Neo4j. Its main role is to convert natural-language medical questions into graph queries and then use the retrieved relations as structured evidence. This is different from RAG because the KG branch does not only search for similar text; it traverses explicit relations between entities such as diseases, symptoms, treatments, medications, advice, and patient-related attributes.
 
-Query expansion is especially useful for Vietnamese medical text because users may describe symptoms in informal language while the dataset uses more formal medical terminology. Expansion can add synonyms, related symptoms, disease names, or anatomical terms. For example, a user may describe ``đau bao tử'' while a medical corpus may contain entries related to stomach pain, epigastric pain, gastritis, or gastroesophageal reflux. Expansion improves the chance that retrieval reaches the relevant region of the knowledge base.
+The Cypher Query Service is responsible for translating user questions into Cypher queries. In the implementation, this process is supported by \texttt{GraphCypherQAChain} and few-shot examples. Few-shot prompting is useful because medical graph queries often require a stable query pattern: identify the target entity, traverse relevant relations, and return disease candidates or associated attributes. A direct LLM answer may be fluent but unsupported, while a Cypher query forces the reasoning step to retrieve concrete graph evidence.
 
-Context filtering is the opposite operation: it removes retrieved passages that are semantically close but clinically irrelevant. In medical QA, this is necessary because two passages can share vocabulary while discussing different conditions, populations, or levels of severity. Filtering also reduces prompt noise, which helps the response generator focus on evidence that is actually useful.
+The KG Agent also supports patient-specific context integration. Retrieved graph results can be filtered using patient information such as age, gender, medical history, current diseases, and symptom context. This prevents the system from returning graph results that are structurally related but clinically less relevant to the patient. For example, a disease relation may exist in the graph, but it may be less appropriate if it mainly concerns a different age group or conflicts with the patient's reported history.
 
-The evaluation in Chapter 8 supports the need for this hybrid design. KG + MedLLM achieves the strongest result on both One-Hop Accuracy and Multi-Hop Awareness Score, suggesting that explicit graph relations are valuable for structured medical reasoning. At the same time, RAG remains necessary because graph triples alone rarely provide enough explanatory detail for patient-facing responses. Therefore, the contribution of the Text Module is not simply choosing KG over RAG, but coordinating them according to the evidence need of each query.
+Context filtering can use embedding similarity between the patient context and disease descriptions. The filtered results are then ranked as disease candidates, including information such as matched symptoms, total symptoms, and similarity scores. This makes the KG output more than a raw list of relations: it becomes a patient-aware candidate set that can be inspected by MedGemma CoT before response generation.
+
+\subsubsection{RAG Agent}
+
+The RAG Agent retrieves and processes unstructured medical documents, mainly from VimedAQA through Qdrant. Its purpose is to provide explanatory medical context that can be used in patient-facing responses. While the KG Agent is strong at structured relation reasoning, the RAG Agent is better suited for definitions, disease descriptions, general advice, medication explanations, and practical health information.
+
+The RAG branch follows three main steps. First, Query Expansion improves the input query by adding relevant medical terms and synonyms. Second, dense retrieval searches the vector database for top-$k$ semantically related passages. Third, the reranker sorts the retrieved passages by practical relevance to the user query. This reranking step helps reduce noise before the response generator synthesizes an answer.
+
+RAG also improves transparency because the final answer can be grounded in retrieved documents rather than only in the parametric memory of the LLM. However, retrieved documents should still be assessed critically. A passage can be medically valid but irrelevant to the patient's specific situation. Therefore, the RAG output is passed as selected context into MedGemma CoT instead of being used blindly.
+
+The KG and RAG branches therefore serve different but complementary purposes. KG contributes compact relational structure and candidate hypotheses, while RAG contributes explanatory context and patient-facing language. The evaluation in Chapter 8 supports this hybrid design: KG + MedLLM achieves the strongest result on both One-Hop Accuracy and Multi-Hop Awareness Score, while RAG remains necessary for richer explanation. The contribution of the Text Module is therefore not choosing KG or RAG in isolation, but coordinating them according to the evidence need of each query.
 
 \subsubsection{Coordinated KG-RAG Evidence Construction}
 
@@ -429,8 +481,8 @@ This coordination also reduces two opposite risks. If the system relies only on 
 \textbf{Query Expansion} & Medical synonyms, related symptoms, disease names, and anatomical terms. & Bridges colloquial user language and formal medical terminology. \\
 \textbf{KG Agent} & Structured entity relations and candidate disease-symptom links. & Provides compact reasoning structure and candidate hypotheses. \\
 \textbf{RAG Agent} & Retrieved explanatory passages from medical documents. & Provides patient-friendly explanation and supporting context. \\
-\textbf{Information Assessment} & Decision on whether evidence is sufficient, weak, conflicting, or missing. & Determines whether to answer, ask follow-up questions, or use fallback search. \\
-\textbf{Response Generator} & Structured medical response with uncertainty and safety framing. & Converts evidence into an understandable answer without presenting it as a definitive diagnosis. \\
+\textbf{MedGemma CoT} & Candidate analysis, red-flag screening, and information sufficiency assessment over selected KG/RAG context. & Determines whether to answer, ask follow-up questions, or use fallback search. \\
+\textbf{Response Generator} & Structured medical response with uncertainty and safety framing. & Converts CoT-reviewed evidence into an understandable answer without presenting it as a definitive diagnosis. \\
 \hline\hline
 \end{tabular}
 \end{adjustbox}
@@ -440,15 +492,19 @@ This coordination also reduces two opposite risks. If the system relies only on 
 
 \subsection{Parallel Reasoning and Fallback Strategy}
 
-The system can evaluate RAG and Knowledge Graph results in parallel. If one source provides sufficient information, it may be selected as the main evidence source. If internal sources are insufficient, the system can use Web Search as a fallback.
+The system can retrieve and filter RAG and Knowledge Graph results in parallel. These agents do not make the final medical decision; they select high-quality context data for MedGemma CoT. If the selected internal context is insufficient after CoT assessment, the system can use Web Search as a fallback or ask the user for missing information.
 
 This strategy reduces dependence on any single source. RAG may fail if the relevant document is not retrieved. The Knowledge Graph may fail if the needed relation is missing. Web Search may provide updated information but requires careful filtering. By combining these sources, the Text Module becomes more robust.
 
 The fallback strategy is especially important for medical topics that change over time or are not well represented in the internal data. However, fallback search should be treated cautiously. The system should prefer trusted medical sources and avoid giving strong claims when source quality is uncertain.
 
-Parallel reasoning does not mean that all sources are merged blindly. The system should compare source relevance, consistency, and sufficiency. When KG and RAG agree, the answer can be more confident. When they conflict or when one source is weak, the response should explain uncertainty or ask for more information. This is important because adding more sources can increase coverage but can also introduce contradictions.
+Parallel retrieval does not mean that all sources are merged blindly. KG/RAG agents first select and filter context based on relevance, patient context, and retrieval quality. MedGemma CoT then compares source consistency and clinical sufficiency. When KG and RAG agree, the answer can be more confident. When they conflict or when one source is weak, the response should explain uncertainty or ask for more information. This is important because adding more sources can increase coverage but can also introduce contradictions.
 
 This strategy also gives the system an interpretable failure path. If the KG branch returns no relevant relation, the system can still use RAG for broader explanatory context. If RAG retrieves weak or overly general passages, the KG branch may provide a more precise disease-symptom relation. If both internal sources are insufficient, the Web Search Agent becomes a controlled fallback rather than an uncontrolled first response. As a result, robustness comes from source diversity and routing logic, not from assuming that one knowledge source is universally reliable.
+
+\subsection{MedGemma CoT for Medical Decision Support}
+
+After KG and RAG agents select candidate context, the MedGemma CoT component performs evidence synthesis and decision support. Web Search is treated as a fallback source when internal context is weak or incomplete, not as the default first source. The role of MedGemma CoT is not to create a definitive diagnosis, but to organize available evidence into a clinically cautious reasoning process. This component receives candidate diseases, matched symptoms, retrieved passages, patient context, and the current conversation state.
 
 \begin{figure}[H]
     \centering
@@ -456,6 +512,34 @@ This strategy also gives the system an interpretable failure path. If the KG bra
     \caption{Medical chain-of-thought and information sufficiency flow}
     \label{fig:medical-cot}
 \end{figure}
+
+Figure \ref{fig:medical-cot} summarizes the decision flow of the MedGemma CoT component: it analyzes candidate diseases, checks red flags, evaluates information sufficiency, and then either produces a cautious diagnostic suggestion or asks follow-up questions.
+
+The first step is candidate-level analysis. For each candidate condition, the model compares the user's reported symptoms with the symptom profile retrieved from KG/RAG. This includes estimating whether the candidate explains the main complaint, which symptoms are matched, which symptoms are missing, and whether the available evidence is too weak. This step is important because a candidate disease should not be listed only because it appears in a retrieved document or graph relation.
+
+The second step is red-flag screening. MedGemma CoT checks whether the conversation contains warning signs such as severe pain, difficulty breathing, neurological symptoms, bleeding, persistent vomiting, high fever, chest pain, or other urgent indicators depending on the symptom category. If red flags are present, the system should prioritize escalation and professional consultation instead of continuing ordinary explanation.
+
+The third step is medical decision branching. If the retrieved evidence and user context are sufficient, the system can synthesize a cautious diagnostic suggestion with likely explanations and monitoring advice. If the evidence is insufficient, the system should activate multi-hop QA and ask the next clinically useful follow-up question. This branch is central to the safety design: the system is allowed to defer the answer when the information is incomplete.
+
+\begin{table}[H]
+\centering
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{>{\RaggedRight\arraybackslash}p{0.24\textwidth} >{\RaggedRight\arraybackslash}p{0.34\textwidth} >{\RaggedRight\arraybackslash}p{0.34\textwidth}}
+\hline\hline
+\textbf{CoT step} & \textbf{Input considered} & \textbf{Output behavior} \\
+\hline
+\textbf{Candidate analysis} & Disease candidates, matched symptoms, retrieved passages, and patient context. & Compare possible conditions and identify which candidates are plausible, weak, or unsupported. \\
+\textbf{Red-flag screening} & Reported symptoms, severity, duration, urgent signs, and risk factors. & Escalate to urgent-care advice when dangerous patterns appear. \\
+\textbf{Information assessment} & Completeness of clinical variables and consistency of evidence sources. & Decide whether to answer, ask follow-up questions, or use fallback search. \\
+\textbf{Response synthesis} & Filtered evidence, candidate ranking, and safety constraints. & Produce a cautious explanation, possible causes, missing information, and next-step guidance. \\
+\hline\hline
+\end{tabular}
+\end{adjustbox}
+\caption{MedGemma CoT decision-support stages}
+\label{table:medgemma-cot-stages}
+\end{table}
+
+This design connects retrieval with safe response generation. KG and RAG provide evidence, but MedGemma CoT decides how that evidence should be interpreted under uncertainty. A high-ranking candidate can still be rejected if key symptoms are missing, and a low-information query can trigger follow-up questioning even when retrieval returns many documents. Therefore, the MedGemma CoT stage prevents the system from confusing evidence retrieval with clinical sufficiency.
 
 \subsection{Safe Medical Response Generation}
 
@@ -989,7 +1073,7 @@ The difference between One-Hop Accuracy and Multi-Hop Awareness is important. On
 
 The stronger performance of KG + MedLLM suggests that explicit relations help the model identify clinically relevant links more reliably than text retrieval alone. However, the result should not be interpreted as showing that KG is always superior to RAG. KG is stronger for structured relation reasoning, while RAG remains useful for explanatory responses and broader medical education. The practical conclusion is that the two sources should be coordinated rather than treated as mutually exclusive.
 
-The lower Multi-Hop Awareness Score of RAG + MedLLM suggests that adding retrieved documents may encourage answer generation even when the user query lacks enough clinical detail. This is a common risk in retrieval-augmented systems: retrieved evidence can make the model appear grounded while the original question remains underspecified. The information sufficiency step is therefore necessary before retrieval-based answer synthesis.
+The lower Multi-Hop Awareness Score of RAG + MedLLM suggests that adding retrieved documents may encourage answer generation even when the user query lacks enough clinical detail. This is a common risk in retrieval-augmented systems: retrieved evidence can make the model appear grounded while the original question remains underspecified. The MedGemma CoT information-sufficiency step is therefore necessary after KG/RAG context selection and before final response synthesis.
 
 The base MedLLM result shows that a language model alone can answer some medical questions but performs worse when structured external knowledge is required. This supports the design choice of placing the LLM inside a retrieval and graph-augmented pipeline rather than using it as the only reasoning source.
 
@@ -1114,7 +1198,7 @@ The main strength of the system is its modular AI architecture. Instead of relyi
 
 The architecture also supports complementary reasoning sources. RAG provides explanatory text, KG provides structured relations, Web Search provides fallback coverage, and memory provides patient-specific continuity. In the Vision Module, segmentation provides localized evidence while the VQA agent converts visual and textual input into an answer. This combination allows the system to handle a wider range of medical-assistant tasks than a single text-only chatbot.
 
-Another strength is that the system makes several uncertainty points explicit. Information sufficiency checks identify incomplete symptom descriptions. Routing determines whether a specialized agent is appropriate. Visual grounding is evaluated as a separate input setting rather than assumed to be beneficial. Memory is treated as patient-reported context rather than verified diagnosis. These design choices improve transparency and make the system easier to evaluate.
+Another strength is that the system makes several uncertainty points explicit. MedGemma CoT-based sufficiency checks identify incomplete symptom descriptions after KG/RAG agents have selected relevant context. Routing determines whether a specialized agent is appropriate. Visual grounding is evaluated as a separate input setting rather than assumed to be beneficial. Memory is treated as patient-reported context rather than verified diagnosis. These design choices improve transparency and make the system easier to evaluate.
 
 \subsection{Text Module Limitations}
 

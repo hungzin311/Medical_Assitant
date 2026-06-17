@@ -3,13 +3,14 @@
 \babel@toc {vietnamese}{}\relax 
 \babel@toc {vietnamese}{}\relax 
 \contentsline {table}{\numberline {1}{\ignorespaces Benefits of the multi-agent design illustrated by the detailed workflow}}{15}{table.caption.3}%
-\contentsline {table}{\numberline {2}{\ignorespaces Text query types and corresponding routing behavior}}{18}{table.caption.4}%
-\contentsline {table}{\numberline {3}{\ignorespaces Coordinated evidence construction in the Text Module}}{23}{table.caption.7}%
-\contentsline {table}{\numberline {4}{\ignorespaces Complementary roles of the Polyp Segmentation Agent and Polyp VQA Agent}}{33}{table.caption.12}%
-\contentsline {table}{\numberline {5}{\ignorespaces Local VimedAQA record distribution used for RAG indexing}}{37}{table.caption.14}%
-\contentsline {table}{\numberline {6}{\ignorespaces Kvasir-VQA-X1 training data before and after segmentation-mask filtering}}{39}{table.caption.18}%
-\contentsline {table}{\numberline {7}{\ignorespaces LoRA fine-tuning hyperparameters for Polyp VQA}}{40}{table.caption.19}%
-\contentsline {table}{\numberline {8}{\ignorespaces Text Module benchmark results}}{42}{table.caption.20}%
-\contentsline {table}{\numberline {9}{\ignorespaces Dice Score comparison for polyp segmentation models}}{43}{table.caption.21}%
-\contentsline {table}{\numberline {10}{\ignorespaces Polyp VQA evaluation on Kvasir-VQA-X1}}{45}{table.caption.22}%
-\contentsline {table}{\numberline {11}{\ignorespaces LLM Judge comparison between LoRA-only and visual-grounded MedGemma on the mask-matched subset}}{45}{table.caption.23}%
+\contentsline {table}{\numberline {2}{\ignorespaces Text query types and corresponding routing behavior}}{19}{table.caption.5}%
+\contentsline {table}{\numberline {3}{\ignorespaces Coordinated evidence construction in the Text Module}}{26}{table.caption.9}%
+\contentsline {table}{\numberline {4}{\ignorespaces MedGemma CoT decision-support stages}}{28}{table.caption.11}%
+\contentsline {table}{\numberline {5}{\ignorespaces Complementary roles of the Polyp Segmentation Agent and Polyp VQA Agent}}{37}{table.caption.15}%
+\contentsline {table}{\numberline {6}{\ignorespaces Local VimedAQA record distribution used for RAG indexing}}{41}{table.caption.17}%
+\contentsline {table}{\numberline {7}{\ignorespaces Kvasir-VQA-X1 training data before and after segmentation-mask filtering}}{43}{table.caption.21}%
+\contentsline {table}{\numberline {8}{\ignorespaces LoRA fine-tuning hyperparameters for Polyp VQA}}{44}{table.caption.22}%
+\contentsline {table}{\numberline {9}{\ignorespaces Text Module benchmark results}}{46}{table.caption.23}%
+\contentsline {table}{\numberline {10}{\ignorespaces Dice Score comparison for polyp segmentation models}}{47}{table.caption.24}%
+\contentsline {table}{\numberline {11}{\ignorespaces Polyp VQA evaluation on Kvasir-VQA-X1}}{49}{table.caption.25}%
+\contentsline {table}{\numberline {12}{\ignorespaces LLM Judge comparison between LoRA-only and visual-grounded MedGemma on the mask-matched subset}}{49}{table.caption.26}%
