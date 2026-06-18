@@ -54,6 +54,16 @@
     \normalsize
     
 \justifying
+    \begin{center}
+        \Large\bfseries Abstract
+    \end{center}
+    \vspace{0.2cm}
+
+    This thesis proposes a Multi-Agent Medical Assistant whose main objective is to improve the reliability, grounding, and continuity of medical consultation across text and image inputs. Instead of relying on a single generative model, the system is designed to route user requests to specialized agents, combine structured and unstructured medical evidence, identify when the available clinical context is insufficient, and preserve useful patient context across sessions without treating it as verified diagnosis. For text-based consultation, the system coordinates Retrieval-Augmented Generation, Knowledge Graph reasoning, multi-hop clarification, MedGemma CoT-based information sufficiency assessment, and Web Search fallback to reduce unsupported or premature medical responses. For vision-based consultation, the system integrates colonoscopy polyp segmentation with Polyp Visual Question Answering, where the segmentation mask acts as a spatial grounding prior while the original endoscopic image remains the source of visual evidence. The system also incorporates patient-scoped semantic memory and human-in-the-loop validation to support personalization, feedback collection, and safer review. Experimental results show that the proposed design achieves several system-level goals: Knowledge Graph evidence improves relation-oriented text reasoning, post-processing improves segmentation consistency for downstream use, LoRA fine-tuning substantially improves Polyp VQA performance, and segmentation grounding improves judge-based VQA quality on the mask-matched subset. Overall, the thesis demonstrates that a modular, grounded, memory-aware architecture can improve observability, evidence control, multimodal reasoning, and safety boundaries in a medical assistant intended for decision support rather than definitive clinical diagnosis.
+
+    \textbf{Keywords:} Multi-agent medical assistant, retrieval-augmented generation, knowledge graph, medical visual question answering, visual grounding, long-term memory, human-in-the-loop validation.
+
+    \newpage
     \let\clearpage\relax
     \tableofcontents
     \listoftables
@@ -67,28 +77,28 @@
 
 The increasing demand for reliable, accessible, and personalized medical information motivates the development of intelligent medical assistant systems. Users often describe symptoms in incomplete or informal language, search for medical information from sources of uneven quality, and may need support across multiple interactions rather than a single isolated conversation.
 
-Recent advances in large language models, retrieval-augmented generation, knowledge graphs, multimodal models, and agent orchestration provide an opportunity to build medical AI systems that are more grounded, modular, and context-aware. However, medical AI also introduces safety challenges, including hallucination, incomplete clinical context, uncertain visual interpretation, and the need for human feedback.
+Recent advances in language models, retrieval-augmented generation, knowledge graphs, vision-language models, and agent orchestration provide an opportunity to build medical AI systems that are more grounded, modular, and context-aware. At the same time, medical AI remains a safety-sensitive research problem. A useful assistant should not only generate fluent responses, but should also identify insufficient clinical context, ground its reasoning in appropriate evidence, handle multimodal inputs cautiously, and preserve patient context without converting self-reported information into verified diagnosis.
 
-This report presents a Multi-Agent Medical Assistant that integrates text-based medical reasoning, medical image analysis, long-term memory, and human-in-the-loop validation. The work focuses on AI techniques and system-level reasoning rather than user interface or backend implementation details.
+This thesis presents a Multi-Agent Medical Assistant designed to study these issues at the system architecture level. The work focuses on how specialized agents can cooperate through structured and unstructured evidence, visual grounding, patient-scoped memory, and human-in-the-loop validation. The thesis does not aim to build a deployable clinical product or replace professional medical judgment. Instead, it investigates the technical feasibility, design trade-offs, and evaluation behavior of a modular medical assistant intended for decision support.
 
 \begin{center}
     \Large\bfseries Summary of Content and Contributions
 \end{center}
 \vspace{0.1cm}
 
-This report studies a multi-agent medical assistant designed around four main technical pillars:
+This thesis makes the following main contributions:
 
 \begin{itemize}
-    \item \textbf{Text-based medical reasoning:} The system combines Multi-hop Question Answering, Retrieval-Augmented Generation, Knowledge Graph reasoning, and Web Search fallback to produce more grounded and cautious medical responses.
+    \item \textbf{A modular multi-agent architecture for medical assistance:} The system separates routing, text reasoning, vision reasoning, memory retrieval, and validation into specialized components. This improves observability and allows intermediate evidence to be inspected before final response generation.
 
-    \item \textbf{Vision-based medical reasoning:} The Vision Module supports general medical image interpretation, colonoscopy polyp segmentation, and Polyp Visual Question Answering. The Polyp VQA component uses a LoRA fine-tuned Vision-Language Model and compares original-image reasoning with segmentation-grounded reasoning.
+    \item \textbf{A grounded Text Module for medical consultation:} The text workflow coordinates multi-hop clarification, query expansion, Retrieval-Augmented Generation, Knowledge Graph reasoning, MedGemma CoT-based information sufficiency assessment, and Web Search fallback. This design distinguishes evidence availability from clinical sufficiency and reduces premature answer generation.
 
-    \item \textbf{Long-term memory for agent continuity:} Mem0 is integrated as a memory layer that stores clinically useful patient-reported facts across sessions, helping agents maintain continuity while avoiding unsupported diagnostic claims.
+    \item \textbf{A segmentation-grounded Vision Module for Polyp VQA:} The vision workflow connects colonoscopy polyp segmentation with visual question answering. The segmentation mask is formulated as a spatial grounding prior, while the original endoscopic image remains the source of appearance-level visual evidence.
 
-    \item \textbf{Human-in-the-loop validation:} The system includes a validation mechanism for collecting user feedback and supporting safer review of generated responses.
+    \item \textbf{A patient-scoped memory layer for contextual continuity:} The thesis integrates Mem0-style semantic memory to retrieve durable patient-reported context across sessions. Memory is used as supporting context for routing and personalization, not as authoritative clinical truth.
+
+    \item \textbf{An experimental evaluation of component and system behavior:} The thesis evaluates text reasoning with One-Hop Accuracy and Multi-Hop Awareness Score, segmentation with Dice Score, and Polyp VQA with BLEU-4, ROUGE-L, and LLM-as-a-judge criteria. The results analyze not only model performance, but also how evidence grounding, post-processing, LoRA fine-tuning, and segmentation guidance affect system-level reliability.
 \end{itemize}
-
-The main contribution of this work is an AI-centered architecture that combines specialized agents, structured and unstructured knowledge retrieval, visual grounding, long-term memory, and validation-oriented safety mechanisms for medical assistance.
 
 \newpage
 \input{content}

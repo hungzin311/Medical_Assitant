@@ -1,6 +1,6 @@
-PWD D:\Medical_Assitant\Report VDT
+PWD d:\Medical_Assitant\Report VDT
 INPUT C:\Users\Hung Zin\AppData\Local\MiKTeX\miktex\data\le\pdftex\pdflatex.fmt
-INPUT main.tex
+INPUT d:\Medical_Assitant\Report VDT\main.tex
 OUTPUT main.log
 INPUT C:\Program Files\MiKTeX\tex\latex\base\article.cls
 INPUT C:\Program Files\MiKTeX\tex\latex\base\article.cls
@@ -334,42 +334,42 @@ INPUT .\images\chi_tiet.png
 INPUT .\images\chi_tiet.png
 INPUT .\images\chi_tiet.png
 INPUT .\images\chi_tiet.png
+INPUT .\images\abctext.png
+INPUT .\images\abctext.png
+INPUT .\images\abctext.png
+INPUT .\images\abctext.png
+INPUT .\images\abctext.png
+INPUT .\images\abctext.png
+INPUT .\images\abctext.png
+INPUT .\images\disavantage_of_traditional_approach.jpg
+INPUT .\images\disavantage_of_traditional_approach.jpg
+INPUT .\images\disavantage_of_traditional_approach.jpg
+INPUT .\images\disavantage_of_traditional_approach.jpg
+INPUT .\images\disavantage_of_traditional_approach.jpg
+INPUT .\images\disavantage_of_traditional_approach.jpg
+INPUT .\images\disavantage_of_traditional_approach.jpg
+INPUT .\images\benefit-of-medical-multihop-qa.jpg
+INPUT .\images\benefit-of-medical-multihop-qa.jpg
+INPUT .\images\benefit-of-medical-multihop-qa.jpg
+INPUT .\images\benefit-of-medical-multihop-qa.jpg
+INPUT .\images\benefit-of-medical-multihop-qa.jpg
+INPUT .\images\benefit-of-medical-multihop-qa.jpg
+INPUT .\images\benefit-of-medical-multihop-qa.jpg
+INPUT .\images\text_module.png
+INPUT .\images\text_module.png
+INPUT .\images\text_module.png
+INPUT .\images\text_module.png
+INPUT .\images\text_module.png
+INPUT .\images\text_module.png
+INPUT .\images\text_module.png
+INPUT .\images\medcot.png
+INPUT .\images\medcot.png
+INPUT .\images\medcot.png
+INPUT .\images\medcot.png
+INPUT .\images\medcot.png
+INPUT .\images\medcot.png
+INPUT .\images\medcot.png
 INPUT C:\Users\Hung Zin\AppData\Roaming\MiKTeX\fonts\tfm\vntex\vnr\vnti12.tfm
-INPUT .\images\abctext.png
-INPUT .\images\abctext.png
-INPUT .\images\abctext.png
-INPUT .\images\abctext.png
-INPUT .\images\abctext.png
-INPUT .\images\abctext.png
-INPUT .\images\abctext.png
-INPUT .\images\disavantage_of_traditional_approach.jpg
-INPUT .\images\disavantage_of_traditional_approach.jpg
-INPUT .\images\disavantage_of_traditional_approach.jpg
-INPUT .\images\disavantage_of_traditional_approach.jpg
-INPUT .\images\disavantage_of_traditional_approach.jpg
-INPUT .\images\disavantage_of_traditional_approach.jpg
-INPUT .\images\disavantage_of_traditional_approach.jpg
-INPUT .\images\benefit-of-medical-multihop-qa.jpg
-INPUT .\images\benefit-of-medical-multihop-qa.jpg
-INPUT .\images\benefit-of-medical-multihop-qa.jpg
-INPUT .\images\benefit-of-medical-multihop-qa.jpg
-INPUT .\images\benefit-of-medical-multihop-qa.jpg
-INPUT .\images\benefit-of-medical-multihop-qa.jpg
-INPUT .\images\benefit-of-medical-multihop-qa.jpg
-INPUT .\images\text_module.png
-INPUT .\images\text_module.png
-INPUT .\images\text_module.png
-INPUT .\images\text_module.png
-INPUT .\images\text_module.png
-INPUT .\images\text_module.png
-INPUT .\images\text_module.png
-INPUT .\images\medcot.png
-INPUT .\images\medcot.png
-INPUT .\images\medcot.png
-INPUT .\images\medcot.png
-INPUT .\images\medcot.png
-INPUT .\images\medcot.png
-INPUT .\images\medcot.png
 INPUT .\images\vision.png
 INPUT .\images\vision.png
 INPUT .\images\vision.png
@@ -396,6 +396,22 @@ INPUT .\images\polyp_post_processing_result_visualization.jpg
 INPUT .\images\polyp_post_processing_result_visualization.jpg
 INPUT .\images\polyp_post_processing_result_visualization.jpg
 INPUT .\images\polyp_post_processing_result_visualization.jpg
+INPUT C:\Users\Hung Zin\AppData\Roaming\MiKTeX\fonts\tfm\vntex\vnr\vnr10.tfm
+INPUT C:\Users\Hung Zin\AppData\Roaming\MiKTeX\fonts\tfm\vntex\vnr\vntt10.tfm
+INPUT C:\Users\Hung Zin\AppData\Roaming\MiKTeX\fonts\tfm\vntex\vnr\vnr10.tfm
+INPUT C:\Program Files\MiKTeX\fonts\tfm\public\amsfonts\cmextra\cmex7.tfm
+INPUT C:\Program Files\MiKTeX\fonts\tfm\public\amsfonts\cmextra\cmex7.tfm
+INPUT C:\Program Files\MiKTeX\fonts\tfm\public\cm\cmbx10.tfm
+INPUT C:\Program Files\MiKTeX\fonts\tfm\public\cm\cmbx7.tfm
+INPUT C:\Program Files\MiKTeX\fonts\tfm\public\cm\cmbx5.tfm
+INPUT C:\Program Files\MiKTeX\fonts\tfm\public\amsfonts\symbols\msam10.tfm
+INPUT C:\Program Files\MiKTeX\fonts\tfm\public\amsfonts\symbols\msam7.tfm
+INPUT C:\Program Files\MiKTeX\fonts\tfm\public\amsfonts\symbols\msam5.tfm
+INPUT C:\Program Files\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm10.tfm
+INPUT C:\Program Files\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm7.tfm
+INPUT C:\Program Files\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm5.tfm
+INPUT C:\Users\Hung Zin\AppData\Roaming\MiKTeX\fonts\tfm\vntex\vnr\vnbx10.tfm
+INPUT C:\Users\Hung Zin\AppData\Roaming\MiKTeX\fonts\tfm\vntex\vnr\vntt10.tfm
 INPUT .\images\image.png
 INPUT .\images\image.png
 INPUT .\images\image.png
@@ -449,17 +465,25 @@ INPUT C:\Program Files\MiKTeX\fonts\type1\public\amsfonts\cm\cmmi8.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\amsfonts\cm\cmmi8.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\amsfonts\cm\cmr12.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\amsfonts\cm\cmr12.pfb
+INPUT C:\Program Files\MiKTeX\fonts\type1\public\amsfonts\cm\cmr6.pfb
+INPUT C:\Program Files\MiKTeX\fonts\type1\public\amsfonts\cm\cmr6.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\amsfonts\cm\cmr8.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\amsfonts\cm\cmr8.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\amsfonts\cm\cmsy10.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\amsfonts\cm\cmsy10.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\amsfonts\cm\cmsy8.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\amsfonts\cm\cmsy8.pfb
+INPUT C:\Users\Hung Zin\AppData\Roaming\MiKTeX\fonts\type1\vntex\vnr\vnbx10.pfb
+INPUT C:\Users\Hung Zin\AppData\Roaming\MiKTeX\fonts\type1\vntex\vnr\vnbx10.pfb
 INPUT C:\Users\Hung Zin\AppData\Roaming\MiKTeX\fonts\type1\vntex\vnr\vnbx12.pfb
 INPUT C:\Users\Hung Zin\AppData\Roaming\MiKTeX\fonts\type1\vntex\vnr\vnbx12.pfb
+INPUT C:\Users\Hung Zin\AppData\Roaming\MiKTeX\fonts\type1\vntex\vnr\vnr10.pfb
+INPUT C:\Users\Hung Zin\AppData\Roaming\MiKTeX\fonts\type1\vntex\vnr\vnr10.pfb
 INPUT C:\Users\Hung Zin\AppData\Roaming\MiKTeX\fonts\type1\vntex\vnr\vnr12.pfb
 INPUT C:\Users\Hung Zin\AppData\Roaming\MiKTeX\fonts\type1\vntex\vnr\vnr12.pfb
 INPUT C:\Users\Hung Zin\AppData\Roaming\MiKTeX\fonts\type1\vntex\vnr\vnti12.pfb
 INPUT C:\Users\Hung Zin\AppData\Roaming\MiKTeX\fonts\type1\vntex\vnr\vnti12.pfb
+INPUT C:\Users\Hung Zin\AppData\Roaming\MiKTeX\fonts\type1\vntex\vnr\vntt10.pfb
+INPUT C:\Users\Hung Zin\AppData\Roaming\MiKTeX\fonts\type1\vntex\vnr\vntt10.pfb
 INPUT C:\Users\Hung Zin\AppData\Roaming\MiKTeX\fonts\type1\vntex\vnr\vntt12.pfb
 INPUT C:\Users\Hung Zin\AppData\Roaming\MiKTeX\fonts\type1\vntex\vnr\vntt12.pfb
