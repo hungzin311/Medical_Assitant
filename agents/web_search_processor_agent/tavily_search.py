@@ -19,21 +19,9 @@ class TavilySearchAgent:
 
         tavily_search = TavilySearchResults(max_results = 5)
 
-        # url = "https://api.tavily.com/search"
-        # params = {
-        #     "api_key": tavily_api_key,
-        #     "query": query,
-        #     "num_results": 5
-        # }
-        
         try:
-            # response = requests.get(url, params=params)
-            # Strip any surrounding quotes from the query
             query = query.strip('"\'')
-            # print("Printing query:", query)
             search_docs = tavily_search.invoke(query)
-            # data = response.json()
-            # if "results" in data:
             if len(search_docs):
                 return "\n".join(["title: " + str(res["title"]) + " - " + 
                                   "url: " + str(res["url"]) + " - " + 

@@ -24,13 +24,18 @@ def emit_stream_event(event: str, payload: dict):
         callback.emit_event(event, payload)
 
 
-def invoke_with_streaming(model, prompt):
+def invoke_with_streaming(model, prompt, max_completion_token = 1024):
+    extra_body = {
+        "chat_template_kwargs": {"enable_thinking": False},
+        "max_completion_tokens": max_completion_token
+    }
     callback = current_stream_callback.get()
     if callback is None:
-        return model.invoke(prompt)
+        return  model.bind(extra_body= extra_body).invoke(prompt)
+
 
     content_parts = []
-    for chunk in model.stream(prompt):
+    for chunk in model.bind(extra_body= extra_body).stream(prompt):
         chunk_content = getattr(chunk, "content", "")
         if chunk_content:
             content_parts.append(chunk_content)

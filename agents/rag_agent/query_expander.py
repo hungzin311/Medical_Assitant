@@ -4,13 +4,21 @@ class QueryExpander:
     def __init__(self, config):
         self.config = config
         self.model = config.rag.llm
-        
+        self.extra_body = {
+            "chat_template_kwargs": {"enable_thinking": False},
+            "max_completion_tokens": 512
+        }
+            
     def expand_query(self, original_query: str, mode:str = "rag", patient_info:Dict =None, chat_history: Optional[List[Dict[str, str]]] = None) -> Dict[str, Any]:
         if mode == "rag":
             expanded_query = self._generate_expansions(original_query, chat_history)
             expanded_query = expanded_query.content
         elif mode == "kg":
             expanded_query = self._generate_kg_refine_query(original_query, patient_info, chat_history)
+        elif mode == "medlineplus":
+            expanded_query = self._generate_medlineplus_query(original_query, chat_history)
+        else:
+            expanded_query = original_query
 
         return {
             "original_query": original_query,
@@ -62,7 +70,7 @@ class QueryExpander:
         
         Hãy tạo 1 câu query tìm kiếm tối ưu HOÀN TOÀN BẰNG TIẾNG VIỆT cho câu hỏi trên:
         """
-        expansion = self.model.invoke(prompt)
+        expansion = self.model.bind(extra_body = self.extra_body).invoke(prompt)
         
         return expansion
     
@@ -124,7 +132,7 @@ class QueryExpander:
         }}
         """
 
-        response = self.model.invoke(prompt)
+        response = self.model.bind(extra_body = self.extra_body).invoke(prompt)
         raw = response.content.strip() 
         match = re.search(r"\{[\s\S]*?\}", raw)
         parsed = json.loads(match.group(0))
@@ -134,4 +142,31 @@ class QueryExpander:
             'refined_question': parsed['refined_question'],
             'patient_context': parsed['patient_context']
         }
+
+    def _generate_medlineplus_query(self, query: str, chat_history: Optional[List[Dict[str, str]]] = None) -> str:
+        prompt = f"""
+        You are a medical search query translator for MedlinePlus, whose documents are in English.
+
+        INPUT USER QUERY:
+        \"\"\"{query}\"\"\"
+
+        CHAT HISTORY:
+        {chat_history}
+
+        TASK:
+        Create ONE concise English medical search query optimized for retrieving MedlinePlus health topic,
+        lab test, symptom, condition, treatment, prevention, and patient education documents.
+
+        RULES:
+        - Translate Vietnamese symptoms, diseases, lab tests, medications, body parts, and care intents into common English medical terms.
+        - Preserve the user's intent: symptoms, cause, diagnosis, treatment, prevention, medication use, lab result interpretation, etc.
+        - Preserve negation/exclusion when present, such as "no chest pain", "without fever", "not pregnant".
+        - Do NOT invent extra symptoms, diseases, risk factors, or diagnoses that the user did not mention.
+        - Prefer MedlinePlus-friendly terms: "high blood pressure" with "hypertension", "diabetes" with "blood sugar", "rash", "itching", "abdominal pain", "lab test results".
+        - Return only the query text. Do not return JSON, markdown, quotes, or explanations.
+
+        English MedlinePlus search query:
+        """
+        response = self.model.bind(extra_body = self.extra_body).invoke(prompt)
+        return response.content.strip()
         

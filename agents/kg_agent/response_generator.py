@@ -1,7 +1,8 @@
+import logging
 from typing import List, Dict, Optional
 from .cypher_query_llm import CypherQueryService
 from .context_filter import ContextFilterEmbedding
-from utils.llm_config import get_gemini_llm_3
+from utils.llm_config import get_llm
 from agents.patient_db_agent import PatientQueryEngine
 from agents.rag_agent.query_expander import QueryExpander
 from utils.config import Config
@@ -16,9 +17,10 @@ mcq_prompt = medical_mcq_evaluation_prompt
 
 class ResponseGenerator:
     def __init__(self, patient_query_engine: PatientQueryEngine):
+        self.logger = logging.getLogger(__name__)
         self.cypher_query_llm = CypherQueryService()
         self.context_filter = ContextFilterEmbedding()
-        self.llm = get_gemini_llm_3(temperature=0.0)
+        self.llm = get_llm(temperature=0.0)
         self.patient_query_engine = patient_query_engine
         self.query_expander = QueryExpander(config)
         self.cached_kg_candidates = None
@@ -29,9 +31,9 @@ class ResponseGenerator:
         
         # query expander
         expanded_result = self.query_expander.expand_query(question, patient_info=patient_profile, mode="kg", chat_history=chat_history)
-        expanded_result = expanded_result["expanded_query"]
-        question = expanded_result["refined_question"]
-        patient_context = expanded_result["patient_context"]
+        expanded_query = expanded_result["expanded_query"]
+        question = expanded_query["refined_question"]
+        patient_context = expanded_query["patient_context"]
 
         print("Expanded question: ", question)
         print("Patient context: ", patient_context)
@@ -52,7 +54,11 @@ class ResponseGenerator:
             kg_candidates_json = self.cached_kg_candidates
             print("Using cached KG context (retrieve failed)")
         else:
-            return "Không có thông tin liên quan"
+            return {
+                "response": "Không có thông tin liên quan",
+                "confidence": 0.0,
+            }
+        self.logger.info("true until invoke llm")
         response = invoke_with_streaming(
             self.llm,
             prompt.format(
@@ -62,7 +68,7 @@ class ResponseGenerator:
                 history=chat_history,
             ),
         )
-
+        self.logger.info(f"Response: {type(response)} ---- {response}")
         # Parse JSON response and extract content
         try:
             response_text = response.content.strip()
@@ -73,9 +79,10 @@ class ResponseGenerator:
             response_json = json.loads(response_text)
             content = response_json.get("step3_action", {}).get("content", "không có thông tin liên quan")
             confidence = response_json.get('step3_action', {}).get('confidence', 0.0)
-        except (json.JSONDecodeError, KeyError) as e:
-            print(f"Error parsing JSON response: {e}")
+        except (json.JSONDecodeError, KeyError, AttributeError) as e:
+            self.logger.warning("Error parsing JSON response: %s", e)
             content = response.content  # Fallback to original content
+            confidence = 0.0
 
         safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
         

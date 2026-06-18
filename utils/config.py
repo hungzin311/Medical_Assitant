@@ -1,7 +1,7 @@
 import os
 import threading
 from dotenv import load_dotenv
-from utils.llm_config import get_embedding, get_gemini_llm, get_gemini_vision_llm, get_polyp_vqa_llm
+from utils.llm_config import get_embedding, get_gemini_llm, get_gemini_vision_llm, get_polyp_vqa_llm, get_llm
 
 load_dotenv()
 
@@ -29,8 +29,8 @@ class RAGConfig:
         self.chunk_size = 512
         self.chunk_overlap = 50
         self.embedding_model = get_embedding()
-        self.llm = get_gemini_llm(temperature=0.0)  
-        self.top_k = 10
+        self.llm = get_llm(temperature=0.0) 
+        self.top_k = 5
         self.vector_search_type = 'similarity'  # or 'mmr'
 
         self.huggingface_token = os.getenv("HUGGINGFACE_TOKEN")
@@ -55,7 +55,7 @@ class MedlinePlusConfig:
             "/home/hung/Coding/VectorDB/data/medlineplus",
         )
         self.embedding_model = get_embedding()
-        self.llm = get_gemini_llm(temperature=0.0)
+        self.llm = get_llm(temperature=0.0)
         self.top_k = int(os.getenv("MEDLINEPLUS_TOP_K", "8"))
         self.qdrant_url = os.getenv("QDRANT_URL")
         self.qdrant_api_key = os.getenv("QDRANT_API_KEY")

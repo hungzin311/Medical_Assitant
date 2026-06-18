@@ -63,9 +63,9 @@ class MedicalRAG:
             query = expanded_query
 
             # Step 2: Retrieval
-            retrieved_documents = self.vectorstore.similarity_search_with_score(
+            retrieved_documents = self.vector_store.retrieve_relevant_chunks(
                 query=query,
-                k=self.config.rag.top_k
+                vectorstore=self.vectorstore,
             )
 
             self.logger.info(f"Retrieved {len(retrieved_documents)} relevant document chunks")

@@ -1,379 +1,390 @@
 {
-    "response": "Dựa trên các tài liệu MedlinePlus được cung cấp, không có thông tin nào giải thích về việc liệu bệnh mỡ máu cao có làm cho các triệu chứng của bạn trở nên nguy hiểm hơn hay không.
-
-Vì ngữ cảnh hiện tại không đủ thông tin để đánh giá tình trạng sức khỏe cụ thể của bạn, bạn nên trao đổi trực tiếp với bác sĩ để được tư vấn và giải đáp chính xác về mối liên quan giữa bệnh nền và các triệu chứng bạn đang gặp phải.",
-    "sources": [
+    "agent_name": "MEDLINEPLUS_AGENT",
+    "original_query": "tôi đang bị đau đầu và buồn nôn",
+    "query": "headache and nausea",
+    "documents": [
         {
-            "title": "Yeast Infection Tests",
+            "id": "topic:273:summary",
+            "content": "Health topic: Headache\nAlso called: Headache, Cluster Headache, Tension Headache, Vascular Headache\nGroups: Brain and Nerves, Symptoms\nNearly everyone has had a headache, the most common form of pain. Learn the different types, the different symptoms of, and when to see a doctor.\nAlmost everyone has had a headache. Headache is the most common form of pain. It's a major reason people miss days at work or school or visit the doctor. The most common type of headache is a tension headache. Tension headaches are due to tight muscles in your shoulders, neck, scalp and jaw. They are often related to stress, depression or anxiety. You are more likely to get tension headaches if you work too much, don't get enough sleep, miss meals, or use alcohol. Other common types of headaches include migraines , cluster headaches, and sinus headaches. Most people can feel much better by making lifestyle changes, learning ways to relax and taking pain relievers . Not all headaches require a doctor's attention. But sometimes headaches warn of a more serious disorder. Let your health care provider know if you have sudden, severe headaches. Get medical help right away if you have a headache after a blow to your head, or if you have a headache along with a stiff neck, fever, confusion, loss of consciousness, or pain in the eye or ear. NIH: National Institute of Neurological Disorders and Stroke",
+            "score": 0.5533539,
             "source": "MedlinePlus",
-            "source_path": "https://medlineplus.gov/lab-tests/yeast-infection-tests/"
+            "source_path": "https://medlineplus.gov/headache.html",
+            "title": "Headache",
+            "doc_type": "health_topic_summary",
+            "entity_id": "273",
+            "entity_type": "health_topic",
+            "section_type": "summary",
+            "metadata": {
+                "entity_id": "273",
+                "entity_type": "health_topic",
+                "title": "Headache",
+                "aliases": [
+                    "Headache",
+                    "Cluster Headache",
+                    "Tension Headache",
+                    "Vascular Headache"
+                ],
+                "groups": [
+                    "Brain and Nerves",
+                    "Symptoms"
+                ],
+                "section_type": "summary",
+                "related_topic_ids": [
+                    "3157"
+                ],
+                "related_lab_test_ids": [],
+                "source_url": "https://medlineplus.gov/headache.html",
+                "doc_type": "health_topic_summary"
+            }
         },
         {
-            "title": "Differential Diagnosis",
+            "id": "health_topic:273:relations",
+            "content": "Headache related_to_topic Migraine; Headache belongs_to_group Brain and Nerves; Headache belongs_to_group Symptoms; Headache mapped_to_mesh_heading Headache; Headache mapped_to_mesh_heading Headache Disorders; Headache related_from_topic Migraine; Headache related_from_topic Sinusitis",
+            "score": 0.4999351,
             "source": "MedlinePlus",
-            "source_path": "https://medlineplus.gov/lab-tests/differential-diagnosis/"
+            "source_path": "https://medlineplus.gov/headache.html",
+            "title": "Headache",
+            "doc_type": "relation_summary",
+            "entity_id": "273",
+            "entity_type": "health_topic",
+            "section_type": "relations",
+            "metadata": {
+                "entity_id": "273",
+                "entity_type": "health_topic",
+                "title": "Headache",
+                "aliases": [
+                    "Headache",
+                    "Cluster Headache",
+                    "Tension Headache",
+                    "Vascular Headache"
+                ],
+                "groups": [
+                    "Brain and Nerves",
+                    "Symptoms"
+                ],
+                "section_type": "relations",
+                "related_topic_ids": [
+                    "3157",
+                    "404"
+                ],
+                "related_lab_test_ids": [],
+                "source_url": "https://medlineplus.gov/headache.html",
+                "doc_type": "relation_summary"
+            }
         },
         {
-            "title": "Panic Disorder Test",
+            "id": "topic:3157:summary",
+            "content": "Health topic: Migraine\nAlso called: Migraine, Vascular Headache\nGroups: Brain and Nerves\nMigraines are pulsing or throbbing headaches in one area of the head. Learn about other symptoms, what triggers migraines, and how to treat them.\nWhat are migraines? Migraines are a recurring type of headache. They cause moderate to severe pain that is throbbing or pulsing. The pain is often on one side of your head. You may also have other symptoms, such as nausea and weakness. You may be sensitive to light and sound. What causes migraines? Researchers believe that migraine has a genetic cause. There are also a number of factors that can trigger a migraine. These factors vary from person to person, and they include: Stress Anxiety Hormonal changes in women Bright or flashing lights Loud noises Strong smells Medicines Too much or not enough sleep Sudden changes in weather or environment Overexertion (too much physical activity) Tobacco Caffeine or caffeine withdrawal Skipped meals Medication overuse (taking medicine for migraines too often) Some people have found that certain foods or ingredients can trigger headaches, especially when they are combined with other triggers. These foods and ingredients include: Alcohol Chocolate Aged cheeses Monosodium glutamate (MSG) Some fruits and nuts Fermented or pickled goods Yeast Cured or processed meats Who is at risk for migraines? About 12% of Americans get migraines. They can affect anyone, but you are more likely to have them if you: Are a woman. Women are three times more likely than men to get migraines. Have a family history of migraines. Most people with migraines have family members who have migraines. Have other medical conditions, such as depression , anxiety , bipolar disorder , sleep disorders , and epilepsy . What are the symptoms of migraines? There are four different phases of migraines. You may not always go through every phase each time you have a migraine.: Prodome. This phase starts up to 24 hours before you get the migraine. You have early signs and symptoms, such as food cravings, unexplained mood changes, uncontrollable yawning, fluid retention, and increased urination. Aura. If you have this phase, you might see flashing or bright lights or zig-zag lines. You may have muscle weakness or feel like you are being touched or grabbed. An aura can happen just before or during a migraine. Headache. A migraine usually starts gradually and then becomes more severe. It typically causes throbbing or pulsing pain, which is often on one side of your head. But sometimes you can have a migraine without a headache. Other migraine symptoms may include Increased sensitivity to light, noise, and odors Nausea and vomiting Worsened pain when you move, cough, or sneeze Postdrome (following the headache). You may feel exhausted, weak, and confused after a migraine. This can last up to a day. Migraines are more common in the morning; people often wake up with them. Some people have migraines at predictable times, such as before menstruation or on weekends following a stressful week of work. How are migraines diagnosed? To make a diagnosis, your health care provider will: Take your medical history Ask about your symptoms Do a physical and neurological exam An important part of diagnosing migraines is to rule out other medical conditions which could be causing the symptoms. So you may also have blood tests, an MRI or CT scan, or other tests. How are migraines treated? There is no cure for migraines. Treatment focuses on relieving symptoms and preventing additional attacks. There are different types of medicines to relieve symptoms. They include triptan drugs, ergotamine drugs, and pain relievers . The sooner you take the medicine, the more effective it is. There are also other things you can do to feel better: Resting with your eyes closed in a quiet, darkened room Placing a cool cloth or ice pack on your forehead Drinking fluids There are some lifestyle changes you can make to prevent migraines: Stress management strategies, such as exercise, relaxation techniques, and biofeedback, may reduce the number and severity of migraines. Biofeedback uses electronic devices to teach you to control certain body functions, such as your heartbeat, blood pressure, and muscle tension. Make a log of what seems to trigger your migraines. You can learn what you need to avoid, such as certain foods and medicines. It also help you figure out what you should do, such as establishing a consistent sleep schedule and eating regular meals. Hormone therapy may help some women whose migraines seem to be linked to their menstrual cycle If you have obesity , losing weight may also be helpful If you have frequent or severe migraines, you may need to take medicines to prevent further attacks. Talk with your health care provider about which drug would be right for you. Certain natural treatments, such as riboflavin (vitamin B2) and coenzyme Q10, may help prevent migraines. If your magnesium level is low, you can try taking magnesium. There is also an herb, butterbur, which some people take to prevent migraines. But butterbur may not be safe for long-term use. Always check with your health care provider before taking any supplements. NIH: National Institute of Neurological Disorders and Stroke",
+            "score": 0.5096946,
             "source": "MedlinePlus",
-            "source_path": "https://medlineplus.gov/lab-tests/panic-disorder-test/"
+            "source_path": "https://medlineplus.gov/migraine.html",
+            "title": "Migraine",
+            "doc_type": "health_topic_summary",
+            "entity_id": "3157",
+            "entity_type": "health_topic",
+            "section_type": "summary",
+            "metadata": {
+                "entity_id": "3157",
+                "entity_type": "health_topic",
+                "title": "Migraine",
+                "aliases": [
+                    "Migraine",
+                    "Vascular Headache"
+                ],
+                "groups": [
+                    "Brain and Nerves"
+                ],
+                "section_type": "summary",
+                "related_topic_ids": [
+                    "273"
+                ],
+                "related_lab_test_ids": [],
+                "source_url": "https://medlineplus.gov/migraine.html",
+                "doc_type": "health_topic_summary"
+            }
         },
         {
-            "title": "Immunoglobulins Blood Test",
+            "id": "health_topic:3157:relations",
+            "content": "Migraine related_from_topic Headache; Migraine related_to_topic Headache; Migraine belongs_to_group Brain and Nerves; Migraine mapped_to_mesh_heading Migraine Disorders",
+            "score": 0.5038318,
             "source": "MedlinePlus",
-            "source_path": "https://medlineplus.gov/lab-tests/immunoglobulins-blood-test/"
+            "source_path": "https://medlineplus.gov/migraine.html",
+            "title": "Migraine",
+            "doc_type": "relation_summary",
+            "entity_id": "3157",
+            "entity_type": "health_topic",
+            "section_type": "relations",
+            "metadata": {
+                "entity_id": "3157",
+                "entity_type": "health_topic",
+                "title": "Migraine",
+                "aliases": [
+                    "Migraine",
+                    "Vascular Headache"
+                ],
+                "groups": [
+                    "Brain and Nerves"
+                ],
+                "section_type": "relations",
+                "related_topic_ids": [
+                    "273"
+                ],
+                "related_lab_test_ids": [],
+                "source_url": "https://medlineplus.gov/migraine.html",
+                "doc_type": "relation_summary"
+            }
         },
         {
-            "title": "Myasthenia Gravis Tests",
+            "id": "topic:489:summary",
+            "content": "Health topic: Nausea and Vomiting\nAlso called: Nausea and Vomiting, Emesis, Vomiting\nGroups: Digestive System, Symptoms\nYou call it barfing, puking, or throwing up; your doctor calls it vomiting. Read more about nausea and vomiting and the conditions that cause them.\nWhat are nausea and vomiting? Nausea is when you feel sick to your stomach, as if you are going to throw up. Vomiting is when you throw up. What causes nausea and vomiting? Nausea and vomiting can be symptoms of many different conditions, including: Morning sickness during pregnancy Gastroenteritis (infection of your intestines) and other infections Migraines Motion sickness Food poisoning Medicines, including those for cancer chemotherapy GERD (reflux) and ulcers Intestinal obstruction When do I need to see a health care provider for nausea and vomiting? Nausea and vomiting are common. They are usually not serious. However, you should contact your health care provider immediately if you have: A reason to think that your vomiting is from poisoning Vomited for longer than 24 hours Blood in the vomit Severe abdominal pain Severe headache and stiff neck Signs of dehydration , such as dry mouth, infrequent urination or dark urine How is the cause of nausea and vomiting diagnosed? Your health care provider will take your medical history, ask about your symptoms and do a physical exam. The provider will look for signs of dehydration. You may have some tests, including blood and urine tests. Women may also have a pregnancy test. What are the treatments for nausea and vomiting? Treatments for nausea and vomiting depend on the cause. You may get treatment for the underlying problem. There are some medicines that can treatment nausea and vomiting. For severe cases of vomiting, you may need extra fluids through an IV (intravenous). There are things that you can do to feel better: Get enough fluids, to avoid dehydration. If you are having trouble keeping liquids down, drink small amounts of clear liquids often. Eat bland foods; stay away from spicy, fatty, or salty foods Eat smaller meals more often Avoid strong smells, since they can sometimes trigger nausea and vomiting If you are pregnant and have morning sickness, eat crackers before you get out of bed in the morning",
+            "score": 0.48814577,
             "source": "MedlinePlus",
-            "source_path": "https://medlineplus.gov/lab-tests/myasthenia-gravis-tests/"
+            "source_path": "https://medlineplus.gov/nauseaandvomiting.html",
+            "title": "Nausea and Vomiting",
+            "doc_type": "health_topic_summary",
+            "entity_id": "489",
+            "entity_type": "health_topic",
+            "section_type": "summary",
+            "metadata": {
+                "entity_id": "489",
+                "entity_type": "health_topic",
+                "title": "Nausea and Vomiting",
+                "aliases": [
+                    "Nausea and Vomiting",
+                    "Emesis",
+                    "Vomiting"
+                ],
+                "groups": [
+                    "Digestive System",
+                    "Symptoms"
+                ],
+                "section_type": "summary",
+                "related_topic_ids": [
+                    "29"
+                ],
+                "related_lab_test_ids": [],
+                "source_url": "https://medlineplus.gov/nauseaandvomiting.html",
+                "doc_type": "health_topic_summary"
+            }
         },
         {
-            "title": "Heart Disease Risk Assessment",
+            "id": "topic:3106:summary",
+            "content": "Health topic: Motion Sickness\nAlso called: Motion Sickness, Airsickness, Carsickness, Seasickness\nGroups: Symptoms\nMotion sickness can start suddenly, with a queasy feeling and cold sweats. Read about how you can prevent motion sickness while traveling. \nMotion sickness is a common problem in people traveling by car, train, airplanes, and especially boats. Anyone can get it, but it is more common in children, pregnant women, and people taking certain medicines. Motion sickness can start suddenly, with a queasy feeling and cold sweats. It can then lead to dizziness and nausea and vomiting . Your brain senses movement by getting signals from your inner ears, eyes, muscles, and joints. When it gets signals that do not match, you can get motion sickness. For example, if you are reading on your phone while riding a bus, your eyes are focused on something that is not moving, but your inner ear senses motion. Where you sit can make a difference. The front seat of a car, forward cars of a train, upper deck on a boat or wing seats in a plane may give you a smoother ride. Looking out into the distance - instead of trying to read or look at something in the vehicle - can also help. Centers for Disease Control and Prevention",
+            "score": 0.4802789,
             "source": "MedlinePlus",
-            "source_path": "https://medlineplus.gov/lab-tests/heart-disease-risk-assessment/"
+            "source_path": "https://medlineplus.gov/motionsickness.html",
+            "title": "Motion Sickness",
+            "doc_type": "health_topic_summary",
+            "entity_id": "3106",
+            "entity_type": "health_topic",
+            "section_type": "summary",
+            "metadata": {
+                "entity_id": "3106",
+                "entity_type": "health_topic",
+                "title": "Motion Sickness",
+                "aliases": [
+                    "Motion Sickness",
+                    "Airsickness",
+                    "Carsickness",
+                    "Seasickness"
+                ],
+                "groups": [
+                    "Symptoms"
+                ],
+                "section_type": "summary",
+                "related_topic_ids": [],
+                "related_lab_test_ids": [],
+                "source_url": "https://medlineplus.gov/motionsickness.html",
+                "doc_type": "health_topic_summary"
+            }
         },
         {
-            "title": "Antibody Serology Tests",
+            "id": "topic:6103:summary",
+            "content": "Health topic: Norovirus Infections\nAlso called: Norovirus Infections, Norwalk virus infections, Norwalk Virus Infections\nGroups: Digestive System, Infections\nNoroviruses are a group of related viruses that cause symptoms like nausea and diarrhea. Learn about the proper treatments for Norovirus Infections.\nNoroviruses are a group of related viruses. Infection with these viruses causes an illness called gastroenteritis , an inflammation of the stomach and intestines. It can spread from person to person, or through contaminated food or water. You can also get it if you touch a contaminated surface. Norovirus can be serious, especially for young children and older adults. The most common symptoms of norovirus infection are: Diarrhea Nausea and vomiting Stomach pain Other symptoms may include fever, headache or body aches. Treatment includes bed rest and lots of liquids to prevent dehydration . There is no specific medicine to treat norovirus infections. Proper hand washing and safe food preparation may help prevent infections. Centers for Disease Control and Prevention",
+            "score": 0.47043547,
             "source": "MedlinePlus",
-            "source_path": "https://medlineplus.gov/lab-tests/antibody-serology-tests/"
+            "source_path": "https://medlineplus.gov/norovirusinfections.html",
+            "title": "Norovirus Infections",
+            "doc_type": "health_topic_summary",
+            "entity_id": "6103",
+            "entity_type": "health_topic",
+            "section_type": "summary",
+            "metadata": {
+                "entity_id": "6103",
+                "entity_type": "health_topic",
+                "title": "Norovirus Infections",
+                "aliases": [
+                    "Norovirus Infections",
+                    "Norwalk virus infections",
+                    "Norwalk Virus Infections"
+                ],
+                "groups": [
+                    "Digestive System",
+                    "Infections"
+                ],
+                "section_type": "summary",
+                "related_topic_ids": [
+                    "3056"
+                ],
+                "related_lab_test_ids": [
+                    "bacteria-culture-test"
+                ],
+                "source_url": "https://medlineplus.gov/norovirusinfections.html",
+                "doc_type": "health_topic_summary"
+            }
         },
         {
-            "title": "Dengue Fever Test",
+            "id": "topic:4177:summary",
+            "content": "Health topic: Childhood Brain Tumors\nAlso called: Childhood Brain Tumors\nGroups: Cancers, Children and Teenagers, Brain and Nerves\nChildhood brain tumors are abnormal growths inside the skull of children. Even benign tumors can be serious. Learn when a child should see a doctor.\nBrain tumors are abnormal growths inside the skull. They are among the most common types of childhood cancers . Some are benign tumors, which aren't cancer. They can still be serious. Malignant tumors are cancerous. Childhood brain and spinal cord tumors can cause headaches and other symptoms. However, other conditions can also cause the same symptoms. Check with a doctor if your child has any of the following problems: Morning headache or headache that goes away after vomiting Frequent nausea and vomiting Vision, hearing, and speech problems Loss of balance or trouble walking Unusual sleepiness Personality changes Seizures Increased head size in infants The symptoms are not the same in every child. Doctors use physical and neurological exams, lab tests, and imaging to diagnose brain tumors. Most childhood brain tumors are diagnosed and removed in surgery. Treatment for children is sometimes different than for an adult. Long-term side effects are an important issue. The options also depend on the type of tumor and where it is. Removal of the tumor is often possible. If not, radiation, chemotherapy, or both may be used. NIH: National Cancer Institute",
+            "score": 0.44783497,
             "source": "MedlinePlus",
-            "source_path": "https://medlineplus.gov/lab-tests/dengue-fever-test/"
+            "source_path": "https://medlineplus.gov/childhoodbraintumors.html",
+            "title": "Childhood Brain Tumors",
+            "doc_type": "health_topic_summary",
+            "entity_id": "4177",
+            "entity_type": "health_topic",
+            "section_type": "summary",
+            "metadata": {
+                "entity_id": "4177",
+                "entity_type": "health_topic",
+                "title": "Childhood Brain Tumors",
+                "aliases": [
+                    "Childhood Brain Tumors"
+                ],
+                "groups": [
+                    "Cancers",
+                    "Children and Teenagers",
+                    "Brain and Nerves"
+                ],
+                "section_type": "summary",
+                "related_topic_ids": [
+                    "173",
+                    "4355"
+                ],
+                "related_lab_test_ids": [],
+                "source_url": "https://medlineplus.gov/childhoodbraintumors.html",
+                "doc_type": "health_topic_summary"
+            }
         }
     ],
-    "confidence": 0.38879815,
-    "retrieval": {
-        "query": "Triệu chứng này có nguy hiểm hơn vì bệnh nền của tôi không?",
-        "intent": "general",
-        "linked_entities": [],
-        "expanded_relations": [],
-        "documents": [
-            {
-                "id": "lab:yeast-infection-tests:section:are-there-any-risks-to-the-test",
-                "content": "Lab test: Yeast Infection Tests
-Section: Are there any risks to the test?
-
-There is no known risk to having a yeast test.",
-                "score": 0.38879815,
-                "source": "MedlinePlus",
-                "source_path": "https://medlineplus.gov/lab-tests/yeast-infection-tests/",
-                "title": "Yeast Infection Tests",
-                "doc_type": "lab_test_section",
-                "entity_id": "yeast-infection-tests",
-                "entity_type": "lab_test",
-                "section_type": "risk",
-                "metadata": {
-                    "entity_id": "yeast-infection-tests",
-                    "entity_type": "lab_test",
-                    "title": "Yeast Infection Tests",
-                    "aliases": [
-                        "Yeast Infection Tests",
-                        "Yeast Infections",
-                        "Candidiasis",
-                        "Moniliasis",
-                        "Thrush",
-                        "Vaginal Yeast Infection"
-                    ],
-                    "groups": [
-                        "Infections",
-                        "Mouth and Teeth",
-                        "Female Reproductive System"
-                    ],
-                    "section_type": "risk",
-                    "related_topic_ids": [
-                        "1255"
-                    ],
-                    "related_lab_test_ids": [],
-                    "source_url": "https://medlineplus.gov/lab-tests/yeast-infection-tests/",
-                    "doc_type": "lab_test_section"
-                }
-            },
-            {
-                "id": "lab_test:differential-diagnosis:relations",
-                "content": "Differential Diagnosis related_to_topic Laboratory Tests",
-                "score": 0.38035038,
-                "source": "MedlinePlus",
-                "source_path": "https://medlineplus.gov/lab-tests/differential-diagnosis/",
-                "title": "Differential Diagnosis",
-                "doc_type": "relation_summary",
-                "entity_id": "differential-diagnosis",
-                "entity_type": "lab_test",
-                "section_type": "relations",
-                "metadata": {
-                    "entity_id": "differential-diagnosis",
-                    "entity_type": "lab_test",
-                    "title": "Differential Diagnosis",
-                    "aliases": [
-                        "Differential Diagnosis",
-                        "Laboratory Tests",
-                        "Blood Tests"
-                    ],
-                    "groups": [
-                        "Diagnostic Tests"
-                    ],
-                    "section_type": "relations",
-                    "related_topic_ids": [
-                        "210"
-                    ],
-                    "related_lab_test_ids": [],
-                    "source_url": "https://medlineplus.gov/lab-tests/differential-diagnosis/",
-                    "doc_type": "relation_summary"
-                }
-            },
-            {
-                "id": "lab_test:panic-disorder-test:relations",
-                "content": "Panic Disorder Test related_to_topic Panic Disorder",
-                "score": 0.37024078,
-                "source": "MedlinePlus",
-                "source_path": "https://medlineplus.gov/lab-tests/panic-disorder-test/",
-                "title": "Panic Disorder Test",
-                "doc_type": "relation_summary",
-                "entity_id": "panic-disorder-test",
-                "entity_type": "lab_test",
-                "section_type": "relations",
-                "metadata": {
-                    "entity_id": "panic-disorder-test",
-                    "entity_type": "lab_test",
-                    "title": "Panic Disorder Test",
-                    "aliases": [
-                        "Panic Disorder Test",
-                        "Panic Disorder"
-                    ],
-                    "groups": [
-                        "Mental Health and Behavior"
-                    ],
-                    "section_type": "relations",
-                    "related_topic_ids": [
-                        "601"
-                    ],
-                    "related_lab_test_ids": [],
-                    "source_url": "https://medlineplus.gov/lab-tests/panic-disorder-test/",
-                    "doc_type": "relation_summary"
-                }
-            },
-            {
-                "id": "lab:immunoglobulins-blood-test:section:are-there-any-risks-to-the-test",
-                "content": "Lab test: Immunoglobulins Blood Test
-Section: Are there any risks to the test?
-
-There is very little risk to having a blood test. You may have slight pain or bruising at the spot where the needle was put in, but most symptoms go away quickly.",
-                "score": 0.36343056,
-                "source": "MedlinePlus",
-                "source_path": "https://medlineplus.gov/lab-tests/immunoglobulins-blood-test/",
-                "title": "Immunoglobulins Blood Test",
-                "doc_type": "lab_test_section",
-                "entity_id": "immunoglobulins-blood-test",
-                "entity_type": "lab_test",
-                "section_type": "risk",
-                "metadata": {
-                    "entity_id": "immunoglobulins-blood-test",
-                    "entity_type": "lab_test",
-                    "title": "Immunoglobulins Blood Test",
-                    "aliases": [
-                        "Immunoglobulins Blood Test",
-                        "Autoimmune Diseases",
-                        "Autoinflammatory Diseases",
-                        "Bacterial Infections",
-                        "Flesh-Eating Bacteria",
-                        "Infections, Bacterial",
-                        "Necrotizing Fasciitis",
-                        "Q Fever",
-                        "Viral Infections",
-                        "Adenovirus Infections",
-                        "Coxsackievirus Infections",
-                        "Enterovirus",
-                        "Hand, Foot, and Mouth Disease",
-                        "Infections, Viral",
-                        "Roseola"
-                    ],
-                    "groups": [
-                        "Immune System",
-                        "Infections"
-                    ],
-                    "section_type": "risk",
-                    "related_topic_ids": [
-                        "154",
-                        "158",
-                        "454"
-                    ],
-                    "related_lab_test_ids": [],
-                    "source_url": "https://medlineplus.gov/lab-tests/immunoglobulins-blood-test/",
-                    "doc_type": "lab_test_section"
-                }
-            },
-            {
-                "id": "lab_test:myasthenia-gravis-tests:relations",
-                "content": "Myasthenia Gravis Tests related_to_topic Myasthenia Gravis",
-                "score": 0.35909253,
-                "source": "MedlinePlus",
-                "source_path": "https://medlineplus.gov/lab-tests/myasthenia-gravis-tests/",
-                "title": "Myasthenia Gravis Tests",
-                "doc_type": "relation_summary",
-                "entity_id": "myasthenia-gravis-tests",
-                "entity_type": "lab_test",
-                "section_type": "relations",
-                "metadata": {
-                    "entity_id": "myasthenia-gravis-tests",
-                    "entity_type": "lab_test",
-                    "title": "Myasthenia Gravis Tests",
-                    "aliases": [
-                        "Myasthenia Gravis Tests",
-                        "Myasthenia Gravis"
-                    ],
-                    "groups": [
-                        "Brain and Nerves"
-                    ],
-                    "section_type": "relations",
-                    "related_topic_ids": [
-                        "336"
-                    ],
-                    "related_lab_test_ids": [],
-                    "source_url": "https://medlineplus.gov/lab-tests/myasthenia-gravis-tests/",
-                    "doc_type": "relation_summary"
-                }
-            },
-            {
-                "id": "lab_test:heart-disease-risk-assessment:relations",
-                "content": "Heart Disease Risk Assessment related_to_topic Heart Diseases",
-                "score": 0.35558742,
-                "source": "MedlinePlus",
-                "source_path": "https://medlineplus.gov/lab-tests/heart-disease-risk-assessment/",
-                "title": "Heart Disease Risk Assessment",
-                "doc_type": "relation_summary",
-                "entity_id": "heart-disease-risk-assessment",
-                "entity_type": "lab_test",
-                "section_type": "relations",
-                "metadata": {
-                    "entity_id": "heart-disease-risk-assessment",
-                    "entity_type": "lab_test",
-                    "title": "Heart Disease Risk Assessment",
-                    "aliases": [
-                        "Heart Disease Risk Assessment",
-                        "Heart Diseases",
-                        "Cardiac diseases",
-                        "Cardiac Diseases",
-                        "Cardiovascular Diseases"
-                    ],
-                    "groups": [
-                        "Older Adults",
-                        "Blood, Heart and Circulation"
-                    ],
-                    "section_type": "relations",
-                    "related_topic_ids": [
-                        "277"
-                    ],
-                    "related_lab_test_ids": [],
-                    "source_url": "https://medlineplus.gov/lab-tests/heart-disease-risk-assessment/",
-                    "doc_type": "relation_summary"
-                }
-            },
-            {
-                "id": "lab:antibody-serology-tests:section:are-there-any-risks-to-this-test",
-                "content": "Lab test: Antibody Serology Tests
-Section: Are there any risks to this test?
-
-There is very little risk to having a blood test. There may be slight pain or bruising at the spot where the needle was put in, but most symptoms go away quickly.",
-                "score": 0.35389638,
-                "source": "MedlinePlus",
-                "source_path": "https://medlineplus.gov/lab-tests/antibody-serology-tests/",
-                "title": "Antibody Serology Tests",
-                "doc_type": "lab_test_section",
-                "entity_id": "antibody-serology-tests",
-                "entity_type": "lab_test",
-                "section_type": "risk",
-                "metadata": {
-                    "entity_id": "antibody-serology-tests",
-                    "entity_type": "lab_test",
-                    "title": "Antibody Serology Tests",
-                    "aliases": [
-                        "Antibody Serology Tests",
-                        "Chickenpox",
-                        "Varicella",
-                        "Varicella-Zoster Virus",
-                        "COVID-19 Testing",
-                        "COVID-19 Antibody Test",
-                        "COVID-19 Viral Test",
-                        "SARS-CoV-2 Testing",
-                        "Hepatitis",
-                        "Viral Hepatitis",
-                        "Infectious Mononucleosis",
-                        "Glandular fever",
-                        "Kissing disease",
-                        "Mono",
-                        "Mononucleosis",
-                        "EBV Infections",
-                        "Epstein-Barr Virus Infections",
-                        "Glandular Fever",
-                        "Shingles",
-                        "Herpes zoster",
-                        "Postherpetic neuralgia",
-                        "Herpes Zoster",
-                        "Post-herpetic Neuralgia"
-                    ],
-                    "groups": [
-                        "Children and Teenagers",
-                        "Infections",
-                        "Skin, Hair and Nails",
-                        "Diagnostic Tests",
-                        "Digestive System",
-                        "Immune System",
-                        "Older Adults",
-                        "Brain and Nerves"
-                    ],
-                    "section_type": "risk",
-                    "related_topic_ids": [
-                        "182",
-                        "7627",
-                        "109",
-                        "298",
-                        "90"
-                    ],
-                    "related_lab_test_ids": [],
-                    "source_url": "https://medlineplus.gov/lab-tests/antibody-serology-tests/",
-                    "doc_type": "lab_test_section"
-                }
-            },
-            {
-                "id": "lab:dengue-fever-test:section:are-there-any-risks-to-the-test",
-                "content": "Lab test: Dengue Fever Test
-Section: Are there any risks to the test?
-
-There is very little risk to having a blood test. You may have slight pain or bruising at the spot where the needle was put in, but most symptoms go away quickly.",
-                "score": 0.35349014,
-                "source": "MedlinePlus",
-                "source_path": "https://medlineplus.gov/lab-tests/dengue-fever-test/",
-                "title": "Dengue Fever Test",
-                "doc_type": "lab_test_section",
-                "entity_id": "dengue-fever-test",
-                "entity_type": "lab_test",
-                "section_type": "risk",
-                "metadata": {
-                    "entity_id": "dengue-fever-test",
-                    "entity_type": "lab_test",
-                    "title": "Dengue Fever Test",
-                    "aliases": [
-                        "Dengue Fever Test",
-                        "Dengue",
-                        "Break-bone fever",
-                        "Dengue fever",
-                        "Break-bone Fever"
-                    ],
-                    "groups": [
-                        "Infections"
-                    ],
-                    "section_type": "risk",
-                    "related_topic_ids": [
-                        "3104"
-                    ],
-                    "related_lab_test_ids": [],
-                    "source_url": "https://medlineplus.gov/lab-tests/dengue-fever-test/",
-                    "doc_type": "lab_test_section"
-                }
-            }
-        ]
-    },
-    "processing_time": 2.1276042461395264
+    "linked_entities": [
+        {
+            "entity_id": "273",
+            "entity_type": "health_topic",
+            "title": "Headache",
+            "matched_alias": "Headache"
+        }
+    ],
+    "expanded_relations": [
+        {
+            "id": "health-topic-273-related-to-topic-health-topic-3157",
+            "source_id": "273",
+            "source_type": "health_topic",
+            "relation_type": "related_to_topic",
+            "target_id": "3157",
+            "target_type": "health_topic",
+            "target_title": "Migraine",
+            "target_url": "https://medlineplus.gov/migraine.html",
+            "evidence": "related-topic"
+        },
+        {
+            "id": "health-topic-273-belongs-to-group-group-14",
+            "source_id": "273",
+            "source_type": "health_topic",
+            "relation_type": "belongs_to_group",
+            "target_id": "14",
+            "target_type": "group",
+            "target_title": "Brain and Nerves",
+            "target_url": "https://medlineplus.gov/brainandnerves.html",
+            "evidence": "group"
+        },
+        {
+            "id": "health-topic-273-belongs-to-group-group-31",
+            "source_id": "273",
+            "source_type": "health_topic",
+            "relation_type": "belongs_to_group",
+            "target_id": "31",
+            "target_type": "group",
+            "target_title": "Symptoms",
+            "target_url": "https://medlineplus.gov/symptoms.html",
+            "evidence": "group"
+        },
+        {
+            "id": "health-topic-273-mapped-to-mesh-heading-mesh-heading-d006261",
+            "source_id": "273",
+            "source_type": "health_topic",
+            "relation_type": "mapped_to_mesh_heading",
+            "target_id": "D006261",
+            "target_type": "mesh_heading",
+            "target_title": "Headache",
+            "target_url": null,
+            "evidence": "mesh-heading"
+        },
+        {
+            "id": "health-topic-273-mapped-to-mesh-heading-mesh-heading-d020773",
+            "source_id": "273",
+            "source_type": "health_topic",
+            "relation_type": "mapped_to_mesh_heading",
+            "target_id": "D020773",
+            "target_type": "mesh_heading",
+            "target_title": "Headache Disorders",
+            "target_url": null,
+            "evidence": "mesh-heading"
+        },
+        {
+            "id": "health-topic-273-related-from-topic-health-topic-3157",
+            "source_id": "273",
+            "source_type": "health_topic",
+            "relation_type": "related_from_topic",
+            "target_id": "3157",
+            "target_type": "health_topic",
+            "target_title": "Migraine",
+            "target_url": "https://medlineplus.gov/migraine.html",
+            "evidence": "related-topic"
+        },
+        {
+            "id": "health-topic-273-related-from-topic-health-topic-404",
+            "source_id": "273",
+            "source_type": "health_topic",
+            "relation_type": "related_from_topic",
+            "target_id": "404",
+            "target_type": "health_topic",
+            "target_title": "Sinusitis",
+            "target_url": "https://medlineplus.gov/sinusitis.html",
+            "evidence": "related-topic"
+        }
+    ],
+    "confidence": 0.5533539,
+    "sources": [
+        {
+            "title": "Headache",
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/headache.html"
+        },
+        {
+            "title": "Migraine",
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/migraine.html"
+        },
+        {
+            "title": "Nausea and Vomiting",
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/nauseaandvomiting.html"
+        },
+        {
+            "title": "Motion Sickness",
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/motionsickness.html"
+        },
+        {
+            "title": "Norovirus Infections",
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/norovirusinfections.html"
+        },
+        {
+            "title": "Childhood Brain Tumors",
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/childhoodbraintumors.html"
+        }
+    ]
 }

@@ -112,9 +112,10 @@ def get_embedding():
 def get_llm(temperature=0.2):
     client = Client(verify=False)
     return ChatOpenAI(
-        model="google/medgemma-27b-it",
+        model="Qwen/Qwen3.6-27B",
         openai_api_base= os.getenv('LLM_BASE_URL'),
         openai_api_key="empty",
         http_client=client,
         streaming=True,
+        temperature = 0.0,
     )

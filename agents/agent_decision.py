@@ -1,4 +1,5 @@
 import logging
+import json
 import time
 from typing import Any, Dict, List, Optional, TypedDict, Union
 from langchain_core.messages import HumanMessage, AIMessage, BaseMessage
@@ -14,10 +15,11 @@ from agents.image_analysis_agent import ImageAnalysisAgent
 from langgraph.checkpoint.memory import MemorySaver
 from agents.kg_agent import KGQueryEngine
 from agents.patient_db_agent import PatientQueryEngine
+from utils.llm_config import *
 from utils.proxy_setting import *
-from utils.prompt import decision_agent_prompt, conversation_agent_prompt
+from utils.prompt import decision_agent_prompt, conversation_agent_prompt, medical_multi_source_cot_prompt
 from utils.config import Config
-from utils.streaming import current_stream_callback, emit_stream_event, invoke_with_streaming
+from utils.streaming import emit_stream_event, invoke_with_streaming
 import concurrent.futures
 
 #Set proxy  
@@ -483,7 +485,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         })
         
         messages = state["messages"]
-        query = state["current_input"]
+        query = _input_to_text(state["current_input"])
         kg_context_limit = config.rag.context_limit 
         rag_context_limit = config.rag.context_limit
         patient_id = state.get('patient_id', 'PAT_001')
@@ -491,167 +493,190 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
 
         print(f"Patient ID: {patient_id}")
 
-        def run_kg_only(): 
+        def build_chat_history(context_limit: int) -> List[Dict[str, str]]:
             chat_history = list(patient_memory_messages)
-            for msg in messages[-kg_context_limit:]:
+            for msg in messages[-context_limit:]:
                 if isinstance(msg, HumanMessage): 
                     chat_history.append({"role": "user", "content": msg.content})
                 elif isinstance(msg, AIMessage):
                     chat_history.append({"role": "assistant", "content": msg.content})
+            return chat_history
+
+        def run_kg_retrieval(): 
             try:
-                response = kg_agent.generate_medical_response(
-                    question=query, 
-                    patient_id=patient_id,
-                    chat_history=chat_history
+                patient_profile = patient_query_engine.get_patient_profile(patient_id)
+                expanded_result = kg_agent.response_generator.query_expander.expand_query(
+                    query,
+                    patient_info=patient_profile,
+                    mode="kg",
+                    chat_history=build_chat_history(kg_context_limit),
                 )
+                expanded_query = expanded_result["expanded_query"]
+                refined_question = expanded_query["refined_question"]
+                patient_context = expanded_query["patient_context"]
+                kg_context = kg_agent.response_generator.cypher_query_llm.retrieve_context_from_kg(refined_question)
+                filtered_context = []
+                if kg_context:
+                    filtered_context = kg_agent.response_generator.context_filter.filter_context(
+                        kg_context,
+                        patient_context,
+                        refined_question,
+                    )
 
-                response_text = response.get('response', 'Tôi không có thông tin liên quan')
-                confidence = float(response.get('confidence', 0.0))
-
-                import json
+                result = {
+                    "agent_name": "KG_AGENT",
+                    "query": refined_question,
+                    "patient_context": patient_context,
+                    "documents": filtered_context,
+                    "confidence": 0.7 if filtered_context else 0.0,
+                    "sources": [],
+                }
                 with open('kg_response.json', 'w', encoding='utf-8') as f:
-                    json_text = json.dumps(response, ensure_ascii=False, indent=4)
-                    json_text = json_text.replace('\\n', '\n')
-                    f.write(json_text)
-
+                    json.dump(result, f, ensure_ascii=False, indent=4, default=str)
+                return result
             except Exception as e:
-                print(f"Error in KG agent: {e}")
-                response_text = "Tôi không có thông tin liên quan"
-                confidence = 0.0
-
-            insufficient_info = (
-                    "Tôi không có đủ thông tin" in response_text or 
-                    "không đủ thông tin" in response_text.lower() or
-                    "thông tin không đầy đủ" in response_text.lower() or
-                    "không thể trả lời" in response_text.lower() or
-                    "không trả lời được" in response_text.lower() or
-                    "không có thông tin liên quan" in response_text.lower()
-                )
-
-            return { 
-                'response': response_text,
-                'confidence': confidence,
-                'insufficient_info': insufficient_info,
-                'agent_name': 'KG_AGENT',
-                'sources': []
-            }
+                logger.exception("Error in KG agent")
+                return {
+                    "agent_name": "KG_AGENT",
+                    "query": query,
+                    "patient_context": "",
+                    "documents": [],
+                    "confidence": 0.0,
+                    "sources": [],
+                    "error": str(e),
+                }
         
-        def run_rag_only(): 
-            chat_history = list(patient_memory_messages)
-            for msg in messages[-rag_context_limit:]:
-                if isinstance(msg, HumanMessage): 
-                    chat_history.append({"role": "user", "content": msg.content})
-                elif isinstance(msg, AIMessage):
-                    chat_history.append({"role": "assistant", "content": msg.content})
+        def run_rag_retrieval(): 
             try:
-                response = rag_agent.process_query(query, chat_history=chat_history)
-                response_text = response.get('response', 'Tôi không có đủ thông tin')
-                confidence = float(response.get('confidence', 0.0)) 
-
-                import json
+                expansion_result = rag_agent.query_expander.expand_query(
+                    query,
+                    mode="rag",
+                    chat_history=build_chat_history(rag_context_limit),
+                )
+                expanded_query = expansion_result["expanded_query"]
+                documents = rag_agent.vector_store.retrieve_relevant_chunks(
+                    query=expanded_query,
+                    vectorstore=rag_agent.vectorstore,
+                )
+                confidence = max([float(doc.get("score") or 0.0) for doc in documents], default=0.0)
+                result = {
+                    "agent_name": "RAG_AGENT",
+                    "query": expanded_query,
+                    "documents": documents,
+                    "confidence": confidence,
+                    "sources": rag_agent.response_generator._extract_sources(documents),
+                }
                 with open('rag_response.json', 'w', encoding='utf-8') as f:
-                    json_text = json.dumps(response, ensure_ascii=False, indent=4)
-                    json_text = json_text.replace('\\n', '\n')
-                    f.write(json_text)
+                    json.dump(result, f, ensure_ascii=False, indent=4, default=str)
+                return result
             except Exception as e:
-                print(f"Error in RAG agent: {e}")
-                response_text = "Tôi không có đủ thông tin"
-                confidence = 0.0
+                logger.exception("Error in RAG agent")
+                return {
+                    "agent_name": "RAG_AGENT",
+                    "query": query,
+                    "documents": [],
+                    "confidence": 0.0,
+                    "sources": [],
+                    "error": str(e),
+                }
 
-            if confidence < config.rag.min_retrieval_confidence: 
-                insufficient_info = True
-                response_text = 'Tôi không có đủ thông tin'
-            else:
-                insufficient_info = (
-                    "Tôi không có đủ thông tin" in response_text or 
-                    "không đủ thông tin" in response_text.lower() or
-                    "thông tin không đầy đủ" in response_text.lower() or
-                    "không thể trả lời" in response_text.lower() or
-                    "không trả lời được" in response_text.lower()
-                )
-            
-            return {
-                "response": response_text,
-                "confidence": confidence,
-                "insufficient_info": insufficient_info,
-                "agent_name": "RAG_AGENT",
-                "sources": response.get("sources", [])
-            }
-
-        def run_medlineplus_only():
-            chat_history = list(patient_memory_messages)
-            medlineplus_context_limit = config.medlineplus.context_limit
-            response = {}
-            for msg in messages[-medlineplus_context_limit:]:
-                if isinstance(msg, HumanMessage):
-                    chat_history.append({"role": "user", "content": msg.content})
-                elif isinstance(msg, AIMessage):
-                    chat_history.append({"role": "assistant", "content": msg.content})
+        def run_medlineplus_retrieval():
             try:
-                response = medlineplus_agent.process_query(query, chat_history=chat_history)
-                response_text = response.get("response", "Tôi không có đủ thông tin")
-                confidence = float(response.get("confidence", 0.0))
-
-                import json
-                with open("medlineplus_response.json", "w", encoding="utf-8") as f:
-                    json_text = json.dumps(response, ensure_ascii=False, indent=4)
-                    json_text = json_text.replace("\\n", "\n")
-                    f.write(json_text)
-            except Exception as e:
-                print(f"Error in MedlinePlus agent: {e}")
-                response_text = "Tôi không có đủ thông tin"
-                confidence = 0.0
-
-            if confidence < config.medlineplus.min_retrieval_confidence:
-                insufficient_info = True
-                response_text = "Tôi không có đủ thông tin"
-            else:
-                insufficient_info = (
-                    "Tôi không có đủ thông tin" in response_text or
-                    "không đủ thông tin" in response_text.lower() or
-                    "thông tin không đầy đủ" in response_text.lower() or
-                    "không thể trả lời" in response_text.lower() or
-                    "không trả lời được" in response_text.lower() or
-                    "không tìm thấy thông tin phù hợp" in response_text.lower()
+                expansion_result = rag_agent.query_expander.expand_query(
+                    query,
+                    mode="medlineplus",
+                    chat_history=build_chat_history(config.medlineplus.context_limit),
                 )
+                medlineplus_query = expansion_result["expanded_query"]
+                retrieval_result = medlineplus_agent.retriever.retrieve(query=medlineplus_query)
+                documents = retrieval_result.get("documents", [])
+                confidence = medlineplus_agent._estimate_confidence(documents)
+                result = {
+                    "agent_name": "MEDLINEPLUS_AGENT",
+                    "original_query": query,
+                    "query": medlineplus_query,
+                    "documents": documents,
+                    "linked_entities": retrieval_result.get("linked_entities", []),
+                    "expanded_relations": retrieval_result.get("expanded_relations", []),
+                    "confidence": confidence,
+                    "sources": medlineplus_agent._extract_sources(documents),
+                }
+                with open("medlineplus_response.json", "w", encoding="utf-8") as f:
+                    json.dump(result, f, ensure_ascii=False, indent=4, default=str)
+                return result
+            except Exception as e:
+                logger.exception("Error in MedlinePlus agent")
+                return {
+                    "agent_name": "MEDLINEPLUS_AGENT",
+                    "query": query,
+                    "documents": [],
+                    "linked_entities": [],
+                    "expanded_relations": [],
+                    "confidence": 0.0,
+                    "sources": [],
+                    "error": str(e),
+                }
 
-            return {
-                "response": response_text,
-                "confidence": confidence,
-                "insufficient_info": insufficient_info,
-                "agent_name": "MEDLINEPLUS_AGENT",
-                "sources": response.get("sources", [])
-            }
+        def compact_text(text: str, max_chars: int = 1400) -> str:
+            text = (text or "").strip()
+            if len(text) <= max_chars:
+                return text
+            return text[: max_chars - 3].rstrip() + "..."
+
+        def format_kg_context(result: Dict[str, Any]) -> str:
+            blocks = []
+            for index, item in enumerate(result.get("documents", [])[:5], start=1):
+                blocks.append(f"[KG-{index}] {compact_text(json.dumps(item, ensure_ascii=False, default=str), 1800)}")
+            return "\n\n".join(blocks) if blocks else "Không có context KG phù hợp."
+
+        def format_documents(result: Dict[str, Any], prefix: str, limit: int = 6) -> str:
+            blocks = []
+            for index, doc in enumerate(result.get("documents", [])[:limit], start=1):
+                blocks.append(
+                    "\n".join([
+                        f"[{prefix}-{index}]",
+                        f"Title: {doc.get('title') or doc.get('source') or doc.get('disease_name') or ''}",
+                        f"Score: {doc.get('score', '')}",
+                        f"URL: {doc.get('source_path', '')}",
+                        f"Content: {compact_text(doc.get('content') or json.dumps(doc, ensure_ascii=False, default=str), 1800)}",
+                    ])
+                )
+            return "\n\n".join(blocks) if blocks else f"Không có context {prefix} phù hợp."
+
+        def format_sources(*results: Dict[str, Any]) -> List[Dict[str, str]]:
+            seen = set()
+            sources = []
+            for result in results:
+                for source in result.get("sources", []):
+                    title = source.get("title") or source.get("source") or result.get("agent_name", "source")
+                    path = source.get("path") or source.get("source_path") or ""
+                    key = (title, path)
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    sources.append({"title": title, "path": path})
+            return sources
             
         with concurrent.futures.ThreadPoolExecutor(max_workers = 3) as executor: 
-            kg_future = executor.submit(run_kg_only)
-            rag_future = executor.submit(run_rag_only)
-            medlineplus_future = executor.submit(run_medlineplus_only)
+            kg_future = executor.submit(run_kg_retrieval)
+            rag_future = executor.submit(run_rag_retrieval)
+            medlineplus_future = executor.submit(run_medlineplus_retrieval)
 
             kg_result = kg_future.result()
             rag_result = rag_future.result()
             medlineplus_result = medlineplus_future.result()
             
-        kg_insufficient = kg_result['insufficient_info']
-        rag_insufficient = rag_result['insufficient_info']
-        medlineplus_insufficient = medlineplus_result['insufficient_info']
-        
-        print(f"KG insufficient_info: {kg_insufficient}")
-        print(f"RAG insufficient_info: {rag_insufficient}")
-        print(f"MedlinePlus insufficient_info: {medlineplus_insufficient}")
+        has_kg_context = bool(kg_result.get("documents"))
+        has_rag_context = bool(rag_result.get("documents")) and rag_result.get("confidence", 0.0) >= config.rag.min_retrieval_confidence
+        has_medlineplus_context = bool(medlineplus_result.get("documents")) and medlineplus_result.get("confidence", 0.0) >= config.medlineplus.min_retrieval_confidence
+
+        print(f"KG context count: {len(kg_result.get('documents', []))}")
+        print(f"RAG context count: {len(rag_result.get('documents', []))}")
+        print(f"MedlinePlus context count: {len(medlineplus_result.get('documents', []))}")
         print(f"RAG confidence: {rag_result.get('confidence', 0.0)}")
         print(f"MedlinePlus confidence: {medlineplus_result.get('confidence', 0.0)}")
-        print(f"RAG sources count: {len(rag_result.get('sources', []))}")
-        print(f"MedlinePlus sources count: {len(medlineplus_result.get('sources', []))}")
         
-        all_results = [kg_result, rag_result, medlineplus_result]
-        sufficient_results = [
-            result for result in all_results
-            if not result.get("insufficient_info", True)
-        ]
-
-        # Case 1: All have insufficient info -> Go to web search
-        if not sufficient_results:
+        if not (has_kg_context or has_rag_context or has_medlineplus_context):
             print("KG, RAG, and MedlinePlus all have insufficient info -> Routing to Web Search")
             emit_stream_event("agent", {
                 "agent": "WEB_SEARCH_PROCESSOR_AGENT",
@@ -668,31 +693,56 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
                 "rag_result": rag_result,
                 "medlineplus_result": medlineplus_result
             }
-        
-        chosen_result = max(
-            sufficient_results,
-            key=lambda result: float(result.get("confidence", 0.0))
+
+        sources = format_sources(rag_result, medlineplus_result)
+        source_text = "\n".join(
+            f"- [{source['title']}]({source['path']})" if source.get("path") else f"- {source['title']}"
+            for source in sources
         )
-        chosen_agent = chosen_result.get("agent_name", "PARALLEL_KG_RAG_AGENT")
-        print(f"Using best sufficient result from {chosen_agent}")
+        history_text = "\n".join(
+            f"{message['role']}: {message['content']}" for message in build_chat_history(config.rag.context_limit)
+        )
+
         emit_stream_event("agent", {
-            "agent": chosen_agent,
-            "message": get_agent_status_message(chosen_agent),
+            "agent": "KG_RAG_PARALLEL",
+            "message": "Generating final answer from KG, RAG, and MedlinePlus context...",
             "transition": True,
         })
 
-        stream_callback = current_stream_callback.get()
-        if stream_callback is not None:
-            print(f"Streaming cached final response from {chosen_agent}")
-            stream_callback.on_llm_new_token(chosen_result["response"])
+        synthesis_prompt = medical_multi_source_cot_prompt.format(
+            patient_context=kg_result.get("patient_context") or state.get("patient_memory_context") or "Không có.",
+            user_query=query,
+            history=history_text or "Không có.",
+            kg_context=format_kg_context(kg_result),
+            rag_context=format_documents(rag_result, "RAG"),
+            medlineplus_query=medlineplus_result.get("query") or query,
+            medlineplus_context=format_documents(medlineplus_result, "MED"),
+            sources=source_text or "Không có nguồn URL.",
+        )
+        ## TO DO: change llm model
+        last_model_response = get_llm()
+        response = invoke_with_streaming(last_model_response, synthesis_prompt)
+        response_text = getattr(response, "content", str(response))
+        try:
+            json_text = response_text.strip()
+            if "```json" in json_text:
+                json_text = json_text.split("```json", 1)[1].split("```", 1)[0].strip()
+            parsed_response = json.loads(json_text)
+            response_text = parsed_response.get("step3_action", {}).get("content", response_text)
+        except Exception as exc:
+            logger.warning("Could not parse multi-source COT response as JSON: %s", exc)
 
         return {
             **state,
-            "output": AIMessage(content=chosen_result["response"]),
+            "output": AIMessage(content=response_text),
             "needs_human_validation": False,
-            "agent_name": chosen_agent,
+            "agent_name": "KG_RAG_PARALLEL",
             "next": "check_validation",
-            "retrieval_confidence": chosen_result.get("confidence", 0.0),
+            "retrieval_confidence": max(
+                float(kg_result.get("confidence", 0.0)),
+                float(rag_result.get("confidence", 0.0)),
+                float(medlineplus_result.get("confidence", 0.0)),
+            ),
             "kg_result": kg_result,
             "rag_result": rag_result,
             "medlineplus_result": medlineplus_result

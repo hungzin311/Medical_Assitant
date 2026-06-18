@@ -3,12 +3,12 @@ from typing import List, Dict
 from .embedding_service import embed_text, cosine_similarity
 from .cypher_query_llm import CypherQueryService
 
-from utils.llm_config import get_gemini_llm_2
+from utils.llm_config import get_llm, get_gemini_llm_3
 import numpy as np 
 
 class ContextFilter:
     def __init__(self):
-        self.llm = get_gemini_llm_2(temperature=0.1)
+        self.llm = get_gemini_llm_3(temperature=0.0)
         self.filter_prompt = PromptTemplate(
             template="""
             Bạn là chuyên gia y tế. Hãy lọc thông tin từ knowledge graph chỉ giữ lại những thông tin PHÙ HỢP với hồ sơ bệnh nhân.
@@ -80,17 +80,27 @@ class ContextFilterEmbedding:
         
         scored = []
         for item in kg_context:
+            if not isinstance(item, dict):
+                continue
+            disease = item.get('d')
+            if not isinstance(disease, dict):
+                continue
+            embedding = disease.get('embedding')
+            disease_name = disease.get('name')
+            if embedding is None or not disease_name:
+                continue
+
             num_symptoms = item.get('total_symptoms', 0)
             matched_symptoms = item.get('matched_symptoms', 0)
             matched_symptoms_list = item.get('matched_symptom_list', [])  # Sửa lỗi typo
             
-            emb = np.array(item['d']['embedding'])
+            emb = np.array(embedding)
             score = cosine_similarity(emb, q_vec)
             
             # Tạo scored item với thông tin đầy đủ
             scored_item = {
                 "score": score,
-                "name": item['d']['name'],  # Thông tin bệnh
+                "name": disease_name,  # Thông tin bệnh
                 "symptom_analysis": {
                     "total_symptoms": num_symptoms,
                     "matched_symptoms": matched_symptoms,

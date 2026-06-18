@@ -95,7 +95,6 @@ HÃY PHÂN TÍCH:"""
             # Build the prompt
             prompt = self._build_prompt(query, context, patient_context, chat_history)            
             response = invoke_with_streaming(self.response_generator_model, prompt)
-            
             # Parse JSON response and extract content (similar to KG agent)
             try:
                 if hasattr(response, 'content'):
