@@ -1,0 +1,53 @@
+{
+  "M0": {
+    "total_cases": 39,
+    "memory_extraction_precision": 0.0,
+    "memory_extraction_recall": 0.0,
+    "memory_retrieval_recall_at_3": 0.0,
+    "memory_retrieval_recall_at_5": 0.0,
+    "routing_accuracy": 0.8974,
+    "routing_accuracy_hard": 0.8889,
+    "routing_accuracy_memory_required": 1.0,
+    "baseline_routing_accuracy": 1.0,
+    "memory_routing_lift_rate": 0.0,
+    "repeated_question_avoidance_rate": 0.0,
+    "answer_quality_score": 3.4615,
+    "avg_latency": 15.2769,
+    "avg_retrieval_latency": 0.0,
+    "avg_routing_latency": 3.1184
+  },
+  "M1": {
+    "total_cases": 39,
+    "memory_extraction_precision": 1.0,
+    "memory_extraction_recall": 1.0,
+    "memory_retrieval_recall_at_3": 1.0,
+    "memory_retrieval_recall_at_5": 1.0,
+    "routing_accuracy": 0.9744,
+    "routing_accuracy_hard": 0.8889,
+    "routing_accuracy_memory_required": 1.0,
+    "baseline_routing_accuracy": 1.0,
+    "memory_routing_lift_rate": 0.0769,
+    "repeated_question_avoidance_rate": 1.0,
+    "answer_quality_score": 4.3333,
+    "avg_latency": 27.9972,
+    "avg_retrieval_latency": 1.4653,
+    "avg_routing_latency": 4.6316
+  },
+  "M2": {
+    "total_cases": 39,
+    "memory_extraction_precision": 0.5769,
+    "memory_extraction_recall": 0.7308,
+    "memory_retrieval_recall_at_3": 0.7308,
+    "memory_retrieval_recall_at_5": 0.7308,
+    "routing_accuracy": 0.9231,
+    "routing_accuracy_hard": 0.7778,
+    "routing_accuracy_memory_required": 0.6667,
+    "baseline_routing_accuracy": 1.0,
+    "memory_routing_lift_rate": 0.0513,
+    "repeated_question_avoidance_rate": 0.7949,
+    "answer_quality_score": 4.4359,
+    "avg_latency": 29.1780,
+    "avg_retrieval_latency": 1.2700,
+    "avg_routing_latency": 4.6522
+  }
+}
