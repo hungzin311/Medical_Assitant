@@ -64,7 +64,7 @@ class PatientMemoryService:
         Path(self.settings.local_qdrant_path).mkdir(parents=True, exist_ok=True)
 
     def _build_mem0_config(self) -> Dict[str, Any]:
-        from utils.llm_config import get_embedding, get_gemini_llm
+        from utils.llm_config import get_embedding, get_llm
 
         return {
             "vector_store": {
@@ -74,7 +74,7 @@ class PatientMemoryService:
             "llm": {
                 "provider": "langchain",
                 "config": {
-                    "model": get_gemini_llm(temperature=self.settings.llm_temperature),
+                    "model": get_llm(temperature=self.settings.llm_temperature),
                     "temperature": self.settings.llm_temperature,
                     "max_tokens": self.settings.llm_max_tokens,
                 },

@@ -70,7 +70,9 @@ class ImageClassifier:
         ]
         
         # Invoke LLM to classify the image
-        response = self.vision_model.invoke(vision_prompt)
+        from utils.llm_config import get_qwen_extra_body
+
+        response = self.vision_model.bind(extra_body=get_qwen_extra_body()).invoke(vision_prompt)
 
         try:
             # Ensure the response is parsed as JSON

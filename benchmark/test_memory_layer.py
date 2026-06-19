@@ -235,10 +235,8 @@ def run_full_system_answer(
 def judge_answer_quality(answer: str, eval_query: Dict[str, Any], query: str) -> Optional[float]:
     if not answer:
         return None
-    if not os.getenv("GOOGLE_API_KEY"):
-        raise RuntimeError("GOOGLE_API_KEY is required for --llm-judge.")
 
-    from utils.llm_config import get_gemini_llm
+    from utils.llm_config import get_llm, get_qwen_extra_body
 
     reference_points = "\n".join(f"- {point}" for point in eval_query["reference_answer_points"])
     prompt = f"""
@@ -259,7 +257,7 @@ Answer:
 
 Return only JSON: {{"score": <number>, "reason": "<short reason>"}}
 """
-    response = get_gemini_llm(temperature=0).invoke(prompt)
+    response = get_llm(temperature=0).bind(extra_body=get_qwen_extra_body()).invoke(prompt)
     text = response.content if hasattr(response, "content") else str(response)
     match = re.search(r"\{.*\}", text, re.DOTALL)
     if not match:
@@ -288,13 +286,7 @@ def evaluate_mode(mode: str, cases: List[Dict[str, Any]], args, graph=None) -> D
 
         for eval_query in case["eval_queries"]:
             query = eval_query["query"]
-            if mode == "M0":
-                expected_agent = eval_query.get(
-                    "expected_agent_without_memory",
-                    eval_query["expected_agent"],
-                )
-            else:
-                expected_agent = eval_query["expected_agent"]
+            expected_agent = eval_query["expected_agent"]
             expected_ids = eval_query.get("expected_relevant_memory_ids", [])
             started_at = time.time()
 

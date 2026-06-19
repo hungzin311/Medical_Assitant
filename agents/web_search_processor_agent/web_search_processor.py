@@ -32,7 +32,9 @@ class WebSearchProcessor:
     def process_web_results(self, query: str, chat_history: Optional[List[Dict[str, str]]] = None) -> str:
         
         web_search_query_prompt = self._build_prompt_for_web_search(query=query, chat_history=chat_history)
-        web_search_query = self.llm.invoke(web_search_query_prompt)
+        from utils.llm_config import get_qwen_extra_body
+
+        web_search_query = self.llm.bind(extra_body=get_qwen_extra_body()).invoke(web_search_query_prompt)
         
         # Retrieve web search results
         web_results = self.web_search_agent.search(web_search_query.content)     

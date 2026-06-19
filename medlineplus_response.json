@@ -1,158 +1,28 @@
 {
     "agent_name": "MEDLINEPLUS_AGENT",
-    "original_query": "tôi đang bị đau đầu và buồn nôn",
-    "query": "headache and nausea",
+    "original_query": "tôi có thấy bị mất nước, phân lỏng hơn bình thường",
+    "query": "dehydration loose stools diarrhea",
     "documents": [
         {
-            "id": "topic:273:summary",
-            "content": "Health topic: Headache\nAlso called: Headache, Cluster Headache, Tension Headache, Vascular Headache\nGroups: Brain and Nerves, Symptoms\nNearly everyone has had a headache, the most common form of pain. Learn the different types, the different symptoms of, and when to see a doctor.\nAlmost everyone has had a headache. Headache is the most common form of pain. It's a major reason people miss days at work or school or visit the doctor. The most common type of headache is a tension headache. Tension headaches are due to tight muscles in your shoulders, neck, scalp and jaw. They are often related to stress, depression or anxiety. You are more likely to get tension headaches if you work too much, don't get enough sleep, miss meals, or use alcohol. Other common types of headaches include migraines , cluster headaches, and sinus headaches. Most people can feel much better by making lifestyle changes, learning ways to relax and taking pain relievers . Not all headaches require a doctor's attention. But sometimes headaches warn of a more serious disorder. Let your health care provider know if you have sudden, severe headaches. Get medical help right away if you have a headache after a blow to your head, or if you have a headache along with a stiff neck, fever, confusion, loss of consciousness, or pain in the eye or ear. NIH: National Institute of Neurological Disorders and Stroke",
-            "score": 0.5533539,
+            "id": "topic:211:summary",
+            "content": "Health topic: Diarrhea\nAlso called: Diarrhea, Dysentery, The runs, The trots\nGroups: Digestive System, Symptoms\nDiarrhea can range from mild to severe and can be dangerous in children. Find out what you can do to treat symptoms and when to call your doctor.\nWhat is diarrhea? Diarrhea is loose, watery stools (bowel movements). You have diarrhea if you have loose stools three or more times in one day. Acute diarrhea is diarrhea that lasts a short time. It is a common problem. It usually lasts about one or two days, but it may last longer. Then it goes away on its own. Diarrhea lasting more than a few days may be a sign of a more serious problem. Chronic diarrhea -- diarrhea that lasts at least four weeks -- can be a symptom of a chronic disease. Chronic diarrhea symptoms may be continual, or they may come and go. What causes diarrhea? The most common causes of diarrhea include: Bacteria from contaminated food or water Viruses such as the flu , norovirus , or rotavirus . Rotavirus is the most common cause of acute diarrhea in children. Parasites, which are tiny organisms found in contaminated food or water Medicines such as antibiotics, cancer drugs, and antacids that contain magnesium Food intolerances and sensitivities, which are problems digesting certain ingredients or foods. An example is lactose intolerance . Diseases that affect the stomach, small intestine, or colon, such as Crohn's disease Problems with how the colon functions, such as irritable bowel syndrome Some people also get diarrhea after stomach surgery, because sometimes the surgeries can cause food to move through your digestive system more quickly. Sometimes no cause can be found. If your diarrhea goes away within a few days, finding the cause is usually not necessary. Who is at risk for diarrhea? People of all ages can get diarrhea. On average, adults In the United States have acute diarrhea once a year. Young children have it an average of twice a year. People who visit developing countries are at risk for traveler's diarrhea . It is caused by consuming contaminated food or water. What other symptoms might I have with diarrhea? Other possible symptoms of diarrhea include: Cramps or pain in the abdomen An urgent need to use the bathroom Loss of bowel control If a virus or bacteria is the cause of your diarrhea, you may also have a fever, chills, and bloody stools. Diarrhea can cause dehydration , which means that your body does not have enough fluid to work properly. Dehydration can be serious, especially for children, older adults, and people with weakened immune systems. When do I need to see a health care provider for diarrhea? Although it is usually not harmful, diarrhea can become dangerous or signal a more serious problem. Contact your health care provider if you have: Signs of dehydration Diarrhea for more than 2 days, if you are an adult. For children, contact the provider if it lasts more than 24 hours. Severe pain in your abdomen or rectum (for adults) A fever of 102 degrees or higher Stools containing blood or pus Stools that are black and tarry If children have diarrhea, parents or caregivers should not hesitate to call a health care provider. Diarrhea can be especially dangerous in newborns and infants. How is the cause of diarrhea diagnosed? To find the cause of diarrhea, your health care provider may: Do a physical exam Ask about any medicines you are taking Test your stool or blood to look for bacteria, parasites, or other signs of disease or infection Ask you to stop eating certain foods to see whether your diarrhea goes away If you have chronic diarrhea, your health care provider may perform other tests to look for signs of disease. What are the treatments for diarrhea? Diarrhea is treated by replacing lost fluids and electrolytes to prevent dehydration. Depending on the cause of the problem, you may need medicines to stop the diarrhea or treat an infection. Adults with diarrhea should drink water, fruit juices, sports drinks, sodas without caffeine, and salty broths. As your symptoms improve, you can eat soft, bland food. Children with diarrhea should be given oral rehydration solutions to replace lost fluids and electrolytes. Can diarrhea be prevented? Two types of diarrhea can be prevented - rotavirus diarrhea and traveler's diarrhea. There are vaccines for rotavirus. They are given to babies in two or three doses. You can help prevent traveler's diarrhea by being careful about what you eat and drink when you are in developing countries: Use only bottled or purified water for drinking, making ice cubes, and brushing your teeth If you do use tap water, boil it or use iodine tablets Make sure that the cooked food you eat is fully cooked and served hot Avoid unwashed or unpeeled raw fruits and vegetables NIH: National Institute of Diabetes and Digestive and Kidney Diseases",
+            "score": 0.62458795,
             "source": "MedlinePlus",
-            "source_path": "https://medlineplus.gov/headache.html",
-            "title": "Headache",
+            "source_path": "https://medlineplus.gov/diarrhea.html",
+            "title": "Diarrhea",
             "doc_type": "health_topic_summary",
-            "entity_id": "273",
+            "entity_id": "211",
             "entity_type": "health_topic",
             "section_type": "summary",
             "metadata": {
-                "entity_id": "273",
+                "entity_id": "211",
                 "entity_type": "health_topic",
-                "title": "Headache",
+                "title": "Diarrhea",
                 "aliases": [
-                    "Headache",
-                    "Cluster Headache",
-                    "Tension Headache",
-                    "Vascular Headache"
-                ],
-                "groups": [
-                    "Brain and Nerves",
-                    "Symptoms"
-                ],
-                "section_type": "summary",
-                "related_topic_ids": [
-                    "3157"
-                ],
-                "related_lab_test_ids": [],
-                "source_url": "https://medlineplus.gov/headache.html",
-                "doc_type": "health_topic_summary"
-            }
-        },
-        {
-            "id": "health_topic:273:relations",
-            "content": "Headache related_to_topic Migraine; Headache belongs_to_group Brain and Nerves; Headache belongs_to_group Symptoms; Headache mapped_to_mesh_heading Headache; Headache mapped_to_mesh_heading Headache Disorders; Headache related_from_topic Migraine; Headache related_from_topic Sinusitis",
-            "score": 0.4999351,
-            "source": "MedlinePlus",
-            "source_path": "https://medlineplus.gov/headache.html",
-            "title": "Headache",
-            "doc_type": "relation_summary",
-            "entity_id": "273",
-            "entity_type": "health_topic",
-            "section_type": "relations",
-            "metadata": {
-                "entity_id": "273",
-                "entity_type": "health_topic",
-                "title": "Headache",
-                "aliases": [
-                    "Headache",
-                    "Cluster Headache",
-                    "Tension Headache",
-                    "Vascular Headache"
-                ],
-                "groups": [
-                    "Brain and Nerves",
-                    "Symptoms"
-                ],
-                "section_type": "relations",
-                "related_topic_ids": [
-                    "3157",
-                    "404"
-                ],
-                "related_lab_test_ids": [],
-                "source_url": "https://medlineplus.gov/headache.html",
-                "doc_type": "relation_summary"
-            }
-        },
-        {
-            "id": "topic:3157:summary",
-            "content": "Health topic: Migraine\nAlso called: Migraine, Vascular Headache\nGroups: Brain and Nerves\nMigraines are pulsing or throbbing headaches in one area of the head. Learn about other symptoms, what triggers migraines, and how to treat them.\nWhat are migraines? Migraines are a recurring type of headache. They cause moderate to severe pain that is throbbing or pulsing. The pain is often on one side of your head. You may also have other symptoms, such as nausea and weakness. You may be sensitive to light and sound. What causes migraines? Researchers believe that migraine has a genetic cause. There are also a number of factors that can trigger a migraine. These factors vary from person to person, and they include: Stress Anxiety Hormonal changes in women Bright or flashing lights Loud noises Strong smells Medicines Too much or not enough sleep Sudden changes in weather or environment Overexertion (too much physical activity) Tobacco Caffeine or caffeine withdrawal Skipped meals Medication overuse (taking medicine for migraines too often) Some people have found that certain foods or ingredients can trigger headaches, especially when they are combined with other triggers. These foods and ingredients include: Alcohol Chocolate Aged cheeses Monosodium glutamate (MSG) Some fruits and nuts Fermented or pickled goods Yeast Cured or processed meats Who is at risk for migraines? About 12% of Americans get migraines. They can affect anyone, but you are more likely to have them if you: Are a woman. Women are three times more likely than men to get migraines. Have a family history of migraines. Most people with migraines have family members who have migraines. Have other medical conditions, such as depression , anxiety , bipolar disorder , sleep disorders , and epilepsy . What are the symptoms of migraines? There are four different phases of migraines. You may not always go through every phase each time you have a migraine.: Prodome. This phase starts up to 24 hours before you get the migraine. You have early signs and symptoms, such as food cravings, unexplained mood changes, uncontrollable yawning, fluid retention, and increased urination. Aura. If you have this phase, you might see flashing or bright lights or zig-zag lines. You may have muscle weakness or feel like you are being touched or grabbed. An aura can happen just before or during a migraine. Headache. A migraine usually starts gradually and then becomes more severe. It typically causes throbbing or pulsing pain, which is often on one side of your head. But sometimes you can have a migraine without a headache. Other migraine symptoms may include Increased sensitivity to light, noise, and odors Nausea and vomiting Worsened pain when you move, cough, or sneeze Postdrome (following the headache). You may feel exhausted, weak, and confused after a migraine. This can last up to a day. Migraines are more common in the morning; people often wake up with them. Some people have migraines at predictable times, such as before menstruation or on weekends following a stressful week of work. How are migraines diagnosed? To make a diagnosis, your health care provider will: Take your medical history Ask about your symptoms Do a physical and neurological exam An important part of diagnosing migraines is to rule out other medical conditions which could be causing the symptoms. So you may also have blood tests, an MRI or CT scan, or other tests. How are migraines treated? There is no cure for migraines. Treatment focuses on relieving symptoms and preventing additional attacks. There are different types of medicines to relieve symptoms. They include triptan drugs, ergotamine drugs, and pain relievers . The sooner you take the medicine, the more effective it is. There are also other things you can do to feel better: Resting with your eyes closed in a quiet, darkened room Placing a cool cloth or ice pack on your forehead Drinking fluids There are some lifestyle changes you can make to prevent migraines: Stress management strategies, such as exercise, relaxation techniques, and biofeedback, may reduce the number and severity of migraines. Biofeedback uses electronic devices to teach you to control certain body functions, such as your heartbeat, blood pressure, and muscle tension. Make a log of what seems to trigger your migraines. You can learn what you need to avoid, such as certain foods and medicines. It also help you figure out what you should do, such as establishing a consistent sleep schedule and eating regular meals. Hormone therapy may help some women whose migraines seem to be linked to their menstrual cycle If you have obesity , losing weight may also be helpful If you have frequent or severe migraines, you may need to take medicines to prevent further attacks. Talk with your health care provider about which drug would be right for you. Certain natural treatments, such as riboflavin (vitamin B2) and coenzyme Q10, may help prevent migraines. If your magnesium level is low, you can try taking magnesium. There is also an herb, butterbur, which some people take to prevent migraines. But butterbur may not be safe for long-term use. Always check with your health care provider before taking any supplements. NIH: National Institute of Neurological Disorders and Stroke",
-            "score": 0.5096946,
-            "source": "MedlinePlus",
-            "source_path": "https://medlineplus.gov/migraine.html",
-            "title": "Migraine",
-            "doc_type": "health_topic_summary",
-            "entity_id": "3157",
-            "entity_type": "health_topic",
-            "section_type": "summary",
-            "metadata": {
-                "entity_id": "3157",
-                "entity_type": "health_topic",
-                "title": "Migraine",
-                "aliases": [
-                    "Migraine",
-                    "Vascular Headache"
-                ],
-                "groups": [
-                    "Brain and Nerves"
-                ],
-                "section_type": "summary",
-                "related_topic_ids": [
-                    "273"
-                ],
-                "related_lab_test_ids": [],
-                "source_url": "https://medlineplus.gov/migraine.html",
-                "doc_type": "health_topic_summary"
-            }
-        },
-        {
-            "id": "health_topic:3157:relations",
-            "content": "Migraine related_from_topic Headache; Migraine related_to_topic Headache; Migraine belongs_to_group Brain and Nerves; Migraine mapped_to_mesh_heading Migraine Disorders",
-            "score": 0.5038318,
-            "source": "MedlinePlus",
-            "source_path": "https://medlineplus.gov/migraine.html",
-            "title": "Migraine",
-            "doc_type": "relation_summary",
-            "entity_id": "3157",
-            "entity_type": "health_topic",
-            "section_type": "relations",
-            "metadata": {
-                "entity_id": "3157",
-                "entity_type": "health_topic",
-                "title": "Migraine",
-                "aliases": [
-                    "Migraine",
-                    "Vascular Headache"
-                ],
-                "groups": [
-                    "Brain and Nerves"
-                ],
-                "section_type": "relations",
-                "related_topic_ids": [
-                    "273"
-                ],
-                "related_lab_test_ids": [],
-                "source_url": "https://medlineplus.gov/migraine.html",
-                "doc_type": "relation_summary"
-            }
-        },
-        {
-            "id": "topic:489:summary",
-            "content": "Health topic: Nausea and Vomiting\nAlso called: Nausea and Vomiting, Emesis, Vomiting\nGroups: Digestive System, Symptoms\nYou call it barfing, puking, or throwing up; your doctor calls it vomiting. Read more about nausea and vomiting and the conditions that cause them.\nWhat are nausea and vomiting? Nausea is when you feel sick to your stomach, as if you are going to throw up. Vomiting is when you throw up. What causes nausea and vomiting? Nausea and vomiting can be symptoms of many different conditions, including: Morning sickness during pregnancy Gastroenteritis (infection of your intestines) and other infections Migraines Motion sickness Food poisoning Medicines, including those for cancer chemotherapy GERD (reflux) and ulcers Intestinal obstruction When do I need to see a health care provider for nausea and vomiting? Nausea and vomiting are common. They are usually not serious. However, you should contact your health care provider immediately if you have: A reason to think that your vomiting is from poisoning Vomited for longer than 24 hours Blood in the vomit Severe abdominal pain Severe headache and stiff neck Signs of dehydration , such as dry mouth, infrequent urination or dark urine How is the cause of nausea and vomiting diagnosed? Your health care provider will take your medical history, ask about your symptoms and do a physical exam. The provider will look for signs of dehydration. You may have some tests, including blood and urine tests. Women may also have a pregnancy test. What are the treatments for nausea and vomiting? Treatments for nausea and vomiting depend on the cause. You may get treatment for the underlying problem. There are some medicines that can treatment nausea and vomiting. For severe cases of vomiting, you may need extra fluids through an IV (intravenous). There are things that you can do to feel better: Get enough fluids, to avoid dehydration. If you are having trouble keeping liquids down, drink small amounts of clear liquids often. Eat bland foods; stay away from spicy, fatty, or salty foods Eat smaller meals more often Avoid strong smells, since they can sometimes trigger nausea and vomiting If you are pregnant and have morning sickness, eat crackers before you get out of bed in the morning",
-            "score": 0.48814577,
-            "source": "MedlinePlus",
-            "source_path": "https://medlineplus.gov/nauseaandvomiting.html",
-            "title": "Nausea and Vomiting",
-            "doc_type": "health_topic_summary",
-            "entity_id": "489",
-            "entity_type": "health_topic",
-            "section_type": "summary",
-            "metadata": {
-                "entity_id": "489",
-                "entity_type": "health_topic",
-                "title": "Nausea and Vomiting",
-                "aliases": [
-                    "Nausea and Vomiting",
-                    "Emesis",
-                    "Vomiting"
+                    "Diarrhea",
+                    "Dysentery",
+                    "The runs",
+                    "The trots"
                 ],
                 "groups": [
                     "Digestive System",
@@ -160,147 +30,513 @@
                 ],
                 "section_type": "summary",
                 "related_topic_ids": [
-                    "29"
+                    "4617",
+                    "254",
+                    "3056",
+                    "3215",
+                    "444"
                 ],
-                "related_lab_test_ids": [],
-                "source_url": "https://medlineplus.gov/nauseaandvomiting.html",
+                "related_lab_test_ids": [
+                    "bacteria-culture-test",
+                    "c-diff-testing",
+                    "calprotectin-stool-test",
+                    "ova-and-parasite-test",
+                    "white-blood-cell-wbc-in-stool"
+                ],
+                "source_url": "https://medlineplus.gov/diarrhea.html",
                 "doc_type": "health_topic_summary"
             }
         },
         {
-            "id": "topic:3106:summary",
-            "content": "Health topic: Motion Sickness\nAlso called: Motion Sickness, Airsickness, Carsickness, Seasickness\nGroups: Symptoms\nMotion sickness can start suddenly, with a queasy feeling and cold sweats. Read about how you can prevent motion sickness while traveling. \nMotion sickness is a common problem in people traveling by car, train, airplanes, and especially boats. Anyone can get it, but it is more common in children, pregnant women, and people taking certain medicines. Motion sickness can start suddenly, with a queasy feeling and cold sweats. It can then lead to dizziness and nausea and vomiting . Your brain senses movement by getting signals from your inner ears, eyes, muscles, and joints. When it gets signals that do not match, you can get motion sickness. For example, if you are reading on your phone while riding a bus, your eyes are focused on something that is not moving, but your inner ear senses motion. Where you sit can make a difference. The front seat of a car, forward cars of a train, upper deck on a boat or wing seats in a plane may give you a smoother ride. Looking out into the distance - instead of trying to read or look at something in the vehicle - can also help. Centers for Disease Control and Prevention",
-            "score": 0.4802789,
+            "id": "health_topic:211:relations",
+            "content": "Diarrhea related_from_topic Bowel Movement; Diarrhea related_from_topic Dehydration; Diarrhea related_to_topic C. diff Infections; Diarrhea related_to_topic Foodborne Illness; Diarrhea related_to_topic Gastroenteritis; Diarrhea related_to_topic Rotavirus Infections; Diarrhea related_to_topic Traveler's Health; Diarrhea belongs_to_group Digestive System; Diarrhea belongs_to_group Symptoms; Diarrhea mapped_to_mesh_heading Diarrhea; Diarrhea related_to_lab_test Bacteria Culture Test; Diarrhea related_to_lab_test C. diff Testing; Diarrhea related_to_lab_test Calprotectin Stool Test; Diarrhea related_to_lab_test Ova and Parasite Test; Diarrhea related_to_lab_test White Blood Cell (WBC) in Stool; Diarrhea related_from_topic E. coli Infections; Diarrhea related_from_topic Gastroenteritis; Diarrhea related_from_topic Rotavirus Infections; Diarrhea related_from_topic Small Intestine Disorders",
+            "score": 0.555423,
             "source": "MedlinePlus",
-            "source_path": "https://medlineplus.gov/motionsickness.html",
-            "title": "Motion Sickness",
-            "doc_type": "health_topic_summary",
-            "entity_id": "3106",
+            "source_path": "https://medlineplus.gov/diarrhea.html",
+            "title": "Diarrhea",
+            "doc_type": "relation_summary",
+            "entity_id": "211",
             "entity_type": "health_topic",
-            "section_type": "summary",
+            "section_type": "relations",
             "metadata": {
-                "entity_id": "3106",
+                "entity_id": "211",
                 "entity_type": "health_topic",
-                "title": "Motion Sickness",
+                "title": "Diarrhea",
                 "aliases": [
-                    "Motion Sickness",
-                    "Airsickness",
-                    "Carsickness",
-                    "Seasickness"
-                ],
-                "groups": [
-                    "Symptoms"
-                ],
-                "section_type": "summary",
-                "related_topic_ids": [],
-                "related_lab_test_ids": [],
-                "source_url": "https://medlineplus.gov/motionsickness.html",
-                "doc_type": "health_topic_summary"
-            }
-        },
-        {
-            "id": "topic:6103:summary",
-            "content": "Health topic: Norovirus Infections\nAlso called: Norovirus Infections, Norwalk virus infections, Norwalk Virus Infections\nGroups: Digestive System, Infections\nNoroviruses are a group of related viruses that cause symptoms like nausea and diarrhea. Learn about the proper treatments for Norovirus Infections.\nNoroviruses are a group of related viruses. Infection with these viruses causes an illness called gastroenteritis , an inflammation of the stomach and intestines. It can spread from person to person, or through contaminated food or water. You can also get it if you touch a contaminated surface. Norovirus can be serious, especially for young children and older adults. The most common symptoms of norovirus infection are: Diarrhea Nausea and vomiting Stomach pain Other symptoms may include fever, headache or body aches. Treatment includes bed rest and lots of liquids to prevent dehydration . There is no specific medicine to treat norovirus infections. Proper hand washing and safe food preparation may help prevent infections. Centers for Disease Control and Prevention",
-            "score": 0.47043547,
-            "source": "MedlinePlus",
-            "source_path": "https://medlineplus.gov/norovirusinfections.html",
-            "title": "Norovirus Infections",
-            "doc_type": "health_topic_summary",
-            "entity_id": "6103",
-            "entity_type": "health_topic",
-            "section_type": "summary",
-            "metadata": {
-                "entity_id": "6103",
-                "entity_type": "health_topic",
-                "title": "Norovirus Infections",
-                "aliases": [
-                    "Norovirus Infections",
-                    "Norwalk virus infections",
-                    "Norwalk Virus Infections"
+                    "Diarrhea",
+                    "Dysentery",
+                    "The runs",
+                    "The trots"
                 ],
                 "groups": [
                     "Digestive System",
-                    "Infections"
+                    "Symptoms"
+                ],
+                "section_type": "relations",
+                "related_topic_ids": [
+                    "5262",
+                    "6051",
+                    "4617",
+                    "254",
+                    "3056",
+                    "3215",
+                    "444",
+                    "1010",
+                    "5446"
+                ],
+                "related_lab_test_ids": [
+                    "bacteria-culture-test",
+                    "c-diff-testing",
+                    "calprotectin-stool-test",
+                    "ova-and-parasite-test",
+                    "white-blood-cell-wbc-in-stool"
+                ],
+                "source_url": "https://medlineplus.gov/diarrhea.html",
+                "doc_type": "relation_summary"
+            }
+        },
+        {
+            "id": "topic:6051:summary",
+            "content": "Health topic: Dehydration\nAlso called: Dehydration, Thirst\nGroups: Symptoms, Metabolic Problems\nDehydration means your body doesn't have enough fluid. Learn about the signs and symptoms of dehydration, and what to do about it.\nWhat is dehydration? Dehydration is a condition caused by the loss of too much fluid from the body . It happens when you are losing more fluids than you are taking in, and your body does not have enough fluids to work properly. What causes dehydration? You can become dehydrated because of: Diarrhea Vomiting Sweating too much Urinating too much, which can happen because of certain medicines and illnesses Fever Not drinking enough water or other fluids Who is more likely to develop dehydration? Certain people are more likely to develop dehydration: Older adults. Some people lose their sense of thirst as they age, so they don't drink enough fluids. Infants and young children, who are more likely to have diarrhea or vomiting People with chronic illnesses that cause them to urinate or sweat more often, such as diabetes , cystic fibrosis , or kidney problems People who take medicines that cause them to urinate or sweat more People who exercise or work outdoors during hot weather What are the symptoms of dehydration? In adults , the symptoms of dehydration include: Feeling very thirsty Dry mouth Urinating and sweating less than usual Dark-colored urine Dry skin Feeling tired Dizziness In infants and young children , the symptoms of dehydration include: Dry mouth and tongue Crying without tears No wet diapers for 3 hours or more A high fever Being unusually sleepy or drowsy Irritability Eyes that look sunken Dehydration can be mild, or it can be severe enough to be life-threatening. Get medical help right away if the symptoms also include: Confusion Fainting Lack of urination Rapid heartbeat Rapid breathing Shock How is dehydration diagnosed? To find out if you dehydration, your health care provider will: Do a physical exam Check your vital signs Ask about your symptoms Your provider may also order tests, such as: Blood tests to check your electrolyte levels, especially potassium and sodium . Electrolytes are minerals in your body that have an electric charge. They have many important jobs, including helping to keep a balance of fluids in your body. Blood tests to check your kidney function . Urine tests to check for dehydration and its cause. What are the treatments for dehydration? The treatment for dehydration is to replace the fluids and electrolytes that you have lost. For mild cases, you may just need to drink lots of water. If you lost electrolytes, sports drinks may help. There are also oral rehydration solutions for children. You can buy those without a prescription. Severe cases may be treated with intravenous (IV) fluids with salt in a hospital. Can dehydration be prevented? The key to preventing dehydration is making sure that you get enough fluids: Drink enough water every day. Each person's needs can be different, so ask your health care provider how much you should be drinking each day. Avoid drinks that have sugar and caffeine . Drink extra fluids when the weather is hot, especially if you are exercising or working outside. If you are losing a lot of minerals in sweat, sports drinks can help you. But some sports drinks have lots of sugar, so be careful not to drink too much of them. Get extra fluids when you are sick. If you are having trouble keeping liquids down, you can try taking small sips of water or sucking on ice chips.",
+            "score": 0.5305334,
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/dehydration.html",
+            "title": "Dehydration",
+            "doc_type": "health_topic_summary",
+            "entity_id": "6051",
+            "entity_type": "health_topic",
+            "section_type": "summary",
+            "metadata": {
+                "entity_id": "6051",
+                "entity_type": "health_topic",
+                "title": "Dehydration",
+                "aliases": [
+                    "Dehydration",
+                    "Thirst"
+                ],
+                "groups": [
+                    "Symptoms",
+                    "Metabolic Problems"
                 ],
                 "section_type": "summary",
                 "related_topic_ids": [
-                    "3056"
+                    "211",
+                    "4224",
+                    "280",
+                    "489"
+                ],
+                "related_lab_test_ids": [
+                    "osmolality-tests"
+                ],
+                "source_url": "https://medlineplus.gov/dehydration.html",
+                "doc_type": "health_topic_summary"
+            }
+        },
+        {
+            "id": "topic:5262:summary",
+            "content": "Health topic: Bowel Movement\nAlso called: Bowel Movement, BM, Feces, Poop, Stool\nGroups: Digestive System\nBowel movements have many names but it's all the same. Everyone has BMs.  Some are normal and some are irregular. Learn more. \nA bowel movement is the last stop in the movement of food through your digestive tract. Your stool passes out of your body through the rectum and anus. Another name for stool is feces. It is made of what is left after your digestive system (stomach, small intestine, and colon) absorbs nutrients and fluids from what you eat and drink. Sometimes a bowel movement isn't normal. Diarrhea happens when stool passes through the large intestine too quickly. Constipation occurs when stool passes through the large intestine too slowly. Bowel incontinence is a problem controlling your bowel movements. Other abnormalities with bowel movements may be a sign of a digestive problem. NIH: National Institute of Diabetes and Digestive and Kidney Diseases",
+            "score": 0.528338,
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/bowelmovement.html",
+            "title": "Bowel Movement",
+            "doc_type": "health_topic_summary",
+            "entity_id": "5262",
+            "entity_type": "health_topic",
+            "section_type": "summary",
+            "metadata": {
+                "entity_id": "5262",
+                "entity_type": "health_topic",
+                "title": "Bowel Movement",
+                "aliases": [
+                    "Bowel Movement",
+                    "BM",
+                    "Feces",
+                    "Poop",
+                    "Stool"
+                ],
+                "groups": [
+                    "Digestive System"
+                ],
+                "section_type": "summary",
+                "related_topic_ids": [
+                    "137",
+                    "5316",
+                    "200",
+                    "211"
                 ],
                 "related_lab_test_ids": [
                     "bacteria-culture-test"
                 ],
-                "source_url": "https://medlineplus.gov/norovirusinfections.html",
+                "source_url": "https://medlineplus.gov/bowelmovement.html",
                 "doc_type": "health_topic_summary"
             }
         },
         {
-            "id": "topic:4177:summary",
-            "content": "Health topic: Childhood Brain Tumors\nAlso called: Childhood Brain Tumors\nGroups: Cancers, Children and Teenagers, Brain and Nerves\nChildhood brain tumors are abnormal growths inside the skull of children. Even benign tumors can be serious. Learn when a child should see a doctor.\nBrain tumors are abnormal growths inside the skull. They are among the most common types of childhood cancers . Some are benign tumors, which aren't cancer. They can still be serious. Malignant tumors are cancerous. Childhood brain and spinal cord tumors can cause headaches and other symptoms. However, other conditions can also cause the same symptoms. Check with a doctor if your child has any of the following problems: Morning headache or headache that goes away after vomiting Frequent nausea and vomiting Vision, hearing, and speech problems Loss of balance or trouble walking Unusual sleepiness Personality changes Seizures Increased head size in infants The symptoms are not the same in every child. Doctors use physical and neurological exams, lab tests, and imaging to diagnose brain tumors. Most childhood brain tumors are diagnosed and removed in surgery. Treatment for children is sometimes different than for an adult. Long-term side effects are an important issue. The options also depend on the type of tumor and where it is. Removal of the tumor is often possible. If not, radiation, chemotherapy, or both may be used. NIH: National Cancer Institute",
-            "score": 0.44783497,
+            "id": "health_topic:6051:relations",
+            "content": "Dehydration related_to_topic Diarrhea; Dehydration related_to_topic Fluid and Electrolyte Balance; Dehydration related_to_topic Heat Illness; Dehydration related_to_topic Nausea and Vomiting; Dehydration belongs_to_group Symptoms; Dehydration belongs_to_group Metabolic Problems; Dehydration mapped_to_mesh_heading Dehydration; Dehydration related_to_lab_test Osmolality Tests; Dehydration related_from_topic Fluid and Electrolyte Balance; Dehydration related_from_topic Heat Illness",
+            "score": 0.4909771,
             "source": "MedlinePlus",
-            "source_path": "https://medlineplus.gov/childhoodbraintumors.html",
-            "title": "Childhood Brain Tumors",
-            "doc_type": "health_topic_summary",
-            "entity_id": "4177",
+            "source_path": "https://medlineplus.gov/dehydration.html",
+            "title": "Dehydration",
+            "doc_type": "relation_summary",
+            "entity_id": "6051",
             "entity_type": "health_topic",
-            "section_type": "summary",
+            "section_type": "relations",
             "metadata": {
-                "entity_id": "4177",
+                "entity_id": "6051",
                 "entity_type": "health_topic",
-                "title": "Childhood Brain Tumors",
+                "title": "Dehydration",
                 "aliases": [
-                    "Childhood Brain Tumors"
+                    "Dehydration",
+                    "Thirst"
                 ],
                 "groups": [
-                    "Cancers",
-                    "Children and Teenagers",
-                    "Brain and Nerves"
+                    "Symptoms",
+                    "Metabolic Problems"
                 ],
-                "section_type": "summary",
+                "section_type": "relations",
                 "related_topic_ids": [
-                    "173",
-                    "4355"
+                    "211",
+                    "4224",
+                    "280",
+                    "489"
+                ],
+                "related_lab_test_ids": [
+                    "osmolality-tests"
+                ],
+                "source_url": "https://medlineplus.gov/dehydration.html",
+                "doc_type": "relation_summary"
+            }
+        },
+        {
+            "id": "health_topic:5262:relations",
+            "content": "Bowel Movement related_from_topic Bowel Incontinence; Bowel Movement related_to_topic Anal Disorders; Bowel Movement related_to_topic Bowel Incontinence; Bowel Movement related_to_topic Constipation; Bowel Movement related_to_topic Diarrhea; Bowel Movement belongs_to_group Digestive System; Bowel Movement mapped_to_mesh_heading Defecation; Bowel Movement mapped_to_mesh_heading Feces; Bowel Movement related_to_lab_test Bacteria Culture Test; Bowel Movement related_from_topic Rectal Disorders",
+            "score": 0.45303732,
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/bowelmovement.html",
+            "title": "Bowel Movement",
+            "doc_type": "relation_summary",
+            "entity_id": "5262",
+            "entity_type": "health_topic",
+            "section_type": "relations",
+            "metadata": {
+                "entity_id": "5262",
+                "entity_type": "health_topic",
+                "title": "Bowel Movement",
+                "aliases": [
+                    "Bowel Movement",
+                    "BM",
+                    "Feces",
+                    "Poop",
+                    "Stool"
+                ],
+                "groups": [
+                    "Digestive System"
+                ],
+                "section_type": "relations",
+                "related_topic_ids": [
+                    "5316",
+                    "137",
+                    "200",
+                    "211",
+                    "5870"
+                ],
+                "related_lab_test_ids": [
+                    "bacteria-culture-test"
+                ],
+                "source_url": "https://medlineplus.gov/bowelmovement.html",
+                "doc_type": "relation_summary"
+            }
+        },
+        {
+            "id": "lab:white-blood-cell-wbc-in-stool:section:why-do-i-need-a-white-blood-cell-in-stool-test",
+            "content": "Lab test: White Blood Cell (WBC) in Stool\nSection: Why do I need a white blood cell in stool test?\n\nMost diarrhea goes away on its own after a day or two, and your health care provider doesn't need to find the cause. But you may need a white blood cell in stool test and other tests if you have symptoms of diarrhea from inflammation that don't improve after a few days. Knowing the cause of your diarrhea helps your provider choose the right treatment. That's important because ongoing diarrhea can lead to serious health problems, including dehydration and electrolyte imbalances . See your provider right away if you have: Signs of dehydration, including dry mouth, dark urine (pee), fatigue, or dizziness Diarrhea for more than 2 days, or for more than 24 hours in a young child or infant A fever of 102 degrees or higher Severe pain in the abdomen (belly) or rectum Stool that is black and tarry or contains blood or pus In adults: frequent vomiting or diarrhea 6 or more times in 24 hours",
+            "score": 0.5389692,
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/lab-tests/white-blood-cell-wbc-in-stool/",
+            "title": "White Blood Cell (WBC) in Stool",
+            "doc_type": "lab_test_section",
+            "entity_id": "white-blood-cell-wbc-in-stool",
+            "entity_type": "lab_test",
+            "section_type": "general",
+            "metadata": {
+                "entity_id": "white-blood-cell-wbc-in-stool",
+                "entity_type": "lab_test",
+                "title": "White Blood Cell (WBC) in Stool",
+                "aliases": [
+                    "White Blood Cell (WBC) in Stool",
+                    "Bacterial Infections",
+                    "Flesh-Eating Bacteria",
+                    "Infections, Bacterial",
+                    "Necrotizing Fasciitis",
+                    "Q Fever",
+                    "Crohn's Disease",
+                    "Regional enteritis",
+                    "Regional ileitis",
+                    "Ileocolitis",
+                    "Inflammatory Bowel Disease",
+                    "Regional Enteritis",
+                    "Regional Ileitis",
+                    "Diarrhea",
+                    "Dysentery",
+                    "The runs",
+                    "The trots",
+                    "Ulcerative Colitis",
+                    "Colitis",
+                    "Distal colitis",
+                    "Pancolitis",
+                    "Ulcerative proctitis"
+                ],
+                "groups": [
+                    "Infections",
+                    "Digestive System",
+                    "Symptoms"
+                ],
+                "section_type": "general",
+                "related_topic_ids": [
+                    "158",
+                    "119",
+                    "211",
+                    "446"
                 ],
                 "related_lab_test_ids": [],
-                "source_url": "https://medlineplus.gov/childhoodbraintumors.html",
-                "doc_type": "health_topic_summary"
+                "source_url": "https://medlineplus.gov/lab-tests/white-blood-cell-wbc-in-stool/",
+                "doc_type": "lab_test_section"
+            }
+        },
+        {
+            "id": "lab_test:c-diff-testing:relations",
+            "content": "C. diff Testing related_to_topic C. diff Infections; C. diff Testing related_to_topic Diarrhea",
+            "score": 0.5321332,
+            "source": "MedlinePlus",
+            "source_path": "https://medlineplus.gov/lab-tests/c-diff-testing/",
+            "title": "C. diff Testing",
+            "doc_type": "relation_summary",
+            "entity_id": "c-diff-testing",
+            "entity_type": "lab_test",
+            "section_type": "relations",
+            "metadata": {
+                "entity_id": "c-diff-testing",
+                "entity_type": "lab_test",
+                "title": "C. diff Testing",
+                "aliases": [
+                    "C. diff Testing",
+                    "C. diff Infections",
+                    "Clostridioides difficile infections",
+                    "Clostridium difficile Infections",
+                    "Clostridium enterocolitis",
+                    "Pseudomembranous colitis",
+                    "Clostridium difficile infections",
+                    "Diarrhea",
+                    "Dysentery",
+                    "The runs",
+                    "The trots"
+                ],
+                "groups": [
+                    "Digestive System",
+                    "Infections",
+                    "Symptoms"
+                ],
+                "section_type": "relations",
+                "related_topic_ids": [
+                    "4617",
+                    "211"
+                ],
+                "related_lab_test_ids": [],
+                "source_url": "https://medlineplus.gov/lab-tests/c-diff-testing/",
+                "doc_type": "relation_summary"
             }
         }
     ],
     "linked_entities": [
         {
-            "entity_id": "273",
+            "entity_id": "6051",
             "entity_type": "health_topic",
-            "title": "Headache",
-            "matched_alias": "Headache"
+            "title": "Dehydration",
+            "matched_alias": "Dehydration"
+        },
+        {
+            "entity_id": "211",
+            "entity_type": "health_topic",
+            "title": "Diarrhea",
+            "matched_alias": "Diarrhea"
+        },
+        {
+            "entity_id": "5262",
+            "entity_type": "health_topic",
+            "title": "Bowel Movement",
+            "matched_alias": "Stool"
         }
     ],
     "expanded_relations": [
         {
-            "id": "health-topic-273-related-to-topic-health-topic-3157",
-            "source_id": "273",
+            "id": "health-topic-5262-related-from-topic-health-topic-5316",
+            "source_id": "5262",
             "source_type": "health_topic",
-            "relation_type": "related_to_topic",
-            "target_id": "3157",
+            "relation_type": "related_from_topic",
+            "target_id": "5316",
             "target_type": "health_topic",
-            "target_title": "Migraine",
-            "target_url": "https://medlineplus.gov/migraine.html",
+            "target_title": "Bowel Incontinence",
+            "target_url": "https://medlineplus.gov/bowelincontinence.html",
             "evidence": "related-topic"
         },
         {
-            "id": "health-topic-273-belongs-to-group-group-14",
-            "source_id": "273",
+            "id": "health-topic-5262-related-to-topic-health-topic-137",
+            "source_id": "5262",
+            "source_type": "health_topic",
+            "relation_type": "related_to_topic",
+            "target_id": "137",
+            "target_type": "health_topic",
+            "target_title": "Anal Disorders",
+            "target_url": "https://medlineplus.gov/analdisorders.html",
+            "evidence": "related-topic"
+        },
+        {
+            "id": "health-topic-5262-related-to-topic-health-topic-5316",
+            "source_id": "5262",
+            "source_type": "health_topic",
+            "relation_type": "related_to_topic",
+            "target_id": "5316",
+            "target_type": "health_topic",
+            "target_title": "Bowel Incontinence",
+            "target_url": "https://medlineplus.gov/bowelincontinence.html",
+            "evidence": "related-topic"
+        },
+        {
+            "id": "health-topic-5262-related-to-topic-health-topic-200",
+            "source_id": "5262",
+            "source_type": "health_topic",
+            "relation_type": "related_to_topic",
+            "target_id": "200",
+            "target_type": "health_topic",
+            "target_title": "Constipation",
+            "target_url": "https://medlineplus.gov/constipation.html",
+            "evidence": "related-topic"
+        },
+        {
+            "id": "health-topic-5262-related-to-topic-health-topic-211",
+            "source_id": "5262",
+            "source_type": "health_topic",
+            "relation_type": "related_to_topic",
+            "target_id": "211",
+            "target_type": "health_topic",
+            "target_title": "Diarrhea",
+            "target_url": "https://medlineplus.gov/diarrhea.html",
+            "evidence": "related-topic"
+        },
+        {
+            "id": "health-topic-211-related-from-topic-health-topic-5262",
+            "source_id": "211",
+            "source_type": "health_topic",
+            "relation_type": "related_from_topic",
+            "target_id": "5262",
+            "target_type": "health_topic",
+            "target_title": "Bowel Movement",
+            "target_url": "https://medlineplus.gov/bowelmovement.html",
+            "evidence": "related-topic"
+        },
+        {
+            "id": "health-topic-5262-belongs-to-group-group-2",
+            "source_id": "5262",
             "source_type": "health_topic",
             "relation_type": "belongs_to_group",
-            "target_id": "14",
+            "target_id": "2",
             "target_type": "group",
-            "target_title": "Brain and Nerves",
-            "target_url": "https://medlineplus.gov/brainandnerves.html",
+            "target_title": "Digestive System",
+            "target_url": "https://medlineplus.gov/digestivesystem.html",
             "evidence": "group"
         },
         {
-            "id": "health-topic-273-belongs-to-group-group-31",
-            "source_id": "273",
+            "id": "health-topic-5262-mapped-to-mesh-heading-mesh-heading-d003672",
+            "source_id": "5262",
+            "source_type": "health_topic",
+            "relation_type": "mapped_to_mesh_heading",
+            "target_id": "D003672",
+            "target_type": "mesh_heading",
+            "target_title": "Defecation",
+            "target_url": null,
+            "evidence": "mesh-heading"
+        },
+        {
+            "id": "health-topic-5262-mapped-to-mesh-heading-mesh-heading-d005243",
+            "source_id": "5262",
+            "source_type": "health_topic",
+            "relation_type": "mapped_to_mesh_heading",
+            "target_id": "D005243",
+            "target_type": "mesh_heading",
+            "target_title": "Feces",
+            "target_url": null,
+            "evidence": "mesh-heading"
+        },
+        {
+            "id": "health-topic-5262-related-to-lab-test-lab-test-bacteria-culture-test",
+            "source_id": "5262",
+            "source_type": "health_topic",
+            "relation_type": "related_to_lab_test",
+            "target_id": "bacteria-culture-test",
+            "target_type": "lab_test",
+            "target_title": "Bacteria Culture Test",
+            "target_url": "https://medlineplus.gov/lab-tests/bacteria-culture-test/",
+            "evidence": "https://medlineplus.gov/lab-tests/bacteria-culture-test"
+        },
+        {
+            "id": "health-topic-6051-related-to-topic-health-topic-211",
+            "source_id": "6051",
+            "source_type": "health_topic",
+            "relation_type": "related_to_topic",
+            "target_id": "211",
+            "target_type": "health_topic",
+            "target_title": "Diarrhea",
+            "target_url": "https://medlineplus.gov/diarrhea.html",
+            "evidence": "related-topic"
+        },
+        {
+            "id": "health-topic-211-related-from-topic-health-topic-6051",
+            "source_id": "211",
+            "source_type": "health_topic",
+            "relation_type": "related_from_topic",
+            "target_id": "6051",
+            "target_type": "health_topic",
+            "target_title": "Dehydration",
+            "target_url": "https://medlineplus.gov/dehydration.html",
+            "evidence": "related-topic"
+        },
+        {
+            "id": "health-topic-6051-related-to-topic-health-topic-4224",
+            "source_id": "6051",
+            "source_type": "health_topic",
+            "relation_type": "related_to_topic",
+            "target_id": "4224",
+            "target_type": "health_topic",
+            "target_title": "Fluid and Electrolyte Balance",
+            "target_url": "https://medlineplus.gov/fluidandelectrolytebalance.html",
+            "evidence": "related-topic"
+        },
+        {
+            "id": "health-topic-6051-related-to-topic-health-topic-280",
+            "source_id": "6051",
+            "source_type": "health_topic",
+            "relation_type": "related_to_topic",
+            "target_id": "280",
+            "target_type": "health_topic",
+            "target_title": "Heat Illness",
+            "target_url": "https://medlineplus.gov/heatillness.html",
+            "evidence": "related-topic"
+        },
+        {
+            "id": "health-topic-6051-related-to-topic-health-topic-489",
+            "source_id": "6051",
+            "source_type": "health_topic",
+            "relation_type": "related_to_topic",
+            "target_id": "489",
+            "target_type": "health_topic",
+            "target_title": "Nausea and Vomiting",
+            "target_url": "https://medlineplus.gov/nauseaandvomiting.html",
+            "evidence": "related-topic"
+        },
+        {
+            "id": "health-topic-6051-belongs-to-group-group-31",
+            "source_id": "6051",
             "source_type": "health_topic",
             "relation_type": "belongs_to_group",
             "target_id": "31",
@@ -310,81 +546,76 @@
             "evidence": "group"
         },
         {
-            "id": "health-topic-273-mapped-to-mesh-heading-mesh-heading-d006261",
-            "source_id": "273",
+            "id": "health-topic-6051-belongs-to-group-group-40",
+            "source_id": "6051",
+            "source_type": "health_topic",
+            "relation_type": "belongs_to_group",
+            "target_id": "40",
+            "target_type": "group",
+            "target_title": "Metabolic Problems",
+            "target_url": "https://medlineplus.gov/metabolicproblems.html",
+            "evidence": "group"
+        },
+        {
+            "id": "health-topic-6051-mapped-to-mesh-heading-mesh-heading-d003681",
+            "source_id": "6051",
             "source_type": "health_topic",
             "relation_type": "mapped_to_mesh_heading",
-            "target_id": "D006261",
+            "target_id": "D003681",
             "target_type": "mesh_heading",
-            "target_title": "Headache",
+            "target_title": "Dehydration",
             "target_url": null,
             "evidence": "mesh-heading"
         },
         {
-            "id": "health-topic-273-mapped-to-mesh-heading-mesh-heading-d020773",
-            "source_id": "273",
+            "id": "health-topic-6051-related-to-lab-test-lab-test-osmolality-tests",
+            "source_id": "6051",
             "source_type": "health_topic",
-            "relation_type": "mapped_to_mesh_heading",
-            "target_id": "D020773",
-            "target_type": "mesh_heading",
-            "target_title": "Headache Disorders",
-            "target_url": null,
-            "evidence": "mesh-heading"
+            "relation_type": "related_to_lab_test",
+            "target_id": "osmolality-tests",
+            "target_type": "lab_test",
+            "target_title": "Osmolality Tests",
+            "target_url": "https://medlineplus.gov/lab-tests/osmolality-tests/",
+            "evidence": "https://medlineplus.gov/lab-tests/osmolality-tests"
         },
         {
-            "id": "health-topic-273-related-from-topic-health-topic-3157",
-            "source_id": "273",
+            "id": "health-topic-211-related-to-topic-health-topic-4617",
+            "source_id": "211",
             "source_type": "health_topic",
-            "relation_type": "related_from_topic",
-            "target_id": "3157",
+            "relation_type": "related_to_topic",
+            "target_id": "4617",
             "target_type": "health_topic",
-            "target_title": "Migraine",
-            "target_url": "https://medlineplus.gov/migraine.html",
-            "evidence": "related-topic"
-        },
-        {
-            "id": "health-topic-273-related-from-topic-health-topic-404",
-            "source_id": "273",
-            "source_type": "health_topic",
-            "relation_type": "related_from_topic",
-            "target_id": "404",
-            "target_type": "health_topic",
-            "target_title": "Sinusitis",
-            "target_url": "https://medlineplus.gov/sinusitis.html",
+            "target_title": "C. diff Infections",
+            "target_url": "https://medlineplus.gov/cdiffinfections.html",
             "evidence": "related-topic"
         }
     ],
-    "confidence": 0.5533539,
+    "confidence": 0.62458795,
     "sources": [
         {
-            "title": "Headache",
+            "title": "Diarrhea",
             "source": "MedlinePlus",
-            "source_path": "https://medlineplus.gov/headache.html"
+            "source_path": "https://medlineplus.gov/diarrhea.html"
         },
         {
-            "title": "Migraine",
+            "title": "Dehydration",
             "source": "MedlinePlus",
-            "source_path": "https://medlineplus.gov/migraine.html"
+            "source_path": "https://medlineplus.gov/dehydration.html"
         },
         {
-            "title": "Nausea and Vomiting",
+            "title": "Bowel Movement",
             "source": "MedlinePlus",
-            "source_path": "https://medlineplus.gov/nauseaandvomiting.html"
+            "source_path": "https://medlineplus.gov/bowelmovement.html"
         },
         {
-            "title": "Motion Sickness",
+            "title": "White Blood Cell (WBC) in Stool",
             "source": "MedlinePlus",
-            "source_path": "https://medlineplus.gov/motionsickness.html"
+            "source_path": "https://medlineplus.gov/lab-tests/white-blood-cell-wbc-in-stool/"
         },
         {
-            "title": "Norovirus Infections",
+            "title": "C. diff Testing",
             "source": "MedlinePlus",
-            "source_path": "https://medlineplus.gov/norovirusinfections.html"
-        },
-        {
-            "title": "Childhood Brain Tumors",
-            "source": "MedlinePlus",
-            "source_path": "https://medlineplus.gov/childhoodbraintumors.html"
+            "source_path": "https://medlineplus.gov/lab-tests/c-diff-testing/"
         }
     ]
 }

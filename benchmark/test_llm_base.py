@@ -52,7 +52,9 @@ def process_single_question(question_data):
             choices=choices
         )
         
-        response = llm.invoke(prompt)
+        from utils.llm_config import get_qwen_extra_body
+
+        response = llm.bind(extra_body=get_qwen_extra_body()).invoke(prompt)
         
         response_text = response.content.strip()
         result = parse_llm_response(response_text)

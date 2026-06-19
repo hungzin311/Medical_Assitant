@@ -103,7 +103,9 @@ class ResponseGenerator:
         
         choices_formatted = "\n".join([f"{i}. {choice}" for i, choice in enumerate(choices)])
         
-        response = self.llm.invoke(mcq_prompt.format(
+        from utils.llm_config import get_qwen_extra_body
+
+        response = self.llm.bind(extra_body=get_qwen_extra_body()).invoke(mcq_prompt.format(
             kg_candidates=kg_candidates_json,
             question=question,
             choices=choices_formatted

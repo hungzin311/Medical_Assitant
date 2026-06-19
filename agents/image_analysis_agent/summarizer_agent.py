@@ -89,7 +89,9 @@ class MedicalImageSummarizer:
         
         try:
             # Invoke LLM for summarization
-            response = self.llm.invoke(summarizer_prompt)
+            from utils.llm_config import get_qwen_extra_body
+
+            response = self.llm.bind(extra_body=get_qwen_extra_body()).invoke(summarizer_prompt)
             
             # Add safety disclaimer and image_id to the response content for tracking
             safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
@@ -142,7 +144,9 @@ class MedicalImageSummarizer:
         
         try:
             # Invoke LLM for follow-up response
-            response = self.llm.invoke(followup_prompt)
+            from utils.llm_config import get_qwen_extra_body
+
+            response = self.llm.bind(extra_body=get_qwen_extra_body()).invoke(followup_prompt)
             # Add safety disclaimer and include the image_id in the response for continued tracking
             safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
             return f"{response.content}{safety_disclaimer}"

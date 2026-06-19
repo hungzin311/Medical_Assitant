@@ -47,30 +47,12 @@ class OpenAIEmbeddings(Embeddings):
         return [item.embedding for item in response.data]
 
 def get_gemini_llm(temperature=0.7):
-    return ChatGoogleGenerativeAI(
-        model="gemini-3.1-flash-lite",
-        google_api_key=os.getenv("GOOGLE_API_KEY"),
-        temperature=temperature,
-        convert_system_message_to_human=False,
-        streaming=True,
-    )
+    return get_llm(temperature=temperature)
 def get_gemini_llm_2(temperature=0.7):
-    return ChatGoogleGenerativeAI(
-        model="gemini-3.1-flash-lite",
-        google_api_key=os.getenv("GOOGLE_API_KEY_2"),
-        temperature=temperature,
-        convert_system_message_to_human=False,
-        streaming=True,
-    )
+    return get_llm(temperature=temperature)
 
 def get_gemini_llm_3(temperature=0.7):
-    return ChatGoogleGenerativeAI(
-        model="gemini-3.1-flash-lite",
-        google_api_key=os.getenv("GOOGLE_API_KEY_3"),
-        temperature=temperature,
-        convert_system_message_to_human=False,
-        streaming=True,
-    )
+    return get_llm(temperature=temperature)
 
 def get_gemini_vision_llm(temperature=0.2):
     return ChatGoogleGenerativeAI(
@@ -100,6 +82,12 @@ def get_polyp_vqa_llm(temperature=0.1):
 
     return get_gemini_vision_llm(temperature=temperature)
 
+def get_qwen_extra_body(max_completion_tokens=1024):
+    return {
+        "chat_template_kwargs": {"enable_thinking": False},
+        "max_completion_tokens": max_completion_tokens,
+    }
+
 def get_graph_db():
     uri = os.getenv("NEO4J_URI")
     user = os.getenv("NEO4J_USER")
@@ -117,5 +105,5 @@ def get_llm(temperature=0.2):
         openai_api_key="empty",
         http_client=client,
         streaming=True,
-        temperature = 0.0,
+        temperature=temperature,
     )

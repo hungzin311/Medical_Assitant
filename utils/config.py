@@ -42,7 +42,7 @@ class RAGConfig:
 
         self.include_sources = True
 
-        self.min_retrieval_confidence = 0.70
+        self.min_retrieval_confidence = 0.50
 
         self.context_limit = 20     
 
@@ -61,9 +61,9 @@ class MedlinePlusConfig:
         self.qdrant_api_key = os.getenv("QDRANT_API_KEY")
         self.vector_name = os.getenv("MEDLINEPLUS_VECTOR_NAME", "dense")
         self.include_relations = os.getenv("MEDLINEPLUS_INCLUDE_RELATIONS", "true").lower() == "true"
-        self.max_relations = int(os.getenv("MEDLINEPLUS_MAX_RELATIONS", "20"))
-        self.min_retrieval_confidence = float(os.getenv("MEDLINEPLUS_MIN_RETRIEVAL_CONFIDENCE", "0.50"))
-        self.context_limit = int(os.getenv("MEDLINEPLUS_CONTEXT_LIMIT", "20"))
+        self.max_relations = 20
+        self.min_retrieval_confidence = 0.4
+        self.context_limit = 20
 
 
 class PatientDBConfig:

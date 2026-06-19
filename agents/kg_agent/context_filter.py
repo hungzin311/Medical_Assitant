@@ -3,7 +3,7 @@ from typing import List, Dict
 from .embedding_service import embed_text, cosine_similarity
 from .cypher_query_llm import CypherQueryService
 
-from utils.llm_config import get_llm, get_gemini_llm_3
+from utils.llm_config import get_gemini_llm_3, get_qwen_extra_body
 import numpy as np 
 
 class ContextFilter:
@@ -48,7 +48,7 @@ class ContextFilter:
         formatted_context = self._format_kg_context(kg_context)
         
         # Apply LLM filter
-        filtered_response = self.llm.invoke(
+        filtered_response = self.llm.bind(extra_body=get_qwen_extra_body()).invoke(
             self.filter_prompt.format(
                 age=age,
                 gender=gender,

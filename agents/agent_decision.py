@@ -1,6 +1,7 @@
 import logging
 import json
 import time
+import threading
 from typing import Any, Dict, List, Optional, TypedDict, Union
 from langchain_core.messages import HumanMessage, AIMessage, BaseMessage
 from langchain_core.prompts import ChatPromptTemplate
@@ -19,6 +20,8 @@ from utils.llm_config import *
 from utils.proxy_setting import *
 from utils.prompt import decision_agent_prompt, conversation_agent_prompt, medical_multi_source_cot_prompt
 from utils.config import Config
+from agents.patient_memory_service.memory_service import get_patient_memory_service
+from agents.patient_memory_service.schemas import *
 from utils.streaming import emit_stream_event, invoke_with_streaming
 import concurrent.futures
 
@@ -94,7 +97,7 @@ def get_decision_chain():
     """Return the shared Decision Agent chain used by LangGraph routing."""
     global _decision_chain
     if _decision_chain is None:
-        decision_model = config.agent_decision.llm
+        decision_model = config.agent_decision.llm.bind(extra_body=get_qwen_extra_body())
         json_parser = JsonOutputParser(pydantic_object=AgentDecision)
         decision_prompt = ChatPromptTemplate.from_messages([
             ("human", f"System: {decision_agent_prompt}\n\nUser: {{input}}"),
@@ -119,8 +122,6 @@ def retrieve_patient_memory_for_query(
         }
 
     try:
-        from agents.patient_memory_service.memory_service import get_patient_memory_service
-        from agents.patient_memory_service.schemas import PatientMemorySearchRequest
 
         service = get_patient_memory_service()
         search_result = service.search(
@@ -334,7 +335,6 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         
         # Prepare input for decision model
         input_text = _input_to_text(current_input)
-        patient_memory_context = state.get("patient_memory_context") or ""
 
         if has_image and image_type == "POLYP SEGMENTATION":
             selected_agent = (
@@ -398,6 +398,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         
         # Prepare input for decision model
         input_text = _input_to_text(current_input)
+        patient_memory_context = state.get("patient_memory_context") or ""
         
         follow_up_keywords = [
             # Từ khóa về chẩn đoán trước đó
@@ -656,6 +657,20 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
                     seen.add(key)
                     sources.append({"title": title, "path": path})
             return sources
+
+        def format_reference_section(sources: List[Dict[str, str]]) -> str:
+            if not sources:
+                return ""
+
+            lines = ["\n\n##### Tài liệu tham khảo:"]
+            for source in sources:
+                title = source.get("title") or "Nguồn tham khảo"
+                path = source.get("path") or ""
+                if path:
+                    lines.append(f"- [{title}]({path})")
+                else:
+                    lines.append(f"- {title}")
+            return "\n".join(lines)
             
         with concurrent.futures.ThreadPoolExecutor(max_workers = 3) as executor: 
             kg_future = executor.submit(run_kg_retrieval)
@@ -695,10 +710,6 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
             }
 
         sources = format_sources(rag_result, medlineplus_result)
-        source_text = "\n".join(
-            f"- [{source['title']}]({source['path']})" if source.get("path") else f"- {source['title']}"
-            for source in sources
-        )
         history_text = "\n".join(
             f"{message['role']}: {message['content']}" for message in build_chat_history(config.rag.context_limit)
         )
@@ -717,7 +728,6 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
             rag_context=format_documents(rag_result, "RAG"),
             medlineplus_query=medlineplus_result.get("query") or query,
             medlineplus_context=format_documents(medlineplus_result, "MED"),
-            sources=source_text or "Không có nguồn URL.",
         )
         ## TO DO: change llm model
         last_model_response = get_llm()
@@ -732,20 +742,14 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         except Exception as exc:
             logger.warning("Could not parse multi-source COT response as JSON: %s", exc)
 
+        response_text = response_text.strip() + format_reference_section(sources)
+
         return {
             **state,
             "output": AIMessage(content=response_text),
             "needs_human_validation": False,
             "agent_name": "KG_RAG_PARALLEL",
             "next": "check_validation",
-            "retrieval_confidence": max(
-                float(kg_result.get("confidence", 0.0)),
-                float(rag_result.get("confidence", 0.0)),
-                float(medlineplus_result.get("confidence", 0.0)),
-            ),
-            "kg_result": kg_result,
-            "rag_result": rag_result,
-            "medlineplus_result": medlineplus_result
         }
         
     # Web Search Processor Node
@@ -1006,7 +1010,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         }
 
     def write_patient_memory(state: AgentState) -> AgentState:
-        """Persist selected long-term patient facts after response generation."""
+        """Schedule selected long-term patient facts to persist after response generation."""
         if not state.get("memory_enabled", True):
             return state
 
@@ -1016,65 +1020,66 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         input_text = _input_to_text(current_input)
         output = state.get("output")
         output_text = output.content if hasattr(output, "content") else str(output or "")
+        agent_name = state.get("agent_name")
 
         if not input_text.strip() and not output_text.strip():
             return state
-        if state.get("agent_name") == "NON_MEDICAL_FILTER":
+        if agent_name == "NON_MEDICAL_FILTER":
             return state
 
-        try:
-            from agents.patient_memory_service.memory_service import get_patient_memory_service
-            from agents.patient_memory_service.schemas import (
-                MemoryMessage,
-                PatientConditionCreate,
-                PatientConversationMemoryCreate,
-            )
+        def persist_memory_background():
+            try:
+                service = get_patient_memory_service()
+                is_image_request = isinstance(current_input, dict) and bool(current_input.get("image"))
+                is_validation = input_text.lower().startswith("validation result:")
 
-            service = get_patient_memory_service()
-            is_image_request = isinstance(current_input, dict) and bool(current_input.get("image"))
-            is_validation = input_text.lower().startswith("validation result:")
-
-            if is_image_request and output_text.strip():
-                service.add_condition(
-                    PatientConditionCreate(
-                        patient_id=patient_id,
-                        condition_text=(
-                            "AI ghi nhận kết quả phân tích ảnh y tế sau đây, cần bác sĩ xác nhận: "
-                            f"{_shorten_text(output_text, 900)}"
-                        ),
-                        condition_type="general",
-                        run_id=session_id,
-                        metadata={
-                            "source": "ai_image_analysis",
-                            "validated": False,
-                            "stored_by": "langgraph_write_patient_memory",
-                        },
+                if is_image_request and output_text.strip():
+                    service.add_condition(
+                        PatientConditionCreate(
+                            patient_id=patient_id,
+                            condition_text=(
+                                "AI ghi nhận kết quả phân tích ảnh y tế sau đây, cần bác sĩ xác nhận: "
+                                f"{_shorten_text(output_text, 900)}"
+                            ),
+                            condition_type="general",
+                            run_id=session_id,
+                            metadata={
+                                "source": "ai_image_analysis",
+                                "validated": False,
+                                "stored_by": "langgraph_write_patient_memory",
+                            },
+                        )
                     )
-                )
-                return state
+                    return
 
-            metadata = {
-                "source": "human_validation" if is_validation else "chat",
-                "stored_by": "langgraph_write_patient_memory",
-            }
-            messages_to_store = []
-            if input_text.strip():
-                messages_to_store.append(MemoryMessage(role="user", content=_shorten_text(input_text, 1500)))
-            if output_text.strip() and not is_validation:
-                messages_to_store.append(MemoryMessage(role="assistant", content=_shorten_text(output_text, 1500)))
+                metadata = {
+                    "source": "human_validation" if is_validation else "chat",
+                    "stored_by": "langgraph_write_patient_memory",
+                }
+                messages_to_store = []
+                if input_text.strip():
+                    messages_to_store.append(MemoryMessage(role="user", content=_shorten_text(input_text, 1500)))
+                if output_text.strip() and not is_validation:
+                    messages_to_store.append(MemoryMessage(role="assistant", content=_shorten_text(output_text, 1500)))
 
-            if messages_to_store:
-                service.add_conversation(
-                    PatientConversationMemoryCreate(
-                        patient_id=patient_id,
-                        run_id=session_id,
-                        infer=True,
-                        messages=messages_to_store,
-                        metadata=metadata,
+                if messages_to_store:
+                    service.add_conversation(
+                        PatientConversationMemoryCreate(
+                            patient_id=patient_id,
+                            run_id=session_id,
+                            infer=True,
+                            messages=messages_to_store,
+                            metadata=metadata,
+                        )
                     )
-                )
-        except Exception as exc:
-            logger.warning("Patient memory write skipped: %s", exc)
+            except Exception as exc:
+                logger.warning("Patient memory write skipped: %s", exc)
+
+        threading.Thread(
+            target=persist_memory_background,
+            name="patient-memory-writer",
+            daemon=True,
+        ).start()
 
         return state
 

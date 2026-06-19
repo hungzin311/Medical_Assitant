@@ -3,6 +3,7 @@ from typing import Optional
 
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.messages import AIMessage
+from utils.llm_config import get_qwen_extra_body
 
 
 current_stream_callback: ContextVar[Optional[BaseCallbackHandler]] = ContextVar(
@@ -25,10 +26,7 @@ def emit_stream_event(event: str, payload: dict):
 
 
 def invoke_with_streaming(model, prompt, max_completion_token = 1024):
-    extra_body = {
-        "chat_template_kwargs": {"enable_thinking": False},
-        "max_completion_tokens": max_completion_token
-    }
+    extra_body = get_qwen_extra_body(max_completion_tokens=max_completion_token)
     callback = current_stream_callback.get()
     if callback is None:
         return  model.bind(extra_body= extra_body).invoke(prompt)

@@ -76,7 +76,9 @@ class PolypVQAAgent:
         ]
 
         try:
-            response = self.vision_model.invoke(vision_prompt)
+            from utils.llm_config import get_qwen_extra_body
+
+            response = self.vision_model.bind(extra_body=get_qwen_extra_body()).invoke(vision_prompt)
             return {
                 "answer": response.content,
                 "success": True,

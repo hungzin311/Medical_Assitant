@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 from langchain_neo4j import GraphCypherQAChain
 from langchain_core.prompts import FewShotPromptTemplate, PromptTemplate
-from utils.llm_config import get_gemini_llm_2, get_embedding, get_graph_db, get_llm
+from utils.llm_config import get_embedding, get_graph_db, get_llm
 from utils.prompt import cypher_chain_prompt, examples_cypher_query
 import threading
 from utils.proxy_setting import set_proxy
@@ -29,7 +29,7 @@ class KGManager:
             return 
             
         self._graph = get_graph_db()
-        self._llm = get_gemini_llm_2(temperature=0.0)
+        self._llm = get_llm(temperature=0.0)
         self._embedding_model = get_embedding()
         self._cypher_chain = None
         self._setup_cypher_chain()

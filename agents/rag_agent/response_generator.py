@@ -207,7 +207,9 @@ HÃY PHÂN TÍCH:"""
         try:
             doc_texts = [f"[{doc['disease_name']}]({doc['description']}) \n {doc['cause']} \n {doc['symptom']}" for doc in retrieved_docs]
             prompt = rag_agent_mcq_evaluation_prompt.format(question=question, choices=choices, context = doc_texts)
-            response = self.response_generator_model.invoke(prompt)
+            from utils.llm_config import get_qwen_extra_body
+
+            response = self.response_generator_model.bind(extra_body=get_qwen_extra_body()).invoke(prompt)
 
             try:
                 response_text = response.content.strip()

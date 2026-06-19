@@ -397,9 +397,6 @@ medical_multi_source_cot_prompt = PromptTemplate(
     CONTEXT TỪ MEDLINEPLUS:
     {medlineplus_context}
 
-    DANH SÁCH NGUỒN:
-    {sources}
-
     CÁCH ĐỌC BA NGUỒN (dùng để suy luận nội bộ, KHÔNG trình bày nguyên văn thành các bước trong câu trả lời):
     - Knowledge Graph: dùng để nhận diện bệnh/triệu chứng ứng viên, quan hệ triệu chứng, điều trị, lời khuyên.
     - RAG nội bộ: dùng làm tài liệu chuyên khoa hoặc tài liệu tiếng Việt có liên quan trực tiếp.
@@ -433,7 +430,10 @@ medical_multi_source_cot_prompt = PromptTemplate(
     - Ví dụ cách nối: "Triệu chứng A+B được KG/RAG gợi ý nhóm bệnh X; MedlinePlus cho biết X thường kèm C/D; vì hiện chưa biết C/D nên chưa đủ kết luận."
     - Nếu có đủ dữ kiện, chọn tối đa 1-2 khả năng nổi bật nhất và giải thích vì sao chúng phù hợp hơn các khả năng khác.
     - Nếu chưa đủ dữ kiện, phải nói rõ "chưa đủ để kết luận bệnh" và nêu dữ kiện phân biệt còn thiếu.
-    - Chỉ hỏi 3-5 câu hỏi tiếp theo quan trọng nhất, ưu tiên câu hỏi giúp phân biệt bệnh hoặc loại trừ red flags.
+    - Nếu người dùng đang trả lời follow-up trước đó hoặc vừa bổ sung một dữ kiện mới, KHÔNG lặp lại toàn bộ câu trả lời/câu hỏi cũ. Hãy ghi nhận dữ kiện mới, cập nhật nhận định, rồi chỉ hỏi thêm dữ kiện thật sự còn thiếu.
+    - Không hỏi lại thông tin đã có trong lịch sử hội thoại hoặc câu hiện tại.
+    - Chỉ hỏi khi câu trả lời tiếp theo làm thay đổi xử trí hoặc giúp loại trừ red flags. Nếu đã đủ để đưa lời khuyên an toàn, có thể không hỏi thêm.
+    - Với lượt follow-up, hỏi tối đa 1-2 câu quan trọng nhất; với lượt đầu tiên có thể hỏi tối đa 3 câu.
     - Nếu context có bệnh nền/yếu tố nguy cơ như tăng huyết áp, tiểu đường, thai kỳ, chấn thương, dùng thuốc..., bắt buộc nhắc lại trong phần nhận định vì đây là dữ kiện ảnh hưởng đến mức độ ưu tiên chẩn đoán.
 
     ĐIỀU KIỆN QUYẾT ĐỊNH:
@@ -456,7 +456,7 @@ medical_multi_source_cot_prompt = PromptTemplate(
     - Không bắt buộc dùng tiêu đề cố định. Có thể viết free-style, miễn là chia đoạn rõ ràng và dễ đọc.
     - Câu trả lời nên có đủ 3 ý, nhưng diễn đạt tự nhiên:
       1. Một đoạn nhận định hiện tại: mở đầu đồng cảm, nói rõ có/chưa đủ dữ kiện, nhắc lại ngắn gọn các triệu chứng/yếu tố quan trọng người bệnh đang có, rồi nêu 1-2 khả năng nổi bật hoặc điểm cần phân biệt.
-      2. Một đoạn hỏi thêm: 3-5 câu hỏi then chốt, viết bằng ngôn ngữ đời thường.
+      2. Một đoạn hỏi thêm chỉ khi còn thiếu dữ kiện quan trọng; nếu là follow-up thì tối đa 1-2 câu và không lặp lại câu đã hỏi.
       3. Một đoạn an toàn: dấu hiệu cần đi khám ngay, nói rõ nhưng không làm người bệnh hoảng sợ.
     - Nên dùng bullet/list ở phần các khả năng bệnh để dễ nhìn. Mỗi bullet nên có:
       * tên khả năng/bệnh,
@@ -492,7 +492,6 @@ medical_multi_source_cot_prompt = PromptTemplate(
         "rag_context",
         "medlineplus_query",
         "medlineplus_context",
-        "sources",
     ]
 )
 
