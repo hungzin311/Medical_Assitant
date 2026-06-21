@@ -1310,6 +1310,39 @@ The lower Multi-Hop Awareness Score of RAG + MedLLM suggests that adding retriev
 
 The base MedLLM result in Table \ref{table:text-module-benchmark} shows that a language model alone can answer some medical questions but performs worse when structured external knowledge is required. Therefore, the benchmark motivates placing the LLM inside a retrieval and graph-augmented pipeline rather than using it as the only reasoning source.
 
+\subsection{Memory Layer Results and Analysis}
+
+The Memory Layer is evaluated on 30 Vietnamese multi-session medical scenarios. The experiment compares three settings: M0 disables long-term memory, M1 uses seeded ground-truth memories as an oracle-style upper bound for retrieval, and M2 stores memories extracted automatically from prior conversation sessions. This design separates three effects: the value of having no memory, the potential value of perfectly prepared memory, and the practical performance of the implemented memory extraction pipeline.
+
+\begin{table}[H]
+\centering
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{l c c c c c c c}
+\hline\hline
+Setting & Cases & Extraction P/R & Recall@3 & Recall@5 & Routing Acc. & Repeated-Q Avoid. & Answer Quality \\
+\hline
+M0: no memory & 30 & 0.00 / 0.00 & 0.00 & 0.00 & 86.67\% & 0.00\% & 3.27 \\
+M1: seeded memory & 30 & 1.00 / 1.00 & 1.00 & 1.00 & 96.67\% & 100.00\% & 4.27 \\
+M2: extracted memory & 30 & 0.58 / 0.80 & 0.80 & 0.80 & 96.67\% & 83.33\% & 4.47 \\
+\hline\hline
+\end{tabular}
+\end{adjustbox}
+\caption{Memory Layer evaluation results on 30 multi-session scenarios}
+\label{table:memory-layer-evaluation}
+\end{table}
+
+Table \ref{table:memory-layer-evaluation} shows that long-term memory improves the system mainly through contextual continuity rather than through large changes in routing. Without memory, M0 achieves a routing accuracy of 86.67\%, but it cannot retrieve patient-specific context or avoid repeated background questions. When memory is available, both M1 and M2 reach 96.67\% routing accuracy. The absolute routing improvement is therefore 10 percentage points, but the measured memory routing lift is only 6.67\%. This indicates that the Decision Agent already performs well for many queries without memory, so memory contributes most clearly in cases where patient history disambiguates an otherwise underspecified question.
+
+The strongest improvement appears in answer quality. The average answer quality increases from 3.27 in M0 to 4.27 in M1 and 4.47 in M2. This suggests that retrieved memory helps the system produce more patient-specific and clinically coherent responses. In the no-memory setting, the assistant often asks generic follow-up questions because it lacks access to known allergies, chronic conditions, medication use, or prior symptoms. With memory, the assistant can reuse relevant context and ask more targeted questions. This is also reflected in repeated-question avoidance: M1 reaches 100.00\%, while M2 reaches 83.33\%. The result supports the thesis argument that memory is useful as a continuity mechanism, especially in consultation-style interactions where the same patient context remains relevant across sessions.
+
+The difference between M1 and M2 is important for interpreting the practical maturity of the module. M1 has perfect extraction and retrieval because the expected memories are inserted directly. M2, which relies on automatic extraction from conversation, obtains 0.58 precision and 0.80 recall. The higher recall shows that the system captures most expected durable facts, but the lower precision indicates that it also stores or retrieves additional facts that are not part of the gold memory set. In a medical assistant, this is a meaningful limitation: extra memory can improve personalization when relevant, but it can also introduce distracting or outdated context if not filtered carefully. The identical Recall@3 and Recall@5 values in M2 further suggest that the missing relevant memories are not merely ranked below the top three; in several cases they are not captured or retrieved at all.
+
+Latency is the main cost of adding memory. Average end-to-end latency increases from 14.14 seconds in M0 to 27.56 seconds in M1 and 28.02 seconds in M2. Retrieval itself contributes about 1.26--1.51 seconds on average, while routing latency increases from 3.12 seconds to approximately 4.65 seconds because the Decision Agent receives a longer memory-augmented context. The remaining latency increase comes from the full system response generation under richer context. Thus, the memory layer improves response quality and continuity, but it also introduces a clear efficiency trade-off.
+
+Across difficulty levels, M1 and M2 achieve perfect routing accuracy on medium cases, while hard cases remain at 83.33\% for all three settings. This pattern suggests that memory helps resolve ordinary contextual incompleteness, but it does not fully solve difficult routing cases involving adversarial prompts, ambiguous references, or safety-sensitive judgment. Therefore, memory should be interpreted as supporting evidence for routing and response generation, not as a substitute for stronger safety policies, contradiction handling, and medical uncertainty assessment.
+
+Overall, the memory evaluation supports the use of patient-scoped long-term memory in the proposed multi-agent architecture. Memory improves personalization, reduces repeated questioning, and increases judged answer quality. At the same time, the M2 results show that automatic memory extraction requires further refinement, especially in precision, relevance filtering, recency handling, and deletion or correction mechanisms. These findings are consistent with the design principle used throughout the thesis: memory should provide contextual support, but it should not be treated as verified clinical truth or allowed to override current evidence.
+
 \subsection{Polyp Segmentation Results and Analysis}
 
 Table \ref{table:dice-scores} presents Dice Score results for several segmentation models with and without post-processing.
