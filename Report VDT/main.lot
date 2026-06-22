@@ -14,8 +14,9 @@
 \contentsline {table}{\numberline {10}{\ignorespaces Local VimedAQA record distribution used for RAG indexing}}{48}{table.caption.24}%
 \contentsline {table}{\numberline {11}{\ignorespaces Kvasir-VQA-X1 training data before and after segmentation-mask filtering}}{50}{table.caption.28}%
 \contentsline {table}{\numberline {12}{\ignorespaces LoRA fine-tuning hyperparameters for Polyp VQA}}{51}{table.caption.29}%
-\contentsline {table}{\numberline {13}{\ignorespaces Text Module benchmark results}}{53}{table.caption.30}%
-\contentsline {table}{\numberline {14}{\ignorespaces Memory Layer evaluation results on 30 multi-session scenarios}}{54}{table.caption.31}%
-\contentsline {table}{\numberline {15}{\ignorespaces Dice Score comparison for polyp segmentation models}}{55}{table.caption.32}%
-\contentsline {table}{\numberline {16}{\ignorespaces Polyp VQA evaluation on Kvasir-VQA-X1}}{56}{table.caption.33}%
-\contentsline {table}{\numberline {17}{\ignorespaces LLM Judge comparison between LoRA-only and visual-grounded MedGemma on the mask-matched subset}}{57}{table.caption.34}%
+\contentsline {table}{\numberline {13}{\ignorespaces Evaluation design for the main system components}}{52}{table.caption.30}%
+\contentsline {table}{\numberline {14}{\ignorespaces Text Module benchmark results}}{53}{table.caption.31}%
+\contentsline {table}{\numberline {15}{\ignorespaces Dice Score comparison for polyp segmentation models}}{54}{table.caption.32}%
+\contentsline {table}{\numberline {16}{\ignorespaces Polyp VQA evaluation on Kvasir-VQA-X1}}{55}{table.caption.33}%
+\contentsline {table}{\numberline {17}{\ignorespaces LLM Judge comparison between LoRA-only and visual-grounded MedGemma on the mask-matched subset}}{55}{table.caption.34}%
+\contentsline {table}{\numberline {18}{\ignorespaces Memory Layer evaluation results on 30 multi-session scenarios}}{56}{table.caption.35}%

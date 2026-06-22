@@ -1241,41 +1241,43 @@ The visual-grounded setting uses a longer maximum sequence length of 1024 becaus
 
 The number of epochs is also different between the two settings. Original-image LoRA is trained for one epoch on the full training set, while the visual-grounded setting is trained for three epochs on the filtered subset. Since the mask-filtered subset is substantially smaller than the full VQA training set, the additional epochs are used to keep the number of training iterations more comparable between the two training strategies. This reduces optimization-step count as a potential confounding variable when comparing original-image fine-tuning and visual-grounded fine-tuning. Training and validation loss curves did not show signs of overfitting across the visual-grounded epochs, supporting the use of additional epochs on the smaller subset.
 
-The original-image setting trains each model to answer from the endoscopic frame and question only. The visual-grounded setting extends the input with segmentation-derived evidence, such as a mask or overlay. To make the comparison fair, each base model should be evaluated under both input settings with the same LoRA strategy and the same evaluation split. This separates two effects: the difference between base-model backbones and the effect of explicit segmentation guidance.
+The original-image setting trains each model to answer from the endoscopic frame and question only. The visual-grounded setting extends the input with segmentation-derived evidence, such as a mask or overlay. Fair comparison requires controlling the evaluation split and LoRA strategy so that two effects can be separated: the difference between base-model backbones and the effect of explicit segmentation guidance.
 
-The output format should be consistent across training and evaluation. Short factual answers are easier to evaluate with lexical metrics, while longer explanatory answers may better reflect clinical reasoning but are harder to score with BLEU or ROUGE. For this reason, LLM Judge is included as a complementary evaluation method.
+The output format is kept consistent across training and evaluation. Short factual answers are easier to evaluate with lexical metrics, while longer explanatory answers may better reflect clinical reasoning but are harder to score with BLEU or ROUGE. For this reason, LLM Judge is included as a complementary evaluation method.
 
-\subsection{Memory Evaluation Scenarios}
+\subsection{Evaluation Design}
 
-The memory layer should be evaluated using multi-session Vietnamese medical scenarios. Representative scenarios include:
+The evaluation is organized by module so that each part of the system is measured with metrics that match its role and output format. Table \ref{table:evaluation-design} summarizes the evaluated components, data sources, comparison settings, and primary metrics. The design places memory alongside text reasoning, segmentation, and Polyp VQA as one evaluated component of the full multi-agent system.
 
-\begin{itemize}
-    \item a user reporting a medication allergy in one session and asking about a drug later;
-    \item a user with a chronic condition asking follow-up symptom questions;
-    \item repeated symptoms across sessions;
-    \item medication use that should influence later advice;
-    \item follow-up questions after medical image analysis.
-\end{itemize}
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.18}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.18\textwidth}
+                                >{\raggedright\arraybackslash}X
+                                >{\raggedright\arraybackslash}X
+                                >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Component} & \textbf{Evaluation Data} & \textbf{Compared Settings} & \textbf{Metrics} \\
+\midrule
+\textbf{Text Module} & One-hop and multi-hop medical reasoning benchmarks & KG + MedLLM; RAG + MedLLM; MedLLM & One-Hop Accuracy; Multi-Hop Awareness Score \\
+\midrule
+\textbf{Polyp Segmentation} & BKAI-IGH NeoPolyp-Small & Segmentation models with and without post-processing & Dice Score \\
+\midrule
+\textbf{Polyp VQA} & Kvasir-VQA-X1 and its mask-matched subset & Base VLMs; LoRA fine-tuning; visual-grounded LoRA & BLEU-4; ROUGE-L; LLM-as-a-judge overall score \\
+\midrule
+\textbf{Memory Layer} & 30 Vietnamese multi-session scenarios & M0 no memory; M1 seeded memory; M2 extracted memory & Extraction P/R; routing accuracy; repeated-question avoidance; answer quality \\
+\bottomrule
+\end{tabularx}
+\caption{Evaluation design for the main system components}
+\label{table:evaluation-design}
+\end{table}
 
-\subsection{Evaluation Metrics}
+The protocol combines component-wise and system-wise evaluation. Component-wise evaluation measures technical outputs such as structured text reasoning, mask overlap, VQA answer quality, and memory extraction behavior. System-wise evaluation checks whether these components improve the behavior of the multi-agent assistant, including correct routing, avoidance of premature medical answers, useful visual grounding, and continuity across sessions.
 
-Different components require different metrics.
+For Polyp VQA, full-dataset and subset-based comparisons are separated. Original-image VQA results on the full Kvasir-VQA-X1 evaluation set are not treated as directly comparable to visual-grounded results unless both are evaluated on the same mask-matched subset. This avoids attributing differences caused by data filtering to the grounding method itself.
 
-\textbf{Text Module.} One-Hop Accuracy and Multi-Hop Awareness Score measure direct reasoning and awareness of missing information.
-
-\textbf{Segmentation.} Dice Score measures overlap between predicted masks and ground-truth masks.
-
-\textbf{Polyp VQA.} BLEU, ROUGE-L, and LLM Judge evaluate answer quality. BLEU and ROUGE-L measure textual overlap, while LLM Judge evaluates semantic correctness, completeness, visual grounding, and safety.
-
-\textbf{Memory Layer.} Memory retrieval relevance, response consistency, repeated-question reduction, routing accuracy, and latency can be used to evaluate the impact of long-term memory.
-
-\subsection{Experimental Protocol}
-
-The experimental protocol follows a component-wise and system-wise evaluation design. Component-wise evaluation measures each technical module with metrics suitable for its output format. The Text Module is evaluated with one-hop and multi-hop reasoning benchmarks. The Segmentation Agent is evaluated with Dice Score. The Polyp VQA Agent is evaluated on Kvasir-VQA-X1 using lexical and judge-based metrics. The Memory Layer is evaluated through multi-session scenarios.
-
-System-wise evaluation focuses on interaction behavior. This includes whether the Decision Agent selects the correct processing path, whether the Text Module asks for missing information, whether visual grounding improves or harms VQA, and whether memory improves continuity without injecting irrelevant context. This distinction is important because a multi-agent assistant can fail even when individual components perform reasonably well. For example, a good segmentation model does not help if the image query is routed to the wrong agent.
-
-For all experiments, qualitative analysis should accompany numerical metrics. Medical AI outputs are difficult to evaluate with a single number because correctness, safety, clarity, and uncertainty handling are all important. The report should therefore include representative successes and failures, especially for high-risk symptom questions, incorrect retrieval cases, segmentation failures, and VQA examples where the mask changes the answer.
+Numerical metrics are interpreted together with qualitative behavior because medical AI outputs cannot be judged reliably by a single score. The analysis therefore focuses on whether each module improves its intended behavior and where its remaining failure modes may affect safety or reliability.
 
 \section{Chapter 8. Results and Analysis}
 
@@ -1310,38 +1312,6 @@ The lower Multi-Hop Awareness Score of RAG + MedLLM suggests that adding retriev
 
 The base MedLLM result in Table \ref{table:text-module-benchmark} shows that a language model alone can answer some medical questions but performs worse when structured external knowledge is required. Therefore, the benchmark motivates placing the LLM inside a retrieval and graph-augmented pipeline rather than using it as the only reasoning source.
 
-\subsection{Memory Layer Results and Analysis}
-
-The Memory Layer is evaluated on 30 Vietnamese multi-session medical scenarios. The experiment compares three settings: M0 disables long-term memory, M1 uses seeded ground-truth memories as an oracle-style upper bound for retrieval, and M2 stores memories extracted automatically from prior conversation sessions. This design separates three effects: the value of having no memory, the potential value of perfectly prepared memory, and the practical performance of the implemented memory extraction pipeline.
-
-\begin{table}[H]
-\centering
-\begin{adjustbox}{width=\textwidth}
-\begin{tabular}{l c c c c c c c}
-\hline\hline
-Setting & Cases & Extraction P/R & Recall@3 & Recall@5 & Routing Acc. & Repeated-Q Avoid. & Answer Quality \\
-\hline
-M0: no memory & 30 & 0.00 / 0.00 & 0.00 & 0.00 & 86.67\% & 0.00\% & 3.27 \\
-M1: seeded memory & 30 & 1.00 / 1.00 & 1.00 & 1.00 & 96.67\% & 100.00\% & 4.27 \\
-M2: extracted memory & 30 & 0.58 / 0.80 & 0.80 & 0.80 & 96.67\% & 83.33\% & 4.47 \\
-\hline\hline
-\end{tabular}
-\end{adjustbox}
-\caption{Memory Layer evaluation results on 30 multi-session scenarios}
-\label{table:memory-layer-evaluation}
-\end{table}
-
-Table \ref{table:memory-layer-evaluation} shows that long-term memory improves the system mainly through contextual continuity rather than through large changes in routing. Without memory, M0 achieves a routing accuracy of 86.67\%, but it cannot retrieve patient-specific context or avoid repeated background questions. When memory is available, both M1 and M2 reach 96.67\% routing accuracy. The absolute routing improvement is therefore 10 percentage points, but the measured memory routing lift is only 6.67\%. This indicates that the Decision Agent already performs well for many queries without memory, so memory contributes most clearly in cases where patient history disambiguates an otherwise underspecified question.
-
-The strongest improvement appears in answer quality. The average answer quality increases from 3.27 in M0 to 4.27 in M1 and 4.47 in M2. This suggests that retrieved memory helps the system produce more patient-specific and clinically coherent responses. In the no-memory setting, the assistant often asks generic follow-up questions because it lacks access to known allergies, chronic conditions, medication use, or prior symptoms. With memory, the assistant can reuse relevant context and ask more targeted questions. This is also reflected in repeated-question avoidance: M1 reaches 100.00\%, while M2 reaches 83.33\%. The result supports the thesis argument that memory is useful as a continuity mechanism, especially in consultation-style interactions where the same patient context remains relevant across sessions.
-
-The difference between M1 and M2 is important for interpreting the practical maturity of the module. M1 has perfect extraction and retrieval because the expected memories are inserted directly. M2, which relies on automatic extraction from conversation, obtains 0.58 precision and 0.80 recall. The higher recall shows that the system captures most expected durable facts, but the lower precision indicates that it also stores or retrieves additional facts that are not part of the gold memory set. In a medical assistant, this is a meaningful limitation: extra memory can improve personalization when relevant, but it can also introduce distracting or outdated context if not filtered carefully. The identical Recall@3 and Recall@5 values in M2 further suggest that the missing relevant memories are not merely ranked below the top three; in several cases they are not captured or retrieved at all.
-
-Latency is the main cost of adding memory. Average end-to-end latency increases from 14.14 seconds in M0 to 27.56 seconds in M1 and 28.02 seconds in M2. Retrieval itself contributes about 1.26--1.51 seconds on average, while routing latency increases from 3.12 seconds to approximately 4.65 seconds because the Decision Agent receives a longer memory-augmented context. The remaining latency increase comes from the full system response generation under richer context. Thus, the memory layer improves response quality and continuity, but it also introduces a clear efficiency trade-off.
-
-Across difficulty levels, M1 and M2 achieve perfect routing accuracy on medium cases, while hard cases remain at 83.33\% for all three settings. This pattern suggests that memory helps resolve ordinary contextual incompleteness, but it does not fully solve difficult routing cases involving adversarial prompts, ambiguous references, or safety-sensitive judgment. Therefore, memory should be interpreted as supporting evidence for routing and response generation, not as a substitute for stronger safety policies, contradiction handling, and medical uncertainty assessment.
-
-Overall, the memory evaluation supports the use of patient-scoped long-term memory in the proposed multi-agent architecture. Memory improves personalization, reduces repeated questioning, and increases judged answer quality. At the same time, the M2 results show that automatic memory extraction requires further refinement, especially in precision, relevance filtering, recency handling, and deletion or correction mechanisms. These findings are consistent with the design principle used throughout the thesis: memory should provide contextual support, but it should not be treated as verified clinical truth or allowed to override current evidence.
 
 \subsection{Polyp Segmentation Results and Analysis}
 
@@ -1377,11 +1347,11 @@ The method should therefore be interpreted as a consistency refinement module, n
 
 \subsection{Polyp VQA Fine-tuning Results and Analysis on Kvasir-VQA-X1}
 
-The Polyp VQA VLM is evaluated using BLEU-4, ROUGE-L, and an LLM-as-a-judge protocol. BLEU-4 and ROUGE-L measure lexical overlap with the reference answer, while the judge-based score is used to assess semantic and clinical answer quality. The judge model is \texttt{google/medgemma-27b-it}. For each prediction, the judge receives the question, ground-truth answer, and model prediction, and returns four scores from 1 to 5: factual accuracy, completeness, clinical relevance, and no hallucination. The final weighted score is computed as:
+The Polyp VQA VLM is evaluated using BLEU-4, ROUGE-L, and an LLM-as-a-judge protocol. BLEU-4 and ROUGE-L measure lexical overlap with the reference answer, while the judge-based score is used to assess semantic and clinical answer quality. The judge model is \texttt{google/medgemma-27b-it}. For each prediction, the judge receives the question, ground-truth answer, and model prediction, and returns four scores from 1 to 5: factual accuracy, completeness, clinical relevance, and no hallucination. The overall score is computed as:
 
 \[
 \begin{aligned}
-\text{Score} ={}& 0.40 \times \text{Factual Accuracy}
+\text{Overall Score} ={}& 0.40 \times \text{Factual Accuracy}
 + 0.40 \times \text{Completeness} \\
 &+ 0.10 \times \text{Clinical Relevance}
 + 0.10 \times \text{No Hallucination}.
@@ -1395,14 +1365,14 @@ This weighting gives the highest importance to factual correctness and coverage 
 \begin{adjustbox}{width=\textwidth}
 \begin{tabular}{p{0.50\textwidth} c c c c}
 \hline\hline
-Model Setting & Samples & BLEU-4 & ROUGE-L & LLM Judge \\
+Model Setting & Samples & BLEU-4 & ROUGE-L & Overall Score \\
 \hline
 MedGemma-4B-it base & 1000 & 0.0055 & 0.1154 & 2.7521 \\
-MedGemma-4B-it + LoRA fine-tuning & 1000 & 0.3657 & 0.6936 & 4.6351 \\
+MedGemma-4B-it + LoRA  & 1000 & 0.3657 & 0.6936 & 4.6351 \\
 Qwen3.5-4B base & 1000 & 0.0261 & 0.2078 & 3.4720 \\
-Qwen3.5-4B + LoRA fine-tuning & 1000 & 0.1935 & 0.5211 & 4.5341 \\
-MedGemma-4B-it + LoRA only, mask-matched subset & 305 & -- & -- & 4.4269 \\
-MedGemma-4B-it + LoRA + visual grounding, mask-matched subset & 305 & 0.4139 & 0.6966 & 4.5751 \\
+Qwen3.5-4B + LoRA  & 1000 & 0.1935 & 0.5211 & 4.5341 \\
+MedGemma-4B-it + LoRA only & 305 & -- & -- & 4.4269 \\
+MedGemma-4B-it + LoRA + visual grounding & 305 & 0.4139 & 0.6966 & 4.5751 \\
 \hline\hline
 \end{tabular}
 \end{adjustbox}
@@ -1410,11 +1380,11 @@ MedGemma-4B-it + LoRA + visual grounding, mask-matched subset & 305 & 0.4139 & 0
 \label{table:polyp-vqa-lora-evaluation}
 \end{table}
 
-The results show that LoRA fine-tuning is the main driver of performance improvement. MedGemma-4B-it improves from a BLEU-4 score of 0.0055 and LLM Judge score of 2.7521 to 0.3657 and 4.6351, respectively. Qwen3.5-4B also benefits strongly from LoRA, increasing from 0.0261 BLEU-4 and 3.4720 judge score to 0.1935 and 4.5341. These improvements indicate that the base VLMs do not directly match the answer style and clinical content distribution of Kvasir-VQA-X1, while lightweight task adaptation substantially improves both lexical matching and semantic answer quality.
+The results show that LoRA fine-tuning is the main driver of performance improvement. MedGemma-4B-it improves from a BLEU-4 score of 0.0055 and overall score of 2.7521 to 0.3657 and 4.6351, respectively. Qwen3.5-4B also benefits strongly from LoRA, increasing from 0.0261 BLEU-4 and 3.4720 overall score to 0.1935 and 4.5341. These improvements indicate that the base VLMs do not directly match the answer style and clinical content distribution of Kvasir-VQA-X1, while lightweight task adaptation substantially improves both lexical matching and semantic answer quality.
 
 Between the two backbones, MedGemma-4B-it achieves stronger fine-tuned performance than Qwen3.5-4B. This is consistent with the expectation that a medically oriented VLM backbone is better aligned with endoscopic visual concepts and clinical answer generation. Qwen3.5-4B remains a strong baseline after fine-tuning, but its lower BLEU-4 and ROUGE-L suggest that it may be less aligned with the dataset's medical visual-language distribution.
 
-The visual grounding comparison must be interpreted on the mask-matched subset only. As shown in Table \ref{table:kvasir-vqa-mask-filtering}, only 1,336 of the 6,212 training images have usable segmentation masks, reducing the training samples from 143,594 to 42,382 for the grounded setting. Therefore, the fair comparison is not between the 1000-sample MedGemma LoRA result and the visual-grounded result. Instead, the correct baseline is the MedGemma LoRA-only model evaluated again on the same 305 evaluation samples that have matched visual grounding inputs. Under this controlled comparison, visual grounding improves the LLM Judge score from 4.4269 to 4.5751. This suggests that segmentation masks provide useful spatial evidence for VQA when the mask is available and aligned with the question.
+The visual grounding comparison must be interpreted on the mask-matched subset only. As shown in Table \ref{table:kvasir-vqa-mask-filtering}, only 1,336 of the 6,212 training images have usable segmentation masks, reducing the training samples from 143,594 to 42,382 for the grounded setting. Therefore, the fair comparison is not between the 1000-sample MedGemma LoRA result and the visual-grounded result. Instead, the correct baseline is the MedGemma LoRA-only model evaluated again on the same 305 evaluation samples that have matched visual grounding inputs. Under this controlled comparison, visual grounding improves the overall score from 4.4269 to 4.5751. This suggests that segmentation masks provide useful spatial evidence for VQA when the mask is available and aligned with the question.
 
 The original-image setting evaluates whether the VLM can identify relevant visual evidence without additional guidance. The visual-grounded setting evaluates whether a segmentation mask improves answer quality by focusing attention on the polyp region. Since only a subset of samples contains matched segmentation masks, the visual grounding analysis is conducted on 305 mask-matched samples.
 
@@ -1429,8 +1399,7 @@ Factual Accuracy & 4.2918 & 4.4951 & +0.2033 \\
 Completeness & 4.3607 & 4.5016 & +0.1409 \\
 Clinical Relevance & 4.8984 & 4.9246 & +0.0262 \\
 No Hallucination & 4.7607 & 4.8393 & +0.0786 \\
-Weighted Score & 4.4269 & 4.5751 & +0.1482 \\
-Samples in 4.0--5.0 range & 238/305 & 255/305 & +17 \\
+Overall Score & 4.4269 & 4.5751 & +0.1482 \\
 \hline\hline
 \end{tabular}
 \end{adjustbox}
@@ -1440,9 +1409,43 @@ Samples in 4.0--5.0 range & 238/305 & 255/305 & +17 \\
 
 The criterion-level judge results in Table \ref{table:polyp-vqa-llm-judge-grounding} indicate that visual grounding improves all four judge criteria. The largest gain appears in factual accuracy (+0.2033), followed by completeness (+0.1409). This pattern is important: the mask does not merely make the generated answer more fluent, but appears to help the model select more correct visual evidence and include more of the expected clinical content. The smaller gain in clinical relevance (+0.0262) is also reasonable because the LoRA-only model already has a very high clinical relevance score of 4.8984, leaving little room for improvement.
 
-The hallucination score also improves from 4.7607 to 4.8393. This suggests that explicit spatial grounding may reduce the tendency to add unsupported visual claims. In medical VQA, this is valuable because a confident but visually unsupported answer can be unsafe even when it uses correct clinical terminology. The distribution of weighted scores also improves: the number of answers in the 4.0--5.0 range increases from 238 to 255 out of 305 samples. Therefore, the improvement is not only reflected in the average score, but also in a larger number of high-quality answers.
+The hallucination score also improves from 4.7607 to 4.8393. This suggests that explicit spatial grounding may reduce the tendency to add unsupported visual claims. In medical VQA, this is valuable because a confident but visually unsupported answer can be unsafe even when it uses correct clinical terminology.
 
 The controlled comparison in Table \ref{table:polyp-vqa-lora-evaluation}, together with the criterion-level breakdown in Table \ref{table:polyp-vqa-llm-judge-grounding}, supports the design choice of connecting the Segmentation Agent with the Polyp VQA Agent. The segmentation mask acts as an intermediate visual evidence signal, allowing the VQA model to focus on the lesion area instead of relying only on global image context or dataset priors. However, the result should not be interpreted as proof that visual grounding is always beneficial. The grounded setting depends on mask availability and mask quality. If the segmentation model misses the lesion, highlights irrelevant tissue, or assigns an incorrect region, the same grounding mechanism may guide the VQA model toward the wrong evidence. For this reason, visual grounding should be treated as a useful but conditional intervention, and future evaluation should include failure cases where incorrect masks degrade the answer.
+
+\subsection{Memory Layer Results and Analysis}
+
+The Memory Layer is evaluated on 30 Vietnamese multi-session medical scenarios. The experiment compares three settings: M0 disables long-term memory, M1 uses seeded ground-truth memories as an oracle-style upper bound for retrieval, and M2 stores memories extracted automatically from prior conversation sessions. This design separates three effects: the value of having no memory, the potential value of perfectly prepared memory, and the practical performance of the implemented memory extraction pipeline.
+
+\begin{table}[H]
+\centering
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{l c c c c c}
+\hline\hline
+Setting & Cases & Extraction P/R &  Routing Acc. & Repeated-Q Avoid. & Answer Quality \\
+\hline
+M0: no memory & 30 & -- & 86.67\% & -- & 3.27 \\
+M1: seeded memory & 30 & 1.00 / 1.00 & 96.67\% & 100.00\% & 4.47 \\
+M2: extracted memory & 30 & 0.58 / 0.80 & 96.67\% & 83.33\% & 4.27 \\
+\hline\hline
+\end{tabular}
+\end{adjustbox}
+\caption{Memory Layer evaluation results on 30 multi-session scenarios}
+\label{table:memory-layer-evaluation}
+\end{table}
+
+Table \ref{table:memory-layer-evaluation} shows that long-term memory improves the system mainly through contextual continuity rather than through large changes in routing. Without memory, M0 achieves a routing accuracy of 86.67\%, but it does not have access to patient-specific facts from previous sessions. When memory is available, both M1 and M2 reach 96.67\% routing accuracy, corresponding to a 10 percentage-point improvement over M0. This indicates that the Decision Agent already performs well for many queries without memory, while remembered patient context helps in cases where the current request is underspecified or depends on prior information.
+
+The strongest improvement appears in answer quality. The average answer quality increases from 3.27 in M0 to 4.47 in M1 and 4.27 in M2. This suggests that retrieved memory helps the system produce more patient-specific and clinically coherent responses. In the no-memory setting, the assistant often asks generic follow-up questions because it lacks access to known allergies, chronic conditions, medication use, or prior symptoms. With memory, the assistant can reuse relevant context and ask more targeted questions. This is also reflected in repeated-question avoidance: M1 reaches 100.00\%, while M2 reaches 83.33\%. The result supports the thesis argument that memory is useful as a continuity mechanism, especially in consultation-style interactions where the same patient context remains relevant across sessions.
+
+The difference between M1 and M2 is important for interpreting the practical maturity of the module. M1 uses seeded reference memories, so its extraction precision and recall are both 1.00. This provides a controlled setting in which the response generator receives the expected patient context. M2, which relies on automatic extraction from conversation, obtains 0.58 precision and 0.80 recall. This means that the automatic memory pipeline captures most expected durable facts, but it also stores or retrieves additional facts that are not part of the reference memory set. The lower answer quality of M2 compared with M1 shows that imperfect memory extraction can affect downstream response generation, even when routing accuracy remains unchanged.
+
+Latency is the main cost of adding memory. Retrieval itself contributes about 1.26-1.51 seconds on average, while routing latency increases from 3.12 seconds to approximately 4.65 seconds because the Decision Agent receives a longer memory-augmented context. The remaining latency increase comes from the full system response generation under richer context. Thus, the memory layer improves response quality and continuity, but it also introduces a clear efficiency trade-off.
+
+Across difficulty levels, M1 and M2 achieve perfect routing accuracy on medium cases, while hard cases remain at 83.33\% for all three settings. This pattern suggests that memory helps resolve ordinary contextual incompleteness, but it does not fully solve difficult routing cases involving adversarial prompts, ambiguous references, or safety-sensitive judgment. Therefore, memory should be interpreted as supporting evidence for routing and response generation, not as a substitute for stronger safety policies, contradiction handling, and medical uncertainty assessment.
+
+Overall, the memory evaluation supports the use of patient-scoped long-term memory in the proposed multi-agent architecture. Memory improves personalization, reduces repeated questioning, and increases judged answer quality. At the same time, the gap between M1 and M2 shows that automatic memory extraction still requires refinement, especially in precision, relevance filtering, recency handling, and deletion or correction mechanisms. These findings are consistent with the design principle used throughout the thesis: memory should provide contextual support, but it should not be treated as verified clinical truth or allowed to override current evidence.
+
 
 \section{Chapter 9. Overall Discussion and Limitations}
 

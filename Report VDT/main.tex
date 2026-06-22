@@ -52,16 +52,22 @@
     %\hrule width0.3\textwidth
     \begingroup
     \normalsize
-    
-\justifying
+
     \begin{center}
         \Large\bfseries Abstract
     \end{center}
     \vspace{0.2cm}
 
+    \noindent\makebox[\textwidth][c]{%
+    \begin{minipage}{0.9\textwidth}
+    \justifying
+    \setlength{\parindent}{0pt}
+
     This thesis proposes a Multi-Agent Medical Assistant whose main objective is to improve the reliability, grounding, and continuity of medical consultation across text and image inputs. Instead of relying on a single generative model, the system is designed to route user requests to specialized agents, combine structured and unstructured medical evidence, identify when the available clinical context is insufficient, and preserve useful patient context across sessions without treating it as verified diagnosis. For text-based consultation, the system coordinates Retrieval-Augmented Generation, Knowledge Graph reasoning, multi-hop clarification, MedGemma CoT-based information sufficiency assessment, and Web Search fallback to reduce unsupported or premature medical responses. For vision-based consultation, the system integrates colonoscopy polyp segmentation with Polyp Visual Question Answering, where the segmentation mask acts as a spatial grounding prior while the original endoscopic image remains the source of visual evidence. The system also incorporates patient-scoped semantic memory and human-in-the-loop validation to support personalization, feedback collection, and safer review. Experimental results show that the proposed design achieves several system-level goals: Knowledge Graph evidence improves relation-oriented text reasoning, post-processing improves segmentation consistency for downstream use, LoRA fine-tuning substantially improves Polyp VQA performance, and segmentation grounding improves judge-based VQA quality on the mask-matched subset. Overall, the thesis demonstrates that a modular, grounded, memory-aware architecture can improve observability, evidence control, multimodal reasoning, and safety boundaries in a medical assistant intended for decision support rather than definitive clinical diagnosis.
 
     \textbf{Keywords:} Multi-agent medical assistant, retrieval-augmented generation, knowledge graph, medical visual question answering, visual grounding, long-term memory, human-in-the-loop validation.
+    \end{minipage}%
+    }
 
     \newpage
     \let\clearpage\relax

@@ -70,22 +70,20 @@
 \contentsline {subsection}{\numberline {7.3}BKAI-IGH NeoPolyp-Small Dataset}{49}{subsection.7.3}%
 \contentsline {subsection}{\numberline {7.4}Kvasir-VQA-X1 Dataset}{49}{subsection.7.4}%
 \contentsline {subsection}{\numberline {7.5}Polyp VQA Fine-tuning Setup}{50}{subsection.7.5}%
-\contentsline {subsection}{\numberline {7.6}Memory Evaluation Scenarios}{52}{subsection.7.6}%
-\contentsline {subsection}{\numberline {7.7}Evaluation Metrics}{52}{subsection.7.7}%
-\contentsline {subsection}{\numberline {7.8}Experimental Protocol}{52}{subsection.7.8}%
-\contentsline {section}{\numberline {8}Chapter 8. Results and Analysis}{53}{section.8}%
-\contentsline {subsection}{\numberline {8.1}Text Module Results and Analysis}{53}{subsection.8.1}%
-\contentsline {subsection}{\numberline {8.2}Memory Layer Results and Analysis}{53}{subsection.8.2}%
-\contentsline {subsection}{\numberline {8.3}Polyp Segmentation Results and Analysis}{55}{subsection.8.3}%
-\contentsline {subsection}{\numberline {8.4}Polyp VQA Fine-tuning Results and Analysis on Kvasir-VQA-X1}{55}{subsection.8.4}%
+\contentsline {subsection}{\numberline {7.6}Evaluation Design}{52}{subsection.7.6}%
+\contentsline {section}{\numberline {8}Chapter 8. Results and Analysis}{52}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Text Module Results and Analysis}{52}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}Polyp Segmentation Results and Analysis}{53}{subsection.8.2}%
+\contentsline {subsection}{\numberline {8.3}Polyp VQA Fine-tuning Results and Analysis on Kvasir-VQA-X1}{54}{subsection.8.3}%
+\contentsline {subsection}{\numberline {8.4}Memory Layer Results and Analysis}{56}{subsection.8.4}%
 \contentsline {section}{\numberline {9}Chapter 9. Overall Discussion and Limitations}{57}{section.9}%
 \contentsline {subsection}{\numberline {9.1}Strengths of the Proposed System}{57}{subsection.9.1}%
 \contentsline {subsection}{\numberline {9.2}Text Module Limitations}{58}{subsection.9.2}%
 \contentsline {subsection}{\numberline {9.3}Vision Module Limitations}{58}{subsection.9.3}%
 \contentsline {subsection}{\numberline {9.4}Kvasir-VQA-X1 Limitations and Domain Transfer}{58}{subsection.9.4}%
-\contentsline {subsection}{\numberline {9.5}Memory Layer Limitations}{59}{subsection.9.5}%
+\contentsline {subsection}{\numberline {9.5}Memory Layer Limitations}{58}{subsection.9.5}%
 \contentsline {subsection}{\numberline {9.6}Evaluation and Safety Limitations}{59}{subsection.9.6}%
 \contentsline {section}{\numberline {10}Chapter 10. Conclusion and Future Work}{59}{section.10}%
 \contentsline {subsection}{\numberline {10.1}Summary of Achievements}{59}{subsection.10.1}%
-\contentsline {subsection}{\numberline {10.2}Technical Contributions}{60}{subsection.10.2}%
+\contentsline {subsection}{\numberline {10.2}Technical Contributions}{59}{subsection.10.2}%
 \contentsline {subsection}{\numberline {10.3}Future Work}{60}{subsection.10.3}%
