@@ -2,13 +2,13 @@
 \babel@toc {vietnamese}{}\relax 
 \babel@toc {vietnamese}{}\relax 
 \babel@toc {vietnamese}{}\relax 
-\contentsline {table}{\numberline {1}{\ignorespaces Benefits of the multi-agent design illustrated by the detailed workflow}}{16}{table.caption.3}%
-\contentsline {table}{\numberline {2}{\ignorespaces Main cooperation patterns in the proposed multi-agent architecture}}{17}{table.caption.4}%
-\contentsline {table}{\numberline {3}{\ignorespaces Decision Agent routing behavior}}{18}{table.caption.5}%
-\contentsline {table}{\numberline {4}{\ignorespaces Knowledge and context sources with reliability considerations}}{19}{table.caption.6}%
-\contentsline {table}{\numberline {5}{\ignorespaces Text query types and corresponding routing behavior}}{21}{table.caption.8}%
-\contentsline {table}{\numberline {6}{\ignorespaces Coordinated evidence construction in the Text Module}}{28}{table.caption.12}%
-\contentsline {table}{\numberline {7}{\ignorespaces MedGemma CoT decision-support stages}}{30}{table.caption.14}%
+\contentsline {table}{\numberline {1}{\ignorespaces Benefits of the multi-agent design illustrated by the detailed workflow}}{17}{table.caption.3}%
+\contentsline {table}{\numberline {2}{\ignorespaces Main cooperation patterns in the proposed multi-agent architecture}}{18}{table.caption.4}%
+\contentsline {table}{\numberline {3}{\ignorespaces Decision Agent routing behavior}}{19}{table.caption.5}%
+\contentsline {table}{\numberline {4}{\ignorespaces Knowledge and context sources with reliability considerations}}{20}{table.caption.6}%
+\contentsline {table}{\numberline {5}{\ignorespaces Text query types and corresponding routing behavior}}{22}{table.caption.8}%
+\contentsline {table}{\numberline {6}{\ignorespaces Coordinated evidence construction in the Text Module}}{29}{table.caption.12}%
+\contentsline {table}{\numberline {7}{\ignorespaces MedGemma CoT decision-support stages}}{31}{table.caption.14}%
 \contentsline {table}{\numberline {8}{\ignorespaces Complementary roles of the Polyp Segmentation Agent and Polyp VQA Agent}}{39}{table.caption.18}%
 \contentsline {table}{\numberline {9}{\ignorespaces Mapping between the Memory Layer design and the current implementation}}{46}{table.caption.22}%
 \contentsline {table}{\numberline {10}{\ignorespaces Local VimedAQA record distribution used for RAG indexing}}{48}{table.caption.24}%

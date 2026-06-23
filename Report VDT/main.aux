@@ -14,23 +14,23 @@
 \@writefile{toc}{\contentsline {section}{\numberline {1}Chapter 1. Introduction}{7}{section.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Motivation}{7}{subsection.1.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Problem Statement}{7}{subsection.1.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Technical Challenges}{7}{subsection.1.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Technical Challenges}{8}{subsection.1.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.4}Objectives}{8}{subsection.1.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.5}Contributions}{8}{subsection.1.5}\protected@file@percent }
 \citation{llm_healthcare}
 \citation{medpalm2}
 \citation{pmc_llama}
 \citation{biomistral}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6}Research Questions}{9}{subsection.1.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.7}Scope of the Thesis}{9}{subsection.1.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Chapter 2. Background and Related Work}{9}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Large Language and Vision-Language Models in Healthcare}{9}{subsection.2.1}\protected@file@percent }
 \citation{llava_med}
 \citation{med_flamingo}
 \citation{medgemma_report}
 \citation{qwen3_report}
 \citation{kvasir_vqa}
 \citation{kvasir_vqa_x1}
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.6}Research Questions}{9}{subsection.1.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.7}Scope of the Thesis}{9}{subsection.1.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {2}Chapter 2. Background and Related Work}{9}{section.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Large Language and Vision-Language Models in Healthcare}{9}{subsection.2.1}\protected@file@percent }
 \citation{llm_hallucination_survey}
 \citation{pubmedqa}
 \citation{medqa}
@@ -39,17 +39,18 @@
 \citation{hotpotqa}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Medical Question Answering and Multi-hop Reasoning}{10}{subsection.2.2}\protected@file@percent }
 \citation{rag_retrieval}
+\citation{neo4j_cypher_doc}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Retrieval-Augmented Generation for Medical QA}{11}{subsection.2.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Medical Knowledge Graphs}{11}{subsection.2.4}\protected@file@percent }
 \citation{langgraph_doc}
 \citation{lora}
 \citation{medgemma_report}
 \citation{qwen3_report}
-\citation{pranet}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Multi-agent AI Systems}{12}{subsection.2.5}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.6}LoRA and Parameter-Efficient Fine-tuning}{12}{subsection.2.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.7}Polyp Segmentation and Neoplasm Characterization}{12}{subsection.2.7}\protected@file@percent }
+\citation{pranet}
 \citation{kvasir_seg}
+\citation{bkai_neopolyp_dataset}
 \citation{unet}
 \citation{unetpp}
 \citation{deeplabv3plus}
@@ -57,73 +58,87 @@
 \citation{polyp_pvt}
 \citation{emcad}
 \citation{polyp_sam}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.8}Long-Term Memory for AI Agents}{13}{subsection.2.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.7}Polyp Segmentation and Neoplasm Characterization}{13}{subsection.2.7}\protected@file@percent }
+\citation{mem0_paper}
+\citation{mem0_docs_overview}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.8}Long-Term Memory for AI Agents}{14}{subsection.2.8}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.9}Human-in-the-loop for Medical AI}{14}{subsection.2.9}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {3}Chapter 3. Proposed Multi-Agent Medical Assistant Architecture}{14}{section.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Overall Architecture}{14}{subsection.3.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Overall architecture of the Multi-Agent Medical Assistant}}{14}{figure.caption.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Overall architecture of the Multi-Agent Medical Assistant}}{15}{figure.caption.1}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{fig:overall-architecture}{{1}{14}{Overall architecture of the Multi-Agent Medical Assistant}{figure.caption.1}{}}
+\newlabel{fig:overall-architecture}{{1}{15}{Overall architecture of the Multi-Agent Medical Assistant}{figure.caption.1}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.2}LangGraph-based Agent Orchestration}{15}{subsection.3.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Detailed agent workflow and module coordination}}{15}{figure.caption.2}\protected@file@percent }
-\newlabel{fig:detailed-agent-workflow}{{2}{15}{Detailed agent workflow and module coordination}{figure.caption.2}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Benefits of the multi-agent design illustrated by the detailed workflow}}{16}{table.caption.3}\protected@file@percent }
-\newlabel{table:multi-agent-benefits}{{1}{16}{Benefits of the multi-agent design illustrated by the detailed workflow}{table.caption.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Agent Cooperation and Cross-module Workflows}{16}{subsection.3.3}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Main cooperation patterns in the proposed multi-agent architecture}}{17}{table.caption.4}\protected@file@percent }
-\newlabel{table:agent-cooperation-patterns}{{2}{17}{Main cooperation patterns in the proposed multi-agent architecture}{table.caption.4}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Decision Agent}{17}{subsection.3.4}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Decision Agent routing behavior}}{18}{table.caption.5}\protected@file@percent }
-\newlabel{table:decision-agent-routing}{{3}{18}{Decision Agent routing behavior}{table.caption.5}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Knowledge and Context Sources}{18}{subsection.3.5}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Knowledge and context sources with reliability considerations}}{19}{table.caption.6}\protected@file@percent }
-\newlabel{table:context-source-reliability}{{4}{19}{Knowledge and context sources with reliability considerations}{table.caption.6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Safety and Human-in-the-loop Validation}{19}{subsection.3.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4}Chapter 4. Text Module: Retrieval and Reasoning}{19}{section.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Role and Processing Flow of the Text Module}{19}{subsection.4.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Text Module architecture for medical knowledge retrieval}}{20}{figure.caption.7}\protected@file@percent }
-\newlabel{fig:text-module-architecture}{{3}{20}{Text Module architecture for medical knowledge retrieval}{figure.caption.7}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Text Query Types and Routing Behavior}{21}{subsection.4.2}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Text query types and corresponding routing behavior}}{21}{table.caption.8}\protected@file@percent }
-\newlabel{table:text-query-routing}{{5}{21}{Text query types and corresponding routing behavior}{table.caption.8}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Conversation Agent and Multi-hop QA}{21}{subsection.4.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.1}Single-turn Limitation versus Multi-hop Clarification}{22}{subsubsection.4.3.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Traditional single-turn approach with limited clinical context}}{22}{figure.caption.9}\protected@file@percent }
-\newlabel{fig:traditional-single-turn-limitation}{{4}{22}{Traditional single-turn approach with limited clinical context}{figure.caption.9}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Multi-hop QA approach with iterative clarification and safer response refinement}}{23}{figure.caption.10}\protected@file@percent }
-\newlabel{fig:medical-multihop-qa-benefit}{{5}{23}{Multi-hop QA approach with iterative clarification and safer response refinement}{figure.caption.10}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.2}Illustrative Multi-hop Consultation Flow}{23}{subsubsection.4.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Clinical Context Requirements before MedGemma CoT}{24}{subsection.4.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Medical Knowledge Retrieval with RAG and Knowledge Graph}{25}{subsection.4.5}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Parallel KG-RAG processing in the Text Module}}{25}{figure.caption.11}\protected@file@percent }
-\newlabel{fig:parallel-kg-rag}{{6}{25}{Parallel KG-RAG processing in the Text Module}{figure.caption.11}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.5.1}Data Retrieval Layer}{25}{subsubsection.4.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.5.2}KG Agent}{26}{subsubsection.4.5.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.5.3}RAG Agent}{26}{subsubsection.4.5.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.5.4}Coordinated KG-RAG Evidence Construction}{27}{subsubsection.4.5.4}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Coordinated evidence construction in the Text Module}}{28}{table.caption.12}\protected@file@percent }
-\newlabel{table:text-evidence-construction}{{6}{28}{Coordinated evidence construction in the Text Module}{table.caption.12}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Parallel Reasoning and Fallback Strategy}{28}{subsection.4.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.7}MedGemma CoT for Medical Decision Support}{28}{subsection.4.7}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Medical chain-of-thought and information sufficiency flow}}{29}{figure.caption.13}\protected@file@percent }
-\newlabel{fig:medical-cot}{{7}{29}{Medical chain-of-thought and information sufficiency flow}{figure.caption.13}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces MedGemma CoT decision-support stages}}{30}{table.caption.14}\protected@file@percent }
-\newlabel{table:medgemma-cot-stages}{{7}{30}{MedGemma CoT decision-support stages}{table.caption.14}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.8}Safe Medical Response Generation}{30}{subsection.4.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5}Chapter 5. Vision Module: General Medical Image Analysis, Polyp Segmentation, and Polyp VQA}{31}{section.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Role and Processing Flow of the Vision Module}{31}{subsection.5.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Vision Module workflow for medical image analysis}}{32}{figure.caption.15}\protected@file@percent }
-\newlabel{fig:vision-module}{{8}{32}{Vision Module workflow for medical image analysis}{figure.caption.15}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Image Routing and Visual Task Classification}{32}{subsection.5.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}General Medical Image Agent}{32}{subsection.5.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Detailed agent workflow with text, vision, memory, and fallback coordination}}{16}{figure.caption.2}\protected@file@percent }
+\newlabel{fig:detailed-agent-workflow}{{2}{16}{Detailed agent workflow with text, vision, memory, and fallback coordination}{figure.caption.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Benefits of the multi-agent design illustrated by the detailed workflow}}{17}{table.caption.3}\protected@file@percent }
+\newlabel{table:multi-agent-benefits}{{1}{17}{Benefits of the multi-agent design illustrated by the detailed workflow}{table.caption.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Agent Cooperation and Cross-module Workflows}{17}{subsection.3.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Main cooperation patterns in the proposed multi-agent architecture}}{18}{table.caption.4}\protected@file@percent }
+\newlabel{table:agent-cooperation-patterns}{{2}{18}{Main cooperation patterns in the proposed multi-agent architecture}{table.caption.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Decision Agent}{19}{subsection.3.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Decision Agent routing behavior}}{19}{table.caption.5}\protected@file@percent }
+\newlabel{table:decision-agent-routing}{{3}{19}{Decision Agent routing behavior}{table.caption.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Knowledge and Context Sources}{19}{subsection.3.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Knowledge and context sources with reliability considerations}}{20}{table.caption.6}\protected@file@percent }
+\newlabel{table:context-source-reliability}{{4}{20}{Knowledge and context sources with reliability considerations}{table.caption.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Safety and Human-in-the-loop Validation}{20}{subsection.3.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Chapter 4. Text Module: Retrieval and Reasoning}{20}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Role and Processing Flow of the Text Module}{20}{subsection.4.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Text Module architecture for medical knowledge retrieval}}{21}{figure.caption.7}\protected@file@percent }
+\newlabel{fig:text-module-architecture}{{3}{21}{Text Module architecture for medical knowledge retrieval}{figure.caption.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Text Query Types and Routing Behavior}{22}{subsection.4.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Text query types and corresponding routing behavior}}{22}{table.caption.8}\protected@file@percent }
+\newlabel{table:text-query-routing}{{5}{22}{Text query types and corresponding routing behavior}{table.caption.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Conversation Agent, Multi-turn Awareness, and KG-based Reasoning}{22}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.1}Single-turn Limitation versus Multi-turn Clarification}{23}{subsubsection.4.3.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Traditional single-turn approach with limited clinical context}}{23}{figure.caption.9}\protected@file@percent }
+\newlabel{fig:traditional-single-turn-limitation}{{4}{23}{Traditional single-turn approach with limited clinical context}{figure.caption.9}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Multi-turn clarification with iterative context collection and safer response refinement}}{24}{figure.caption.10}\protected@file@percent }
+\newlabel{fig:medical-multihop-qa-benefit}{{5}{24}{Multi-turn clarification with iterative context collection and safer response refinement}{figure.caption.10}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.2}Illustrative Multi-turn Consultation Flow}{25}{subsubsection.4.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Clinical Context Requirements before MedGemma CoT}{25}{subsection.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Medical Knowledge Retrieval with RAG and Knowledge Graph}{26}{subsection.4.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Parallel KG-RAG processing in the Text Module}}{26}{figure.caption.11}\protected@file@percent }
+\newlabel{fig:parallel-kg-rag}{{6}{26}{Parallel KG-RAG processing in the Text Module}{figure.caption.11}{}}
+\citation{qdrant_doc}
+\citation{neo4j_cypher_doc}
+\citation{embeddinggemma_modelcard}
+\citation{qdrant_doc}
+\citation{bm25}
+\citation{reranking_search}
+\citation{neo4j_cypher_doc}
+\citation{langchain_graphcypherqa}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.5.1}Data Retrieval Layer}{27}{subsubsection.4.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.5.2}KG Agent}{27}{subsubsection.4.5.2}\protected@file@percent }
+\citation{vimedaqa_dataset}
+\citation{qdrant_doc}
+\citation{reranking_search}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.5.3}RAG Agent}{28}{subsubsection.4.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.5.4}Coordinated KG-RAG Evidence Construction}{28}{subsubsection.4.5.4}\protected@file@percent }
+\citation{tavily_search}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Coordinated evidence construction in the Text Module}}{29}{table.caption.12}\protected@file@percent }
+\newlabel{table:text-evidence-construction}{{6}{29}{Coordinated evidence construction in the Text Module}{table.caption.12}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Parallel Reasoning and Fallback Strategy}{29}{subsection.4.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7}MedGemma CoT for Medical Decision Support and Answer Synthesis}{30}{subsection.4.7}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Medical chain-of-thought, information sufficiency, and answer synthesis flow}}{30}{figure.caption.13}\protected@file@percent }
+\newlabel{fig:medical-cot}{{7}{30}{Medical chain-of-thought, information sufficiency, and answer synthesis flow}{figure.caption.13}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces MedGemma CoT decision-support stages}}{31}{table.caption.14}\protected@file@percent }
+\newlabel{table:medgemma-cot-stages}{{7}{31}{MedGemma CoT decision-support stages}{table.caption.14}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Chapter 5. Vision Module: General Medical Image Analysis, Polyp Segmentation, and Polyp VQA}{32}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Role and Processing Flow of the Vision Module}{32}{subsection.5.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Vision Module workflow with routing, optional grounding, summarization, and memory context}}{32}{figure.caption.15}\protected@file@percent }
+\newlabel{fig:vision-module}{{8}{32}{Vision Module workflow with routing, optional grounding, summarization, and memory context}{figure.caption.15}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Image Routing and Visual Task Classification}{33}{subsection.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}General Diagnosis Agent}{33}{subsection.5.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Polyp Segmentation Agent}{33}{subsection.5.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}DeepLabV3+ for Polyp Segmentation}{33}{subsection.5.5}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces DeepLabV3+ encoder-decoder architecture with Atrous Spatial Pyramid Pooling}}{34}{figure.caption.16}\protected@file@percent }
-\newlabel{fig:deeplabv3plus-architecture}{{9}{34}{DeepLabV3+ encoder-decoder architecture with Atrous Spatial Pyramid Pooling}{figure.caption.16}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}DeepLabV3+ for Polyp Segmentation}{34}{subsection.5.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces DeepLabV3+ encoder-decoder architecture with Atrous Spatial Pyramid Pooling}}{35}{figure.caption.16}\protected@file@percent }
+\newlabel{fig:deeplabv3plus-architecture}{{9}{35}{DeepLabV3+ encoder-decoder architecture with Atrous Spatial Pyramid Pooling}{figure.caption.16}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.6}Post-processing and Overlay Mask}{35}{subsection.5.6}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Visualization of raw and post-processed polyp segmentation masks}}{37}{figure.caption.17}\protected@file@percent }
 \newlabel{fig:post-processing-visualization}{{10}{37}{Visualization of raw and post-processed polyp segmentation masks}{figure.caption.17}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.7}Polyp VQA Agent Design with LoRA Fine-tuned VLMs}{37}{subsection.5.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.7}Polyp VQA Agent Design with LoRA Fine-tuned VLMs}{38}{subsection.5.7}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.8}Segmentation-to-VQA Agent Cooperation}{38}{subsection.5.8}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Complementary roles of the Polyp Segmentation Agent and Polyp VQA Agent}}{39}{table.caption.18}\protected@file@percent }
 \newlabel{table:segmentation-vqa-cooperation}{{8}{39}{Complementary roles of the Polyp Segmentation Agent and Polyp VQA Agent}{table.caption.18}{}}
@@ -135,9 +150,16 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.10}Original-image and Segmentation-grounded VQA Settings}{41}{subsection.5.10}\protected@file@percent }
 \citation{mem0_paper}
 \citation{mem0_docs_overview}
+\citation{mem0_paper}
+\citation{mem0_docs_overview}
+\citation{qdrant_doc}
+\citation{langchain_doc}
 \@writefile{toc}{\contentsline {section}{\numberline {6}Chapter 6. Memory Layer: Long-Term Context for Medical Agents}{42}{section.6}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Role of the Memory Layer}{42}{subsection.6.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Integration Architecture}{42}{subsection.6.2}\protected@file@percent }
+\citation{fastapi_doc}
+\citation{mem0_paper}
+\citation{qdrant_doc}
 \@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Technical Pipeline}{43}{subsection.6.3}\protected@file@percent }
 \newlabel{alg:memory-retrieval}{{1}{43}{Patient-scoped memory retrieval before agent routing}{lstlisting.1}{}}
 \@writefile{lol}{\contentsline {lstlisting}{\numberline {1}{\ignorespaces Patient-scoped memory retrieval before agent routing}}{43}{lstlisting.1}\protected@file@percent }
@@ -153,6 +175,7 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {7.1}VimedAQA Dataset}{47}{subsection.7.1}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Medical QA dataset overview used for retrieval-oriented experiments}}{47}{figure.caption.23}\protected@file@percent }
 \newlabel{fig:medical-qa-dataset-overview}{{11}{47}{Medical QA dataset overview used for retrieval-oriented experiments}{figure.caption.23}{}}
+\citation{bkai_neopolyp_dataset}
 \@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces Local VimedAQA record distribution used for RAG indexing}}{48}{table.caption.24}\protected@file@percent }
 \newlabel{table:vimedaqa-record-distribution}{{10}{48}{Local VimedAQA record distribution used for RAG indexing}{table.caption.24}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {7.2}VietMedKG}{48}{subsection.7.2}\protected@file@percent }
@@ -168,8 +191,15 @@
 \@writefile{lot}{\contentsline {table}{\numberline {11}{\ignorespaces Kvasir-VQA-X1 training data before and after segmentation-mask filtering}}{50}{table.caption.28}\protected@file@percent }
 \newlabel{table:kvasir-vqa-mask-filtering}{{11}{50}{Kvasir-VQA-X1 training data before and after segmentation-mask filtering}{table.caption.28}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {7.5}Polyp VQA Fine-tuning Setup}{50}{subsection.7.5}\protected@file@percent }
+\citation{bleu}
+\citation{rouge}
+\citation{llm_as_judge}
 \@writefile{lot}{\contentsline {table}{\numberline {12}{\ignorespaces LoRA fine-tuning hyperparameters for Polyp VQA}}{51}{table.caption.29}\protected@file@percent }
 \newlabel{table:polyp-vqa-training-hyperparameters}{{12}{51}{LoRA fine-tuning hyperparameters for Polyp VQA}{table.caption.29}{}}
+\citation{dice}
+\citation{bleu}
+\citation{rouge}
+\citation{llm_as_judge}
 \@writefile{toc}{\contentsline {subsection}{\numberline {7.6}Evaluation Design}{52}{subsection.7.6}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {13}{\ignorespaces Evaluation design for the main system components}}{52}{table.caption.30}\protected@file@percent }
 \newlabel{table:evaluation-design}{{13}{52}{Evaluation design for the main system components}{table.caption.30}{}}
@@ -177,7 +207,10 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {8.1}Text Module Results and Analysis}{52}{subsection.8.1}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {14}{\ignorespaces Text Module benchmark results}}{53}{table.caption.31}\protected@file@percent }
 \newlabel{table:text-module-benchmark}{{14}{53}{Text Module benchmark results}{table.caption.31}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {8.2}Polyp Segmentation Results and Analysis}{53}{subsection.8.2}\protected@file@percent }
+\citation{bleu}
+\citation{rouge}
+\citation{llm_as_judge}
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.2}Polyp Segmentation Results and Analysis}{54}{subsection.8.2}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {15}{\ignorespaces Dice Score comparison for polyp segmentation models}}{54}{table.caption.32}\protected@file@percent }
 \newlabel{table:dice-scores}{{15}{54}{Dice Score comparison for polyp segmentation models}{table.caption.32}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {8.3}Polyp VQA Fine-tuning Results and Analysis on Kvasir-VQA-X1}{54}{subsection.8.3}\protected@file@percent }
@@ -192,52 +225,63 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {9.1}Strengths of the Proposed System}{57}{subsection.9.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {9.2}Text Module Limitations}{58}{subsection.9.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {9.3}Vision Module Limitations}{58}{subsection.9.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {9.4}Kvasir-VQA-X1 Limitations and Domain Transfer}{58}{subsection.9.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {9.5}Memory Layer Limitations}{58}{subsection.9.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {9.6}Evaluation and Safety Limitations}{59}{subsection.9.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {10}Chapter 10. Conclusion and Future Work}{59}{section.10}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {10.1}Summary of Achievements}{59}{subsection.10.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {10.2}Technical Contributions}{59}{subsection.10.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {10.3}Future Work}{60}{subsection.10.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.4}Kvasir-VQA-X1 Limitations and Domain Transfer}{59}{subsection.9.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.5}Memory Layer Limitations}{59}{subsection.9.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.6}Evaluation and Safety Limitations}{60}{subsection.9.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {10}Chapter 10. Conclusion and Future Work}{60}{section.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.1}Summary of Achievements}{60}{subsection.10.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.2}Technical Contributions}{61}{subsection.10.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.3}Future Work}{61}{subsection.10.3}\protected@file@percent }
 \bibcite{langgraph_doc}{1}
 \bibcite{gemini_2_flash}{2}
 \bibcite{qdrant_doc}{3}
-\bibcite{mem0_paper}{4}
-\bibcite{mem0_docs_overview}{5}
-\bibcite{tavily_search}{6}
-\bibcite{e5_embedding}{7}
-\bibcite{vimedaqa_dataset}{8}
-\bibcite{rag_retrieval}{9}
-\bibcite{medical_ai_review}{10}
-\bibcite{multimodal_medical}{11}
-\bibcite{llm_healthcare}{12}
-\bibcite{medpalm2}{13}
-\bibcite{pmc_llama}{14}
-\bibcite{biomistral}{15}
-\bibcite{llava_med}{16}
-\bibcite{med_flamingo}{17}
-\bibcite{llm_hallucination_survey}{18}
-\bibcite{pubmedqa}{19}
-\bibcite{medqa}{20}
-\bibcite{medmcqa}{21}
-\bibcite{hotpotqa}{22}
-\bibcite{ai_medical_diagnosis}{23}
-\bibcite{conversational_ai_health}{24}
-\bibcite{vietnamese_nlp}{25}
-\bibcite{medical_chatbots}{26}
-\bibcite{multi_agent_coordination}{27}
-\bibcite{reranking_search}{28}
-\bibcite{unet}{29}
-\bibcite{unetpp}{30}
-\bibcite{deeplabv3plus}{31}
-\bibcite{pranet}{32}
-\bibcite{kvasir_seg}{33}
-\bibcite{polyp_pvt}{34}
-\bibcite{emcad}{35}
-\bibcite{polyp_sam}{36}
-\bibcite{kvasir_vqa}{37}
-\bibcite{kvasir_vqa_x1}{38}
-\bibcite{lora}{39}
-\bibcite{medgemma_report}{40}
-\bibcite{qwen3_report}{41}
-\gdef \@abspage@last{63}
+\bibcite{neo4j_cypher_doc}{4}
+\bibcite{langchain_doc}{5}
+\bibcite{langchain_graphcypherqa}{6}
+\bibcite{fastapi_doc}{7}
+\bibcite{mem0_paper}{8}
+\bibcite{mem0_docs_overview}{9}
+\bibcite{tavily_search}{10}
+\bibcite{e5_embedding}{11}
+\bibcite{embeddinggemma_modelcard}{12}
+\bibcite{vimedaqa_dataset}{13}
+\bibcite{rag_retrieval}{14}
+\bibcite{medical_ai_review}{15}
+\bibcite{multimodal_medical}{16}
+\bibcite{llm_healthcare}{17}
+\bibcite{medpalm2}{18}
+\bibcite{pmc_llama}{19}
+\bibcite{biomistral}{20}
+\bibcite{llava_med}{21}
+\bibcite{med_flamingo}{22}
+\bibcite{llm_hallucination_survey}{23}
+\bibcite{pubmedqa}{24}
+\bibcite{medqa}{25}
+\bibcite{medmcqa}{26}
+\bibcite{hotpotqa}{27}
+\bibcite{ai_medical_diagnosis}{28}
+\bibcite{conversational_ai_health}{29}
+\bibcite{vietnamese_nlp}{30}
+\bibcite{medical_chatbots}{31}
+\bibcite{multi_agent_coordination}{32}
+\bibcite{reranking_search}{33}
+\bibcite{bm25}{34}
+\bibcite{unet}{35}
+\bibcite{unetpp}{36}
+\bibcite{deeplabv3plus}{37}
+\bibcite{pranet}{38}
+\bibcite{kvasir_seg}{39}
+\bibcite{bkai_neopolyp_dataset}{40}
+\bibcite{polyp_pvt}{41}
+\bibcite{emcad}{42}
+\bibcite{polyp_sam}{43}
+\bibcite{kvasir_vqa}{44}
+\bibcite{kvasir_vqa_x1}{45}
+\bibcite{dice}{46}
+\bibcite{bleu}{47}
+\bibcite{rouge}{48}
+\bibcite{llm_as_judge}{49}
+\bibcite{lora}{50}
+\bibcite{medgemma_report}{51}
+\bibcite{qwen3_report}{52}
+\gdef \@abspage@last{65}

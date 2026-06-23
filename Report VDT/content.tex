@@ -2,11 +2,11 @@
 
 \subsection{Motivation}
 
-Healthcare information seeking is increasingly mediated by digital systems, yet most users still face a fundamental gap between their symptoms and reliable medical interpretation. A patient may describe a symptom in informal language, omit clinically important details, misunderstand medication risks, or combine several concerns across different interaction sessions. At the same time, medical information available on the internet is abundant but uneven in quality, difficult to verify, and often not adapted to the user's clinical context.
+Healthcare information seeking is increasingly mediated by digital systems, yet most users still face a fundamental gap between everyday symptom descriptions and reliable medical interpretation. A patient may say that they have stomach pain, dizziness, or chest discomfort, but leave out details that strongly affect the next safe step: onset time, duration, severity, medication use, pregnancy status, allergies, chronic disease history, or warning signs. At the same time, medical information available on the internet is abundant but uneven in quality, difficult to verify, and often not adapted to the user's clinical context.
 
 Recent progress in large language models (LLMs), retrieval-augmented generation (RAG), knowledge graphs, and vision-language models (VLMs) makes it possible to design medical assistants that can reason over both text and images. However, a direct application of a single generative model is not sufficient for a safety-critical domain. Medical consultation requires source grounding, uncertainty awareness, follow-up questioning, multimodal interpretation, and mechanisms for human validation.
 
-This thesis develops a \textbf{Multi-Agent Medical Assistant} that combines text-based medical reasoning, medical image analysis, long-term memory, and human-in-the-loop validation. The system is designed as a coordinated set of specialized agents rather than a single monolithic model. In the text pathway, structured Knowledge Graph evidence and unstructured RAG evidence are coordinated before MedGemma CoT performs information-sufficiency assessment. In the vision pathway, polyp segmentation provides spatial grounding for VQA rather than replacing direct interpretation of the original endoscopic image. The memory layer supplies patient-scoped contextual continuity while remaining separate from verified clinical diagnosis.
+This thesis develops a \textbf{Multi-Agent Medical Assistant} that combines text-based medical reasoning, medical image analysis, long-term memory, and human-in-the-loop validation. The system is designed as a coordinated set of specialized agents rather than a single monolithic model. In practice, this means the assistant may ask before it answers, retrieve evidence before it explains, or route an image to a specialized visual workflow instead of treating every request as ordinary chat. In the text pathway, structured Knowledge Graph evidence and unstructured RAG evidence are coordinated before MedGemma CoT performs information-sufficiency assessment and final answer synthesis. In the vision pathway, polyp segmentation provides spatial grounding for VQA rather than replacing direct interpretation of the original endoscopic image. The memory layer supplies patient-scoped contextual continuity while remaining separate from verified clinical diagnosis.
 
 \subsection{Problem Statement}
 
@@ -14,8 +14,8 @@ The problem addressed in this thesis is how to design and evaluate a medical ass
 
 \begin{itemize}
     \item produce medical answers grounded in structured and unstructured evidence;
-    \item detect incomplete clinical context and collect missing information through multi-hop questioning;
-    \item coordinate RAG, Knowledge Graph reasoning, MedGemma CoT sufficiency assessment, and Web Search fallback for text-based consultation;
+    \item detect incomplete clinical context and collect missing information through multi-turn clarification;
+    \item coordinate RAG, Knowledge Graph reasoning, MedGemma CoT sufficiency assessment and answer synthesis, and Web Search fallback for text-based consultation;
     \item connect general medical image analysis with a specialized colonoscopy polyp workflow;
     \item use polyp segmentation masks as spatial grounding for VQA while preserving the original image as the visual evidence source;
     \item maintain patient-scoped context across sessions without treating memory as verified diagnosis;
@@ -47,7 +47,7 @@ Several challenges motivate the proposed architecture.
 The main objective is to design and evaluate an AI-centered multi-agent medical assistant with four core capabilities:
 
 \begin{itemize}
-    \item \textbf{Text Module:} medical reasoning with Conversation Agent, Multi-hop QA, query expansion, RAG, Knowledge Graph, MedGemma CoT sufficiency assessment, Web Search, and safe response generation;
+    \item \textbf{Text Module:} medical reasoning with Conversation Agent, multi-turn clarification, query expansion, RAG, Knowledge Graph, MedGemma CoT sufficiency assessment and answer synthesis, and Web Search fallback;
     \item \textbf{Vision Module:} general image analysis, polyp segmentation, and grounded Polyp VQA;
     \item \textbf{Memory Layer:} patient-scoped long-term context using Mem0-style memory integration;
     \item \textbf{Human Validation:} user validation and feedback logging as a human-in-the-loop safety mechanism.
@@ -59,17 +59,25 @@ The main contributions of this thesis are organized around architecture, groundi
 
 \begin{itemize}
     \item a modular multi-agent architecture that separates routing, text reasoning, vision reasoning, memory retrieval, and human validation while allowing intermediate evidence to be shared across agents;
-    \item a grounded Text Module that coordinates Multi-hop QA, query expansion, RAG, Knowledge Graph reasoning, MedGemma CoT sufficiency assessment, and fallback search to reduce unsupported or premature medical responses;
+    \item a grounded Text Module that coordinates multi-turn clarification, query expansion, RAG, Knowledge Graph reasoning, MedGemma CoT sufficiency assessment and answer synthesis, and fallback search to reduce unsupported or premature medical responses;
     \item a Vision Module that connects general medical image analysis, polyp segmentation, and segmentation-grounded Polyp VQA for multimodal reasoning;
     \item a polyp segmentation pipeline with connected-component post-processing and region-wise color dominance refinement to improve mask consistency for interpretation and downstream VQA grounding;
     \item a grounded Polyp VQA formulation that adapts MedGemma-4B-it and Qwen3.5-4B with LoRA and compares original-image with mask-guided inputs;
     \item a patient-scoped long-term memory layer using Mem0 to support contextual continuity while keeping stored patient-reported facts separate from verified diagnoses;
-    \item an evaluation design that analyzes both component performance and system behavior using Dice Score, BLEU-4, ROUGE-L, LLM Judge, One-Hop Accuracy, Multi-Hop Awareness Score, and memory-oriented scenarios.
+    \item an evaluation design that analyzes both component performance and system behavior using Dice Score, BLEU-4, ROUGE-L, LLM Judge, One-Hop Accuracy, Multi-Turn Awareness Score, and memory-oriented scenarios.
 \end{itemize}
 
 \subsection{Research Questions}
 
-This thesis is guided by five research questions. First, how can a medical assistant combine conversational reasoning, RAG, Knowledge Graph reasoning, and Web Search to reduce unsupported medical responses? Second, how can information sufficiency assessment inside the MedGemma CoT workflow improve safety in symptom-based consultation? Third, can segmentation masks improve Polyp VQA by providing visual grounding for a fine-tuned VLM? Fourth, how can long-term memory support personalization without turning patient-reported facts into verified diagnoses? Finally, what trade-offs appear between modularity, response quality, latency, and safety in a multi-agent medical assistant?
+This thesis is guided by five research questions:
+
+\begin{itemize}
+    \item How can a medical assistant combine conversational reasoning, RAG, Knowledge Graph reasoning, and Web Search to reduce unsupported medical responses?
+    \item How can information sufficiency assessment inside the MedGemma CoT workflow improve safety in symptom-based consultation?
+    \item Can segmentation masks improve Polyp VQA by providing visual grounding for a fine-tuned VLM?
+    \item How can long-term memory support personalization without turning patient-reported facts into verified diagnoses?
+    \item What trade-offs appear between modularity, response quality, latency, and safety in a multi-agent medical assistant?
+\end{itemize}
 
 These questions connect the architecture with the evaluation methodology. The thesis therefore evaluates the system as a reasoning architecture and not as a clinical product ready for deployment.
 
@@ -89,7 +97,7 @@ Medical vision-language models extend this trend from text-only reasoning to ima
 
 However, current LLMs and VLMs still have important limitations for medical assistants. They can generate fluent but unsupported answers, especially when the user question lacks clinical context or when the model relies only on parametric memory \cite{llm_hallucination_survey}. Many models also operate without explicit retrieval, Knowledge Graph evidence, segmentation grounding, or human validation. For VLMs, correct-looking answers may come from dataset priors or textual shortcuts rather than from the relevant image region, which is risky in endoscopy because lesion interpretation depends on local boundary, texture, morphology, and color patterns.
 
-This thesis therefore treats LLMs and VLMs as components inside a larger safety-aware architecture. The proposed system combines model generation with routing, RAG, Knowledge Graph reasoning, MedGemma CoT-based information sufficiency assessment, patient-scoped memory, segmentation-based visual grounding, and human validation. This design addresses the limitation of standalone models by testing whether external evidence and spatial grounding improve reasoning reliability rather than only answer fluency.
+This thesis therefore treats LLMs and VLMs as components inside a larger safety-aware architecture. The proposed system combines model generation with routing, RAG, Knowledge Graph reasoning, MedGemma CoT-based information sufficiency assessment and answer synthesis, patient-scoped memory, segmentation-based visual grounding, and human validation. This design addresses the limitation of standalone models by testing whether external evidence and spatial grounding improve reasoning reliability rather than only answer fluency.
 
 \subsection{Medical Question Answering and Multi-hop Reasoning}
 
@@ -97,33 +105,33 @@ Medical question answering has traditionally been evaluated through benchmark da
 
 The key difference is that medical consultation is frequently underspecified at the first turn. A user asking about chest pain, abdominal pain, fever, dizziness, or medication use may omit onset time, severity, duration, associated symptoms, age, pregnancy status, allergies, chronic diseases, or current medication. A direct answer may therefore be clinically incomplete even if it is linguistically fluent. This creates a gap between single-turn medical QA and interactive medical reasoning.
 
-Multi-hop reasoning addresses this gap by decomposing a complex question into intermediate reasoning steps and evidence requirements. General multi-hop QA research shows that answering some questions requires connecting multiple supporting facts rather than retrieving one isolated passage \cite{hotpotqa}. In the medical domain, the same principle appears in two forms. The first form is evidence multi-hop reasoning, where the system combines information from multiple sources such as retrieved documents, Knowledge Graph relations, and previous conversation context. The second form is dialogue multi-hop reasoning, where the system asks follow-up questions before generating a final response.
+Multi-hop reasoning addresses this gap by decomposing a complex question into intermediate reasoning steps and evidence requirements. General multi-hop QA research shows that answering some questions requires connecting multiple supporting facts rather than retrieving one isolated passage \cite{hotpotqa}. In the medical domain, the same principle appears in two forms. The first form is evidence multi-hop reasoning, where the system combines information from multiple sources such as retrieved documents, Knowledge Graph relations, and previous conversation context. The second form is multi-turn clarification, where the system asks follow-up questions before generating a final response.
 
-This thesis focuses on the second form as a safety mechanism and uses the first form for evidence synthesis. The Conversation Agent helps identify missing clinical variables, while KG and RAG agents construct structured and unstructured evidence when the query is answerable from available sources. MedGemma CoT then acts as an information-sufficiency decision point: it decides whether the system should synthesize an answer, ask a targeted follow-up question, or activate fallback search. This workflow makes multi-hop QA more than a prompting technique; it becomes a control mechanism for deciding when to answer, when to retrieve, when to ask, and when to recommend professional care. It also separates general medical education from patient-specific advice: a question such as ``What is gastritis?'' can often be answered from retrieved explanatory material, whereas ``Do I have gastritis?'' requires additional clinical variables and a more cautious response.
+This thesis focuses on multi-turn clarification as a safety mechanism and uses evidence multi-hop reasoning for KG/RAG evidence synthesis. The Conversation Agent helps identify missing clinical variables, while KG and RAG agents construct structured and unstructured evidence when the query is answerable from available sources. MedGemma CoT then acts as an information-sufficiency decision point: it decides whether the system should synthesize an answer, ask a targeted follow-up question, or activate fallback search. This workflow makes clarification more than a prompting technique; it becomes a control mechanism for deciding when to answer, when to retrieve, when to ask, and when to recommend professional care. It also separates general medical education from patient-specific advice: a question such as ``What is gastritis?'' can often be answered from retrieved explanatory material, whereas ``Do I have gastritis?'' requires additional clinical variables and a more cautious response.
 
 \subsection{Retrieval-Augmented Generation for Medical QA}
 
-Retrieval-Augmented Generation combines neural generation with external document retrieval \cite{rag_retrieval}. In a medical assistant, RAG can reduce hallucination by grounding the model response in retrieved medical documents. A typical RAG pipeline includes query expansion, embedding-based retrieval, document reranking, and response generation with source context.
+Retrieval-Augmented Generation combines neural generation with external document retrieval \cite{rag_retrieval}. Following the formulation of Lewis et al., the generator is not expected to answer only from parametric memory; it is conditioned on retrieved passages that provide non-parametric knowledge for the current input. In a medical assistant, this design is useful because answers can be grounded in retrieved medical documents instead of relying only on the model's internal weights. A typical RAG pipeline includes query expansion, embedding-based retrieval, document reranking, and evidence-conditioned answer synthesis.
 
-The proposed system uses RAG for Vietnamese medical question answering. Documents are embedded and stored in a vector database, while the response generator uses retrieved context to produce structured answers. This approach is useful when the answer requires explanatory text, treatment descriptions, disease overviews, or patient-friendly medical information.
+The proposed system uses RAG for Vietnamese medical question answering. Documents are embedded and stored in a vector database, while MedGemma CoT uses retrieved context to produce structured, safety-aware answers. This approach is useful when the answer requires explanatory text, treatment descriptions, disease overviews, or patient-friendly medical information.
 
-RAG is not sufficient by itself. Retrieval can fail when a query is underspecified, when relevant documents are absent from the corpus, or when semantically similar but clinically irrelevant passages are retrieved. A retrieved passage can also make an answer appear grounded even when the original clinical question remains incomplete. For this reason, the proposed Text Module combines RAG with query expansion, reranking, context filtering, Knowledge Graph reasoning, and MedGemma CoT sufficiency assessment.
+RAG is not sufficient by itself. Retrieval can fail when a query is underspecified, when relevant documents are absent from the corpus, or when semantically similar but clinically irrelevant passages are retrieved. A retrieved passage can also make an answer appear grounded even when the original clinical question remains incomplete. For this reason, the proposed Text Module combines RAG with query expansion, reranking, context filtering, Knowledge Graph reasoning, and MedGemma CoT sufficiency assessment and answer synthesis.
 
 Medical RAG also requires attention to language and domain mismatch. In Vietnamese medical QA, users may mix colloquial expressions with formal medical terms. A retrieval system must bridge this gap without retrieving unrelated passages. Query expansion and filtering are therefore not auxiliary features; they are necessary parts of making retrieval usable in real consultation-style interactions.
 
 \subsection{Medical Knowledge Graphs}
 
-Knowledge Graphs represent medical knowledge as entities and relations. Entities may include diseases, symptoms, drugs, body parts, risk factors, tests, or treatments. Relations encode structured links such as disease-has-symptom, drug-treats-disease, or disease-associated-with-risk-factor.
+Knowledge Graphs represent medical knowledge as entities and relations. In the conventional graph view, nodes describe entities and edges encode typed relationships between them; in a medical setting, these entities may include diseases, symptoms, drugs, body parts, risk factors, tests, or treatments. Relations encode structured links such as disease-has-symptom, drug-treats-disease, or disease-associated-with-risk-factor.
 
-Compared with RAG, a Knowledge Graph is more suitable for structured reasoning. It can support explicit traversal of disease-symptom relationships and provide more interpretable evidence for certain diagnostic suggestions. In this thesis, the Knowledge Graph Agent queries VietMedKG through Neo4j and supports reasoning for symptom-to-disease and related medical questions.
+Compared with RAG, a Knowledge Graph is more suitable for structured reasoning. It can support explicit traversal of disease-symptom relationships and provide more interpretable evidence for certain diagnostic suggestions. In this thesis, the Knowledge Graph Agent queries VietMedKG through Neo4j and supports reasoning for symptom-to-disease and related medical questions \cite{neo4j_cypher_doc}.
 
 Knowledge Graphs also have limitations. They depend on relation coverage and graph construction quality. A graph may encode important disease-symptom relations but lack detailed explanation or updated guidance. Therefore, this thesis treats KG and RAG as complementary rather than competing approaches.
 
-The complementarity is especially relevant for medical reasoning. A Knowledge Graph can provide a compact relation such as a symptom-disease link, but a patient-facing answer often requires explanation, uncertainty, and practical next steps. RAG can provide that explanatory material. Conversely, RAG may retrieve long text but fail to make an explicit relation clear. KG can provide structure to support the final synthesis. In the proposed system, these two evidence channels are not treated as final answers; they are passed to the reasoning stage, where sufficiency, uncertainty, and safety boundaries are assessed before response generation.
+The complementarity is especially relevant for medical reasoning. A Knowledge Graph can provide a compact relation such as a symptom-disease link, but a patient-facing answer often requires explanation, uncertainty, and practical next steps. RAG can provide that explanatory material. Conversely, RAG may retrieve long text but fail to make an explicit relation clear. KG can provide structure to support the final synthesis. In the proposed system, these two evidence channels are not treated as final answers; they are passed to MedGemma CoT, where sufficiency, uncertainty, safety boundaries, and final response content are handled together.
 
 \subsection{Multi-agent AI Systems}
 
-Multi-agent systems divide complex tasks among specialized agents. In medical AI, this is useful because different queries require different capabilities. A symptom consultation may require multi-hop questioning and sufficiency assessment, a disease explanation may require RAG, a structured reasoning query may require Knowledge Graph traversal, an image question may require a vision-language model, and a follow-up question may require patient memory.
+Multi-agent systems divide complex tasks among specialized agents. In medical AI, this is useful because different queries require different capabilities. A symptom consultation may require multi-turn clarification and sufficiency assessment, a disease explanation may require RAG, a structured reasoning query may require Knowledge Graph traversal, an image question may require a vision-language model, and a follow-up question may require patient memory.
 
 The proposed system uses a Decision Agent to route user requests to the appropriate agents. The workflow is orchestrated with LangGraph \cite{langgraph_doc}, which allows the system to maintain short-term state, coordinate agent execution, retrieve patient memory before routing, and route to fallback strategies when internal knowledge is insufficient.
 
@@ -133,7 +141,7 @@ However, multi-agent systems introduce coordination challenges. Routing errors, 
 
 \subsection{LoRA and Parameter-Efficient Fine-tuning}
 
-Fine-tuning large VLMs is computationally expensive because full-parameter updates require significant memory and training resources. LoRA provides a parameter-efficient alternative by learning low-rank adaptation matrices while keeping most original model parameters fixed \cite{lora}. This reduces the training cost and makes domain adaptation more practical.
+Fine-tuning large VLMs is computationally expensive because full-parameter updates require significant memory and training resources. LoRA provides a parameter-efficient alternative by freezing the pretrained model weights and learning low-rank adaptation matrices that are injected into selected layers \cite{lora}. This reduces the training cost and makes domain adaptation more practical.
 
 In this thesis, LoRA is used to adapt VLMs for Polyp VQA. The goal is to improve the model's ability to answer endoscopy-related visual questions while keeping fine-tuning feasible under limited resources. This is appropriate for the thesis setting because endoscopic VQA data is specialized and smaller than the generic multimodal corpora used to train foundation models.
 
@@ -145,11 +153,11 @@ LoRA also makes it practical to compare input formulations. In this work, Polyp 
 
 Colonoscopy polyp segmentation is a key medical image analysis task because accurate localization of polyps can support colorectal cancer screening and clinical interpretation. The task can be binary, where the model separates polyp from background, or multi-class, where the model also distinguishes neoplastic and non-neoplastic regions. Compared with general semantic segmentation, polyp segmentation is difficult because polyps vary greatly in size, color, texture, shape, and boundary clarity. The boundary between polyp tissue and surrounding mucosa can be ambiguous, and artifacts such as blur, specular highlights, low contrast, and imperfect bowel preparation can further reduce visual quality \cite{pranet}.
 
-Public datasets have strongly shaped research in this area. Kvasir-SEG provides manually annotated gastrointestinal polyp images with segmentation masks and is widely used for benchmarking binary polyp segmentation \cite{kvasir_seg}. For neoplasm characterization, the BKAI-IGH NeoPolyp dataset extends the problem from localization to multi-class segmentation, where the model must distinguish neoplastic and non-neoplastic regions. This makes the task closer to clinical interpretation than a pure foreground-background mask, but it also increases class imbalance and label ambiguity.
+Public datasets have strongly shaped research in this area. Kvasir-SEG provides manually annotated gastrointestinal polyp images with segmentation masks and is widely used for benchmarking binary polyp segmentation \cite{kvasir_seg}. For neoplasm characterization, the BKAI-IGH NeoPolyp dataset extends the problem from localization to multi-class segmentation, where the model must distinguish neoplastic and non-neoplastic regions \cite{bkai_neopolyp_dataset}. This makes the task closer to clinical interpretation than a pure foreground-background mask, but it also increases class imbalance and label ambiguity.
 
 Early deep learning approaches for biomedical segmentation were strongly influenced by U-Net, whose encoder-decoder structure combines contextual feature extraction with precise localization through skip connections \cite{unet}. U-Net++ further redesigned skip pathways with nested dense connections to reduce the semantic gap between encoder and decoder features \cite{unetpp}. These architectures remain important baselines because medical datasets are often small and require models that can learn from limited annotated data.
 
-DeepLabV3+ introduced another influential direction by combining atrous convolution, Atrous Spatial Pyramid Pooling, and a decoder for boundary refinement \cite{deeplabv3plus}. The multi-scale receptive fields are useful for polyp segmentation because lesions can occupy very different image areas. This thesis follows the DeepLabV3+ family for the deployed segmentation model and produces a three-class output. In the BKAI-IGH NeoPolyp-Small setting, DeepLabV3+ with RegNetx320 achieves the strongest Dice Score after post-processing among the evaluated models.
+DeepLabV3+ introduced another influential direction by combining atrous convolution, Atrous Spatial Pyramid Pooling, and a decoder for boundary refinement \cite{deeplabv3plus}. Its design follows the common semantic-segmentation goal of preserving stronger object-level context while recovering sharper boundaries in the decoder. The multi-scale receptive fields are useful for polyp segmentation because lesions can occupy very different image areas. This thesis follows the DeepLabV3+ family for the deployed segmentation model and produces a three-class output. In the BKAI-IGH NeoPolyp-Small setting, DeepLabV3+ with RegNetx320 achieves the strongest Dice Score after post-processing among the evaluated models.
 
 Attention-based and transformer-based methods address different limitations. PraNet uses a parallel partial decoder and reverse attention to refine boundary cues and recover missed regions \cite{pranet}. Polyp-PVT replaces a CNN backbone with a pyramid vision transformer and introduces modules for cascaded fusion, camouflage identification, and similarity aggregation, improving robustness in challenging cases such as small objects and appearance variation \cite{polyp_pvt}. More recent medical segmentation work also emphasizes efficient decoders; EMCAD proposes a multi-scale convolutional attention decoder that reduces parameters and FLOPs while maintaining strong performance across medical segmentation tasks \cite{emcad}.
 
@@ -161,7 +169,7 @@ In this thesis, segmentation is not only an end result but also an intermediate 
 
 Most dialogue agents maintain short-term state within a session, but medical interaction often requires continuity across sessions. Long-term memory allows an agent to remember clinically useful facts such as allergies, chronic diseases, medication use, repeated symptoms, and patient preferences.
 
-In the proposed system, Mem0 is used as a patient-scoped long-term memory layer backed by vector retrieval. It does not replace LangGraph, RAG, the Knowledge Graph, or patient data storage. Instead, it provides additional context that helps agents personalize responses, support routing, and avoid repeatedly asking for information that was already provided.
+In the proposed system, Mem0 is used as a patient-scoped long-term memory layer backed by vector retrieval \cite{mem0_paper,mem0_docs_overview}. The Mem0 design emphasizes persistent agent memory: salient facts are extracted from interactions, stored with embeddings and metadata, and retrieved when they are relevant to a later query. In this thesis, that idea is adapted conservatively for medical use. Mem0 does not replace LangGraph, RAG, the Knowledge Graph, or patient data storage. Instead, it provides additional context that helps agents personalize responses, support routing, and avoid repeatedly asking for information that was already provided.
 
 Medical memory must be handled conservatively. A stored fact may represent a user-reported allergy or symptom history, but it should not be treated as a verified diagnosis. Memory is therefore used as supporting context rather than authoritative clinical truth, and it should remain subordinate to the current user input, retrieved medical evidence, and current image findings.
 
@@ -177,7 +185,7 @@ The proposed system is organized as a multi-agent medical assistant with four ma
 
 \begin{itemize}
     \item \textbf{Decision and orchestration layer:} selects the appropriate processing path;
-    \item \textbf{Text Module:} handles medical QA, multi-hop consultation, RAG, Knowledge Graph, and fallback search;
+    \item \textbf{Text Module:} handles medical QA, multi-turn consultation, RAG, Knowledge Graph, and fallback search;
     \item \textbf{Vision Module:} handles general medical image interpretation, polyp segmentation, and Polyp VQA;
     \item \textbf{Memory and validation layer:} provides long-term patient context and human-in-the-loop feedback.
 \end{itemize}
@@ -199,20 +207,22 @@ The high-level architecture in Figure \ref{fig:overall-architecture} establishes
 
 LangGraph is used as the workflow orchestration framework. It maintains state across the processing flow and connects decision nodes with task-specific agents. The graph-based structure is useful because medical consultation is not a simple single-step process. A query may require routing, follow-up questioning, retrieval, fallback search, image analysis, validation, or memory update.
 
-The short-term state includes the current query, image path when available, selected agent, conversation history, patient identifier, and intermediate outputs such as segmentation paths or retrieved contexts. This state supports coherent routing and response generation within the current session.
+The short-term state includes the current query, image path when available, selected agent, conversation history, patient identifier, and intermediate outputs such as segmentation paths or retrieved contexts. This state supports coherent routing and answer synthesis within the current session.
 
-The graph structure also makes the workflow easier to control than a purely prompt-based pipeline. Each node has a clear role: routing, retrieval, image analysis, response generation, validation, or memory update. This is useful in a medical context because the system can inspect intermediate outputs before producing the final answer. For example, if retrieval fails or the image route is uncertain, the workflow can move to a fallback path instead of forcing a response from incomplete evidence.
+The graph structure also makes the workflow easier to control than a purely prompt-based pipeline. Each node has a clear role: routing, retrieval, image analysis, MedGemma CoT reasoning, validation, or memory update. This is useful in a medical context because the system can inspect intermediate outputs before producing the final answer. For example, if retrieval fails or the image route is uncertain, the workflow can move to a fallback path instead of forcing a response from incomplete evidence.
 
 Another advantage is that LangGraph separates short-term state from long-term memory. Short-term state is useful for the current interaction, while Mem0 stores facts that may remain useful across sessions. This separation prevents temporary reasoning artifacts, such as a retrieved passage or a provisional model output, from automatically becoming persistent patient memory.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{images/chi_tiet.png}
-    \caption{Detailed agent workflow and module coordination}
+    \caption{Detailed agent workflow with text, vision, memory, and fallback coordination}
     \label{fig:detailed-agent-workflow}
 \end{figure}
 
-Figure \ref{fig:detailed-agent-workflow} shows both the system components and the routes between them. Table \ref{table:multi-agent-benefits} summarizes the architectural benefits that follow from this workflow.
+Figure \ref{fig:detailed-agent-workflow} shows both the system components and the routes between them. The Agent Core separates text-oriented and image-oriented requests while receiving patient context from the Memory Layer. In the text branch, medical queries pass through parallel KG/RAG evidence construction, query expansion, KG-based RAG, document-based RAG, and MedGemma CoT synthesis. If the selected evidence is weak or the user query is missing important context, the workflow can move to Web Search or conversational handling instead of forcing a final medical answer.
+
+The image branch in Figure \ref{fig:detailed-agent-workflow} routes image-text inputs through a vision decision step. Colonoscopy-related tasks can use polyp segmentation and, when needed, segmentation-grounded Polyp VQA. Other clinical images are routed to the general visual diagnosis path. A summarizer then converts visual-agent outputs into a user-facing response. Table \ref{table:multi-agent-benefits} summarizes the architectural benefits that follow from this workflow.
 
 \begin{table}[H]
 \centering
@@ -221,11 +231,11 @@ Figure \ref{fig:detailed-agent-workflow} shows both the system components and th
 \hline\hline
 \textbf{Benefit} & \textbf{How Figure \ref{fig:detailed-agent-workflow} supports the benefit} \\
 \hline
-\textbf{Functional decomposition} & User input is routed from the Agent Core to specialized text and vision branches. This means heterogeneous medical tasks can be handled by agents with suitable tools instead of forcing one model to perform retrieval, reasoning, segmentation, and VQA at the same time. \\
+\textbf{Functional decomposition} & User input is routed from the Agent Core to specialized text and vision branches. This means heterogeneous medical tasks can be handled by agents with suitable tools instead of forcing one model to perform retrieval, reasoning, segmentation, VQA, summarization, and fallback handling at the same time. \\
 \textbf{Evidence specialization} & KG, RAG, Web Search, shared memory, and segmentation masks appear as separate evidence channels. The system can therefore combine structured relations, explanatory documents, updated web evidence, patient context, and visual grounding without collapsing them into one opaque prompt. \\
 \textbf{Graceful fallback} & MedGemma CoT evaluates the selected KG/RAG context and routes weak-evidence cases to Web Search or conversational handling. This helps avoid premature answers when internal evidence is missing, uncertain, or clinically underspecified. \\
 \textbf{Cross-modal continuity} & Vision outputs and text reasoning interact through shared memory and workflow state. A user can upload an image, receive an initial interpretation, and then continue asking follow-up questions that reuse the image-derived context. \\
-\textbf{Observability and evaluation} & Intermediate modules such as routing, query expansion, KG/RAG retrieval, segmentation, and response generation are explicit. Errors can therefore be traced to a specific stage, and the system can be evaluated beyond the final generated answer. \\
+\textbf{Observability and evaluation} & Intermediate modules such as routing, query expansion, KG/RAG retrieval, segmentation, visual grounding, summarization, and MedGemma CoT reasoning are explicit. Errors can therefore be traced to a specific stage, and the system can be evaluated beyond the final generated answer. \\
 \hline\hline
 \end{tabular}
 \end{adjustbox}
@@ -233,7 +243,7 @@ Figure \ref{fig:detailed-agent-workflow} shows both the system components and th
 \label{table:multi-agent-benefits}
 \end{table}
 
-The table clarifies that the system is not merely a collection of independent models. Its value comes from how intermediate evidence is produced, assessed, reused, and routed before final response generation.
+The table clarifies that the system is not merely a collection of independent models. Its value comes from how intermediate evidence is produced, assessed, reused, and routed before MedGemma CoT produces the final response.
 
 \subsection{Agent Cooperation and Cross-module Workflows}
 
@@ -243,7 +253,7 @@ The cooperation mechanism can be summarized as follows:
 
 \begin{itemize}
     \item \textbf{Text cooperation:} Conversation Agent, Query Expansion, KG Agent, RAG Agent, Web Search Agent, and MedGemma CoT cooperate to decide whether to ask, retrieve, reason, or fall back.
-    \item \textbf{Vision cooperation:} Polyp Segmentation Agent produces a lesion mask that becomes visual grounding for the Polyp VQA Agent.
+    \item \textbf{Vision cooperation:} Polyp Segmentation Agent produces a lesion mask that becomes visual grounding for the Polyp VQA Agent, while the summarizer consolidates visual-agent outputs into the final response.
     \item \textbf{Cross-modal cooperation:} image-derived context can support later text follow-up questions, while text context can guide image interpretation.
     \item \textbf{Memory-supported cooperation:} patient-reported facts can help routing and personalization, but they remain supporting context rather than confirmed clinical evidence.
 \end{itemize}
@@ -256,7 +266,7 @@ The cooperation mechanism can be summarized as follows:
 \textbf{Cooperation pattern} & \textbf{Agents involved} & \textbf{Shared evidence} & \textbf{Main benefit} \\
 \hline
 \textbf{Text reasoning} & Conversation, Query Expansion, KG, RAG, MedGemma CoT, Web Search & Follow-up needs, expanded query, KG facts, retrieved passages, fallback evidence & Safer medical QA \\
-\textbf{Segmentation-to-VQA} & Polyp Segmentation Agent and Polyp VQA Agent & Segmentation mask and overlay image & Better visual grounding \\
+\textbf{Segmentation-to-VQA} & Polyp Segmentation Agent, Polyp VQA Agent, and Summarizer & Segmentation mask, overlay image, and visual-agent answer & Better visual grounding and clearer final response \\
 \textbf{Cross-modal follow-up} & Vision agents, Conversation Agent, Text Module & Image result, short-term state, user follow-up question & Interactive consultation \\
 \textbf{Memory-assisted routing} & Memory Layer, Decision Agent, task-specific agents & Patient-reported allergies, medication use, chronic conditions, prior findings & Continuity across sessions \\
 \hline\hline
@@ -266,9 +276,9 @@ The cooperation mechanism can be summarized as follows:
 \label{table:agent-cooperation-patterns}
 \end{table}
 
-\textbf{Text reasoning pattern.} The Text Module uses cooperation to avoid premature answer generation. The Conversation Agent first checks whether the user has provided enough clinical context. If the query is sufficiently specified, Query Expansion reformulates it into medically useful terms. The KG Agent then returns structured relations such as symptom--disease links, while the RAG Agent retrieves explanatory documents. These evidence sources are passed into MedGemma CoT, which evaluates information sufficiency and decides whether to synthesize an answer, ask a follow-up question, or activate fallback search.
+\textbf{Text reasoning pattern.} The Text Module uses cooperation to avoid premature answers. The Conversation Agent first checks whether the user has provided enough clinical context. If the query is sufficiently specified, Query Expansion reformulates it into medically useful terms. The KG Agent then returns structured relations such as symptom--disease links, while the RAG Agent retrieves explanatory documents. These evidence sources are passed into MedGemma CoT, which evaluates information sufficiency and decides whether to synthesize an answer, ask a follow-up question, or activate fallback search.
 
-\textbf{Segmentation-to-VQA pattern.} In the Vision Module, the Polyp Segmentation Agent produces a mask that localizes clinically relevant regions in a colonoscopy image. This mask is not only a final segmentation output; it is reused as a visual grounding signal for the Polyp VQA Agent. The VQA Agent can then answer natural-language questions using both the original image and the segmentation overlay.
+\textbf{Segmentation-to-VQA pattern.} In the Vision Module, the Polyp Segmentation Agent produces a mask that localizes clinically relevant regions in a colonoscopy image. This mask is not only a final segmentation output; it is reused as a visual grounding signal for the Polyp VQA Agent when the task requires visual grounding. The VQA Agent can then answer natural-language questions using both the original image and the segmentation overlay, and the Summarizer converts the visual outputs into a concise user-facing response.
 
 \textbf{Cross-modal follow-up pattern.} After a user uploads a medical image, the interaction can continue as a dialogue. The user may ask what a highlighted region means, whether a finding is concerning, or what symptoms should be monitored. The system keeps image-derived context in short-term workflow state and routes later text questions back to the relevant visual evidence or to the Text Module for medical explanation.
 
@@ -278,7 +288,7 @@ Overall, agent cooperation turns modularity into an evidence-passing workflow. S
 
 \subsection{Decision Agent}
 
-The Decision Agent is responsible for determining which agent should handle a request. For text-only queries, it decides whether the query should be handled by Conversation Agent, KG/RAG reasoning, or Web Search. For image queries, it routes to General Medical Image Agent, Polyp Segmentation Agent, or Polyp VQA Agent.
+The Decision Agent is responsible for determining which agent should handle a request. For text-only queries, it decides whether the query should be handled by Conversation Agent, KG/RAG reasoning, or Web Search. For image queries, it routes to General Diagnosis Agent, Polyp Segmentation Agent, or Polyp VQA Agent.
 
 The decision process considers four main signals:
 
@@ -299,7 +309,7 @@ The decision process considers four main signals:
 \textbf{General or incomplete conversation} & Conversation Agent & Collect missing details or answer non-specialized dialogue safely. \\
 \textbf{Medical text query with enough context} & KG/RAG reasoning and MedGemma CoT & Retrieve evidence, compare sources, and synthesize a cautious medical response. \\
 \textbf{Weak internal evidence} & Web Search fallback or follow-up question & Avoid forcing an answer when internal sources do not support the query. \\
-\textbf{General medical image} & General Medical Image Agent & Provide cautious visual interpretation without assuming a polyp-specific workflow. \\
+\textbf{General medical image} & General Diagnosis Agent & Provide cautious visual interpretation without assuming a polyp-specific workflow. \\
 \textbf{Colonoscopy segmentation request} & Polyp Segmentation Agent & Produce a spatial mask for direct inspection and downstream grounding. \\
 \textbf{Polyp image question} & Polyp VQA Agent & Answer an image-question pair using the specialized VQA pipeline. \\
 \hline\hline
@@ -309,7 +319,7 @@ The decision process considers four main signals:
 \label{table:decision-agent-routing}
 \end{table}
 
-Routing errors are important because they can create downstream failures. If a symptom consultation is routed directly to answer generation, the system may skip necessary follow-up questions. If a general image is routed to the specialized polyp workflow, the segmentation model may produce meaningless output. If a polyp VQA question is routed to a generic VLM, the answer may lack domain-specific reasoning. Therefore, the Decision Agent is evaluated not only as a convenience component but also as a safety-critical part of the architecture.
+Routing errors are important because they can create downstream failures. If a symptom consultation is routed directly to final synthesis, the system may skip necessary follow-up questions. If a general image is routed to the specialized polyp workflow, the segmentation model may produce meaningless output. If a polyp VQA question is routed to a generic VLM, the answer may lack domain-specific reasoning. Therefore, the Decision Agent is evaluated not only as a convenience component but also as a safety-critical part of the architecture.
 
 \begin{quote}
 \textbf{Conservative routing principle.} When the task is ambiguous, the system should prefer clarification or a safer general path over a highly specialized agent. Specialized agents are useful only when the intent and input type match their assumptions.
@@ -357,7 +367,7 @@ Human validation is placed after the AI response rather than inside every intern
 
 \subsection{Role and Processing Flow of the Text Module}
 
-The Text Module is responsible for medical reasoning over user-provided language. It handles questions about symptoms, diseases, drugs, medical concepts, and follow-up concerns. Its main goal is to produce responses that are grounded, cautious, and aware of missing clinical information.
+The Text Module is responsible for medical reasoning over user-provided language. It handles questions about symptoms, diseases, drugs, medical concepts, and follow-up concerns. Its main goal is to produce MedGemma CoT responses that are grounded, cautious, and aware of missing clinical information.
 
 \begin{figure}[H]
     \centering
@@ -366,17 +376,17 @@ The Text Module is responsible for medical reasoning over user-provided language
     \label{fig:text-module-architecture}
 \end{figure}
 
-Figure \ref{fig:text-module-architecture} provides the high-level view of the Text Module. It shows that text reasoning begins with user input classification, then branches into conversational handling, KG/RAG evidence retrieval, MedGemma CoT assessment, fallback search, and final response generation. Although the workflow diagram may visualize assessment as a separate decision node, this node should be interpreted as a logical step inside MedGemma CoT rather than as an independent agent. This figure is therefore introduced at the beginning of the chapter before the individual agents are discussed in detail.
+Figure \ref{fig:text-module-architecture} provides the high-level view of the Text Module. It shows that text reasoning begins with user input classification, then branches into conversational handling, KG/RAG evidence retrieval, MedGemma CoT assessment and synthesis, and fallback search. Although the workflow diagram may visualize assessment as a separate decision node, this node should be interpreted as a logical step inside MedGemma CoT rather than as an independent agent. This figure is therefore introduced at the beginning of the chapter before the individual agents are discussed in detail.
 
 \begin{quote}
 \textbf{Core idea.} The Text Module is not only a retrieval component. It is a control layer that decides when to ask, when to retrieve, when to synthesize evidence, and when to avoid a patient-specific conclusion.
 \end{quote}
 
-The general processing flow begins with input analysis, then moves to clarification when the query is clinically underspecified, evidence retrieval when the query is answerable from medical sources, MedGemma CoT assessment when candidate evidence is available, and final response generation only after the system has enough context to communicate safely. This flow is designed to make the Text Module cautious by default. The module does not assume that every query should immediately trigger a final answer. Instead, it separates the tasks of understanding the user intent, checking information completeness, retrieving evidence, and generating the final response.
+The general processing flow begins with input analysis, then moves to clarification when the query is clinically underspecified, evidence retrieval when the query is answerable from medical sources, and MedGemma CoT assessment and synthesis when candidate evidence is available. This flow is designed to make the Text Module cautious by default. The module does not assume that every query should immediately trigger a final answer. Instead, it separates the tasks of understanding the user intent, checking information completeness, retrieving evidence, and producing a safe final answer through MedGemma CoT.
 
 The Text Module therefore acts as the main reasoning layer for non-image medical queries. It must handle two very different types of user input. The first type is educational, such as asking what a disease is or how a medication works. The second type is consultation-oriented, such as describing symptoms and asking what might be happening. The second type requires stricter information sufficiency checks because the same symptom can have different meanings depending on duration, severity, age, medical history, and associated signs.
 
-The workflow in Figure \ref{fig:detailed-agent-workflow} also shows that text reasoning is not reduced to document retrieval alone. The Text Module combines conversational intake, KG/RAG context selection, MedGemma CoT reasoning, web fallback, and final medical response generation. This layered structure is important because the main risk in medical QA is not only whether the system can retrieve facts, but whether the reasoning component knows when the available context is insufficient for a patient-specific conclusion.
+The workflow in Figure \ref{fig:detailed-agent-workflow} also shows that text reasoning is not reduced to document retrieval alone. The Text Module combines conversational intake, KG/RAG context selection, MedGemma CoT reasoning and synthesis, and web fallback. This layered structure is important because the main risk in medical QA is not only whether the system can retrieve facts, but whether the reasoning component knows when the available context is insufficient for a patient-specific conclusion.
 
 \subsection{Text Query Types and Routing Behavior}
 
@@ -403,21 +413,23 @@ The Text Module is designed around the observation that medical text queries are
 
 Table \ref{table:text-query-routing} shows why routing is part of the reasoning problem. If every text query is treated as a retrieval query, the system may return medical documents even when the user actually needs clarification. Conversely, if every symptom query is treated as a conversational query, the system may underuse available medical evidence. The Text Module therefore uses routing to decide when to ask, when to retrieve, when to reason over graph relations, and when to synthesize a response.
 
-\subsection{Conversation Agent and Multi-hop QA}
+\subsection{Conversation Agent, Multi-turn Awareness, and KG-based Reasoning}
 
 The Conversation Agent handles cases where the user's query is incomplete or conversational. In medical consultation, missing information is common. For example, a symptom description may lack onset time, severity, location, duration, associated symptoms, medical history, or current medication use.
 
-Multi-hop QA is used to collect this missing information step by step. Instead of generating a diagnostic suggestion immediately, the agent asks focused follow-up questions. This process helps the system approximate a structured clinical intake conversation. The goal is not to replace a doctor, but to reduce the risk of giving an answer from insufficient evidence.
+In this thesis, the term multi-hop has two related but distinct meanings. At the dialogue level, the system performs \textbf{multi-turn clarification}: it collects missing information step by step before producing a patient-specific response. At the evidence level, the KG-based reasoning branch can follow structured relations such as symptom--disease, disease--treatment, disease--medication, and disease--advice. The former is evaluated as multi-turn awareness, while the latter is discussed as an architectural advantage of combining Knowledge Graph evidence with RAG.
+
+Multi-turn clarification is used when the current user input is not sufficient for a safe answer. Instead of generating a diagnostic suggestion immediately, the agent asks focused follow-up questions. This process helps the system approximate a structured clinical intake conversation. The goal is not to replace a doctor, but to reduce the risk of giving an answer from insufficient evidence.
 
 The follow-up questions are designed to be concise and clinically relevant. For symptom-based consultation, the system prioritizes red flags and high-impact missing variables. For example, in a fever-related query, duration, peak temperature, associated respiratory or gastrointestinal symptoms, medication use, and risk factors may change the response. In a pain-related query, location, severity, onset, radiation, and accompanying symptoms are important.
 
 This behavior improves usability because the system does not overwhelm the user with a full medical form. It asks only the next useful question based on the current context.
 
-The multi-hop design also improves traceability. Each follow-up question corresponds to a missing clinical variable, such as onset, duration, severity, location, associated symptoms, medication use, allergy history, or risk factors. This makes it possible to analyze whether the agent is asking useful questions or merely extending the conversation. In evaluation, this behavior is reflected by Multi-Hop Awareness Score, which rewards the system for recognizing when additional information is needed.
+The multi-turn design also improves traceability. Each follow-up question corresponds to a missing clinical variable, such as onset, duration, severity, location, associated symptoms, medication use, allergy history, or risk factors. This makes it possible to analyze whether the agent is asking useful questions or merely extending the conversation. In evaluation, this behavior is reflected by the Multi-Turn Awareness Score, which rewards the system for recognizing when additional information is needed before answering.
 
-\subsubsection{Single-turn Limitation versus Multi-hop Clarification}
+\subsubsection{Single-turn Limitation versus Multi-turn Clarification}
 
-The difference between a traditional single-turn response and the proposed multi-hop QA behavior is illustrated in Figures \ref{fig:traditional-single-turn-limitation} and \ref{fig:medical-multihop-qa-benefit}. These two examples use the same general symptom scenario, but the response strategies are different.
+The difference between a traditional single-turn response and the proposed multi-turn clarification behavior is illustrated in Figures \ref{fig:traditional-single-turn-limitation} and \ref{fig:medical-multihop-qa-benefit}. These two examples use the same general symptom scenario, but the response strategies are different.
 
 \begin{figure}[H]
     \centering
@@ -433,23 +445,23 @@ This failure mode is particularly important in medical AI because symptoms are r
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.92\textwidth]{images/benefit-of-medical-multihop-qa.jpg}
-    \caption{Multi-hop QA approach with iterative clarification and safer response refinement}
+    \caption{Multi-turn clarification with iterative context collection and safer response refinement}
     \label{fig:medical-multihop-qa-benefit}
 \end{figure}
 
-Figure \ref{fig:medical-multihop-qa-benefit} demonstrates the advantage of the multi-hop QA workflow. Instead of producing a final answer immediately, the system first identifies missing clinical information and asks a focused follow-up question. When the user provides additional context, such as a blood pressure value or the absence of severe neurological symptoms, the system updates its interpretation. The answer then becomes more specific: it can distinguish between hypertensive emergency, hypertensive urgency, and a high but not immediately life-threatening blood pressure state.
+Figure \ref{fig:medical-multihop-qa-benefit} demonstrates the advantage of the multi-turn clarification workflow. Instead of producing a final answer immediately, the system first identifies missing clinical information and asks a focused follow-up question. When the user provides additional context, such as a blood pressure value or the absence of severe neurological symptoms, the system updates its interpretation. The answer then becomes more specific: it can distinguish between hypertensive emergency, hypertensive urgency, and a high but not immediately life-threatening blood pressure state.
 
-This iterative process improves the response in three ways. First, it improves \textbf{clinical specificity} because the system can condition its answer on newly provided variables. Second, it improves \textbf{safety} because red flags are checked before giving ordinary advice. Third, it improves \textbf{explainability} because each follow-up question corresponds to a missing piece of information that affects the final decision. In this sense, multi-hop QA is not only a conversational feature; it is a safety mechanism for controlling when the system is allowed to answer.
+This iterative process improves the response in three ways. First, it improves \textbf{clinical specificity} because the system can condition its answer on newly provided variables. Second, it improves \textbf{safety} because red flags are checked before giving ordinary advice. Third, it improves \textbf{explainability} because each follow-up question corresponds to a missing piece of information that affects the final decision. In this sense, multi-turn awareness is not only a conversational feature; it is a safety mechanism for controlling when the system is allowed to answer.
 
-The comparison also clarifies the role of the Conversation Agent. Its purpose is not to ask many questions for their own sake, but to ask the next question that most reduces clinical uncertainty. A good follow-up question should be short, relevant, and oriented toward high-impact variables such as red flags, vital signs, duration, severity, medication use, and patient history. Once sufficient information is available, the system can move from clarification to evidence retrieval and response generation.
+The comparison also clarifies the role of the Conversation Agent. Its purpose is not to ask many questions for their own sake, but to ask the next question that most reduces clinical uncertainty. A good follow-up question should be short, relevant, and oriented toward high-impact variables such as red flags, vital signs, duration, severity, medication use, and patient history. Once sufficient information is available, the system can move from clarification to evidence retrieval and MedGemma CoT synthesis.
 
-\subsubsection{Illustrative Multi-hop Consultation Flow}
+\subsubsection{Illustrative Multi-turn Consultation Flow}
 
-An illustrative symptom consultation demonstrates why multi-hop behavior is needed. Suppose the user writes: ``I have stomach pain and nausea. What disease could it be?'' A single-turn chatbot may immediately list gastritis, food poisoning, reflux, or appendicitis. However, this answer is clinically weak because the initial input lacks duration, pain location, severity, fever, vomiting, stool changes, medication use, pregnancy status, and warning signs.
+An illustrative symptom consultation demonstrates why multi-turn behavior is needed. Suppose the user writes: ``I have stomach pain and nausea. What disease could it be?'' A single-turn chatbot may immediately list gastritis, food poisoning, reflux, or appendicitis. However, this answer is clinically weak because the initial input lacks duration, pain location, severity, fever, vomiting, stool changes, medication use, pregnancy status, and warning signs.
 
 In the proposed workflow, the Conversation Agent first treats the query as underspecified. Instead of giving a strong conclusion, it asks a focused follow-up question such as: ``Where is the pain located, how long has it lasted, and do you have fever, vomiting blood, black stool, severe pain, or persistent vomiting?'' This question is not arbitrary; it targets variables that can change the safety framing of the response. If the user later reports mild epigastric pain after meals without red flags, the system can retrieve information about gastritis or reflux and provide cautious advice. If the user reports severe right-lower abdominal pain with fever, the system should prioritize urgent professional care rather than ordinary health education.
 
-This example illustrates the difference between answer generation and consultation support. The goal of the Conversation Agent is not to prolong the dialogue, but to determine whether the current evidence is sufficient for the next safe action. The final response may still include possible causes, but it should clearly separate likely explanations, missing information, warning signs, and next steps.
+This example illustrates the difference between direct answering and consultation support. The goal of the Conversation Agent is not to prolong the dialogue, but to determine whether the current evidence is sufficient for the next safe action. The final response may still include possible causes, but it should clearly separate likely explanations, missing information, warning signs, and next steps.
 
 \subsection{Clinical Context Requirements before MedGemma CoT}
 
@@ -470,11 +482,11 @@ Many medical questions should not be answered directly. A safe assistant should 
     \item out-of-scope or non-medical queries.
 \end{itemize}
 
-Information sufficiency is also connected to evaluation. A model that refuses to conclude when the evidence is incomplete may appear less decisive, but it is safer in medical reasoning. Therefore, this thesis uses Multi-Hop Awareness Score to measure whether MedGemma CoT can recognize insufficient information rather than forcing an answer.
+Information sufficiency is also connected to evaluation. A model that refuses to conclude when the evidence is incomplete may appear less decisive, but it is safer in medical reasoning. Therefore, this thesis uses Multi-Turn Awareness Score to measure whether MedGemma CoT can recognize insufficient information and trigger follow-up behavior rather than forcing an answer. This metric should be interpreted as awareness of missing clinical context, not as direct accuracy of path-level KG multi-hop reasoning.
 
 In implementation, information sufficiency should be interpreted as a dynamic threshold rather than a fixed checklist. The threshold is lower for general education and higher for patient-specific recommendations, medication-related questions, and symptoms associated with potentially urgent conditions. This design allows the Text Module to answer low-risk factual questions while remaining cautious when the user appears to request personalized medical judgment.
 
-An important insight is that information sufficiency is an architectural control point inside MedGemma CoT, not only a prompt instruction. The result of this assessment changes the route of execution: the system may continue to response synthesis, ask the Conversation Agent to collect missing details, or invoke Web Search when KG/RAG context is weak.
+An important insight is that information sufficiency is an architectural control point inside MedGemma CoT, not only a prompt instruction. The result of this assessment changes the route of execution: the system may continue to answer synthesis, ask the Conversation Agent to collect missing details, or invoke Web Search when KG/RAG context is weak.
 
 This step prevents a common failure mode of retrieval-augmented systems. A retrieved passage can make a response appear grounded even when the original user question is incomplete. For example, if the user says only ``I have chest pain,'' RAG may retrieve documents about angina, reflux, anxiety, or muscle pain. These documents are medically relevant, but they do not solve the missing-context problem. The system must first identify urgent warning signs and ask about onset, severity, radiation, shortness of breath, sweating, and cardiovascular history. Therefore, evidence availability and clinical sufficiency are related but not identical.
 
@@ -493,13 +505,13 @@ The parallel design in Figure \ref{fig:parallel-kg-rag} reflects a central assum
 
 \subsubsection{Data Retrieval Layer}
 
-The data retrieval layer is responsible for collecting candidate evidence before medical reasoning begins. In the proposed Text Module, retrieval is not limited to one database. The RAG branch retrieves unstructured medical documents from the Qdrant vector database, while the KG branch retrieves structured disease and symptom relations from Neo4j. This dual-source design allows the system to use both semantic similarity and explicit medical relations.
+The data retrieval layer is responsible for collecting candidate evidence before medical reasoning begins. In the proposed Text Module, retrieval is not limited to one database. The RAG branch retrieves unstructured medical documents from the Qdrant vector database, while the KG branch retrieves structured disease and symptom relations from Neo4j \cite{qdrant_doc,neo4j_cypher_doc}. This dual-source design allows the system to use both semantic similarity and explicit medical relations.
 
 Before retrieval, Query Expansion reformulates the user question by adding related medical terms, synonyms, anatomical terms, and possible disease names. This is especially important for Vietnamese medical queries because users may describe symptoms in informal language, while the data source may use more formal medical terminology. For example, a user may say ``đau bao tử'', while relevant documents may use terms such as epigastric pain, gastritis, reflux, or stomach pain.
 
-The vector retrieval branch uses dense embedding search. In the implementation, documents are embedded with \texttt{google/embeddinggemma-300m} and stored in Qdrant using cosine similarity. Dense retrieval is useful because it can match semantically related expressions even when the exact keywords differ. The retrieval design can also be extended with hybrid search, where dense vector search is combined with keyword-based retrieval such as BM25. This is useful in medical QA because some terms, drug names, disease names, and abbreviations require exact lexical matching, while symptom descriptions often benefit from semantic matching.
+The vector retrieval branch uses dense embedding search. In the implementation, documents are embedded with \texttt{google/embeddinggemma-300m} and stored in Qdrant using cosine similarity \cite{embeddinggemma_modelcard,qdrant_doc}. Dense retrieval is useful because it can match semantically related expressions even when the exact keywords differ. The retrieval design can also be extended with hybrid search, where dense vector search is combined with keyword-based retrieval such as BM25 \cite{bm25}. This is useful in medical QA because some terms, drug names, disease names, and abbreviations require exact lexical matching, while symptom descriptions often benefit from semantic matching.
 
-After candidate documents are retrieved, a reranker reorders them according to query-document relevance. This step is important because initial vector similarity may return documents that are semantically close but clinically less useful. The reranker helps prioritize documents that better match the actual user question before MedGemma CoT receives the selected context.
+After candidate documents are retrieved, a reranker reorders them according to query-document relevance \cite{reranking_search}. This step is important because initial vector similarity may return documents that are semantically close but clinically less useful. The reranker helps prioritize documents that better match the actual user question before MedGemma CoT receives the selected context.
 
 \begin{quote}
 \textbf{Retrieval interpretation.} RAG is most useful for explanatory medical text, while Knowledge Graph retrieval is most useful for structured relationships. The system uses both because medical QA often needs a relation-level hypothesis and a patient-friendly explanation.
@@ -507,29 +519,31 @@ After candidate documents are retrieved, a reranker reorders them according to q
 
 \subsubsection{KG Agent}
 
-The KG Agent retrieves structured medical knowledge from Neo4j. Its main role is to convert natural-language medical questions into graph queries and then use the retrieved relations as structured evidence. This is different from RAG because the KG branch does not only search for similar text; it traverses explicit relations between entities such as diseases, symptoms, treatments, medications, advice, and patient-related attributes.
+The KG Agent retrieves structured medical knowledge from Neo4j \cite{neo4j_cypher_doc}. Its main role is to convert natural-language medical questions into graph queries and then use the retrieved relations as structured evidence. This is different from RAG because the KG branch does not only search for similar text; it traverses explicit relations between entities such as diseases, symptoms, treatments, medications, advice, and patient-related attributes.
 
-The Cypher Query Service is responsible for translating user questions into Cypher queries. In the implementation, this process is supported by \texttt{GraphCypherQAChain} and few-shot examples. Few-shot prompting is useful because medical graph queries often require a stable query pattern: identify the target entity, traverse relevant relations, and return disease candidates or associated attributes. A direct LLM answer may be fluent but unsupported, while a Cypher query forces the reasoning step to retrieve concrete graph evidence.
+The Cypher Query Service is responsible for translating user questions into Cypher queries. In the implementation, this process is supported by \texttt{GraphCypherQAChain} and few-shot examples \cite{langchain_graphcypherqa}. Few-shot prompting is useful because medical graph queries often require a stable query pattern: identify the target entity, traverse relevant relations, and return disease candidates or associated attributes. A direct LLM answer may be fluent but unsupported, while a Cypher query forces the reasoning step to retrieve concrete graph evidence.
 
 The KG Agent also supports patient-specific context integration. Retrieved graph results can be filtered using patient information such as age, gender, medical history, current diseases, and symptom context. This prevents the system from returning graph results that are structurally related but clinically less relevant to the patient. For example, a disease relation may exist in the graph, but it may be less appropriate if it mainly concerns a different age group or conflicts with the patient's reported history.
 
-Context filtering can use embedding similarity between the patient context and disease descriptions. The filtered results are then ranked as disease candidates, including information such as matched symptoms, total symptoms, and similarity scores. This makes the KG output more than a raw list of relations: it becomes a patient-aware candidate set that can be inspected by MedGemma CoT before response generation.
+Context filtering can use embedding similarity between the patient context and disease descriptions. The filtered results are then ranked as disease candidates, including information such as matched symptoms, total symptoms, and similarity scores. This makes the KG output more than a raw list of relations: it becomes a patient-aware candidate set that can be inspected by MedGemma CoT before final synthesis.
+
+The main advantage of KG-based reasoning is that the system can organize evidence as explicit medical relations rather than as isolated text snippets. For example, a symptom cluster can lead to candidate diseases, and each candidate can then be connected to treatment methods, medication information, prevention advice, or associated conditions. This supports multi-hop evidence construction such as symptom $\rightarrow$ disease $\rightarrow$ treatment or symptom $\rightarrow$ disease $\rightarrow$ warning signs. In the current evaluation, this capability is not measured as a separate path-level multi-hop accuracy score; it is presented as a design advantage that complements the measured One-Hop Accuracy and Multi-Turn Awareness Score.
 
 \subsubsection{RAG Agent}
 
-The RAG Agent retrieves and processes unstructured medical documents, mainly from VimedAQA through Qdrant. Its purpose is to provide explanatory medical context that can be used in patient-facing responses. While the KG Agent is strong at structured relation reasoning, the RAG Agent is better suited for definitions, disease descriptions, general advice, medication explanations, and practical health information.
+The RAG Agent retrieves and processes unstructured medical documents, mainly from VimedAQA through Qdrant \cite{vimedaqa_dataset,qdrant_doc}. Its purpose is to provide explanatory medical context that can be used in patient-facing responses. While the KG Agent is strong at structured relation reasoning, the RAG Agent is better suited for definitions, disease descriptions, general advice, medication explanations, and practical health information.
 
-The RAG branch follows three main steps. First, Query Expansion improves the input query by adding relevant medical terms and synonyms. Second, dense retrieval searches the vector database for top-$k$ semantically related passages. Third, the reranker sorts the retrieved passages by practical relevance to the user query. This reranking step helps reduce noise before the response generator synthesizes an answer.
+The RAG branch follows three main steps. First, Query Expansion improves the input query by adding relevant medical terms and synonyms. Second, dense retrieval searches the vector database for top-$k$ semantically related passages. Third, the reranker sorts the retrieved passages by practical relevance to the user query \cite{reranking_search}. This reranking step helps reduce noise before MedGemma CoT synthesizes an answer.
 
 RAG also improves transparency because the final answer can be grounded in retrieved documents rather than only in the parametric memory of the LLM. However, retrieved documents should still be assessed critically. A passage can be medically valid but irrelevant to the patient's specific situation. Therefore, the RAG output is passed as selected context into MedGemma CoT instead of being used blindly.
 
-The KG and RAG branches therefore serve different but complementary purposes. KG contributes compact relational structure and candidate hypotheses, while RAG contributes explanatory context and patient-facing language. This hybrid design is evaluated in the Text Module benchmark in Table \ref{table:text-module-benchmark}, where KG + MedLLM achieves the strongest result on both One-Hop Accuracy and Multi-Hop Awareness Score. RAG remains necessary for richer explanation, but the benchmark shows that structured KG evidence improves relation-oriented reasoning. The contribution of the Text Module is therefore not choosing KG or RAG in isolation, but coordinating them according to the evidence need of each query.
+The KG and RAG branches therefore serve different but complementary purposes. KG contributes compact relational structure and candidate hypotheses, while RAG contributes explanatory context and patient-facing language. This hybrid design is evaluated in the Text Module benchmark in Table \ref{table:text-module-benchmark}, where KG + MedLLM achieves the strongest result on both One-Hop Accuracy and Multi-Turn Awareness Score. The One-Hop Accuracy result supports the usefulness of structured KG evidence for relation-oriented questions, while Multi-Turn Awareness reflects the system's ability to recognize when the current clinical context is still insufficient. RAG remains necessary for richer explanation, but the benchmark should not be interpreted as proving complete KG path-traversal accuracy. The contribution of the Text Module is therefore not choosing KG or RAG in isolation, but coordinating them according to the evidence need and information sufficiency of each query.
 
 \subsubsection{Coordinated KG-RAG Evidence Construction}
 
 The KG and RAG branches contribute different forms of evidence. The KG branch is useful for identifying candidate relations, such as a disease being associated with a symptom or a drug being related to a disease category. The RAG branch is useful for converting those relations into explanatory language that can be understood by non-expert users. This distinction matters because a medical assistant must both reason and communicate.
 
-For example, when the user asks about a symptom cluster, the KG branch can return candidate diseases connected to the symptoms. These candidates should not be treated as diagnoses. Instead, they serve as structured hypotheses that guide retrieval and response generation. The RAG branch can then retrieve documents explaining the candidate conditions, typical symptoms, warning signs, and general management. The response generator can synthesize these sources into a cautious answer: possible explanations, why they may be relevant, what information is missing, and when to seek medical care.
+For example, when the user asks about a symptom cluster, the KG branch can return candidate diseases connected to the symptoms. These candidates should not be treated as diagnoses. Instead, they serve as structured hypotheses that guide retrieval and MedGemma CoT synthesis. The RAG branch can then retrieve documents explaining the candidate conditions, typical symptoms, warning signs, and general management. MedGemma CoT can synthesize these sources into a cautious answer: possible explanations, why they may be relevant, what information is missing, and when to seek medical care.
 
 This coordination also reduces two opposite risks. If the system relies only on KG, the answer may become too sparse and relation-like, lacking patient-friendly explanation. If the system relies only on RAG, the answer may become verbose and less structured, especially when retrieved passages contain overlapping or weakly relevant information. By combining both, the Text Module can use KG for structure and RAG for explanation.
 
@@ -543,8 +557,7 @@ This coordination also reduces two opposite risks. If the system relies only on 
 \textbf{Query Expansion} & Medical synonyms, related symptoms, disease names, and anatomical terms. & Bridges colloquial user language and formal medical terminology. \\
 \textbf{KG Agent} & Structured entity relations and candidate disease-symptom links. & Provides compact reasoning structure and candidate hypotheses. \\
 \textbf{RAG Agent} & Retrieved explanatory passages from medical documents. & Provides patient-friendly explanation and supporting context. \\
-\textbf{MedGemma CoT} & Candidate analysis, red-flag screening, and information sufficiency assessment over selected KG/RAG context. & Determines whether to answer, ask follow-up questions, or use fallback search. \\
-\textbf{Response Generator} & Structured medical response with uncertainty and safety framing. & Converts CoT-reviewed evidence into an understandable answer without presenting it as a definitive diagnosis. \\
+\textbf{MedGemma CoT} & Candidate analysis, red-flag screening, information sufficiency assessment, and final answer synthesis over selected KG/RAG context. & Determines whether to answer, ask follow-up questions, use fallback search, or produce a cautious response without presenting it as a definitive diagnosis. \\
 \hline\hline
 \end{tabular}
 \end{adjustbox}
@@ -554,18 +567,18 @@ This coordination also reduces two opposite risks. If the system relies only on 
 
 \subsection{Parallel Reasoning and Fallback Strategy}
 
-The system can retrieve and filter RAG and Knowledge Graph results in parallel. These agents do not make the final medical decision; they select context for MedGemma CoT. If the selected internal context is insufficient after CoT assessment, the system can use Web Search as a fallback or ask the user for missing information.
+The system can retrieve and filter RAG and Knowledge Graph results in parallel. These agents do not make the final medical decision; they select context for MedGemma CoT. If the selected internal context is insufficient after CoT assessment, the system can use Web Search as a fallback or ask the user for missing information. In the implementation, Web Search fallback is backed by Tavily search tooling \cite{tavily_search}.
 
 This strategy reduces dependence on any single source. RAG may fail if the relevant document is not retrieved, while the Knowledge Graph may fail if the needed relation is missing. If one internal source is weak, the other source can still provide partial support. If both internal sources are weak, Web Search becomes a controlled fallback rather than an uncontrolled first response. Parallel retrieval does not mean that all sources are merged blindly: KG/RAG agents first select and filter context based on relevance, patient context, and retrieval quality, and MedGemma CoT then compares source consistency and clinical sufficiency.
 
-\subsection{MedGemma CoT for Medical Decision Support}
+\subsection{MedGemma CoT for Medical Decision Support and Answer Synthesis}
 
 After KG and RAG agents select candidate context, the MedGemma CoT component performs evidence synthesis and decision support. Web Search is treated as a fallback source when internal context is weak or incomplete, not as the default first source. The role of MedGemma CoT is not to create a definitive diagnosis, but to organize available evidence into a clinically cautious reasoning process. This component receives candidate diseases, matched symptoms, retrieved passages, patient context, and the current conversation state.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.48\textwidth]{images/medcot.png}
-    \caption{Medical chain-of-thought and information sufficiency flow}
+    \caption{Medical chain-of-thought, information sufficiency, and answer synthesis flow}
     \label{fig:medical-cot}
 \end{figure}
 
@@ -575,7 +588,7 @@ The first step is candidate-level analysis. For each candidate condition, the mo
 
 The second step is red-flag screening. MedGemma CoT checks whether the conversation contains warning signs such as severe pain, difficulty breathing, neurological symptoms, bleeding, persistent vomiting, high fever, chest pain, or other urgent indicators depending on the symptom category. If red flags are present, the system should prioritize escalation and professional consultation instead of continuing ordinary explanation.
 
-The third step is medical decision branching. If the retrieved evidence and user context are sufficient, the system can synthesize a cautious diagnostic suggestion with likely explanations and monitoring advice. If the evidence is insufficient, the system should activate multi-hop QA and ask the next clinically useful follow-up question. This branch is central to the safety design: the system is allowed to defer the answer when the information is incomplete.
+The third step is medical decision branching. If the retrieved evidence and user context are sufficient, the system can synthesize a cautious diagnostic suggestion with likely explanations and monitoring advice. If the evidence is insufficient, the system should activate multi-turn clarification and ask the next clinically useful follow-up question. This branch is central to the safety design: the system is allowed to defer the answer when the information is incomplete.
 
 \begin{table}[H]
 \centering
@@ -587,7 +600,7 @@ The third step is medical decision branching. If the retrieved evidence and user
 \textbf{Candidate analysis} & Disease candidates, matched symptoms, retrieved passages, and patient context. & Compare possible conditions and identify which candidates are plausible, weak, or unsupported. \\
 \textbf{Red-flag screening} & Reported symptoms, severity, duration, urgent signs, and risk factors. & Escalate to urgent-care advice when dangerous patterns appear. \\
 \textbf{Information assessment} & Completeness of clinical variables and consistency of evidence sources. & Decide whether to answer, ask follow-up questions, or use fallback search. \\
-\textbf{Response synthesis} & Filtered evidence, candidate ranking, and safety constraints. & Produce a cautious explanation, possible causes, missing information, and next-step guidance. \\
+\textbf{Answer synthesis} & Filtered evidence, candidate ranking, and safety constraints. & Produce a cautious explanation, possible causes, missing information, and next-step guidance. \\
 \hline\hline
 \end{tabular}
 \end{adjustbox}
@@ -595,11 +608,9 @@ The third step is medical decision branching. If the retrieved evidence and user
 \label{table:medgemma-cot-stages}
 \end{table}
 
-This design connects retrieval with safe response generation. KG and RAG provide evidence, but MedGemma CoT decides how that evidence should be interpreted under uncertainty. A high-ranking candidate can still be rejected if key symptoms are missing, and a low-information query can trigger follow-up questioning even when retrieval returns many documents. Therefore, the MedGemma CoT stage prevents the system from confusing evidence retrieval with clinical sufficiency.
+This design connects retrieval with safe MedGemma CoT synthesis. KG and RAG provide evidence, but MedGemma CoT decides how that evidence should be interpreted under uncertainty. A high-ranking candidate can still be rejected if key symptoms are missing, and a low-information query can trigger follow-up questioning even when retrieval returns many documents. Therefore, the MedGemma CoT stage prevents the system from confusing evidence retrieval with clinical sufficiency.
 
-\subsection{Safe Medical Response Generation}
-
-The final response is generated from the available evidence and conversation context. A safe medical response should:
+When MedGemma CoT decides that enough information is available, its final output should:
 
 \begin{itemize}
     \item answer the user's question directly when possible;
@@ -610,11 +621,9 @@ The final response is generated from the available evidence and conversation con
     \item avoid presenting the AI output as a definitive diagnosis.
 \end{itemize}
 
-The generated response is then available for human-in-the-loop validation.
+The generated response is then available for human-in-the-loop validation. The final answer is therefore the result of a controlled MedGemma CoT reasoning process rather than a raw model completion. The response format should be adapted to risk level: low-risk educational questions can receive concise explanations; symptom-based questions should include known information, missing information, warning signs, and next steps; urgent or red-flag cases should prioritize escalation over detailed explanation.
 
-The final response is therefore the result of a controlled reasoning pipeline rather than a raw model completion. This design helps separate evidence collection from natural-language generation, making the system easier to analyze and improve. The response format should be adapted to risk level: low-risk educational questions can receive concise explanations; symptom-based questions should include known information, missing information, warning signs, and next steps; urgent or red-flag cases should prioritize escalation over detailed explanation.
-
-The response generator should also preserve the provenance of reasoning as much as possible. If the answer is mainly based on RAG evidence, it should emphasize retrieved medical information. If the answer depends on KG relations, it should explain that the listed conditions are related possibilities rather than confirmed diagnoses. If Web Search is used, the response should be more conservative because source quality may vary. This provenance-aware response style improves user trust and makes the system easier to audit.
+MedGemma CoT should also preserve the provenance of reasoning as much as possible. If the answer is mainly based on RAG evidence, it should emphasize retrieved medical information. If the answer depends on KG relations, it should explain that the listed conditions are related possibilities rather than confirmed diagnoses. If Web Search is used, the response should be more conservative because source quality may vary. This provenance-aware response style improves user trust and makes the system easier to audit.
 
 In addition, the response should separate \textit{medical knowledge} from \textit{patient-specific interpretation}. For example, the system can explain that gastritis commonly causes epigastric pain and nausea, but it should not conclude that the user has gastritis without sufficient context. This separation is central to safe medical assistance: the assistant may provide useful education and triage guidance, but it should avoid replacing clinical diagnosis.
 
@@ -631,25 +640,27 @@ The design intentionally separates general image analysis from specialized polyp
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.82\textwidth]{images/vision.png}
-    \caption{Vision Module workflow for medical image analysis}
+    \caption{Vision Module workflow with routing, optional grounding, summarization, and memory context}
     \label{fig:vision-module}
 \end{figure}
 
+Figure \ref{fig:vision-module} expands the image branch of the full workflow. The Agent Core receives image-text input and can use patient context from the Memory Layer before routing to the Vision Agent. The medical image decision step then separates polyp-specific tasks from other clinical images. For polyp images, the workflow may use the original image directly for Polyp VQA or first generate a segmentation mask when visual grounding is needed. For other clinical images, the request is routed to the General Diagnosis Agent. The Summarizer combines the selected visual-agent output into the final response, while memory can be retrieved or updated as supporting patient context.
+
 \subsection{Image Routing and Visual Task Classification}
 
-When an image is uploaded, the system determines whether the task is general image interpretation, polyp segmentation, or Polyp VQA. If the user explicitly requests mask generation or segmentation, the image is routed to the Polyp Segmentation Agent. If the user asks a question about an endoscopic polyp image, the image is routed to the Polyp VQA Agent. Other medical images can be handled by the General Medical Image Agent.
+When an image is uploaded, the system determines whether the task is general image interpretation, polyp segmentation, or Polyp VQA. If the user explicitly requests mask generation or segmentation, the image is routed to the Polyp Segmentation Agent. If the user asks a question about an endoscopic polyp image, the image is routed to the Polyp VQA Agent, with segmentation added when visual grounding is needed. Other medical images can be handled by the General Diagnosis Agent.
 
 This routing step is important because the same image can support different tasks. A user may ask for a segmentation mask, a description of visible findings, or a question about risk. Routing prevents the system from applying the wrong agent to the wrong task.
 
-Visual routing also depends on the accompanying text. An image without a question may require general description, while the same image with a question about polyp type should trigger Polyp VQA. If the user asks specifically for localization or mask generation, segmentation becomes the primary task. The image and the text prompt are therefore interpreted together rather than independently.
+Visual routing also depends on the accompanying text. An image without a question may require general description, while the same image with a question about polyp type should trigger Polyp VQA. If the user asks specifically for localization or mask generation, segmentation becomes the primary task. If the question requires evidence from a suspected lesion region, the system can use the segmentation mask as a grounding signal before VQA. The image and the text prompt are therefore interpreted together rather than independently.
 
-\subsection{General Medical Image Agent}
+\subsection{General Diagnosis Agent}
 
-The General Medical Image Agent handles medical images outside the specialized polyp workflow. It uses a multimodal model to describe visible findings, provide cautious interpretation, and recommend appropriate follow-up when necessary.
+The General Diagnosis Agent handles medical images outside the specialized polyp workflow. It uses a multimodal model to describe visible findings, provide cautious interpretation, and recommend appropriate follow-up when necessary.
 
 This agent is positioned as a support tool rather than a diagnostic authority. Its output should be interpreted as preliminary information and should not replace clinical review by trained professionals.
 
-Because the General Medical Image Agent covers a broad space of image modalities, it is not the main formal evaluation target in this thesis. Its role is to provide system coverage and demonstrate extensibility of the vision pipeline. The specialized polyp workflow receives more detailed quantitative evaluation.
+Because the General Diagnosis Agent covers a broad space of image modalities, it is not the main formal evaluation target in this thesis. Its role is to provide system coverage and demonstrate extensibility of the vision pipeline. The specialized polyp workflow receives more detailed quantitative evaluation.
 
 The agent should avoid unsupported claims about diagnosis, severity, or treatment. Its most appropriate output style is a cautious description of visible content, possible medical relevance, and recommendation for professional interpretation when the image is clinically significant. This safety framing is necessary because different medical image modalities require different expert knowledge and acquisition conditions.
 
@@ -906,13 +917,13 @@ Visual grounding can improve answer quality when the mask correctly highlights c
 
 The Memory Layer provides persistent patient context for the multi-agent system. Its purpose is not to perform diagnosis, but to preserve clinically useful facts that may remain relevant across sessions, such as reported symptoms, allergies, medication use, chronic diseases, treatment reactions, warning signs, lifestyle factors, and communication preferences. This design addresses a limitation of ordinary chat history: short-term conversation state is useful inside one session, but it does not provide reliable continuity when the same patient returns with a related question later.
 
-The proposed system uses Mem0 as the external memory management layer. Mem0 is designed around the idea of extracting salient facts from interactions, storing them with embeddings and metadata, and later retrieving relevant memories for a new query \cite{mem0_paper,mem0_docs_overview}. In this thesis, Mem0 is treated as a memory substrate rather than as a medical reasoning model. It does not replace LangGraph, RAG, Knowledge Graph reasoning, image analysis, or patient database storage. Instead, it provides an additional patient-context channel that can improve routing, personalization, and continuity.
+The proposed system uses Mem0 as the external memory management layer. Mem0 is designed around the idea of extracting salient facts from interactions, storing them with embeddings and metadata, and later retrieving relevant memories for a new query \cite{mem0_paper,mem0_docs_overview}. In this thesis, Mem0 is treated as a memory substrate rather than as a medical reasoning model. That distinction matters: remembering that a patient reported an allergy is useful, but it is not the same as verifying the allergy clinically. Mem0 does not replace LangGraph, RAG, Knowledge Graph reasoning, image analysis, or patient database storage. Instead, it provides an additional patient-context channel that can improve routing, personalization, and continuity.
 
 A key design principle is separation of responsibility. LangGraph manages workflow state and agent coordination; RAG and the Knowledge Graph provide external medical knowledge; the Memory Layer stores reusable patient-specific facts; and task-specific agents generate outputs under safety constraints. This separation prevents long-term memory from becoming an uncontrolled medical knowledge base or a hidden diagnostic record. In particular, the system stores memory as reported or source-attributed facts rather than as confirmed clinical truth.
 
 \subsection{Integration Architecture}
 
-The implemented architecture wraps Mem0 inside a patient-scoped service rather than calling the library directly from every agent. The service is implemented in \path{agents/patient_memory_service/memory_service.py}. It lazily constructs a Mem0 \texttt{Memory} instance, configures Qdrant as the vector store, attaches a LangChain LLM for fact extraction, attaches a LangChain embedding model, and passes custom medical memory instructions to Mem0. The service also standardizes metadata for patient scope, session scope, condition type, source, status, and timestamps.
+The implemented architecture wraps Mem0 inside a patient-scoped service rather than calling the library directly from every agent. The service is implemented in \path{agents/patient_memory_service/memory_service.py}. It lazily constructs a Mem0 \texttt{Memory} instance, configures Qdrant as the vector store, attaches a LangChain LLM for fact extraction, attaches a LangChain embedding model, and passes custom medical memory instructions to Mem0 \cite{mem0_paper,mem0_docs_overview,qdrant_doc,langchain_doc}. The service also standardizes metadata for patient scope, session scope, condition type, source, status, and timestamps.
 
 The memory service exposes four main operations:
 
@@ -923,9 +934,9 @@ The memory service exposes four main operations:
     \item \textbf{Governance operations:} list and delete endpoints support memory review, correction workflows, and patient-scoped deletion.
 \end{itemize}
 
-The service is also exposed through the FastAPI router \texttt{/api/patient-memory}. This makes the Memory Layer usable both inside the LangGraph workflow and as a separate service for debugging, inspection, or future administrative tools. In the current application, \texttt{app.py} includes this router, while the graph itself calls the Python service directly.
+The service is also exposed through the FastAPI router \texttt{/api/patient-memory} \cite{fastapi_doc}. This makes the Memory Layer usable both inside the LangGraph workflow and as a separate service for debugging, inspection, or future administrative tools. In the current application, \texttt{app.py} includes this router, while the graph itself calls the Python service directly.
 
-At the orchestration level, the integration follows a retrieval-before-reasoning and write-after-guardrails pattern. First, the LangGraph node \texttt{retrieve\_patient\_memory} searches for relevant patient memory before the Decision Agent selects an agent. The formatted memory context is then inserted into the routing prompt and into downstream agent prompts as supporting context. After answer generation, human-validation handling, and output guardrails, the \texttt{write\_patient\_memory} node considers whether the current interaction contains durable facts worth storing. The graph ordering is therefore:
+At the orchestration level, the integration follows a retrieval-before-reasoning and write-after-guardrails pattern. First, the LangGraph node \texttt{retrieve\_patient\_memory} searches for relevant patient memory before the Decision Agent selects an agent. The formatted memory context is then inserted into the routing prompt and into downstream agent prompts as supporting context. After task-agent output, human-validation handling, and output guardrails, the \texttt{write\_patient\_memory} node considers whether the current interaction contains durable facts worth storing. The graph ordering is therefore:
 
 \begin{center}
 \texttt{analyze\_input} $\rightarrow$ \texttt{retrieve\_patient\_memory} $\rightarrow$ \texttt{route\_to\_agent} $\rightarrow$ \texttt{task agent} $\rightarrow$ \texttt{check\_validation} $\rightarrow$ \texttt{apply\_guardrails} $\rightarrow$ \texttt{write\_patient\_memory}.
@@ -951,7 +962,7 @@ where $x_i$ is the natural-language memory text, $e_i = \mathrm{Embed}(x_i)$ is 
 
 subject to metadata filters such as \texttt{user\_id=p}, \texttt{agent\_id}, \texttt{run\_id}, \texttt{condition\_type}, and \texttt{status}. This corresponds to the implemented call \texttt{memory.search(query, filters, top\_k, threshold)}.
 
-\textbf{Memory construction.} The system supports two write modes. In explicit condition writing, the application constructs a memory string from a validated structured payload and stores it without LLM inference. In conversation writing, the system submits user and assistant turns to Mem0 and lets the configured LLM extract concise durable facts according to the medical memory policy. In both cases, Mem0 embeds the resulting memory and stores it in Qdrant with metadata and history tracking.
+\textbf{Memory construction.} The system supports two write modes. In explicit condition writing, the application constructs a memory string from a validated structured payload and stores it without LLM inference. In conversation writing, the system submits user and assistant turns to Mem0 and lets the configured LLM extract concise durable facts according to the medical memory policy. In both cases, Mem0 embeds the resulting memory and stores it in Qdrant with metadata and history tracking \cite{mem0_paper,qdrant_doc}.
 
 \begin{lstlisting}[caption={Patient-scoped memory retrieval before agent routing},label={alg:memory-retrieval}]
 Input: patient_id p, query q, memory_enabled flag, top_k K, threshold tau
@@ -1126,7 +1137,7 @@ Total & 44,228 \\
 \label{table:vimedaqa-record-distribution}
 \end{table}
 
-For retrieval-based reasoning, each record is converted into a retrievable passage. During inference, the user query is embedded and compared with stored passages, and the most relevant contexts are supplied to the answer generator. This setup allows the system to reuse Vietnamese medical information while keeping response generation separate from data indexing.
+For retrieval-based reasoning, each record is converted into a retrievable passage. During inference, the user query is embedded and compared with stored passages, and the most relevant contexts are supplied to MedGemma CoT. This setup allows the system to reuse Vietnamese medical information while keeping evidence indexing separate from final answer synthesis.
 
 The quality of this component depends on preprocessing and retrieval design. Noisy passages, duplicated records, or overly broad chunks can reduce retrieval precision. Therefore, the dataset is treated as a knowledge source that requires cleaning, normalization, consistent chunking, and metadata-aware indexing.
 
@@ -1145,7 +1156,7 @@ VietMedKG complements RAG by supporting relation-oriented reasoning. For example
 
 \subsection{BKAI-IGH NeoPolyp-Small Dataset}
 
-BKAI-IGH NeoPolyp-Small is used for the polyp segmentation experiments. The dataset contains colonoscopy images with pixel-level annotations for neoplastic and non-neoplastic polyp regions. In this thesis, the segmentation task is formulated as a three-class problem: background, neoplastic polyp region, and non-neoplastic polyp region. This makes the dataset suitable for evaluating both lesion localization and class-aware mask prediction.
+BKAI-IGH NeoPolyp-Small is used for the polyp segmentation experiments \cite{bkai_neopolyp_dataset}. The dataset contains colonoscopy images with pixel-level annotations for neoplastic and non-neoplastic polyp regions. In this thesis, the segmentation task is formulated as a three-class problem: background, neoplastic polyp region, and non-neoplastic polyp region. This makes the dataset suitable for evaluating both lesion localization and class-aware mask prediction.
 
 \begin{figure}[H]
     \centering
@@ -1158,7 +1169,7 @@ The annotations in Figure \ref{fig:bkai-igh-neopolyp-dataset} serve as ground tr
 
 \subsection{Kvasir-VQA-X1 Dataset}
 
-Kvasir-VQA-X1 is used as the primary dataset for LoRA fine-tuning and evaluation of the Polyp VQA VLM. It is a gastrointestinal endoscopy visual question answering dataset organized as image-question-answer triples \cite{kvasir_vqa_x1}. The public dataset extends Kvasir-VQA with 159,549 new question-answer pairs designed for medical reasoning and robustness evaluation. In the local training split used by this thesis, the full VQA setting contains 6,212 original endoscopic images and 143,594 image-question-answer samples.
+Kvasir-VQA-X1 is used as the primary dataset for LoRA fine-tuning and evaluation of the Polyp VQA VLM. It is a gastrointestinal endoscopy visual question answering dataset organized as image-question-answer triples \cite{kvasir_vqa_x1}. Compared with classification-only endoscopy datasets, this format asks the model to connect a visual region, a natural-language question, and a clinically meaningful answer. The public dataset extends Kvasir-VQA with 159,549 new question-answer pairs designed for medical reasoning and robustness evaluation. In the local training split used by this thesis, the full VQA setting contains 6,212 original endoscopic images and 143,594 image-question-answer samples.
 
 \begin{figure}[H]
     \centering
@@ -1243,7 +1254,7 @@ The number of epochs is also different between the two settings. Original-image 
 
 The original-image setting trains each model to answer from the endoscopic frame and question only. The visual-grounded setting extends the input with segmentation-derived evidence, such as a mask or overlay. Fair comparison requires controlling the evaluation split and LoRA strategy so that two effects can be separated: the difference between base-model backbones and the effect of explicit segmentation guidance.
 
-The output format is kept consistent across training and evaluation. Short factual answers are easier to evaluate with lexical metrics, while longer explanatory answers may better reflect clinical reasoning but are harder to score with BLEU or ROUGE. For this reason, LLM Judge is included as a complementary evaluation method.
+The output format is kept consistent across training and evaluation. Short factual answers are easier to evaluate with lexical metrics, while longer explanatory answers may better reflect clinical reasoning but are harder to score with BLEU or ROUGE \cite{bleu,rouge}. BLEU rewards $n$-gram precision, and ROUGE-L captures longest-common-subsequence overlap; both are useful, but neither can fully decide whether a medical answer is clinically appropriate. For this reason, LLM Judge is included as a complementary evaluation method \cite{llm_as_judge}.
 
 \subsection{Evaluation Design}
 
@@ -1260,11 +1271,11 @@ The evaluation is organized by module so that each part of the system is measure
 \toprule
 \textbf{Component} & \textbf{Evaluation Data} & \textbf{Compared Settings} & \textbf{Metrics} \\
 \midrule
-\textbf{Text Module} & One-hop and multi-hop medical reasoning benchmarks & KG + MedLLM; RAG + MedLLM; MedLLM & One-Hop Accuracy; Multi-Hop Awareness Score \\
+\textbf{Text Module} & One-hop relation and multi-turn awareness benchmarks & KG + MedLLM; RAG + MedLLM; MedLLM & One-Hop Accuracy; Multi-Turn Awareness Score \\
 \midrule
-\textbf{Polyp Segmentation} & BKAI-IGH NeoPolyp-Small & Segmentation models with and without post-processing & Dice Score \\
+\textbf{Polyp Segmentation} & BKAI-IGH NeoPolyp-Small & Segmentation models with and without post-processing & Dice Score \cite{dice} \\
 \midrule
-\textbf{Polyp VQA} & Kvasir-VQA-X1 and its mask-matched subset & Base VLMs; LoRA fine-tuning; visual-grounded LoRA & BLEU-4; ROUGE-L; LLM-as-a-judge overall score \\
+\textbf{Polyp VQA} & Kvasir-VQA-X1 and its mask-matched subset & Base VLMs; LoRA fine-tuning; visual-grounded LoRA & BLEU-4; ROUGE-L; LLM-as-a-judge overall score \cite{bleu,rouge,llm_as_judge} \\
 \midrule
 \textbf{Memory Layer} & 30 Vietnamese multi-session scenarios & M0 no memory; M1 seeded memory; M2 extracted memory & Extraction P/R; routing accuracy; repeated-question avoidance; answer quality \\
 \bottomrule
@@ -1283,13 +1294,13 @@ Numerical metrics are interpreted together with qualitative behavior because med
 
 \subsection{Text Module Results and Analysis}
 
-The Text Module is evaluated using one-hop and multi-hop medical reasoning benchmarks. Table \ref{table:text-module-benchmark} summarizes the comparison.
+The Text Module is evaluated using one-hop relation questions and multi-turn awareness cases. Table \ref{table:text-module-benchmark} summarizes the comparison.
 
 \begin{table}[H]
 \centering
 \begin{tabular}{l c c}
 \hline\hline
-Model Variant & One-Hop Accuracy & Multi-Hop Awareness Score \\
+Model Variant & One-Hop Accuracy & Multi-Turn Awareness Score \\
 \hline
 \textbf{KG + MedLLM} & \textbf{86.95\%} & \textbf{70.83\%} \\
 RAG + MedLLM & 67.97\% & 40.38\% \\
@@ -1300,15 +1311,17 @@ MedLLM & 60.87\% & 50.72\% \\
 \label{table:text-module-benchmark}
 \end{table}
 
-The KG + MedLLM setting achieves the best performance in both One-Hop Accuracy and Multi-Hop Awareness Score. This suggests that structured medical relations help the model reason more accurately when the task depends on disease-symptom links or explicit medical relationships.
+The KG + MedLLM setting achieves the best performance in both One-Hop Accuracy and Multi-Turn Awareness Score. The first result suggests that structured medical relations help the model answer relation-oriented questions more accurately when the task depends on disease-symptom links or explicit medical relationships. The second result suggests that the system is better at recognizing when the current clinical context is still insufficient for a safe patient-specific answer.
 
-RAG + MedLLM performs better than the base model on one-hop reasoning but is weaker on Multi-Hop Awareness. This indicates that retrieved text is useful for explanation, but it may not always help the model recognize when information is incomplete. The base MedLLM setting lacks external grounding and therefore performs worse on structured reasoning.
+RAG + MedLLM performs better than the base model on one-hop reasoning but is weaker on Multi-Turn Awareness. This indicates that retrieved text is useful for explanation, but it may not always help the model recognize when information is incomplete. The base MedLLM setting lacks external grounding and therefore performs worse on structured relation reasoning.
 
-The difference between One-Hop Accuracy and Multi-Hop Awareness is important. One-Hop Accuracy measures whether the system can answer when the required relation is available. Multi-Hop Awareness measures whether the system understands that a direct answer may be unsafe when key information is missing. A medical assistant should perform well on both dimensions. High answer accuracy alone is not sufficient if the model answers prematurely in incomplete clinical scenarios.
+The difference between One-Hop Accuracy and Multi-Turn Awareness is important. One-Hop Accuracy measures whether the system can answer when the required relation is available, such as mapping a symptom set to a likely disease candidate. Multi-Turn Awareness measures whether the system understands that a direct answer may be unsafe when key clinical information is missing and a follow-up turn is needed. A medical assistant should perform well on both dimensions. High answer accuracy alone is not sufficient if the model answers prematurely in incomplete clinical scenarios.
 
 The stronger performance of KG + MedLLM suggests that explicit relations help the model identify clinically relevant links more reliably than text retrieval alone. However, the result should not be interpreted as showing that KG is always superior to RAG. KG is stronger for structured relation reasoning, while RAG remains useful for explanatory responses and broader medical education. The practical conclusion is that the two sources should be coordinated rather than treated as mutually exclusive.
 
-The lower Multi-Hop Awareness Score of RAG + MedLLM suggests that adding retrieved documents may encourage answer generation even when the user query lacks enough clinical detail. This is a common risk in retrieval-augmented systems: retrieved evidence can make the model appear grounded while the original question remains underspecified. The MedGemma CoT information-sufficiency step is therefore necessary after KG/RAG context selection and before final response synthesis.
+The lower Multi-Turn Awareness Score of RAG + MedLLM suggests that adding retrieved documents may encourage direct answering even when the user query lacks enough clinical detail. This is a common risk in retrieval-augmented systems: retrieved evidence can make the model appear grounded while the original question remains underspecified. The MedGemma CoT information-sufficiency step is therefore necessary after KG/RAG context selection and before final answer synthesis.
+
+The Multi-Turn Awareness Score should not be read as direct evidence that the system has solved full path-level KG multi-hop reasoning. The benchmark mainly measures whether the system recognizes insufficient context and avoids a premature answer. The advantage of KG-based multi-hop reasoning is therefore discussed as an architectural capability: the graph can support structured chains such as symptom $\rightarrow$ disease $\rightarrow$ treatment, while the evaluated multi-turn behavior measures whether the system knows when more user context is required before using those relations in a patient-facing response.
 
 The base MedLLM result in Table \ref{table:text-module-benchmark} shows that a language model alone can answer some medical questions but performs worse when structured external knowledge is required. Therefore, the benchmark motivates placing the LLM inside a retrieval and graph-augmented pipeline rather than using it as the only reasoning source.
 
@@ -1347,7 +1360,7 @@ The method should therefore be interpreted as a consistency refinement module, n
 
 \subsection{Polyp VQA Fine-tuning Results and Analysis on Kvasir-VQA-X1}
 
-The Polyp VQA VLM is evaluated using BLEU-4, ROUGE-L, and an LLM-as-a-judge protocol. BLEU-4 and ROUGE-L measure lexical overlap with the reference answer, while the judge-based score is used to assess semantic and clinical answer quality. The judge model is \texttt{google/medgemma-27b-it}. For each prediction, the judge receives the question, ground-truth answer, and model prediction, and returns four scores from 1 to 5: factual accuracy, completeness, clinical relevance, and no hallucination. The overall score is computed as:
+The Polyp VQA VLM is evaluated using BLEU-4, ROUGE-L, and an LLM-as-a-judge protocol \cite{bleu,rouge,llm_as_judge}. BLEU-4 and ROUGE-L measure lexical overlap with the reference answer, while the judge-based score is used to assess semantic and clinical answer quality. The judge model is \texttt{google/medgemma-27b-it}. For each prediction, the judge receives the question, ground-truth answer, and model prediction, and returns four scores from 1 to 5: factual accuracy, completeness, clinical relevance, and no hallucination. The overall score is computed as:
 
 \[
 \begin{aligned}
@@ -1380,11 +1393,13 @@ MedGemma-4B-it + LoRA + visual grounding & 305 & 0.4139 & 0.6966 & 4.5751 \\
 \label{table:polyp-vqa-lora-evaluation}
 \end{table}
 
-The results show that LoRA fine-tuning is the main driver of performance improvement. MedGemma-4B-it improves from a BLEU-4 score of 0.0055 and overall score of 2.7521 to 0.3657 and 4.6351, respectively. Qwen3.5-4B also benefits strongly from LoRA, increasing from 0.0261 BLEU-4 and 3.4720 overall score to 0.1935 and 4.5341. These improvements indicate that the base VLMs do not directly match the answer style and clinical content distribution of Kvasir-VQA-X1, while lightweight task adaptation substantially improves both lexical matching and semantic answer quality.
+The clearest pattern in Table \ref{table:polyp-vqa-lora-evaluation} is that LoRA fine-tuning is the main driver of performance improvement. MedGemma-4B-it improves from a BLEU-4 score of 0.0055 and overall score of 2.7521 to 0.3657 and 4.6351, respectively. Qwen3.5-4B also benefits strongly from LoRA, increasing from 0.0261 BLEU-4 and 3.4720 overall score to 0.1935 and 4.5341. In practical terms, the base VLMs can process the image-question input, but they are not yet aligned with the answer style and clinical content distribution of Kvasir-VQA-X1. Lightweight task adaptation substantially improves both lexical matching and semantic answer quality.
 
 Between the two backbones, MedGemma-4B-it achieves stronger fine-tuned performance than Qwen3.5-4B. This is consistent with the expectation that a medically oriented VLM backbone is better aligned with endoscopic visual concepts and clinical answer generation. Qwen3.5-4B remains a strong baseline after fine-tuning, but its lower BLEU-4 and ROUGE-L suggest that it may be less aligned with the dataset's medical visual-language distribution.
 
-The visual grounding comparison must be interpreted on the mask-matched subset only. As shown in Table \ref{table:kvasir-vqa-mask-filtering}, only 1,336 of the 6,212 training images have usable segmentation masks, reducing the training samples from 143,594 to 42,382 for the grounded setting. Therefore, the fair comparison is not between the 1000-sample MedGemma LoRA result and the visual-grounded result. Instead, the correct baseline is the MedGemma LoRA-only model evaluated again on the same 305 evaluation samples that have matched visual grounding inputs. Under this controlled comparison, visual grounding improves the overall score from 4.4269 to 4.5751. This suggests that segmentation masks provide useful spatial evidence for VQA when the mask is available and aligned with the question.
+The visual grounding comparison must be interpreted on the mask-matched subset only. As shown in Table \ref{table:kvasir-vqa-mask-filtering}, only 1,336 of the 6,212 training images have usable segmentation masks, reducing the training samples from 143,594 to 42,382 for the grounded setting. Therefore, the fair comparison is not between the 1000-sample MedGemma LoRA result and the visual-grounded result.
+
+Instead, the correct baseline is the MedGemma LoRA-only model evaluated again on the same 305 evaluation samples that have matched visual grounding inputs. Under this controlled comparison, visual grounding improves the overall score from 4.4269 to 4.5751. The gain is modest, but it is meaningful because the grounded model is being tested against a strong LoRA-only baseline on the same subset. The result supports the idea that segmentation masks can provide useful spatial evidence for VQA when the mask is available and aligned with the question.
 
 The original-image setting evaluates whether the VLM can identify relevant visual evidence without additional guidance. The visual-grounded setting evaluates whether a segmentation mask improves answer quality by focusing attention on the polyp region. Since only a subset of samples contains matched segmentation masks, the visual grounding analysis is conducted on 305 mask-matched samples.
 
@@ -1407,7 +1422,7 @@ Overall Score & 4.4269 & 4.5751 & +0.1482 \\
 \label{table:polyp-vqa-llm-judge-grounding}
 \end{table}
 
-The criterion-level judge results in Table \ref{table:polyp-vqa-llm-judge-grounding} indicate that visual grounding improves all four judge criteria. The largest gain appears in factual accuracy (+0.2033), followed by completeness (+0.1409). This pattern is important: the mask does not merely make the generated answer more fluent, but appears to help the model select more correct visual evidence and include more of the expected clinical content. The smaller gain in clinical relevance (+0.0262) is also reasonable because the LoRA-only model already has a very high clinical relevance score of 4.8984, leaving little room for improvement.
+The criterion-level judge results in Table \ref{table:polyp-vqa-llm-judge-grounding} show improvement across all four judge criteria. The largest gain appears in factual accuracy (+0.2033), followed by completeness (+0.1409). This pattern is important because it suggests that the mask is not merely changing the wording of the answer. It appears to help the model select more correct visual evidence and include more of the expected clinical content. The smaller gain in clinical relevance (+0.0262) is also reasonable because the LoRA-only model already has a very high clinical relevance score of 4.8984, leaving little room for improvement.
 
 The hallucination score also improves from 4.7607 to 4.8393. This suggests that explicit spatial grounding may reduce the tendency to add unsupported visual claims. In medical VQA, this is valuable because a confident but visually unsupported answer can be unsafe even when it uses correct clinical terminology.
 
@@ -1436,13 +1451,13 @@ M2: extracted memory & 30 & 0.58 / 0.80 & 96.67\% & 83.33\% & 4.27 \\
 
 Table \ref{table:memory-layer-evaluation} shows that long-term memory improves the system mainly through contextual continuity rather than through large changes in routing. Without memory, M0 achieves a routing accuracy of 86.67\%, but it does not have access to patient-specific facts from previous sessions. When memory is available, both M1 and M2 reach 96.67\% routing accuracy, corresponding to a 10 percentage-point improvement over M0. This indicates that the Decision Agent already performs well for many queries without memory, while remembered patient context helps in cases where the current request is underspecified or depends on prior information.
 
-The strongest improvement appears in answer quality. The average answer quality increases from 3.27 in M0 to 4.47 in M1 and 4.27 in M2. This suggests that retrieved memory helps the system produce more patient-specific and clinically coherent responses. In the no-memory setting, the assistant often asks generic follow-up questions because it lacks access to known allergies, chronic conditions, medication use, or prior symptoms. With memory, the assistant can reuse relevant context and ask more targeted questions. This is also reflected in repeated-question avoidance: M1 reaches 100.00\%, while M2 reaches 83.33\%. The result supports the thesis argument that memory is useful as a continuity mechanism, especially in consultation-style interactions where the same patient context remains relevant across sessions.
+The strongest improvement appears in answer quality. The average answer quality increases from 3.27 in M0 to 4.47 in M1 and 4.27 in M2. The reason is easy to see in consultation-style dialogue: without memory, the assistant often has to ask generic background questions again; with memory, it can reuse known allergies, chronic conditions, medication use, or prior symptoms and move to a more targeted next question. This is also reflected in repeated-question avoidance: M1 reaches 100.00\%, while M2 reaches 83.33\%. The result supports the thesis argument that memory is useful as a continuity mechanism, especially when the same patient context remains relevant across sessions.
 
-The difference between M1 and M2 is important for interpreting the practical maturity of the module. M1 uses seeded reference memories, so its extraction precision and recall are both 1.00. This provides a controlled setting in which the response generator receives the expected patient context. M2, which relies on automatic extraction from conversation, obtains 0.58 precision and 0.80 recall. This means that the automatic memory pipeline captures most expected durable facts, but it also stores or retrieves additional facts that are not part of the reference memory set. The lower answer quality of M2 compared with M1 shows that imperfect memory extraction can affect downstream response generation, even when routing accuracy remains unchanged.
+The difference between M1 and M2 is important for interpreting the practical maturity of the module. M1 uses seeded reference memories, so its extraction precision and recall are both 1.00. This provides a controlled setting in which MedGemma CoT and the routed task agent receive the expected patient context. M2, which relies on automatic extraction from conversation, obtains 0.58 precision and 0.80 recall. This means that the automatic memory pipeline captures most expected durable facts, but it also stores or retrieves additional facts that are not part of the reference memory set. The lower answer quality of M2 compared with M1 shows that imperfect memory extraction can affect downstream answer synthesis, even when routing accuracy remains unchanged.
 
-Latency is the main cost of adding memory. Retrieval itself contributes about 1.26-1.51 seconds on average, while routing latency increases from 3.12 seconds to approximately 4.65 seconds because the Decision Agent receives a longer memory-augmented context. The remaining latency increase comes from the full system response generation under richer context. Thus, the memory layer improves response quality and continuity, but it also introduces a clear efficiency trade-off.
+Latency is the main cost of adding memory. Retrieval itself contributes about 1.26-1.51 seconds on average, while routing latency increases from 3.12 seconds to approximately 4.65 seconds because the Decision Agent receives a longer memory-augmented context. The remaining latency increase comes from full-system answer synthesis under richer context. Thus, the memory layer improves response quality and continuity, but it also introduces a clear efficiency trade-off.
 
-Across difficulty levels, M1 and M2 achieve perfect routing accuracy on medium cases, while hard cases remain at 83.33\% for all three settings. This pattern suggests that memory helps resolve ordinary contextual incompleteness, but it does not fully solve difficult routing cases involving adversarial prompts, ambiguous references, or safety-sensitive judgment. Therefore, memory should be interpreted as supporting evidence for routing and response generation, not as a substitute for stronger safety policies, contradiction handling, and medical uncertainty assessment.
+Across difficulty levels, M1 and M2 achieve perfect routing accuracy on medium cases, while hard cases remain at 83.33\% for all three settings. This pattern suggests that memory helps resolve ordinary contextual incompleteness, but it does not fully solve difficult routing cases involving adversarial prompts, ambiguous references, or safety-sensitive judgment. Therefore, memory should be interpreted as supporting evidence for routing and answer synthesis, not as a substitute for stronger safety policies, contradiction handling, and medical uncertainty assessment.
 
 Overall, the memory evaluation supports the use of patient-scoped long-term memory in the proposed multi-agent architecture. Memory improves personalization, reduces repeated questioning, and increases judged answer quality. At the same time, the gap between M1 and M2 shows that automatic memory extraction still requires refinement, especially in precision, relevance filtering, recency handling, and deletion or correction mechanisms. These findings are consistent with the design principle used throughout the thesis: memory should provide contextual support, but it should not be treated as verified clinical truth or allowed to override current evidence.
 
@@ -1451,49 +1466,51 @@ Overall, the memory evaluation supports the use of patient-scoped long-term memo
 
 \subsection{Strengths of the Proposed System}
 
-The main strength of the system is its modular AI architecture. Instead of relying on a single model, the system combines specialized agents for text reasoning, graph reasoning, retrieval, visual analysis, VQA, memory, and validation. This design improves extensibility and makes the reasoning process easier to analyze.
+The main strength of the system is its modular AI architecture. Instead of relying on a single model, the system combines specialized components for routing, text reasoning, graph reasoning, retrieval, visual analysis, VQA, memory, and validation. This design improves extensibility and makes the reasoning process easier to inspect because each intermediate decision can be associated with a specific module.
 
-The architecture also supports complementary reasoning sources. RAG provides explanatory text, KG provides structured relations, Web Search provides fallback coverage, and memory provides patient-specific continuity. In the Vision Module, segmentation provides localized evidence while the VQA agent converts visual and textual input into an answer. This combination allows the system to handle a wider range of medical-assistant tasks than a single text-only chatbot.
+The architecture also supports complementary reasoning sources. KG provides structured medical relations and can organize evidence paths such as symptom $\rightarrow$ disease $\rightarrow$ treatment, while RAG provides explanatory text for patient-facing answers. Web Search provides fallback coverage when internal evidence is weak, and memory provides patient-specific continuity. In the Vision Module, segmentation provides localized evidence, post-processing improves mask consistency, and the VQA agent converts original-image and mask-guided visual input into an answer. This combination allows the system to handle a wider range of medical-assistant tasks than a single text-only chatbot.
 
-Another strength is that the system makes several uncertainty points explicit. MedGemma CoT-based sufficiency checks identify incomplete symptom descriptions after KG/RAG agents have selected relevant context. Routing determines whether a specialized agent is appropriate. Visual grounding is evaluated as a separate input setting rather than assumed to be beneficial. Memory is treated as patient-reported context rather than verified diagnosis. These design choices improve transparency and make the system easier to evaluate.
+Another strength is that the system makes several uncertainty points explicit. MedGemma CoT-based sufficiency checks identify incomplete symptom descriptions after KG/RAG agents have selected relevant context, and the system can then decide whether to synthesize an answer, ask a follow-up question, or use fallback search. This behavior is evaluated through Multi-Turn Awareness Score rather than treated as direct proof of full KG path reasoning. Routing determines whether a specialized agent is appropriate. Visual grounding is evaluated on a mask-matched subset rather than assumed to be universally beneficial. Memory is evaluated through no-memory, seeded-memory, and extracted-memory settings, which separates the value of continuity from the current limitations of automatic memory extraction. These design choices improve transparency and make the system easier to evaluate.
 
 \subsection{Text Module Limitations}
 
-The Text Module depends on the coverage and quality of its data sources. RAG may retrieve irrelevant documents, and the Knowledge Graph may not contain all relevant medical relations. Multi-hop QA also depends on correctly identifying missing information.
+The Text Module depends on the coverage and quality of its data sources. RAG may retrieve irrelevant documents, and the Knowledge Graph may not contain all relevant medical relations. Multi-turn clarification also depends on correctly identifying missing information. The current text benchmark evaluates one-hop relation answering and multi-turn awareness, but it does not yet evaluate complete path-level KG reasoning across chains such as symptom $\rightarrow$ disease $\rightarrow$ treatment $\rightarrow$ warning sign.
 
 Vietnamese medical language adds additional challenges. Users may describe symptoms in informal language, use regional terms, or mix Vietnamese with English medical terminology. If query expansion does not capture these variations, retrieval quality may decrease. If expansion is too broad, the system may retrieve clinically unrelated contexts. This trade-off affects both answer accuracy and safety.
 
-The Text Module also cannot guarantee clinical correctness. Even when KG and RAG provide useful evidence, the final synthesis is still generated by an LLM and may omit caveats or overstate uncertainty. Human validation and expert review remain necessary for high-risk cases.
+The Text Module also cannot guarantee clinical correctness. Even when KG and RAG provide useful evidence, MedGemma CoT still performs the final synthesis with an LLM and may omit caveats, understate uncertainty, or over-generalize from incomplete context. Human validation and expert review remain necessary for high-risk cases.
 
 \subsection{Vision Module Limitations}
 
-The Vision Module is limited by the quality of segmentation and VQA fine-tuning data. General medical image interpretation is broad and difficult to validate across all modalities. Polyp VQA is more focused but depends on the relevance of the training dataset and the quality of segmentation masks.
+The Vision Module is limited by the quality of segmentation, mask availability, and VQA fine-tuning data. General medical image interpretation is broad and difficult to validate across all modalities. Polyp VQA is more focused, but the experimental result is tied to Kvasir-VQA-X1 and to the subset of images that have usable segmentation masks.
 
-Segmentation errors can propagate to downstream VQA. If the mask misses the polyp region, highlights irrelevant tissue, or assigns the wrong class, the grounded VQA input may mislead the model. Therefore, visual grounding is not automatically safer than original-image VQA. It should be evaluated as an intervention that can help in some cases and harm in others.
+The segmentation results show that region-level post-processing improves Dice Score, with DeepLabV3+ (RegNetx320) increasing from 82.56\% to 86.33\%. This supports the usefulness of connected-component and color-dominance refinement for making masks more consistent. However, the method regularizes an existing prediction rather than detecting missed lesions. It may improve a noisy but mostly correct region, but it cannot recover a lesion that the base model fails to segment.
 
-The General Medical Image Agent has broader coverage but weaker guarantees. Without modality-specific fine-tuning and evaluation, its outputs should remain descriptive and cautious. This agent is useful for system extensibility, but the thesis does not claim comprehensive diagnostic performance across all medical image types.
+Segmentation errors can propagate to downstream VQA. If the mask misses the polyp region, highlights irrelevant tissue, or assigns the wrong class, the grounded VQA input may mislead the model. Therefore, visual grounding is not automatically safer than original-image VQA. The Chapter 8 result shows a positive controlled effect on the mask-matched subset, where MedGemma LoRA with visual grounding improves the judge score from 4.4269 to 4.5751 and improves factual accuracy, completeness, clinical relevance, and no-hallucination criteria. This should be interpreted as conditional evidence that masks help when they are available and aligned with the question, not as proof that every mask-guided answer is safer.
+
+The General Diagnosis Agent has broader coverage but weaker guarantees. Without modality-specific fine-tuning and evaluation, its outputs should remain descriptive and cautious. This agent is useful for system extensibility, but the thesis does not claim comprehensive diagnostic performance across all medical image types.
 
 \subsection{Kvasir-VQA-X1 Limitations and Domain Transfer}
 
-Kvasir-VQA-X1 is useful for endoscopic VQA, but dataset coverage and annotation style may not fully match real deployment images or user questions. Metrics such as BLEU and ROUGE-L may not capture clinical correctness, so LLM Judge and qualitative analysis are also needed.
+Kvasir-VQA-X1 is useful for endoscopic VQA, but dataset coverage and annotation style may not fully match real deployment images or user questions. Metrics such as BLEU and ROUGE-L may not capture clinical correctness, so LLM Judge and qualitative analysis are also needed. In the current results, LoRA fine-tuning is the main driver of VQA improvement: MedGemma-4B-it increases from 2.7521 to 4.6351 overall score, and Qwen3.5-4B increases from 3.4720 to 4.5341. This means that the conclusion should emphasize both task adaptation and visual grounding, not visual grounding alone.
 
 Domain transfer is a central concern. A model fine-tuned on Kvasir-VQA-X1 may learn the style and distribution of that dataset but still struggle with images from different devices, lighting conditions, bowel preparation quality, or clinical populations. User questions in deployment may also be longer, less structured, and more ambiguous than dataset questions. These differences should be considered when interpreting evaluation results.
 
-The two VQA settings also introduce different risks. The original-image setting depends on the VLM's own attention and visual reasoning. The grounded setting depends on both segmentation quality and the VLM's ability to use the overlay correctly. A fair discussion must therefore analyze not only which setting scores higher but also why it succeeds or fails.
+The two VQA settings also introduce different risks. The original-image setting depends on the VLM's own attention and visual reasoning. The grounded setting depends on both segmentation quality and the VLM's ability to use the overlay correctly. A fair discussion must therefore analyze not only which setting scores higher but also why it succeeds or fails. Because visual grounding is evaluated on 305 mask-matched evaluation samples, it should not be directly compared with full-set LoRA results on 1000 samples. The fair comparison is the LoRA-only versus visual-grounded setting on the same mask-matched subset.
 
 \subsection{Memory Layer Limitations}
 
-Memory can be stale, incomplete, or incorrectly extracted. Patient-reported facts may change over time. Therefore, memory should be used as supporting context only and should not override current user input or medical evidence.
+Memory can be stale, incomplete, or incorrectly extracted. Patient-reported facts may change over time. Therefore, memory should be used as supporting context only and should not override current user input or medical evidence. The memory evaluation shows that long-term memory improves answer quality from 3.27 in the no-memory setting to 4.47 with seeded memory and 4.27 with extracted memory. It also improves routing accuracy from 86.67\% to 96.67\% when memory is available. These results support memory as a useful continuity mechanism, but not as a substitute for current evidence or expert judgment.
 
-A memory layer can also introduce privacy and governance concerns. Even clinically useful facts may be sensitive. The system should avoid storing unnecessary personally identifiable information and should support correction or deletion of stored facts. In the current thesis scope, memory is evaluated as a system integration feature rather than as a complete clinical record management system.
+A memory layer can also introduce privacy and governance concerns. Even clinically useful facts may be sensitive. The system should avoid storing unnecessary personally identifiable information and should support correction or deletion of stored facts. In the current thesis scope, memory is evaluated as a system integration feature rather than as a complete clinical record management system. The gap between seeded memory and extracted memory is especially important: extracted memory reaches 0.58 precision and 0.80 recall, which means it captures many useful facts but also stores or retrieves extra information that can affect answer synthesis.
 
-Another limitation is that memory retrieval may surface irrelevant old facts. If the response generator uses such facts without checking relevance, personalization can become distracting or unsafe. The agent should only use memory when it is directly related to the current question.
+Another limitation is that memory retrieval may surface irrelevant old facts. If MedGemma CoT or another routed task agent uses such facts without checking relevance, personalization can become distracting or unsafe. The agent should only use memory when it is directly related to the current question, and the retrieved memory should remain subordinate to the user's current statement and external medical evidence. Memory also introduces latency: retrieval and longer memory-augmented prompts increase routing and full-system response time. This is an acceptable trade-off for continuity in many consultation settings, but it should be optimized before deployment.
 
 \subsection{Evaluation and Safety Limitations}
 
 The evaluation is component-oriented and system-oriented, but it is not a clinical trial. The system should be positioned as medical decision support, not as a replacement for physicians. More rigorous expert evaluation is necessary before any clinical use.
 
-The metrics used in this thesis capture important but incomplete aspects of performance. Dice Score measures segmentation overlap but does not fully measure clinical usefulness. BLEU and ROUGE-L measure text similarity but not necessarily medical correctness. LLM Judge can evaluate semantic quality but may contain evaluator bias. One-Hop Accuracy and Multi-Hop Awareness Score measure reasoning behavior but cannot cover all clinical scenarios.
+The metrics used in this thesis capture important but incomplete aspects of performance. Dice Score measures segmentation overlap but does not fully measure clinical usefulness or downstream VQA reliability. BLEU and ROUGE-L measure text similarity but not necessarily medical correctness. LLM Judge can evaluate semantic quality but may contain evaluator bias, even when a medical judge model is used. Memory metrics such as extraction precision/recall, repeated-question avoidance, and answer quality capture continuity behavior but do not prove clinical safety. One-Hop Accuracy and Multi-Turn Awareness Score measure relation-oriented answering and insufficient-context awareness, but they cannot cover all clinical scenarios or prove full path-level KG reasoning. Multi-Turn Awareness should therefore be interpreted as a safety behavior: the model recognizes when a patient-specific answer requires more context, rather than simply producing a longer conversation.
 
 For these reasons, the results should be interpreted as evidence of technical feasibility and comparative system behavior, not as proof of clinical readiness. Future evaluation should include medical expert review, larger datasets, prospective testing, and safety analysis under realistic user interactions.
 
@@ -1501,9 +1518,9 @@ For these reasons, the results should be interpreted as evidence of technical fe
 
 \subsection{Summary of Achievements}
 
-This thesis demonstrates that a medical assistant can be made more controllable by separating routing, evidence retrieval, visual grounding, memory retrieval, and response generation into specialized agents. The resulting system improves observability because intermediate evidence can be inspected before final answer generation. It also improves safety behavior by distinguishing evidence availability from clinical sufficiency, preserving patient context without treating it as verified diagnosis, and evaluating visual grounding as a conditional intervention rather than an assumed benefit.
+This thesis demonstrates that a medical assistant can be made more controllable when routing, evidence retrieval, visual grounding, memory retrieval, and validation are separated into explicit workflow components. MedGemma CoT is then used for text-side sufficiency assessment and answer synthesis rather than as an isolated answer generator. The resulting system improves observability because intermediate evidence can be inspected before final answers are produced. It also improves safety behavior by distinguishing evidence availability from clinical sufficiency: KG/RAG may provide candidate evidence, but MedGemma CoT must still decide whether to answer, ask a follow-up question, or fall back to additional search. The system also preserves patient context without treating it as verified diagnosis and evaluates visual grounding as a conditional intervention rather than an assumed benefit.
 
-Experimentally, the thesis shows four main outcomes. First, structured Knowledge Graph evidence improves relation-oriented text reasoning compared with text-only generation. Second, connected-component and color-dominance post-processing improves segmentation consistency for colonoscopy polyp masks. Third, LoRA fine-tuning substantially improves Polyp VQA performance for both MedGemma-4B-it and Qwen3.5-4B. Fourth, segmentation-grounded VQA improves judge-based answer quality on the mask-matched subset, especially in factual accuracy and completeness. Together, these results support the thesis argument that modular grounding and evidence control can improve medical-assistant behavior at the system level.
+Experimentally, the thesis shows five main outcomes. First, the Text Module benchmark shows that KG + MedLLM achieves the strongest One-Hop Accuracy and Multi-Turn Awareness Score, supporting the usefulness of structured evidence and explicit insufficient-context detection. This should be interpreted as evidence for relation-oriented answering and multi-turn awareness, while full KG path-level reasoning remains a future evaluation target. Second, connected-component and color-dominance post-processing improves segmentation consistency for colonoscopy polyp masks, with the strongest DeepLabV3+ setting reaching 86.33\% Dice Score after post-processing. Third, LoRA fine-tuning substantially improves Polyp VQA performance for both MedGemma-4B-it and Qwen3.5-4B, showing that task adaptation is essential before using compact VLMs for endoscopic VQA. Fourth, segmentation-grounded VQA improves judge-based answer quality on the mask-matched subset, especially in factual accuracy and completeness, but this gain is conditional on mask availability and mask quality. Fifth, patient-scoped memory improves personalization, routing accuracy, repeated-question avoidance, and answer quality, while adding latency and relevance-filtering trade-offs. Together, these results support the thesis argument that modular grounding and evidence control can improve medical-assistant behavior at the system level.
 
 \subsection{Technical Contributions}
 
@@ -1511,13 +1528,13 @@ The technical contributions are:
 
 \begin{itemize}
     \item a graph-orchestrated multi-agent architecture that separates routing, text reasoning, vision reasoning, memory retrieval, and validation;
-    \item a Text Module with Multi-hop QA, KG/RAG evidence construction, MedGemma CoT sufficiency assessment, and fallback search;
-    \item a Vision Module that links polyp segmentation with segmentation-grounded Polyp VQA;
-    \item a region-level post-processing method for improving multi-class polyp mask consistency;
-    \item LoRA fine-tuned Polyp VQA models based on MedGemma-4B-it and Qwen3.5-4B, evaluated under original-image and visual-grounded settings;
-    \item a patient-scoped memory layer and human-in-the-loop validation mechanism for contextual continuity, feedback, and review.
+    \item a Text Module that combines multi-turn clarification, KG/RAG evidence construction, MedGemma CoT sufficiency assessment and answer synthesis, and fallback search;
+    \item a Vision Module that links three-class polyp segmentation, mask post-processing, original-image Polyp VQA, and segmentation-grounded Polyp VQA;
+    \item a region-level post-processing method based on connected components and color dominance for improving multi-class polyp mask consistency;
+    \item LoRA fine-tuned Polyp VQA models based on MedGemma-4B-it and Qwen3.5-4B, evaluated under original-image and mask-matched visual-grounded settings;
+    \item a patient-scoped memory layer and human-in-the-loop validation mechanism for contextual continuity, feedback, repeated-question reduction, and review.
 \end{itemize}
 
 \subsection{Future Work}
 
-Future work should focus on expanding Vietnamese medical datasets, improving Knowledge Graph coverage, strengthening RAG retrieval and reranking, improving visual grounding robustness, refining LoRA fine-tuning for VQA, adding expert validation, and developing stronger memory governance mechanisms. Clinical evaluation with medical professionals is also necessary before any real-world deployment.
+Future work should focus on expanding Vietnamese medical datasets, improving Knowledge Graph coverage, strengthening RAG retrieval and reranking, improving visual grounding robustness, refining LoRA fine-tuning for VQA, adding expert validation, and developing stronger memory governance mechanisms. For the Text Module, an important next step is to build a dedicated path-level KG benchmark that evaluates chains such as symptom $\rightarrow$ disease $\rightarrow$ treatment and symptom $\rightarrow$ disease $\rightarrow$ warning sign, separately from Multi-Turn Awareness Score. Multi-turn evaluation should also be expanded into longer clinical dialogue scenarios that test whether the system asks relevant follow-up questions, stops asking when enough context is available, and preserves safety boundaries during answer synthesis. For the Vision Module, future work should evaluate grounding under segmentation failure cases, expand mask-matched data coverage, test additional endoscopy datasets, and measure whether improved masks consistently improve VQA behavior rather than only Dice Score. For the Memory Layer, future work should improve extraction precision, recency handling, contradiction resolution, user correction, deletion workflows, and latency control. Clinical evaluation with medical professionals is also necessary before any real-world deployment.
