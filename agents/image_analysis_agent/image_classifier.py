@@ -9,12 +9,12 @@ from langchain_core.output_parsers import JsonOutputParser
 class ClassificationDecision(TypedDict):
     """Output structure for the decision agent."""
     image_type: str
-    reasoning: str
+    eng_query: str
     confidence: float
 
 class ImageClassifier:
-    """Uses GPT-4o Vision to analyze images and determine their type."""
-    
+    """Uses a vision model to classify medical images and refine the user query."""
+
     def __init__(self, vision_model):
         self.vision_model = vision_model
         self.json_parser = JsonOutputParser(pydantic_object=ClassificationDecision)
@@ -41,27 +41,22 @@ class ImageClassifier:
             {"role": "user", "content": [
                 {"type": "text", "text": (
                     f"""
-                    System: You are an expert in medical imaging. Analyze the uploaded image.
-                    
-                    {f'CÂU HỎI CỦA NGƯỜI DÙNG: {user_query}' if user_query else ''}
-                    
-                    Phân tích hình ảnh này và xác định loại:
-                    
-                    **Các loại hình ảnh y tế:**
-                    - 'POLYP SEGMENTATION': Hình ảnh nội soi đại tràng có polyp (colonoscopy images with polyps)
-                    - 'GENERAL MEDICAL IMAGE': Hình ảnh y tế khác (X-ray, CT, MRI, etc.)
-                    - 'NON-MEDICAL': Không phải hình ảnh y tế
-                    
-                    **Hướng dẫn phân loại:**
-                    - Nếu là ảnh nội soi đại tràng (màu hồng/đỏ, có cấu trúc ruột, có thể có polyp) → 'POLYP SEGMENTATION'
-                    - Nếu là ảnh y tế khác (X-ray, siêu âm, CT, MRI, etc.) → 'GENERAL MEDICAL IMAGE'
-                    - Nếu không phải ảnh y tế → 'NON-MEDICAL'
-                    
-                    Trả lời theo định dạng JSON:
+                    You are a medical image classifier.
+
+                    User query: {user_query or ""}
+
+                    Return ONLY valid JSON with:
+                    - image_type: one of "POLYP SEGMENTATION", "GENERAL MEDICAL IMAGE", "NON-MEDICAL"
+                    - eng_query: a short English VQA question for the image. If the user query is empty, use "What are the main findings in this endoscopic image?"
+                    - confidence: a number from 0 to 1
+
+                    Classify colonoscopy/endoscopic images with possible polyps as "POLYP SEGMENTATION".
+
+                    JSON format:
                     {{
-                    "image_type": "LOẠI HÌNH ẢNH",
-                    "reasoning": "Lý do phân loại từng bước",
-                    "confidence": 0.95
+                      "image_type": "POLYP SEGMENTATION",
+                      "eng_query": "What are the main findings in this endoscopic image?",
+                      "confidence": 0.95
                     }}
                     """
                 )},
@@ -78,8 +73,12 @@ class ImageClassifier:
             # Ensure the response is parsed as JSON
             response_json = self.json_parser.parse(response.content)
             return response_json  # Returns a dictionary instead of a string
-        except json.JSONDecodeError:
+        except Exception:
             print("[ImageAnalyzer] Warning: Response was not valid JSON.")
-            return {"image_type": "unknown", "reasoning": "Invalid JSON response", "confidence": 0.0}
+            return {
+                "image_type": "unknown",
+                "eng_query": user_query or "What are the main findings in this image?",
+                "confidence": 0.0,
+            }
 
         # return response.content.strip().lower()

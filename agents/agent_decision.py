@@ -1,6 +1,5 @@
 import logging
 import json
-import time
 import threading
 from typing import Any, Dict, List, Optional, TypedDict, Union
 from langchain_core.messages import HumanMessage, AIMessage, BaseMessage
@@ -53,6 +52,7 @@ class AgentState(MessagesState):
     agent_name: Optional[str]  # Current active agent
     current_input: Optional[Union[str, Dict]]  # Input to be processed
     has_image: bool  # Whether the current input contains an image
+    eng_query: Optional[str]
     image_type: Optional[str]  # Type of medical image if present
     output: Optional[str]  # Final output to user
     needs_human_validation: bool  # Whether human validation is required
@@ -278,17 +278,20 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         
         # Get the text from the input
         input_text = _input_to_text(current_input)
-        
+        #init eng_query to handle case: return without eng_query
+        eng_query = input_text
         # Original image processing code
         if isinstance(current_input, dict) and "image" in current_input:
             has_image = True
             image_path = current_input.get("image", None)
             image_type_response = image_analyzer.analyze_image(image_path, input_text)
-            image_type = image_type_response['image_type']
+            image_type = image_type_response.get("image_type", "unknown")
+            eng_query = image_type_response.get("eng_query") or input_text
             print("ANALYZED IMAGE TYPE: ", image_type)
         
         return {
             **state,
+            "eng_query": eng_query,
             "has_image": has_image,
             "image_type": image_type,
             "bypass_routing": False  # Set to False to ensure normal routing
@@ -565,7 +568,7 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
                     "query": expanded_query,
                     "documents": documents,
                     "confidence": confidence,
-                    "sources": rag_agent.response_generator._extract_sources(documents),
+                    "sources": [],
                 }
                 with open('rag_response.json', 'w', encoding='utf-8') as f:
                     json.dump(result, f, ensure_ascii=False, indent=4, default=str)
@@ -731,14 +734,19 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
         )
         ## TO DO: change llm model
         last_model_response = get_llm()
-        response = invoke_with_streaming(last_model_response, synthesis_prompt)
+        response = invoke_with_streaming(last_model_response, synthesis_prompt, max_completion_token=2048)
         response_text = getattr(response, "content", str(response))
         try:
             json_text = response_text.strip()
             if "```json" in json_text:
                 json_text = json_text.split("```json", 1)[1].split("```", 1)[0].strip()
             parsed_response = json.loads(json_text)
-            response_text = parsed_response.get("step3_action", {}).get("content", response_text)
+            step3_action = parsed_response.get("step3_action", {})
+            content = (step3_action.get("content") or "").strip()
+            follow_up_advice = (step3_action.get("follow_up_advice") or "").strip()
+            if follow_up_advice and follow_up_advice not in content:
+                content = f"{content}\n\n{follow_up_advice}".strip()
+            response_text = content or response_text
         except Exception as exc:
             logger.warning("Could not parse multi-source COT response as JSON: %s", exc)
 
@@ -902,33 +910,65 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
 
         current_input = state["current_input"]
         image_path = current_input.get("image", None)
-        user_query = current_input.get("text", "") if isinstance(current_input, dict) else ""
-        if state.get("patient_memory_context"):
-            user_query = (
-                f"{user_query}\n\nLong-term patient memory (supporting context only, not a confirmed diagnosis):\n"
-                f"{state.get('patient_memory_context')}"
-            ).strip()
-
+        # use english query to match the finetune version of vlm.
+        user_query = state.get("eng_query", "")
+        messages = state.get('messages')
+        segmentation_path = None
         try:
-            segmentation_path = image_analyzer.segment_polyp(image_path)
+            # segmentation_path = image_analyzer.segment_polyp(image_path)
             vqa_result = image_analyzer.answer_polyp_vqa(
                 image_path=image_path,
-                segmentation_image_path=segmentation_path,
                 user_query=user_query,
             )
+            if not vqa_result.get("success"):
+                summarized_result = {
+                    "success": False,
+                    "summary": vqa_result.get(
+                        "answer",
+                        "Tôi đã gặp lỗi khi phân tích VQA polyp. Vui lòng thử lại hoặc tham khảo bác sĩ chuyên khoa.",
+                    ),
+                    "error": vqa_result.get("error"),
+                }
+                response = AIMessage(content=summarized_result["summary"])
+                return {
+                    **state,
+                    "output": response,
+                    "needs_human_validation": True,
+                    "agent_name": "POLYP_VQA_AGENT",
+                    "polyp_segmentation_path": segmentation_path,
+                }
+
+            if state.get("patient_memory_context"):
+                user_query = (
+                    f"{user_query}\n\nLong-term patient memory (supporting context only, not a confirmed diagnosis):\n"
+                    f"{state.get('patient_memory_context')}"
+                ).strip()
+            
+            diagnosis_result = {
+                "diagnosis": vqa_result['answer'],
+                "success": vqa_result['success'],
+                "image_path": image_path,
+                "analysis_type": ""
+            }
+
+            summarized_result = image_analyzer.summarize_diagnosis(
+                diagnosis_result=diagnosis_result,
+                chat_history=messages[-10:] if len(messages) > 0 else None,
+                user_query=user_query
+            )
+            
         except Exception as e:
             print(f"Error in polyp VQA agent: {e}")
-            segmentation_path = None
-            vqa_result = {
+            summarized_result = {
                 "success": False,
-                "answer": "Tôi đã gặp lỗi khi phân tích VQA polyp. Vui lòng thử lại hoặc tham khảo bác sĩ chuyên khoa.",
+                "summary": "Tôi đã gặp lỗi khi phân tích VQA polyp. Vui lòng thử lại hoặc tham khảo bác sĩ chuyên khoa.",
                 "error": str(e),
             }
 
-        if vqa_result["success"]:
-            response = AIMessage(content=vqa_result["answer"])
+        if summarized_result["success"]:
+            response = AIMessage(content=summarized_result['summary'])
         else:
-            response = AIMessage(content=vqa_result["answer"])
+            response = AIMessage(content=summarized_result['summary'])
 
         return {
             **state,

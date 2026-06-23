@@ -52,7 +52,7 @@
             backdrop-filter: blur(20px);
             border: 2px solid rgba(237, 27, 46, 0.1);
             border-radius: 24px;
-            padding: 30px;
+            padding: 24px;
             height: calc(100vh - 40px);
             max-height: calc(100vh - 40px);
             display: flex;
@@ -65,7 +65,7 @@
 
         .sidebar-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 22px;
         }
 
         .sidebar-header h3 {
@@ -85,10 +85,10 @@
         }
 
         .agent-section {
-            margin-bottom: 20px;
-            padding: 18px;
+            margin-bottom: 14px;
+            padding: 15px;
             background: linear-gradient(135deg, rgba(237, 27, 46, 0.03) 0%, rgba(0, 193, 213, 0.03) 100%);
-            border-radius: 16px;
+            border-radius: 14px;
             border: 1.5px solid rgba(237, 27, 46, 0.1);
         }
 
@@ -96,7 +96,7 @@
             color: var(--viettel-red);
             font-weight: 700;
             font-size: 0.95rem;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -109,13 +109,14 @@
         }
 
         .agent-section li {
-            padding: 8px 0;
+            padding: 6px 0;
             color: var(--text-primary);
-            font-size: 0.88rem;
+            font-size: 0.84rem;
             font-weight: 500;
             display: flex;
             align-items: center;
             gap: 10px;
+            line-height: 1.35;
         }
 
         .agent-section li i {
@@ -189,7 +190,7 @@
             color: white;
             transform: translateY(-50%) translateX(-2px);
         }
-
+        
         .chat-header h4 {
             font-weight: 700;
             margin-bottom: 5px;
@@ -679,84 +680,86 @@
                     <i class="fas fa-robot"></i>
                     Medical AI
                 </h3>
-                <p>Advanced Multi-Agent System</p>
+                <p>Grounded Multi-Agent Assistant</p>
             </div>
             
             <div class="agent-section">
                 <h6>
                     <i class="fas fa-brain"></i>
-                    Available Agents
+                    Core Agents
                 </h6>
                 <ul>
-                    <li><i class="fas fa-comment-medical"></i> Medical Conversation Agent</li>
-                    <li><i class="fas fa-database"></i> Medical RAG Agent</li>
-                    <li><i class="fas fa-search"></i> Web Search Agent</li>
+                    <li><i class="fas fa-route"></i> Decision Agent routing</li>
+                    <li><i class="fas fa-comment-medical"></i> Conversation Agent</li>
+                    <li><i class="fas fa-project-diagram"></i> Parallel KG/RAG Agent</li>
+                    <li><i class="fas fa-search"></i> Web Search fallback</li>
+                </ul>
+            </div>
+            
+            <div class="agent-section">
+                <h6>
+                    <i class="fas fa-notes-medical"></i>
+                    Text Reasoning
+                </h6>
+                <ul>
+                    <li><i class="fas fa-question-circle"></i> Multi-hop clarification</li>
+                    <li><i class="fas fa-expand-arrows-alt"></i> Medical query expansion</li>
+                    <li><i class="fas fa-database"></i> RAG document retrieval</li>
+                    <li><i class="fas fa-sitemap"></i> Knowledge Graph reasoning</li>
+                    <li><i class="fas fa-stethoscope"></i> MedGemma CoT sufficiency check</li>
                 </ul>
             </div>
             
             <div class="agent-section">
                 <h6>
                     <i class="fas fa-eye"></i>
-                    Computer Vision
+                    Vision Module
                 </h6>
                 <ul>
-                    <li><i class="fas fa-allergies"></i> Skin Lesion Segmentation</li>
+                    <li><i class="fas fa-image"></i> General medical image analysis</li>
+                    <li><i class="fas fa-draw-polygon"></i> Colonoscopy polyp segmentation</li>
+                    <li><i class="fas fa-comments"></i> Segmentation-grounded Polyp VQA</li>
+                    <li><i class="fas fa-crosshairs"></i> Visual mask grounding</li>
                 </ul>
             </div>
             
             <div class="agent-section">
                 <h6>
-                    <i class="fas fa-cogs"></i>
-                    RAG Capabilities
+                    <i class="fas fa-shield-alt"></i>
+                    Memory & Safety
                 </h6>
                 <ul>
-                    <li><i class="fas fa-vector-square"></i> Advanced embedding</li>
-                    <li><i class="fas fa-expand-arrows-alt"></i> Query expansion</li>
-                    <li><i class="fas fa-search-plus"></i> Vector similarity search</li>
-                    <li><i class="fas fa-shield-alt"></i> Hallucination prevention</li>
-                </ul>
-            </div>
-            
-            <div class="agent-section">
-                <h6>
-                    <i class="fas fa-project-diagram"></i>
-                    Orchestration
-                </h6>
-                <ul>
-                    <li><i class="fas fa-sync-alt"></i> Coordinated interaction</li>
-                    <li><i class="fas fa-tasks"></i> Dynamic task allocation</li>
-                    <li><i class="fas fa-puzzle-piece"></i> Seamless integration</li>
+                    <li><i class="fas fa-user-clock"></i> Patient-scoped long-term memory</li>
+                    <li><i class="fas fa-layer-group"></i> LangGraph workflow state</li>
+                    <li><i class="fas fa-user-check"></i> Human-in-the-loop validation</li>
+                    <li><i class="fas fa-user-shield"></i> Cautious decision support</li>
                 </ul>
             </div>
             
             <button id="clear-chat" class="clear-btn">
                 <i class="fas fa-trash me-2"></i>
-                Clear Conversation
+                Xóa cuộc trò chuyện
             </button>
         </div>
         
         <!-- Chat Container -->
         <div class="chat-container">
             <div class="chat-header">
-                <a href="/" class="back-btn">
-                    <i class="fas fa-arrow-left"></i>
-                    Dashboard
-                </a>
                 <h4>
                     <i class="fas fa-stethoscope me-2"></i>
                     Multi-Agent Medical Assistant
                 </h4>
-                <small>Upload medical images or ask health-related questions</small>
+                <small>Đặt câu hỏi sức khỏe hoặc tải ảnh y tế để được hỗ trợ phân tích</small>
             </div>
             
             <div id="chat-body" class="chat-body">
                 <div class="message assistant-message">
                     <div class="agent-tag">
                         <i class="fas fa-robot"></i>
-                        System
+                        SYSTEM
                     </div>
                     <div class="message-content">
-                        <p>Hello! I'm your medical assistant. You can ask me health-related questions or upload medical images for analysis.</p>
+                        <p>Xin chào! Tôi có thể hỗ trợ bạn trả lời các câu hỏi sức khỏe hoặc phân tích ảnh y tế bạn tải lên.</p>
                     </div>
                 </div>
             </div>
@@ -778,7 +781,7 @@
                             <input type="file" class="file-upload-input" id="image-upload" accept="image/*">
                         </div>
                         
-                        <textarea id="message-input" class="message-input" rows="1" placeholder="Ask a medical question..."></textarea>
+                        <textarea id="message-input" class="message-input" rows="1" placeholder="Nhập câu hỏi y tế của bạn..."></textarea>
                         
                         <button type="submit" class="send-btn">
                             <i class="fas fa-paper-plane"></i>
@@ -895,10 +898,10 @@
                 waitingEl.innerHTML = `
                     <div class="agent-tag">
                         <i class="fas fa-clock"></i>
-                        System
+                        Hệ thống
                     </div>
                     <div class="message-content">
-                        <p style="color: #ffc107;">⏳ Processing validation...</p>
+                        <p style="color: #ffc107;">Đang xử lý phản hồi xác nhận...</p>
                     </div>
                 `;
                 chatBody.appendChild(waitingEl);
@@ -1055,10 +1058,10 @@
                 errorElement.innerHTML = `
                     <div class="agent-tag">
                         <i class="fas fa-exclamation-triangle"></i>
-                        System
+                        Hệ thống
                     </div>
                     <div class="message-content">
-                        <p style="color: #dc3545;">Sorry, there was an error processing your validation. Please try again.</p>
+                        <p style="color: #dc3545;">Rất tiếc, đã có lỗi khi xử lý phản hồi xác nhận. Vui lòng thử lại.</p>
                     </div>
                 `;
                 chatBody.appendChild(errorElement);
@@ -1117,10 +1120,10 @@
                     <div class="message assistant-message">
                         <div class="agent-tag">
                             <i class="fas fa-robot"></i>
-                            System
+                            Hệ thống
                         </div>
                         <div class="message-content">
-                            <p>Hello! I'm your medical assistant. You can ask me health-related questions or upload medical images for analysis.</p>
+                            <p>Xin chào! Tôi có thể hỗ trợ bạn trả lời các câu hỏi sức khỏe hoặc phân tích ảnh y tế bạn tải lên.</p>
                         </div>
                     </div>
                 `;
@@ -1232,7 +1235,7 @@
                         });
                     } else if (eventName === 'error') {
                         finalData = payload;
-                        rawResponse = payload.response || 'Sorry, there was an error processing your request.';
+                        rawResponse = payload.response || 'Rất tiếc, đã có lỗi khi xử lý yêu cầu của bạn.';
                         ensureAssistantMessage();
                         agentNameElement.textContent = getAgentDisplayName(payload.agent || 'System');
                         responseElement.innerHTML = `<p style="color: #dc3545;">${rawResponse}</p>`;
@@ -1493,10 +1496,10 @@
                     errorElement.innerHTML = `
                         <div class="agent-tag">
                             <i class="fas fa-exclamation-triangle"></i>
-                            System
+                            Hệ thống
                         </div>
                         <div class="message-content">
-                            <p style="color: #dc3545;">Sorry, there was an error processing your request. Please try again.</p>
+                            <p style="color: #dc3545;">Rất tiếc, đã có lỗi khi xử lý yêu cầu của bạn. Vui lòng thử lại.</p>
                         </div>
                     `;
                     chatBody.appendChild(errorElement);
