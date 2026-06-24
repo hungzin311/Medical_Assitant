@@ -14,5 +14,3 @@ This project is a multi-agent medical assistant system that integrates advanced 
 1. Clone this repository
 2. Install dependencies from `requirements.txt`
 3. Run the application as described in the documentation
-
-For detailed information about the system, usage, and architecture, please refer to [Report.pdf](Report.pdf). 
