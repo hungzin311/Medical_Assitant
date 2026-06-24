@@ -2,17 +2,27 @@
 \babel@toc {vietnamese}{}\relax 
 \babel@toc {vietnamese}{}\relax 
 \babel@toc {vietnamese}{}\relax 
-\contentsline {figure}{\numberline {1}{\ignorespaces Overall architecture of the Multi-Agent Medical Assistant}}{15}{figure.caption.1}%
-\contentsline {figure}{\numberline {2}{\ignorespaces Detailed agent workflow with text, vision, memory, and fallback coordination}}{16}{figure.caption.2}%
-\contentsline {figure}{\numberline {3}{\ignorespaces Text Module architecture for medical knowledge retrieval}}{21}{figure.caption.7}%
-\contentsline {figure}{\numberline {4}{\ignorespaces Traditional single-turn approach with limited clinical context}}{23}{figure.caption.9}%
-\contentsline {figure}{\numberline {5}{\ignorespaces Multi-turn clarification with iterative context collection and safer response refinement}}{24}{figure.caption.10}%
-\contentsline {figure}{\numberline {6}{\ignorespaces Parallel KG-RAG processing in the Text Module}}{26}{figure.caption.11}%
-\contentsline {figure}{\numberline {7}{\ignorespaces Medical chain-of-thought, information sufficiency, and answer synthesis flow}}{30}{figure.caption.13}%
-\contentsline {figure}{\numberline {8}{\ignorespaces Vision Module workflow with routing, optional grounding, summarization, and memory context}}{32}{figure.caption.15}%
-\contentsline {figure}{\numberline {9}{\ignorespaces DeepLabV3+ encoder-decoder architecture with Atrous Spatial Pyramid Pooling}}{35}{figure.caption.16}%
-\contentsline {figure}{\numberline {10}{\ignorespaces Visualization of raw and post-processed polyp segmentation masks}}{37}{figure.caption.17}%
-\contentsline {figure}{\numberline {11}{\ignorespaces Medical QA dataset overview used for retrieval-oriented experiments}}{47}{figure.caption.23}%
-\contentsline {figure}{\numberline {12}{\ignorespaces Overview of the VietMedKG data source used by the Knowledge Graph Agent}}{48}{figure.caption.25}%
-\contentsline {figure}{\numberline {13}{\ignorespaces Example images and annotations from the BKAI-IGH NeoPolyp-Small dataset}}{49}{figure.caption.26}%
-\contentsline {figure}{\numberline {14}{\ignorespaces Example structure of the Kvasir-VQA-X1 dataset for gastrointestinal endoscopy VQA}}{50}{figure.caption.27}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Overall architecture of the Multi-Agent Medical Assistant}}{9}{figure.caption.1}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Detailed agent workflow with text, vision, memory, and fallback coordination}}{10}{figure.caption.2}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Text Module architecture for medical knowledge retrieval}}{15}{figure.caption.7}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Traditional single-turn approach with limited clinical context}}{18}{figure.caption.9}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Multi-turn clarification with iterative context collection and safer response refinement}}{19}{figure.caption.10}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Parallel KG-RAG processing in the Text Module}}{21}{figure.caption.11}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Medical chain-of-thought, information sufficiency, and answer synthesis flow}}{25}{figure.caption.13}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {5.1}{\ignorespaces Vision Module workflow with routing, optional grounding, summarization, and memory context}}{27}{figure.caption.15}%
+\contentsline {figure}{\numberline {5.2}{\ignorespaces DeepLabV3+ encoder-decoder architecture with Atrous Spatial Pyramid Pooling}}{30}{figure.caption.16}%
+\contentsline {figure}{\numberline {5.3}{\ignorespaces Visualization of raw and post-processed polyp segmentation masks}}{32}{figure.caption.17}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {7.1}{\ignorespaces Medical QA dataset overview used for retrieval-oriented experiments}}{44}{figure.caption.23}%
+\contentsline {figure}{\numberline {7.2}{\ignorespaces Overview of the VietMedKG data source used by the Knowledge Graph Agent}}{45}{figure.caption.25}%
+\contentsline {figure}{\numberline {7.3}{\ignorespaces Example images and annotations from the BKAI-IGH NeoPolyp-Small dataset}}{46}{figure.caption.26}%
+\contentsline {figure}{\numberline {7.4}{\ignorespaces Example structure of the Kvasir-VQA-X1 dataset for gastrointestinal endoscopy VQA}}{47}{figure.caption.27}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
