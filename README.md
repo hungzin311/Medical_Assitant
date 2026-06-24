@@ -1,6 +1,6 @@
 # Medical Assistant
 
-![System Overview](system.png)
+![System Overview](https://github.com/hungzin311/Medical_Assitant/blob/main/Report%20VDT/images/chi_tiet.png)
 
 This project is a multi-agent medical assistant system that integrates advanced AI for medical image analysis, information retrieval, and conversational support.
 
