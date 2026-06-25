@@ -1,0 +1,31 @@
+\newpage
+\thispagestyle{empty}
+\begin{center}
+    \Large\bfseries Preface
+\end{center}
+\vspace{0.1cm}
+
+The increasing demand for reliable, accessible, and personalized medical information motivates the development of intelligent medical assistant systems. Users often describe symptoms in incomplete or informal language, search for medical information from sources of uneven quality, and may need support across multiple interactions rather than a single isolated conversation.
+
+Recent advances in language models, retrieval-augmented generation, knowledge graphs, vision-language models, and agent orchestration provide an opportunity to build medical AI systems that are more grounded, modular, and context-aware. At the same time, medical AI remains a safety-sensitive research problem. A useful assistant should not only generate fluent responses, but should also identify insufficient clinical context, ground its reasoning in appropriate evidence, handle multimodal inputs cautiously, and preserve patient context without converting self-reported information into verified diagnosis.
+
+This thesis presents a Multi-Agent Medical Assistant designed to study these issues at the system architecture level. The work focuses on how specialized agents can cooperate through structured and unstructured evidence, visual grounding, patient-scoped memory, and human-in-the-loop validation. The thesis does not aim to build a deployable clinical product or replace professional medical judgment. Instead, it investigates the technical feasibility, design trade-offs, and evaluation behavior of a modular medical assistant intended for decision support.
+
+\begin{center}
+    \Large\bfseries Summary of Content and Contributions
+\end{center}
+\vspace{0.1cm}
+
+This thesis makes the following main contributions:
+
+\begin{itemize}
+    \item \textbf{A modular multi-agent architecture for medical assistance:} The system separates routing, text reasoning, vision reasoning, memory retrieval, and validation into specialized components. This improves observability and allows intermediate evidence to be inspected before final answer synthesis.
+
+    \item \textbf{A grounded Text Module for medical consultation:} The text workflow coordinates multi-turn clarification, query expansion, Retrieval-Augmented Generation, Knowledge Graph reasoning, MedGemma CoT-based information sufficiency assessment and answer synthesis, and Web Search fallback. This design distinguishes evidence availability from clinical sufficiency and reduces premature answers.
+
+    \item \textbf{A segmentation-grounded Vision Module for Polyp VQA:} The vision workflow connects three-class colonoscopy polyp segmentation, connected-component and color-dominance post-processing, and visual question answering. The segmentation mask is formulated as a spatial grounding prior, while the original endoscopic image remains the source of appearance-level visual evidence.
+
+    \item \textbf{A patient-scoped memory layer for contextual continuity:} The thesis integrates Mem0-style semantic memory to retrieve durable patient-reported context across sessions. Memory is used as supporting context for routing, personalization, repeated-question reduction, and answer synthesis, not as authoritative clinical truth.
+
+    \item \textbf{An experimental evaluation of component and system behavior:} The thesis evaluates text reasoning with One-Hop Accuracy and Multi-Turn Awareness Score, segmentation with Dice Score, Polyp VQA with BLEU-4, ROUGE-L, and LLM-as-a-judge criteria, and memory with extraction precision/recall, routing accuracy, repeated-question avoidance, and answer quality. The results analyze not only model performance, but also how evidence grounding, post-processing, LoRA fine-tuning, segmentation guidance, and patient-scoped memory affect system-level reliability.
+\end{itemize}

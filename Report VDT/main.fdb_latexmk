@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1782297953.84472 "main.tex" "main.pdf" "main" 1782297955.145 0
+["pdflatex"] 1782355354.61686 "main.tex" "main.pdf" "main" 1782355355.92125 0
   "/etc/texmf/web2c/texmf.cnf" 1781577280.57175 475 c0e671620eb5563b2130f56340a5fde8 ""
   "/home/hung/.texlive2025/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1200.600pk" 1782095557.78418 14040 83d05ebadc3cf34a4579b23688a1d816 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
@@ -54,7 +54,6 @@
   "/usr/share/texlive/texmf-dist/fonts/type1/vntex/vnr/vnbx12.pfb" 1647811568 41089 cd085a6112214f1ec9535fe0d1ee127f ""
   "/usr/share/texlive/texmf-dist/fonts/type1/vntex/vnr/vnr10.pfb" 1647811568 41608 f55c1a79be39d4e7ed224ba660d7353d ""
   "/usr/share/texlive/texmf-dist/fonts/type1/vntex/vnr/vnr12.pfb" 1647811568 40319 02110ade360715fbba33c66db50ef607 ""
-  "/usr/share/texlive/texmf-dist/fonts/type1/vntex/vnr/vnr8.pfb" 1647811568 41310 310d863e4c8e005265dc9ba6af1579a2 ""
   "/usr/share/texlive/texmf-dist/fonts/type1/vntex/vnr/vnti12.pfb" 1647811568 45761 b38306bf09f04723b8bae7dfaf293584 ""
   "/usr/share/texlive/texmf-dist/fonts/type1/vntex/vnr/vntt10.pfb" 1647811568 41221 c1f2d5e30504195bc4ee3c8fab0ee4ad ""
   "/usr/share/texlive/texmf-dist/fonts/type1/vntex/vnr/vntt12.pfb" 1647811568 40832 4a1109db0219898270ca9c4c2fdb38d4 ""
@@ -174,15 +173,15 @@
   "images/tong_quan.png" 1781497961.89575 32451 0f8736da20f2cbaedad6a01538e4f2b9 ""
   "images/vision.png" 1782293669.92798 88201 1b3b4b14b3753f52a734bbe0a05126b5 ""
   "includes/custom-commands.tex" 1781497961.89634 584 948bdba1700b4ed288690b9bdab83a2b ""
-  "includes/document-header.tex" 1782296950.77788 2458 f2052b6746528c4a56d748e04732d590 ""
+  "includes/document-header.tex" 1782355352.85535 2447 405a420133ff1e425a9da476b32ee13f ""
   "includes/metadata.tex" 1782096200.9908 673 6c0ad187b8185343206acbada63677fa ""
   "includes/packages.tex" 1782099445.87105 928 bd47dc6f4a9a432348d5564264136831 ""
-  "main.aux" 1782297955.04681 26188 3231f175ac02ac340b27ab835fbff766 "pdflatex"
-  "main.lof" 1782297955.05084 2454 cc4d0d56f62fe8835952ea14d5db341c "pdflatex"
-  "main.lot" 1782297955.05084 2770 70c59ec2e13f1ed2c5b76a1451b9f891 "pdflatex"
-  "main.out" 1782297955.04981 19714 beb055cfc3a52b18780d507d50e642b9 "pdflatex"
-  "main.tex" 1782296330.5771 10788 7e875b3c932c425b149ba5f76c0abe10 ""
-  "main.toc" 1782297955.05084 7892 6887e9c834f474c7fe33529ed377f6b5 "pdflatex"
+  "main.aux" 1782355355.82482 26188 c9ff644ac0476dcf0ceaa5e6c562bc9f "pdflatex"
+  "main.lof" 1782355355.82863 2454 cc4d0d56f62fe8835952ea14d5db341c "pdflatex"
+  "main.lot" 1782355355.82863 2770 70c59ec2e13f1ed2c5b76a1451b9f891 "pdflatex"
+  "main.out" 1782355355.82782 19714 beb055cfc3a52b18780d507d50e642b9 "pdflatex"
+  "main.tex" 1782354994.77521 6345 4f9942beea227b6d39794cb8f4378639 ""
+  "main.toc" 1782355355.82863 7892 6887e9c834f474c7fe33529ed377f6b5 "pdflatex"
   "references.tex" 1782296180.19251 10471 d67c549af48f13adf604a0c6f45ed490 ""
   (generated)
   "main.aux"
