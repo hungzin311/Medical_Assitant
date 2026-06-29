@@ -5,28 +5,22 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {3.1}{\ignorespaces Benefits of the multi-agent design illustrated by the detailed workflow}}{11}{table.caption.3}%
-\contentsline {table}{\numberline {3.2}{\ignorespaces Main cooperation patterns in the proposed multi-agent architecture}}{12}{table.caption.4}%
-\contentsline {table}{\numberline {3.3}{\ignorespaces Decision Agent routing behavior}}{13}{table.caption.5}%
-\contentsline {table}{\numberline {3.4}{\ignorespaces Knowledge and context sources with reliability considerations}}{14}{table.caption.6}%
+\contentsline {table}{\numberline {3.1}{\ignorespaces Benefits of the multi-agent design illustrated by the detailed workflow}}{12}{table.caption.3}%
+\contentsline {table}{\numberline {3.2}{\ignorespaces Main cooperation patterns in the proposed multi-agent architecture}}{13}{table.caption.4}%
+\contentsline {table}{\numberline {3.3}{\ignorespaces Decision Agent routing behavior}}{14}{table.caption.5}%
+\contentsline {table}{\numberline {3.4}{\ignorespaces Knowledge and context sources with reliability considerations}}{15}{table.caption.6}%
+\contentsline {table}{\numberline {3.5}{\ignorespaces Text query types and corresponding routing behavior}}{17}{table.caption.8}%
+\contentsline {table}{\numberline {3.6}{\ignorespaces Coordinated evidence construction in the Text Module}}{23}{table.caption.10}%
+\contentsline {table}{\numberline {3.7}{\ignorespaces MedGemma CoT decision-support stages}}{25}{table.caption.12}%
+\contentsline {table}{\numberline {3.8}{\ignorespaces Complementary roles of the Polyp Segmentation Agent and Polyp VQA Agent}}{32}{table.caption.15}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {4.1}{\ignorespaces Text query types and corresponding routing behavior}}{16}{table.caption.8}%
-\contentsline {table}{\numberline {4.2}{\ignorespaces Coordinated evidence construction in the Text Module}}{24}{table.caption.12}%
-\contentsline {table}{\numberline {4.3}{\ignorespaces MedGemma CoT decision-support stages}}{26}{table.caption.14}%
-\addvspace {10\p@ }
-\contentsline {table}{\numberline {5.1}{\ignorespaces Complementary roles of the Polyp Segmentation Agent and Polyp VQA Agent}}{34}{table.caption.18}%
-\addvspace {10\p@ }
-\contentsline {table}{\numberline {6.1}{\ignorespaces Mapping between the Memory Layer design and the current implementation}}{43}{table.caption.22}%
-\addvspace {10\p@ }
-\contentsline {table}{\numberline {7.1}{\ignorespaces Local VimedAQA record distribution used for RAG indexing}}{44}{table.caption.24}%
-\contentsline {table}{\numberline {7.2}{\ignorespaces Kvasir-VQA-X1 training data before and after segmentation-mask filtering}}{47}{table.caption.28}%
-\contentsline {table}{\numberline {7.3}{\ignorespaces LoRA fine-tuning hyperparameters for Polyp VQA}}{48}{table.caption.29}%
-\contentsline {table}{\numberline {7.4}{\ignorespaces Evaluation design for the main system components}}{49}{table.caption.30}%
-\addvspace {10\p@ }
-\contentsline {table}{\numberline {8.1}{\ignorespaces Text Module benchmark results}}{50}{table.caption.31}%
-\contentsline {table}{\numberline {8.2}{\ignorespaces Dice Score comparison for polyp segmentation models}}{51}{table.caption.32}%
-\contentsline {table}{\numberline {8.3}{\ignorespaces Polyp VQA evaluation on Kvasir-VQA-X1}}{52}{table.caption.33}%
-\contentsline {table}{\numberline {8.4}{\ignorespaces LLM Judge comparison between LoRA-only and visual-grounded MedGemma on the mask-matched subset}}{53}{table.caption.34}%
-\contentsline {table}{\numberline {8.5}{\ignorespaces Memory Layer evaluation results on 30 multi-session scenarios}}{54}{table.caption.35}%
-\addvspace {10\p@ }
+\contentsline {table}{\numberline {4.1}{\ignorespaces Local VimedAQA record distribution used for RAG indexing}}{41}{table.caption.17}%
+\contentsline {table}{\numberline {4.2}{\ignorespaces Kvasir-VQA-X1 training data before and after segmentation-mask filtering}}{44}{table.caption.21}%
+\contentsline {table}{\numberline {4.3}{\ignorespaces LoRA fine-tuning hyperparameters for Polyp VQA}}{45}{table.caption.22}%
+\contentsline {table}{\numberline {4.4}{\ignorespaces Evaluation protocol for the main system components}}{46}{table.caption.23}%
+\contentsline {table}{\numberline {4.5}{\ignorespaces Text Module benchmark results}}{47}{table.caption.24}%
+\contentsline {table}{\numberline {4.6}{\ignorespaces Dice Score comparison for polyp segmentation models}}{50}{table.caption.27}%
+\contentsline {table}{\numberline {4.7}{\ignorespaces Polyp VQA evaluation on Kvasir-VQA-X1}}{52}{table.caption.29}%
+\contentsline {table}{\numberline {4.8}{\ignorespaces LLM Judge comparison between LoRA-only and visual-grounded MedGemma on the mask-matched subset}}{53}{table.caption.30}%
+\contentsline {table}{\numberline {4.9}{\ignorespaces Memory Layer evaluation results on 30 multi-session scenarios}}{53}{table.caption.31}%
 \addvspace {10\p@ }

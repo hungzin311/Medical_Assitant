@@ -51,6 +51,14 @@
     {\thesubsection}
     {1em}
     {}
+\titleformat{\subsubsection}
+    {\normalfont\normalsize\bfseries}
+    {\thesubsubsection}
+    {1em}
+    {}
+
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{1}
 
 \renewcommand{\cfttoctitlefont}{\hfill\Large\bfseries}
 \renewcommand{\cftaftertoctitle}{\hfill}
@@ -137,6 +145,7 @@
     \pagenumbering{gobble}
     \let\clearpage\relax
     \thispagestyle{empty}
+    \setcounter{tocdepth}{1}
     \tableofcontents
     \newpage
     \hypersetup{pageanchor=true}
