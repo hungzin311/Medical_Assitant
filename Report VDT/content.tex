@@ -44,14 +44,18 @@ Several challenges motivate the proposed architecture.
 
 \section{Objectives}
 
-The main objective is to design and evaluate an AI-centered multi-agent medical assistant with four core capabilities:
+The main objective of this thesis is to design, implement, and evaluate an AI-centered multi-agent medical assistant that can support preliminary medical information seeking in a grounded, modular, and safety-aware manner. Instead of relying on a single generative model, the system aims to coordinate multiple specialized agents so that each type of input is handled by the most appropriate reasoning pathway. The assistant is expected to retrieve evidence before generating medical explanations, ask for additional information when the user's description is incomplete, incorporate patient-scoped context when relevant, and provide mechanisms for user validation and feedback.
+
+More specifically, the thesis focuses on four core capabilities:
 
 \begin{itemize}
-    \item \textbf{Text Module:} medical reasoning with Conversation Agent, multi-turn clarification, query expansion, RAG, Knowledge Graph, MedGemma CoT sufficiency assessment and answer synthesis, and Web Search fallback;
-    \item \textbf{Vision Module:} general image analysis, polyp segmentation, and grounded Polyp VQA;
-    \item \textbf{Memory Layer:} patient-scoped long-term context using Mem0-style memory integration;
-    \item \textbf{Human Validation:} user validation and feedback logging as a human-in-the-loop safety mechanism.
+    \item \textbf{Text Module:} to build a consultation-oriented text reasoning workflow that combines the Conversation Agent, multi-turn clarification, query expansion, RAG, Knowledge Graph reasoning, MedGemma CoT-based information sufficiency assessment and answer synthesis, and Web Search fallback. This objective emphasizes reducing premature answers when the clinical context is incomplete and improving response grounding through both structured and unstructured evidence.
+    \item \textbf{Vision Module:} to support medical image understanding through general image analysis, colonoscopy polyp segmentation, and grounded Polyp VQA. The goal is not only to answer visual questions, but also to investigate whether segmentation masks can provide useful spatial grounding for VQA while preserving the original image as the primary visual evidence source.
+    \item \textbf{Memory Layer:} to integrate patient-scoped long-term context using a Mem0-style memory mechanism. This layer is designed to preserve useful information such as allergies, chronic conditions, medication history, or repeated symptoms across sessions, while keeping stored patient-reported facts separate from verified clinical diagnoses.
+    \item \textbf{Human Validation:} to incorporate user validation and feedback logging as a human-in-the-loop safety mechanism. This objective supports review of generated responses, collection of correction signals, and analysis of cases where the assistant may need to be more cautious or request professional medical attention.
 \end{itemize}
+
+In addition to system design, the thesis also aims to evaluate the proposed architecture at both component and workflow levels. The evaluation covers text-based medical question answering, Knowledge Graph reasoning, memory-aware interaction, polyp segmentation quality, and Polyp VQA performance. Through these experiments, the thesis examines how modular agent coordination affects response quality, grounding, latency, and safety behavior in a medical assistant setting.
 
 \section{Contributions}
 
@@ -214,7 +218,7 @@ Another advantage is that LangGraph separates short-term state from long-term me
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.95\textwidth]{images/chi_tiet.png}
+    \includegraphics[width=\textwidth]{images/chi_tiet.png}
     \caption{Detailed agent workflow with text, vision, memory, and fallback coordination}
     \label{fig:detailed-agent-workflow}
 \end{figure}
@@ -320,9 +324,7 @@ The decision process considers four main signals:
 
 Routing errors are important because they can create downstream failures. If a symptom consultation is routed directly to final synthesis, the system may skip necessary follow-up questions. If a general image is routed to the specialized polyp workflow, the segmentation model may produce meaningless output. If a polyp VQA question is routed to a generic VLM, the answer may lack domain-specific reasoning. Therefore, the Decision Agent is evaluated not only as a convenience component but also as a safety-critical part of the architecture.
 
-\begin{quote}
 \textbf{Conservative routing principle.} When the task is ambiguous, the system should prefer clarification or a safer general path over a highly specialized agent. Specialized agents are useful only when the intent and input type match their assumptions.
-\end{quote}
 
 \subsection{Knowledge and Context Sources}
 
@@ -377,9 +379,7 @@ The Text Module is responsible for medical reasoning over user-provided language
 
 Figure \ref{fig:text-module-architecture} provides the high-level view of the Text Module. It shows that text reasoning begins with user input classification, then branches into conversational handling, KG/RAG evidence retrieval, MedGemma CoT assessment and synthesis, and fallback search. Although the workflow diagram may visualize assessment as a separate decision node, this node should be interpreted as a logical step inside MedGemma CoT rather than as an independent agent. This figure is therefore introduced at the beginning of the module section before the individual agents are discussed in detail.
 
-\begin{quote}
 \textbf{Core idea.} The Text Module is not only a retrieval component. It is a control layer that decides when to ask, when to retrieve, when to synthesize evidence, and when to avoid a patient-specific conclusion.
-\end{quote}
 
 The general processing flow begins with input analysis, then moves to clarification when the query is clinically underspecified, evidence retrieval when the query is answerable from medical sources, and MedGemma CoT assessment and synthesis when candidate evidence is available. This flow is designed to make the Text Module cautious by default. The module does not assume that every query should immediately trigger a final answer. Instead, it separates the tasks of understanding the user intent, checking information completeness, retrieving evidence, and producing a safe final answer through MedGemma CoT.
 
@@ -440,9 +440,7 @@ This example illustrates the difference between direct answering and consultatio
 
 Information sufficiency is not implemented as a standalone agent. It is a decision step inside MedGemma CoT that receives two inputs from the upstream Text Module: the user's clinical context and evidence retrieved by KG/RAG agents. KG and RAG provide structured relations, candidate diseases, matched symptoms, and explanatory passages; MedGemma CoT decides whether this context is enough to answer safely.
 
-\begin{quote}
 \textbf{Sufficiency is a decision boundary.} A query can have retrieved evidence and still be clinically insufficient. The system should not confuse ``documents were found'' with ``the user gave enough context for patient-specific advice.''
-\end{quote}
 
 This distinction is necessary because retrieved evidence does not always mean that the user's case is clinically clear. The system should distinguish between:
 
@@ -480,9 +478,7 @@ The vector retrieval branch uses dense embedding search. In the implementation, 
 
 After candidate documents are retrieved, a reranker reorders them according to query-document relevance \cite{reranking_search}. This step is important because initial vector similarity may return documents that are semantically close but clinically less useful. The reranker helps prioritize documents that better match the actual user question before MedGemma CoT receives the selected context.
 
-\begin{quote}
 \textbf{Retrieval interpretation.} RAG is most useful for explanatory medical text, while Knowledge Graph retrieval is most useful for structured relationships. The system uses both because medical QA often needs a relation-level hypothesis and a patient-friendly explanation.
-\end{quote}
 
 \subsubsection{KG Agent}
 
@@ -961,24 +957,17 @@ Algorithm \ref{alg:memory-retrieval} corresponds to the retrieval and formatting
 Input: graph state S containing patient_id, session_id, user input, agent output
 Output: updated state S
 
-if S.memory_enabled is false then
+if memory is disabled, input/output are empty,
+   or S.agent_name == NON_MEDICAL_FILTER then
     return S
 end if
 
 input_text <- text(S.current_input)
 output_text <- text(S.output)
 
-if input_text and output_text are empty then
-    return S
-end if
-
-if S.agent_name == NON_MEDICAL_FILTER then
-    return S
-end if
-
 if S.current_input contains a medical image and output_text is not empty then
-    fact <- "AI-recorded medical image analysis, requires clinician confirmation: "
-            + shorten(output_text)
+    fact <- "AI-recorded medical image analysis; requires clinician confirmation: "
+            + summarize(output_text)
     Mem0.add(
         messages = [{role: user, content: fact}],
         user_id = S.patient_id,
@@ -990,14 +979,8 @@ if S.current_input contains a medical image and output_text is not empty then
     return S
 end if
 
-messages_to_store <- []
-if input_text is not empty then
-    append {role: user, content: shorten(input_text)} to messages_to_store
-end if
-if output_text is not empty and input is not a validation result then
-    append {role: assistant, content: shorten(output_text)} to messages_to_store
-end if
-
+messages_to_store <- shortened user turn and, unless it is a validation result,
+                     shortened assistant turn
 if messages_to_store is not empty then
     Mem0.add(
         messages = messages_to_store,
@@ -1126,14 +1109,14 @@ The full Kvasir-VQA-X1 training split contains 6,212 original endoscopic images 
 
 \begin{table}[H]
 \centering
-\begin{tabular}{l c c}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X c c}
 \hline\hline
 Training Data Setting & Number of Images & Number of Samples \\
 \hline
 Original Kvasir-VQA-X1 training data & 6,212 & 143,594 \\
 Mask-filtered visual grounding subset & 1,336 & 42,382 \\
 \hline\hline
-\end{tabular}
+\end{tabularx}
 \caption{Kvasir-VQA-X1 training data before and after segmentation-mask filtering}
 \label{table:kvasir-vqa-mask-filtering}
 \end{table}
@@ -1212,7 +1195,7 @@ The evaluation protocol is kept as a compact bridge between the datasets and the
 \midrule
 \textbf{Polyp Segmentation} & BKAI-IGH NeoPolyp-Small & Segmentation models with and without post-processing & Dice Score \cite{dice} \\
 \midrule
-\textbf{Polyp VQA} & Kvasir-VQA-X1 and its mask-matched subset & Base VLMs; LoRA fine-tuning; visual-grounded LoRA & BLEU-4; ROUGE-L; LLM-as-a-judge overall score \cite{bleu,rouge,llm_as_judge} \\
+\textbf{Polyp VQA} & Kvasir-VQA-X1 and its mask-matched subset & Base VLMs; LoRA fine-tuning; visual-grounded LoRA & BLEU-4; ROUGE-L; LLM-Judge Score \cite{bleu,rouge,llm_as_judge} \\
 \midrule
 \textbf{Memory Layer} & 30 Vietnamese multi-session scenarios & M0 no memory; M1 seeded memory; M2 extracted memory & Extraction P/R; routing accuracy; repeated-question avoidance; answer quality \\
 \bottomrule
@@ -1227,7 +1210,9 @@ For Polyp VQA, full-dataset and subset-based comparisons are separated. Original
 
 \subsection{Text Module Results and Analysis}
 
-The Text Module is evaluated using one-hop relation questions and multi-turn awareness cases. Table \ref{table:text-module-benchmark} summarizes the comparison.
+The Text Module is evaluated using one-hop relation questions and multi-turn awareness cases. The one-hop setting measures whether the system can answer relation-oriented medical questions when the relevant relation is available, while the multi-turn setting measures whether the system recognizes that a patient-specific query is underspecified and should trigger follow-up clarification. These two metrics therefore capture different behaviors and should not be averaged into a single score.
+
+Three settings are compared. \textbf{MedLLM} represents the base language-model setting without external KG or RAG evidence. \textbf{RAG + MedLLM} adds retrieved unstructured medical documents before answer generation. \textbf{KG + MedLLM} adds structured medical relations from the Knowledge Graph before MedGemma CoT assessment and synthesis. Table \ref{table:text-module-benchmark} summarizes the comparison. Scores are reported as percentages, and higher values indicate better performance.
 
 \begin{table}[H]
 \centering
@@ -1244,15 +1229,15 @@ MedLLM & 60.87\% & 50.72\% \\
 \label{table:text-module-benchmark}
 \end{table}
 
-The KG + MedLLM setting achieves the best performance in both One-Hop Accuracy and Multi-Turn Awareness Score. The first result suggests that structured medical relations help the model answer relation-oriented questions more accurately when the task depends on disease-symptom links or explicit medical relationships. The second result suggests that the system is better at recognizing when the current clinical context is still insufficient for a safe patient-specific answer.
+The KG + MedLLM setting achieves the best performance in both One-Hop Accuracy and Multi-Turn Awareness Score. Compared with the base MedLLM setting, KG + MedLLM improves One-Hop Accuracy from 60.87\% to 86.95\%, a gain of +26.08 percentage points. It also improves Multi-Turn Awareness Score from 50.72\% to 70.83\%, a gain of +20.11 percentage points. Compared with RAG + MedLLM, the KG-based setting is higher by +18.98 percentage points on One-Hop Accuracy and +30.45 percentage points on Multi-Turn Awareness. These differences suggest that structured medical relations help the model answer relation-oriented questions more accurately and also support better recognition of insufficient patient context.
 
-RAG + MedLLM performs better than the base model on one-hop reasoning but is weaker on Multi-Turn Awareness. This indicates that retrieved text is useful for explanation, but it may not always help the model recognize when information is incomplete. The base MedLLM setting lacks external grounding and therefore performs worse on structured relation reasoning.
+RAG + MedLLM performs better than the base model on one-hop reasoning, increasing One-Hop Accuracy from 60.87\% to 67.97\% (+7.10 percentage points), but it is weaker on Multi-Turn Awareness, decreasing from 50.72\% to 40.38\% (-10.34 percentage points). This contrast is important. Retrieved text can provide useful explanatory evidence, but it may also encourage the model to produce a direct answer when the original clinical question remains incomplete. The base MedLLM setting lacks external grounding and therefore performs worse on structured relation reasoning, but it is not affected by potentially over-confident retrieved context in the same way.
 
-The difference between One-Hop Accuracy and Multi-Turn Awareness is important. One-Hop Accuracy measures whether the system can answer when the required relation is available, such as mapping a symptom set to a likely disease candidate. Multi-Turn Awareness measures whether the system understands that a direct answer may be unsafe when key clinical information is missing and a follow-up turn is needed. A medical assistant should perform well on both dimensions. High answer accuracy alone is not sufficient if the model answers prematurely in incomplete clinical scenarios.
+This separation matters for safety. A model can achieve reasonable One-Hop Accuracy by answering relation-oriented questions, but still behave poorly in a consultation setting if it answers too early when the patient context is incomplete. A medical assistant should therefore perform well on both dimensions: it should answer when the evidence and clinical context are sufficient, and it should ask targeted follow-up questions when important variables are missing.
 
-The stronger performance of KG + MedLLM suggests that explicit relations help the model identify clinically relevant links more reliably than text retrieval alone. However, the result should not be interpreted as showing that KG is always superior to RAG. KG is stronger for structured relation reasoning, while RAG remains useful for explanatory responses and broader medical education. The practical conclusion is that the two sources should be coordinated rather than treated as mutually exclusive.
+The stronger performance of KG + MedLLM suggests that explicit relations help the model identify clinically relevant links more reliably than text retrieval alone in this benchmark. However, the result should not be interpreted as showing that KG is always superior to RAG. The benchmark emphasizes relation-oriented questions and insufficient-context awareness, which naturally favors structured evidence. RAG remains useful for explanatory responses, disease overviews, treatment descriptions, and broader medical education. The practical conclusion is that the two sources should be coordinated rather than treated as mutually exclusive.
 
-The lower Multi-Turn Awareness Score of RAG + MedLLM suggests that adding retrieved documents may encourage direct answering even when the user query lacks enough clinical detail. This is a common risk in retrieval-augmented systems: retrieved evidence can make the model appear grounded while the original question remains underspecified. The MedGemma CoT information-sufficiency step is therefore necessary after KG/RAG context selection and before final answer synthesis.
+The lower Multi-Turn Awareness Score of RAG + MedLLM supports the need for an explicit sufficiency check. Retrieved evidence can make the model appear grounded while the original question remains underspecified. The MedGemma CoT information-sufficiency step is therefore necessary after KG/RAG context selection and before final answer synthesis.
 
 The Multi-Turn Awareness Score should not be read as direct evidence that the system has solved full path-level KG multi-hop reasoning. The benchmark mainly measures whether the system recognizes insufficient context and avoids a premature answer. The advantage of KG-based multi-hop reasoning is therefore discussed as an architectural capability: the graph can support structured chains such as symptom $\rightarrow$ disease $\rightarrow$ treatment, while the evaluated multi-turn behavior measures whether the system knows when more user context is required before using those relations in a patient-facing response.
 
@@ -1260,7 +1245,7 @@ The base MedLLM result in Table \ref{table:text-module-benchmark} shows that a l
 
 \paragraph*{Multi-turn clarification case analysis.}
 
-The difference between a traditional single-turn response and the proposed multi-turn clarification behavior is illustrated in Figures \ref{fig:traditional-single-turn-limitation} and \ref{fig:medical-multihop-qa-benefit}. These two examples use the same general symptom scenario, but the response strategies are different.
+The difference between a traditional single-turn response and the proposed multi-turn clarification behavior is illustrated in Figures \ref{fig:traditional-single-turn-limitation} and \ref{fig:medical-multihop-qa-benefit}. These two examples use the same general symptom scenario, but the response strategies are different. They should be interpreted as qualitative case analysis that explains the failure mode and desired behavior behind the Multi-Turn Awareness Score, rather than as additional quantitative benchmark results.
 
 \begin{figure}[H]
     \centering
@@ -1289,7 +1274,7 @@ The comparison also clarifies the role of the Conversation Agent. Its purpose is
 
 \subsection{Polyp Segmentation Results and Analysis}
 
-Table \ref{table:dice-scores} presents Dice Score results for several segmentation models with and without post-processing.
+Table \ref{table:dice-scores} presents Dice Score results for several segmentation models on the BKAI-IGH NeoPolyp-Small segmentation task, with and without the proposed post-processing step. Dice Score is used here as an overlap-based metric between the predicted mask and the ground-truth annotation, so a higher value indicates better agreement in pixel-level lesion localization and class-aware mask prediction.
 
 \begin{table}[H]
 \centering
@@ -1311,7 +1296,9 @@ U-Net++ & 77.54\% & - \\
 \label{table:dice-scores}
 \end{table}
 
-Post-processing improves segmentation consistency across the evaluated models. The RegNetx320 variant achieves the strongest result, increasing from 82.56\% to 86.33\% Dice Score. The ResNet50 variant also improves from 81.12\% to 85.62\%. These gains indicate that region-level refinement is useful even when the base segmentation model is already strong.
+Post-processing improves segmentation consistency across all models for which post-processed results are reported. PraNet increases from 80.02\% to 82.94\%, DeepLabV3+ (RegNetx320) increases from 82.56\% to 86.33\%, DeepLabV3+ (ResNet50) increases from 81.12\% to 85.62\%, and EMCAD (PVT2-b2) increases from 80.93\% to 83.76\%. These correspond to gains of +2.92, +3.77, +4.50, and +2.83 percentage points, respectively. The average improvement over these four post-processed models is therefore approximately +3.51 percentage points. U-Net and U-Net++ are included as baseline segmentation results, but no post-processing value is reported for these two models, so they are not included in the gain analysis.
+
+Among the compared settings, DeepLabV3+ (RegNetx320) achieves the strongest final result with 86.33\% Dice Score after post-processing. DeepLabV3+ (ResNet50) obtains the largest absolute improvement, increasing by +4.50 percentage points. This pattern suggests that the refinement step is useful not only for the best-performing backbone, but also for models whose raw predictions contain more class inconsistency inside the detected lesion region.
 
 The improvement is consistent with the post-processing method described in the Vision Reasoning Module. Connected component analysis changes the interpretation of the mask from isolated pixel predictions to region-level candidates, and region-wise color dominance refinement reduces mixed red/green class fragments inside a connected lesion. This is especially relevant in the BKAI-IGH NeoPolyp setting because a pixel can be spatially inside the lesion but still counted as wrong if its neoplastic/non-neoplastic label is incorrect.
 
@@ -1322,17 +1309,19 @@ The improvement is consistent with the post-processing method described in the V
     \label{fig:post-processing-visualization}
 \end{figure}
 
-The qualitative examples in Figure \ref{fig:post-processing-visualization} align with the quantitative trend in Table \ref{table:dice-scores}. The largest gains appear when the raw prediction is close to the correct region but contains minority-class artifacts. In these cases, $C_k(R_i)$ identifies the dominant class, and the update rule for $M'(x,y)$ improves overlap by regularizing the label inside the connected component.
+The qualitative examples in Figure \ref{fig:post-processing-visualization} align with the quantitative trend in Table \ref{table:dice-scores}. Each row compares the original colonoscopy image, the ground-truth mask, the raw prediction, and the processed prediction. In the first two examples, the raw prediction locates the lesion but assigns a small part of the connected region to the wrong class. After refinement, the minority-class artifact is removed and the processed mask becomes closer to the ground truth. In the third and fourth examples, the same effect appears in more irregular connected regions: the method preserves the approximate lesion geometry while making the class label inside the region more consistent.
+
+The largest gains therefore appear when the raw prediction is close to the correct region but contains minority-class artifacts. In these cases, $C_k(R_i)$ identifies the dominant class, and the update rule for $M'(x,y)$ improves overlap by regularizing the label inside the connected component. This explains why the method can improve Dice Score without changing the underlying segmentation backbone: it corrects local class fragmentation after the model has already detected the lesion region.
 
 The method should therefore be interpreted as a consistency refinement module, not as a replacement for the segmentation model. It cannot recover a missed lesion, and it may incorrectly merge touching regions that actually belong to different classes. For downstream Polyp VQA, its main benefit is a clearer overlay for visual grounding and human review; its main risk is that an incorrect refined mask may guide the VQA model toward wrong evidence. This motivates the separate evaluation of original-image VQA and segmentation-grounded VQA.
 
 \subsection{Polyp VQA Fine-tuning Results and Analysis on Kvasir-VQA-X1}
 
-The Polyp VQA VLM is evaluated using BLEU-4, ROUGE-L, and an LLM-as-a-judge protocol \cite{bleu,rouge,llm_as_judge}. BLEU-4 and ROUGE-L measure lexical overlap with the reference answer, while the judge-based score is used to assess semantic and clinical answer quality. The judge model is \texttt{google/medgemma-27b-it}. For each prediction, the judge receives the question, ground-truth answer, and model prediction, and returns four scores from 1 to 5: factual accuracy, completeness, clinical relevance, and no hallucination. The overall score is computed as:
+The Polyp VQA VLM is evaluated using BLEU-4, ROUGE-L, and an LLM-as-a-judge protocol \cite{bleu,rouge,llm_as_judge}. BLEU-4 and ROUGE-L measure lexical overlap with the reference answer, while the judge-based score is used to assess semantic and clinical answer quality. The judge model is \texttt{google/medgemma-27b-it}. For each prediction, the judge receives the question, ground-truth answer, and model prediction, and returns four scores from 1 to 5: factual accuracy, completeness, clinical relevance, and no hallucination. The weighted LLM-Judge Score is computed as:
 
 \[
 \begin{aligned}
-\text{Overall Score} ={}& 0.40 \times \text{Factual Accuracy}
+\text{LLM-Judge Score} ={}& 0.40 \times \text{Factual Accuracy}
 + 0.40 \times \text{Completeness} \\
 &+ 0.10 \times \text{Clinical Relevance}
 + 0.10 \times \text{No Hallucination}.
@@ -1346,7 +1335,7 @@ This weighting gives the highest importance to factual correctness and coverage 
 \begin{adjustbox}{width=\textwidth}
 \begin{tabular}{p{0.50\textwidth} c c c c}
 \hline\hline
-Model Setting & Samples & BLEU-4 & ROUGE-L & Overall Score \\
+Model Setting & Samples & BLEU-4 & ROUGE-L & LLM-Judge Score \\
 \hline
 MedGemma-4B-it base & 1000 & 0.0055 & 0.1154 & 2.7521 \\
 MedGemma-4B-it + LoRA  & 1000 & 0.3657 & 0.6936 & 4.6351 \\
@@ -1361,13 +1350,13 @@ MedGemma-4B-it + LoRA + visual grounding & 305 & 0.4139 & 0.6966 & 4.5751 \\
 \label{table:polyp-vqa-lora-evaluation}
 \end{table}
 
-The clearest pattern in Table \ref{table:polyp-vqa-lora-evaluation} is that LoRA fine-tuning is the main driver of performance improvement. MedGemma-4B-it improves from a BLEU-4 score of 0.0055 and overall score of 2.7521 to 0.3657 and 4.6351, respectively. Qwen3.5-4B also benefits strongly from LoRA, increasing from 0.0261 BLEU-4 and 3.4720 overall score to 0.1935 and 4.5341. In practical terms, the base VLMs can process the image-question input, but they are not yet aligned with the answer style and clinical content distribution of Kvasir-VQA-X1. Lightweight task adaptation substantially improves both lexical matching and semantic answer quality.
+The clearest pattern in Table \ref{table:polyp-vqa-lora-evaluation} is that LoRA fine-tuning is the main driver of performance improvement. MedGemma-4B-it improves from a BLEU-4 score of 0.0055 and an LLM-Judge Score of 2.7521 to 0.3657 and 4.6351, respectively. Qwen3.5-4B also benefits strongly from LoRA, increasing from a BLEU-4 score of 0.0261 and an LLM-Judge Score of 3.4720 to 0.1935 and 4.5341. In practical terms, the base VLMs can process the image-question input, but they are not yet aligned with the answer style and clinical content distribution of Kvasir-VQA-X1. Lightweight task adaptation substantially improves both lexical matching and semantic answer quality.
 
 Between the two backbones, MedGemma-4B-it achieves stronger fine-tuned performance than Qwen3.5-4B. This is consistent with the expectation that a medically oriented VLM backbone is better aligned with endoscopic visual concepts and clinical answer generation. Qwen3.5-4B remains a strong baseline after fine-tuning, but its lower BLEU-4 and ROUGE-L suggest that it may be less aligned with the dataset's medical visual-language distribution.
 
 The visual grounding comparison must be interpreted on the mask-matched subset only. As shown in Table \ref{table:kvasir-vqa-mask-filtering}, only 1,336 of the 6,212 training images have usable segmentation masks, reducing the training samples from 143,594 to 42,382 for the grounded setting. Therefore, the fair comparison is not between the 1000-sample MedGemma LoRA result and the visual-grounded result.
 
-Instead, the correct baseline is the MedGemma LoRA-only model evaluated again on the same 305 evaluation samples that have matched visual grounding inputs. Under this controlled comparison, visual grounding improves the overall score from 4.4269 to 4.5751. The gain is modest, but it is meaningful because the grounded model is being tested against a strong LoRA-only baseline on the same subset. The result supports the idea that segmentation masks can provide useful spatial evidence for VQA when the mask is available and aligned with the question.
+Instead, the correct baseline is the MedGemma LoRA-only model evaluated again on the same 305 evaluation samples that have matched visual grounding inputs. Under this controlled comparison, visual grounding improves the LLM-Judge Score from 4.4269 to 4.5751. The gain is modest, but it is meaningful because the grounded model is being tested against a strong LoRA-only baseline on the same subset. The result supports the idea that segmentation masks can provide useful spatial evidence for VQA when the mask is available and aligned with the question.
 
 The original-image setting evaluates whether the VLM can identify relevant visual evidence without additional guidance. The visual-grounded setting evaluates whether a segmentation mask improves answer quality by focusing attention on the polyp region. Since only a subset of samples contains matched segmentation masks, the visual grounding analysis is conducted on 305 mask-matched samples.
 
@@ -1382,7 +1371,7 @@ Factual Accuracy & 4.2918 & 4.4951 & +0.2033 \\
 Completeness & 4.3607 & 4.5016 & +0.1409 \\
 Clinical Relevance & 4.8984 & 4.9246 & +0.0262 \\
 No Hallucination & 4.7607 & 4.8393 & +0.0786 \\
-Overall Score & 4.4269 & 4.5751 & +0.1482 \\
+LLM-Judge Score & 4.4269 & 4.5751 & +0.1482 \\
 \hline\hline
 \end{tabular}
 \end{adjustbox}
@@ -1456,13 +1445,13 @@ The Vision Module is limited by the quality of segmentation, mask availability, 
 
 The segmentation results show that region-level post-processing improves Dice Score, with DeepLabV3+ (RegNetx320) increasing from 82.56\% to 86.33\%. This supports the usefulness of connected-component and color-dominance refinement for making masks more consistent. However, the method regularizes an existing prediction rather than detecting missed lesions. It may improve a noisy but mostly correct region, but it cannot recover a lesion that the base model fails to segment.
 
-Segmentation errors can propagate to downstream VQA. If the mask misses the polyp region, highlights irrelevant tissue, or assigns the wrong class, the grounded VQA input may mislead the model. Therefore, visual grounding is not automatically safer than original-image VQA. The results section shows a positive controlled effect on the mask-matched subset, where MedGemma LoRA with visual grounding improves the judge score from 4.4269 to 4.5751 and improves factual accuracy, completeness, clinical relevance, and no-hallucination criteria. This should be interpreted as conditional evidence that masks help when they are available and aligned with the question, not as proof that every mask-guided answer is safer.
+Segmentation errors can propagate to downstream VQA. If the mask misses the polyp region, highlights irrelevant tissue, or assigns the wrong class, the grounded VQA input may mislead the model. Therefore, visual grounding is not automatically safer than original-image VQA. The results section shows a positive controlled effect on the mask-matched subset, where MedGemma LoRA with visual grounding improves the LLM-Judge Score from 4.4269 to 4.5751 and improves factual accuracy, completeness, clinical relevance, and no-hallucination criteria. This should be interpreted as conditional evidence that masks help when they are available and aligned with the question, not as proof that every mask-guided answer is safer.
 
 The General Diagnosis Agent has broader coverage but weaker guarantees. Without modality-specific fine-tuning and evaluation, its outputs should remain descriptive and cautious. This agent is useful for system extensibility, but the thesis does not claim comprehensive diagnostic performance across all medical image types.
 
 \subsection{Kvasir-VQA-X1 and Domain Transfer}
 
-Kvasir-VQA-X1 is useful for endoscopic VQA, but dataset coverage and annotation style may not fully match real deployment images or user questions. Metrics such as BLEU and ROUGE-L may not capture clinical correctness, so LLM Judge and qualitative analysis are also needed. In the current results, LoRA fine-tuning is the main driver of VQA improvement: MedGemma-4B-it increases from 2.7521 to 4.6351 overall score, and Qwen3.5-4B increases from 3.4720 to 4.5341. This means that the conclusion should emphasize both task adaptation and visual grounding, not visual grounding alone.
+Kvasir-VQA-X1 is useful for endoscopic VQA, but dataset coverage and annotation style may not fully match real deployment images or user questions. Metrics such as BLEU and ROUGE-L may not capture clinical correctness, so LLM Judge and qualitative analysis are also needed. In the current results, LoRA fine-tuning is the main driver of VQA improvement: MedGemma-4B-it increases from 2.7521 to 4.6351 in LLM-Judge Score, and Qwen3.5-4B increases from 3.4720 to 4.5341. This means that the conclusion should emphasize both task adaptation and visual grounding, not visual grounding alone.
 
 Domain transfer is a central concern. A model fine-tuned on Kvasir-VQA-X1 may learn the style and distribution of that dataset but still struggle with images from different devices, lighting conditions, bowel preparation quality, or clinical populations. User questions in deployment may also be longer, less structured, and more ambiguous than dataset questions. These differences should be considered when interpreting evaluation results.
 
@@ -1488,7 +1477,7 @@ For these reasons, the results should be interpreted as evidence of technical fe
 
 \subsection{Summary of Achievements}
 
-This thesis demonstrates that a medical assistant can be made more controllable when routing, evidence retrieval, visual grounding, memory retrieval, and validation are separated into explicit workflow components. MedGemma CoT is then used for text-side sufficiency assessment and answer synthesis rather than as an isolated answer generator. The resulting system improves observability because intermediate evidence can be inspected before final answers are produced. It also improves safety behavior by distinguishing evidence availability from clinical sufficiency: KG/RAG may provide candidate evidence, but MedGemma CoT must still decide whether to answer, ask a follow-up question, or fall back to additional search. The system also preserves patient context without treating it as verified diagnosis and evaluates visual grounding as a conditional intervention rather than an assumed benefit.
+This thesis demonstrates that a medical assistant can be made more controllable when routing, evidence retrieval, visual grounding, memory retrieval, and validation are separated into explicit workflow components. MedGemma CoT is used for text-side sufficiency assessment and answer synthesis rather than as an isolated answer generator. The system improves observability and safety behavior by allowing intermediate evidence to be inspected, distinguishing evidence availability from clinical sufficiency, preserving patient context without treating it as verified diagnosis, and evaluating visual grounding as a conditional intervention.
 
 Experimentally, the thesis shows five main outcomes. First, the Text Module benchmark shows that KG + MedLLM achieves the strongest One-Hop Accuracy and Multi-Turn Awareness Score, supporting the usefulness of structured evidence and explicit insufficient-context detection. This should be interpreted as evidence for relation-oriented answering and multi-turn awareness, while full KG path-level reasoning remains a future evaluation target. Second, connected-component and color-dominance post-processing improves segmentation consistency for colonoscopy polyp masks, with the strongest DeepLabV3+ setting reaching 86.33\% Dice Score after post-processing. Third, LoRA fine-tuning substantially improves Polyp VQA performance for both MedGemma-4B-it and Qwen3.5-4B, showing that task adaptation is essential before using compact VLMs for endoscopic VQA. Fourth, segmentation-grounded VQA improves judge-based answer quality on the mask-matched subset, especially in factual accuracy and completeness, but this gain is conditional on mask availability and mask quality. Fifth, patient-scoped memory improves personalization, routing accuracy, repeated-question avoidance, and answer quality, while adding latency and relevance-filtering trade-offs. Together, these results support the thesis argument that modular grounding and evidence control can improve medical-assistant behavior at the system level.
 
@@ -1507,4 +1496,4 @@ The technical contributions are:
 
 \section{Future Work}
 
-Future work should focus on expanding Vietnamese medical datasets, improving Knowledge Graph coverage, strengthening RAG retrieval and reranking, improving visual grounding robustness, refining LoRA fine-tuning for VQA, adding expert validation, and developing stronger memory governance mechanisms. For the Text Module, an important next step is to build a dedicated path-level KG benchmark that evaluates chains such as symptom $\rightarrow$ disease $\rightarrow$ treatment and symptom $\rightarrow$ disease $\rightarrow$ warning sign, separately from Multi-Turn Awareness Score. Multi-turn evaluation should also be expanded into longer clinical dialogue scenarios that test whether the system asks relevant follow-up questions, stops asking when enough context is available, and preserves safety boundaries during answer synthesis. For the Vision Module, future work should evaluate grounding under segmentation failure cases, expand mask-matched data coverage, test additional endoscopy datasets, and measure whether improved masks consistently improve VQA behavior rather than only Dice Score. For the Memory Layer, future work should improve extraction precision, recency handling, contradiction resolution, user correction, deletion workflows, and latency control. Clinical evaluation with medical professionals is also necessary before any real-world deployment.
+Future work should focus on expanding Vietnamese medical datasets, improving Knowledge Graph coverage, strengthening RAG retrieval and reranking, improving visual grounding robustness, refining LoRA fine-tuning for VQA, adding expert validation, and developing stronger memory governance mechanisms. For the Text Module, an important next step is to build a dedicated path-level KG benchmark for chains such as symptom $\rightarrow$ disease $\rightarrow$ treatment and symptom $\rightarrow$ disease $\rightarrow$ warning sign, separately from Multi-Turn Awareness Score. Multi-turn evaluation should also cover longer clinical dialogues that test relevant follow-up questions, stopping behavior when enough context is available, and safety boundaries during answer synthesis. For the Vision Module, future work should evaluate grounding under segmentation failure cases, expand mask-matched data coverage, and test whether improved masks consistently improve VQA behavior rather than only Dice Score. For the Memory Layer, future work should improve extraction precision, recency handling, contradiction resolution, user correction, deletion workflows, and latency control. Clinical evaluation with medical professionals is also necessary before real-world deployment.

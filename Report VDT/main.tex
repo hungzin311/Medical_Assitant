@@ -1,7 +1,10 @@
 % !TeX spellcheck = en_US
-\documentclass[12pt, a4paper]{report}
+\documentclass[a4paper]{report}
+\usepackage{scrextend}
 \usepackage[utf8]{vietnam}
 \usepackage[english,vietnamese]{babel}
+\usepackage{times}
+\changefontsizes{13pt}
 \usepackage{float}
 \usepackage{adjustbox}
 \setlength{\belowcaptionskip}{-10pt}
@@ -83,7 +86,7 @@
 \hypersetup{pageanchor=false}
 
 \setlength{\parskip}{3pt} % Đặt khoảng cách giữa các đoạn văn, bạn có thể thử 0pt
-\setlength{\parindent}{15pt} % Nếu parskip là 0, bạn có thể muốn thụt đầu dòng
+\setlength{\parindent}{0pt}
 
 \setlist{noitemsep, topsep=0pt, partopsep=0pt}
 \selectlanguage{vietnamese}
@@ -93,7 +96,9 @@
     %-------------------------------------------------------------
     %-- Make the header of the document                          |
     %------>------>------>------>------>------>------>------>--> |
+    \newgeometry{top=2cm,bottom=2cm,left=2cm,right=2cm}
     \input{includes/document-header}
+    \restoregeometry
     \thispagestyle{empty}
     \selectlanguage{vietnamese}
     %\hrule width0.3\textwidth
@@ -108,7 +113,18 @@
     \noindent\makebox[\textwidth][c]{%
     \begin{minipage}{0.9\textwidth}
     \justifying
-    \setlength{\parindent}{15pt}
+    \setlength{\parindent}{0pt}
+
+    First and foremost, I would like to express my deepest gratitude to my supervisor, PhD. Dinh Viet Sang, for his dedicated guidance, valuable advice, and continuous support throughout the completion of this thesis. His expertise, patience, and constructive feedback have greatly helped me improve the quality of this work and overcome challenges during the research process.
+
+    I would also like to express my heartfelt appreciation to my family for their unconditional love, trust, and support. Their encouragement has always been a strong source of motivation for me, especially during difficult and stressful periods of my study. Their belief in my ability has given me the confidence to keep moving forward, even when the work became challenging. Without their understanding and support, this academic journey would have been much harder to complete.
+
+    I would like to give special thanks to my girlfriend, Nhí, for always accompanying and supporting me in every journey. Her care, patience, and understanding have meant a great deal to me throughout the process of writing this thesis. She has always been by my side, encouraging me, listening to me, and giving me strength during both ordinary days and difficult moments. Her companionship has made this journey not only more manageable, but also more meaningful.
+
+    My sincere thanks also go to my friends, who have shared with me many valuable moments during my years of study. I am grateful for their encouragement, advice, discussions, and support throughout the thesis-writing process. Their friendship has brought me motivation, balance, and memorable experiences beyond academic work. The time spent learning, working, and growing together has become an important part of my university life.
+
+    Finally, I would like to extend my sincere thanks to Hanoi University of Science and Technology for providing me with a valuable academic environment, knowledge, and opportunities throughout my years of study. The education and experiences I have received at the university have helped me build not only technical knowledge, but also discipline, independence, and a deeper sense of responsibility in my work. I am honored to have studied and completed this thesis as a student of Hanoi University of Science and Technology.
+
     \end{minipage}%
     }
 

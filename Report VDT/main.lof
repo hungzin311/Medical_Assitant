@@ -5,19 +5,19 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Overall architecture of the Multi-Agent Medical Assistant}}{10}{figure.caption.1}%
-\contentsline {figure}{\numberline {3.2}{\ignorespaces Detailed agent workflow with text, vision, memory, and fallback coordination}}{11}{figure.caption.2}%
-\contentsline {figure}{\numberline {3.3}{\ignorespaces Text Module architecture for medical knowledge retrieval}}{16}{figure.caption.7}%
-\contentsline {figure}{\numberline {3.4}{\ignorespaces Parallel KG-RAG processing in the Text Module}}{20}{figure.caption.9}%
-\contentsline {figure}{\numberline {3.5}{\ignorespaces Medical chain-of-thought, information sufficiency, and answer synthesis flow}}{24}{figure.caption.11}%
-\contentsline {figure}{\numberline {3.6}{\ignorespaces Vision Module workflow with routing, optional grounding, summarization, and memory context}}{26}{figure.caption.13}%
-\contentsline {figure}{\numberline {3.7}{\ignorespaces DeepLabV3+ encoder-decoder architecture with Atrous Spatial Pyramid Pooling}}{29}{figure.caption.14}%
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Overall architecture of the Multi-Agent Medical Assistant}}{12}{figure.caption.1}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Detailed agent workflow with text, vision, memory, and fallback coordination}}{13}{figure.caption.2}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Text Module architecture for medical knowledge retrieval}}{19}{figure.caption.7}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Parallel KG-RAG processing in the Text Module}}{24}{figure.caption.9}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Medical chain-of-thought, information sufficiency, and answer synthesis flow}}{28}{figure.caption.11}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Vision Module workflow with routing, optional grounding, summarization, and memory context}}{31}{figure.caption.13}%
+\contentsline {figure}{\numberline {3.7}{\ignorespaces DeepLabV3+ encoder-decoder architecture with Atrous Spatial Pyramid Pooling}}{34}{figure.caption.14}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Medical QA dataset overview used for retrieval-oriented experiments}}{41}{figure.caption.16}%
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Overview of the VietMedKG data source used by the Knowledge Graph Agent}}{42}{figure.caption.18}%
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Example images and annotations from the BKAI-IGH NeoPolyp-Small dataset}}{43}{figure.caption.19}%
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Example structure of the Kvasir-VQA-X1 dataset for gastrointestinal endoscopy VQA}}{44}{figure.caption.20}%
-\contentsline {figure}{\numberline {4.5}{\ignorespaces Traditional single-turn approach with limited clinical context}}{48}{figure.caption.25}%
-\contentsline {figure}{\numberline {4.6}{\ignorespaces Multi-turn clarification with iterative context collection and safer response refinement}}{49}{figure.caption.26}%
-\contentsline {figure}{\numberline {4.7}{\ignorespaces Visualization of raw and post-processed polyp segmentation masks}}{51}{figure.caption.28}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Medical QA dataset overview used for retrieval-oriented experiments}}{47}{figure.caption.16}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Overview of the VietMedKG data source used by the Knowledge Graph Agent}}{48}{figure.caption.18}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Example images and annotations from the BKAI-IGH NeoPolyp-Small dataset}}{49}{figure.caption.19}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Example structure of the Kvasir-VQA-X1 dataset for gastrointestinal endoscopy VQA}}{50}{figure.caption.20}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Traditional single-turn approach with limited clinical context}}{55}{figure.caption.25}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Multi-turn clarification with iterative context collection and safer response refinement}}{56}{figure.caption.26}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Visualization of raw and post-processed polyp segmentation masks}}{58}{figure.caption.28}%
 \addvspace {10\p@ }
