@@ -24,7 +24,6 @@ from agents.agent_decision import process_query, create_agent_graph
 from agents.patient_memory_service.api import router as patient_memory_router
 from utils.proxy_setting import *
 from utils.streaming import current_stream_callback
-from agents.patient_db_agent import PatientQueryEngine
 from langchain_core.callbacks import BaseCallbackHandler
 
 config = Config()
@@ -32,9 +31,7 @@ config = Config()
 #Set proxy 
 set_proxy()
 
-patient_query_engine = PatientQueryEngine(config)
-
-graph = create_agent_graph(patient_query_engine)
+graph = create_agent_graph()
 
 
 # Initialize FastAPI app with increased limits for large form data

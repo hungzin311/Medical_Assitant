@@ -429,11 +429,8 @@ def main():
     graph = None
     if args.full_system:
         from agents.agent_decision import create_agent_graph
-        from agents.patient_db_agent import PatientQueryEngine
-        from utils.config import Config
 
-        config = Config()
-        graph = create_agent_graph(PatientQueryEngine(config))
+        graph = create_agent_graph()
 
     all_results = []
     summary = {}

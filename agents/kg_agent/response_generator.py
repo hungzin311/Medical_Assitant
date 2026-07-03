@@ -3,7 +3,6 @@ from typing import List, Dict, Optional
 from .cypher_query_llm import CypherQueryService
 from .context_filter import ContextFilterEmbedding
 from utils.llm_config import get_llm
-from agents.patient_db_agent import PatientQueryEngine
 from agents.rag_agent.query_expander import QueryExpander
 from utils.config import Config
 from utils.prompt import medical_cot_prompt, medical_direct_kg_prompt, medical_mcq_evaluation_prompt
@@ -16,21 +15,16 @@ prompt = medical_cot_prompt
 mcq_prompt = medical_mcq_evaluation_prompt
 
 class ResponseGenerator:
-    def __init__(self, patient_query_engine: PatientQueryEngine):
+    def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.cypher_query_llm = CypherQueryService()
         self.context_filter = ContextFilterEmbedding()
         self.llm = get_llm(temperature=0.0)
-        self.patient_query_engine = patient_query_engine
         self.query_expander = QueryExpander(config)
         self.cached_kg_candidates = None
     
-    def generate_response(self, question: str, patient_id: str, chat_history: Optional[List[Dict[str, str]]] = None):
-        # patient profile
-        patient_profile = self.patient_query_engine.get_patient_profile(patient_id) 
-        
-        # query expander
-        expanded_result = self.query_expander.expand_query(question, patient_info=patient_profile, mode="kg", chat_history=chat_history)
+    def generate_response(self, question: str, patient_id: str = None, chat_history: Optional[List[Dict[str, str]]] = None):
+        expanded_result = self.query_expander.expand_query(question, patient_info=None, mode="kg", chat_history=chat_history)
         expanded_query = expanded_result["expanded_query"]
         question = expanded_query["refined_question"]
         patient_context = expanded_query["patient_context"]

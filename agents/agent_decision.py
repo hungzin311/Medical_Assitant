@@ -14,7 +14,6 @@ from agents.web_search_processor_agent import WebSearchProcessorAgent
 from agents.image_analysis_agent import ImageAnalysisAgent
 from langgraph.checkpoint.memory import MemorySaver
 from agents.kg_agent import KGQueryEngine
-from agents.patient_db_agent import PatientQueryEngine
 from utils.llm_config import *
 from utils.proxy_setting import *
 from utils.prompt import decision_agent_prompt, conversation_agent_prompt, medical_multi_source_cot_prompt
@@ -248,11 +247,11 @@ def _memory_context_message(patient_memory_context: Optional[str]) -> List[Dict[
     ]
 
 
-def create_agent_graph(patient_query_engine: PatientQueryEngine):
+def create_agent_graph():
     """Create and configure the LangGraph for agent orchestration."""
     decision_chain = get_decision_chain()
 
-    kg_agent = KGQueryEngine(patient_query_engine)
+    kg_agent = KGQueryEngine()
     rag_agent = MedicalRAG(config)
     medlineplus_agent = MedlinePlusAgent(config)
 
@@ -508,10 +507,9 @@ def create_agent_graph(patient_query_engine: PatientQueryEngine):
 
         def run_kg_retrieval(): 
             try:
-                patient_profile = patient_query_engine.get_patient_profile(patient_id)
                 expanded_result = kg_agent.response_generator.query_expander.expand_query(
                     query,
-                    patient_info=patient_profile,
+                    patient_info=None,
                     mode="kg",
                     chat_history=build_chat_history(kg_context_limit),
                 )

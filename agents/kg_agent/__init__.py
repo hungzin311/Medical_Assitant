@@ -3,8 +3,6 @@ from .cypher_query_llm import CypherQueryService
 from .context_filter import ContextFilterEmbedding
 from .response_generator import ResponseGenerator
 from typing import Dict, List, Any, Optional
-from agents.patient_db_agent import PatientQueryEngine
-
 logging.getLogger("httpx").disabled = True
 
 class KGQueryEngine:
@@ -12,11 +10,11 @@ class KGQueryEngine:
     High-level query interface for Knowledge Graph operations.
     """
     
-    def __init__(self, patient_query_engine: PatientQueryEngine):
+    def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.cypher_service = CypherQueryService()
         self.context_filter = ContextFilterEmbedding()
-        self.response_generator = ResponseGenerator(patient_query_engine)
+        self.response_generator = ResponseGenerator()
     
     def retrieve_medical_context(self, question: str) -> Dict[str, Any]:
         """Retrieve medical context from knowledge graph"""

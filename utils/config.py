@@ -66,28 +66,6 @@ class MedlinePlusConfig:
         self.context_limit = 20
 
 
-class PatientDBConfig:
-    def __init__(self):
-        self.vector_db_type = "qdrant"
-        self.embedding_dim = 768  
-        self.distance_metric = "Cosine"
-        self.use_local = False
-        self.url = os.getenv("QDRANT_URL")
-        self.api_key = os.getenv("QDRANT_API_KEY")
-        self.collection_name = "medical_records"  
-        self.embedding_model = get_embedding()
-        self.top_k = 50  
-        self.llm = get_gemini_llm(temperature=0.1) 
-        self.max_age_range_default = 10  
-        self.min_cases_for_confidence = 5  
-        self.outbreak_threshold = 5  
-        self.risk_score_threshold = 0.7  
-        
-        # Population monitoring settings
-        self.monitoring_time_windows = ["7d", "30d", "90d"]
-        self.alert_confidence_threshold = 0.6
-        self.max_population_results = 1000
-
 class MedicalCVConfig:
     def __init__(self):
         self.llm = get_gemini_vision_llm(temperature=0.1) 
@@ -143,7 +121,6 @@ class Config:
         self.conversation = ConversationConfig()
         self.rag = RAGConfig()
         self.medlineplus = MedlinePlusConfig()
-        self.patient_db = PatientDBConfig()  # Add patient database configuration
         self.medical_cv = MedicalCVConfig()
         self.web_search = WebSearchConfig()
         self.api = APIConfig()

@@ -1,11 +1,7 @@
 from agents.kg_agent import KGQueryEngine
-from agents.patient_db_agent import PatientQueryEngine
-from utils.config import Config
 import json
 
-config = Config()
-patient_query_engine = PatientQueryEngine(config)
-kg_agent = KGQueryEngine(patient_query_engine)
+kg_agent = KGQueryEngine()
 
 def benchmark_kg_agent_mcq():
     with open('data/benchmark/symptom_to_disease_mcq_two_hop.json', 'r', encoding='utf-8') as f:
