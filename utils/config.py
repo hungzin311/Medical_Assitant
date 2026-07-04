@@ -7,7 +7,7 @@ load_dotenv()
 
 class AgentDecisoinConfig:
     def __init__(self):
-        self.llm = get_gemini_llm(temperature=0.1)  # Deterministic
+        self.llm = get_gemini_llm(temperature=0.0)  # Deterministic
 
 class ConversationConfig:
     def __init__(self):

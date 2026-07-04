@@ -51,68 +51,6 @@ class MedicalRAG:
                 "processing_time": time.time() - start_time
             }
         
-    def process_query(self, query: str, chat_history: Optional[List[Dict[str, str]]] = None) -> Dict[str, Any]:
-        start_time = time.time()
-        self.logger.info(f"RAG Agent processing query: {query}")
-        
-        try:
-            # Step 1: Expand query
-            expansion_result = self.query_expander.expand_query(query, mode="rag", chat_history=chat_history)
-            expanded_query = expansion_result["expanded_query"]
-            self.logger.info(f"   Expanded: '{expanded_query}'")
-            query = expanded_query
-
-            # Step 2: Retrieval
-            retrieved_documents = self.vector_store.retrieve_relevant_chunks(
-                query=query,
-                vectorstore=self.vectorstore,
-            )
-
-            self.logger.info(f"Retrieved {len(retrieved_documents)} relevant document chunks")
-            
-            # Check if we have any documents
-            if not retrieved_documents:
-                self.logger.warning("No relevant documents found in the knowledge base")
-                processing_time = time.time() - start_time
-                return {
-                    "response": "Tôi không có đủ thông tin để trả lời câu hỏi này dựa trên ngữ cảnh được cung cấp.",
-                    "sources": [],
-                    "confidence": 0.0,
-                    "processing_time": processing_time
-                }
-
-            # Step 3: Rerank the retrieved documents if we have a reranker and enough documents
-            # if self.reranker and len(retrieved_documents) > 1:
-            #     reranked_documents = self.reranker.rerank(query, retrieved_documents)
-            #     self.logger.info(f"Reranked retrieved documents and chose top {len(reranked_documents)}")
-            # else:
-            #     self.logger.info(f"Could not rerank the retrieved documents, falling back to original scores")
-            # TODO: Rerank the retrieved documents
-            reranked_documents = retrieved_documents
-
-            # Step 4: Generate response
-            response = self.response_generator.generate_response(
-                query=query,
-                retrieved_docs=reranked_documents,
-                chat_history=chat_history
-                )
-            
-            # Add timing information
-            processing_time = time.time() - start_time
-            response["processing_time"] = processing_time
-            
-            return response
-        
-        except Exception as e:
-            self.logger.error(f"Error processing query: {e}")
-            # Return error response
-            return {
-                "response": f"I encountered an error while processing your query: {str(e)}",
-                "sources": [],
-                "confidence": 0.0,
-                "processing_time": time.time() - start_time
-            }
-
     def evaluate_mcq(self, question: str, choices: List[str]) -> Dict[str, Any]:
         try:
             expansion_result = self.query_expander.expand_query(question, mode="rag", chat_history=None)

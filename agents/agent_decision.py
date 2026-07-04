@@ -492,6 +492,8 @@ def create_agent_graph():
         kg_context_limit = config.rag.context_limit 
         rag_context_limit = config.rag.context_limit
         patient_id = state.get('patient_id', 'PAT_001')
+        session_id = state.get("session_id")
+        kg_cache_key = f"{patient_id}:{session_id}" if session_id else patient_id
         patient_memory_messages = _memory_context_message(state.get("patient_memory_context"))
 
         print(f"Patient ID: {patient_id}")
@@ -524,6 +526,18 @@ def create_agent_graph():
                         patient_context,
                         refined_question,
                     )
+                    if filtered_context:
+                        kg_agent.response_generator.set_cached_kg_candidates(
+                            filtered_context,
+                            kg_cache_key,
+                        )
+                        print("Updated parallel KG cache with new context")
+                used_cached_context = False
+                if not filtered_context:
+                    filtered_context = kg_agent.response_generator.get_cached_kg_candidates(kg_cache_key)
+                    used_cached_context = bool(filtered_context)
+                    if used_cached_context:
+                        print("Using cached KG context in parallel flow (current KG context count is 0)")
 
                 result = {
                     "agent_name": "KG_AGENT",
@@ -532,9 +546,8 @@ def create_agent_graph():
                     "documents": filtered_context,
                     "confidence": 0.7 if filtered_context else 0.0,
                     "sources": [],
+                    "used_cached_context": used_cached_context,
                 }
-                with open('kg_response.json', 'w', encoding='utf-8') as f:
-                    json.dump(result, f, ensure_ascii=False, indent=4, default=str)
                 return result
             except Exception as e:
                 logger.exception("Error in KG agent")
@@ -542,7 +555,7 @@ def create_agent_graph():
                     "agent_name": "KG_AGENT",
                     "query": query,
                     "patient_context": "",
-                    "documents": [],
+                    "documents": kg_agent.response_generator.get_cached_kg_candidates(kg_cache_key),
                     "confidence": 0.0,
                     "sources": [],
                     "error": str(e),
@@ -568,8 +581,6 @@ def create_agent_graph():
                     "confidence": confidence,
                     "sources": [],
                 }
-                with open('rag_response.json', 'w', encoding='utf-8') as f:
-                    json.dump(result, f, ensure_ascii=False, indent=4, default=str)
                 return result
             except Exception as e:
                 logger.exception("Error in RAG agent")
@@ -603,8 +614,6 @@ def create_agent_graph():
                     "confidence": confidence,
                     "sources": medlineplus_agent._extract_sources(documents),
                 }
-                with open("medlineplus_response.json", "w", encoding="utf-8") as f:
-                    json.dump(result, f, ensure_ascii=False, indent=4, default=str)
                 return result
             except Exception as e:
                 logger.exception("Error in MedlinePlus agent")
@@ -672,21 +681,38 @@ def create_agent_graph():
                 else:
                     lines.append(f"- {title}")
             return "\n".join(lines)
+
+        def normalize_retrieval_result(result: Any, agent_name: str) -> Dict[str, Any]:
+            if isinstance(result, dict):
+                return result
+            logger.warning("%s returned invalid retrieval result: %r", agent_name, result)
+            return {
+                "agent_name": agent_name,
+                "query": query,
+                "documents": [],
+                "confidence": 0.0,
+                "sources": [],
+                "error": f"Invalid retrieval result: {result!r}",
+            }
             
         with concurrent.futures.ThreadPoolExecutor(max_workers = 3) as executor: 
             kg_future = executor.submit(run_kg_retrieval)
             rag_future = executor.submit(run_rag_retrieval)
             medlineplus_future = executor.submit(run_medlineplus_retrieval)
 
-            kg_result = kg_future.result()
-            rag_result = rag_future.result()
-            medlineplus_result = medlineplus_future.result()
+            kg_result = normalize_retrieval_result(kg_future.result(), "KG_AGENT")
+            rag_result = normalize_retrieval_result(rag_future.result(), "RAG_AGENT")
+            medlineplus_result = normalize_retrieval_result(
+                medlineplus_future.result(),
+                "MEDLINEPLUS_AGENT",
+            )
             
         has_kg_context = bool(kg_result.get("documents"))
         has_rag_context = bool(rag_result.get("documents")) and rag_result.get("confidence", 0.0) >= config.rag.min_retrieval_confidence
         has_medlineplus_context = bool(medlineplus_result.get("documents")) and medlineplus_result.get("confidence", 0.0) >= config.medlineplus.min_retrieval_confidence
 
-        print(f"KG context count: {len(kg_result.get('documents', []))}")
+        kg_cache_label = " (cached)" if kg_result.get("used_cached_context") else ""
+        print(f"KG context count: {len(kg_result.get('documents', []))}{kg_cache_label}")
         print(f"RAG context count: {len(rag_result.get('documents', []))}")
         print(f"MedlinePlus context count: {len(medlineplus_result.get('documents', []))}")
         print(f"RAG confidence: {rag_result.get('confidence', 0.0)}")

@@ -23,11 +23,7 @@ class KGQueryEngine:
     def filter_context_for_patient(self, kg_context: List[Dict], patient_info: Dict, question: str):
         """Filter KG context based on patient profile"""
         return self.context_filter.filter_context(kg_context, patient_info, question)
-    
-    def generate_medical_response(self, question: str, patient_id: str = None, chat_history: Optional[List[Dict[str, str]]] = None) -> str:
-        """Generate complete medical response using filtered KG context"""
-        return self.response_generator.generate_response(question, patient_id, chat_history)
-    
+        
     def evaluate_mcq(self, question: str, choices: List[str]) -> Dict[str, Any]:
         return self.response_generator.evaluate_mcq(question, choices)
     

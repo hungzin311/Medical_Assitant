@@ -1,6 +1,5 @@
 from py2neo import Graph, Node, Relationship
 import pandas as pd
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import asyncio
 import inspect
 import os
@@ -96,7 +95,7 @@ def truncate_text(text, max_tokens=2000):
     
     return truncated.strip()
 
-def create_disease_embedding(name, description):
+async def create_disease_embedding(name, description):
     try:
         # Combine name and description with clear structure
         if description and description.strip():
@@ -112,12 +111,12 @@ def create_disease_embedding(name, description):
             return None
             
         # Create embedding using Vietnamese_Embedding model.
-        if hasattr(embedding_model, "embed_query"):
-            embedding = embedding_model.embed_query(combined_text)
-        else:
+        if hasattr(embedding_model, "aembed_query"):
             embedding = embedding_model.aembed_query(combined_text)
             if inspect.isawaitable(embedding):
-                embedding = asyncio.run(embedding)
+                embedding = await embedding
+        else:
+            embedding = await asyncio.to_thread(embedding_model.embed_query, combined_text)
         
         # Validate embedding
         if embedding and len(embedding) > 0:
@@ -164,7 +163,19 @@ def check_node_exists(graph, associated_disease):
     result = graph.run(query, disease_name=disease_name).data()
     return result[0]["node_exists"] if result else False
 
-def process_row(row, graph_instance, df_data):
+async def run_query(graph_instance, query, **parameters):
+    return await asyncio.to_thread(graph_instance.run, query, **parameters)
+
+async def merge_node(graph_instance, node, primary_label, primary_key):
+    return await asyncio.to_thread(graph_instance.merge, node, primary_label, primary_key)
+
+async def create_relationship(graph_instance, relationship):
+    return await asyncio.to_thread(graph_instance.create, relationship)
+
+async def check_node_exists_async(graph, associated_disease):
+    return await asyncio.to_thread(check_node_exists, graph, associated_disease)
+
+async def process_row(row, graph_instance, df_data):
     try:
         disease_name = row['tên_bệnh']
         disease_description = row['mô_tả_bệnh']
@@ -193,7 +204,7 @@ def process_row(row, graph_instance, df_data):
 
     if disease_name and disease_description and disease_category and disease_cause:
         # Create embedding for disease
-        disease_embedding = create_disease_embedding(disease_name, disease_description)
+        disease_embedding = await create_disease_embedding(disease_name, disease_description)
         
         # Create disease node using py2neo Node and merge (compatible approach)
         disease_node = Node("Disease", 
@@ -203,7 +214,7 @@ def process_row(row, graph_instance, df_data):
                            cause=to_lowercase(disease_cause),
                            embedding=disease_embedding)
         
-        graph_instance.merge(disease_node, "Disease", "name")
+        await merge_node(graph_instance, disease_node, "Disease", "name")
         
 
     if cure_method and cure_department and cure_probability:
@@ -216,11 +227,11 @@ def process_row(row, graph_instance, df_data):
         MATCH (d:Disease {name: $disease_name})
         MERGE (d)-[:TREATED_BY]->(t)
         """
-        graph_instance.run(treatment_query,
-                         disease_name=to_lowercase(disease_name),
-                         method=to_lowercase(cure_method),
-                         department=to_lowercase(cure_department),
-                         success_rate=to_lowercase(cure_probability))
+        await run_query(graph_instance, treatment_query,
+                        disease_name=to_lowercase(disease_name),
+                        method=to_lowercase(cure_method),
+                        department=to_lowercase(cure_department),
+                        success_rate=to_lowercase(cure_probability))
 
     if disease_symptom and check_method and people_easy_get and disease_node:
         # Create symptom node and relationship
@@ -231,9 +242,9 @@ def process_row(row, graph_instance, df_data):
                            symptoms=symptoms_list, 
                            diagnosis=diagnosis_list, 
                            risk_group=to_lowercase(people_easy_get))
-        graph_instance.merge(symptom_node, "Symptom", "disease_name")
+        await merge_node(graph_instance, symptom_node, "Symptom", "disease_name")
         has_rela = Relationship(disease_node, "HAS_SYMPTOM", symptom_node)
-        graph_instance.create(has_rela)
+        await create_relationship(graph_instance, has_rela)
 
     if drug_recommend and drug_common and drug_detail and disease_node:
         # Create medication node and relationship
@@ -244,9 +255,9 @@ def process_row(row, graph_instance, df_data):
                               common_drugs=common_drugs_list, 
                               drug_info=to_lowercase(drug_detail), 
                               recommended_drugs=recommended_drugs_list)
-        graph_instance.merge(medication_node, "Medication", "disease_name")
+        await merge_node(graph_instance, medication_node, "Medication", "disease_name")
         prescribed_rela = Relationship(disease_node, "PRESCRIBED", medication_node)
-        graph_instance.create(prescribed_rela)
+        await create_relationship(graph_instance, prescribed_rela)
 
     if nutrition_do_eat and nutrition_not_eat and nutrition_recommend_meal and disease_prevention and disease_node:
         # Create nutrition node and relationship
@@ -259,13 +270,13 @@ def process_row(row, graph_instance, df_data):
                              recommended_meals=recommended_meals_list, 
                              foods_to_avoid=foods_to_avoid_list, 
                              prevention=to_lowercase(disease_prevention))
-        graph_instance.merge(nutrition_node, "Advice", "disease_name")
+        await merge_node(graph_instance, nutrition_node, "Advice", "disease_name")
         treated_rela = Relationship(disease_node, "HAS_ADVICE", nutrition_node)
-        graph_instance.create(treated_rela)
+        await create_relationship(graph_instance, treated_rela)
 
     if associated_disease and disease_node:
         if isinstance(associated_disease, str) and not '[' in associated_disease:
-            if check_node_exists(graph_instance, to_lowercase(associated_disease)):
+            if await check_node_exists_async(graph_instance, to_lowercase(associated_disease)):
                 return
             associated_disease_description = None
             associated_disease_category = None
@@ -276,11 +287,11 @@ def process_row(row, graph_instance, df_data):
                 associated_disease_category = associated_row['loại_bệnh']
                 associated_disease_cause = associated_row['nguyên_nhân']
             # Create embedding for associated disease
-            associated_embedding = create_disease_embedding(associated_disease, associated_disease_description)
+            associated_embedding = await create_disease_embedding(associated_disease, associated_disease_description)
             associated_disease_node = Node("Disease", name=to_lowercase(associated_disease), description=to_lowercase(associated_disease_description), category=to_lowercase(associated_disease_category), cause=to_lowercase(associated_disease_cause), embedding=associated_embedding)
-            graph_instance.merge(associated_disease_node, "Disease", "name")
+            await merge_node(graph_instance, associated_disease_node, "Disease", "name")
             has_associated_rela = Relationship(disease_node, "ASSOCIATED_WITH", associated_disease_node)
-            graph_instance.create(has_associated_rela)
+            await create_relationship(graph_instance, has_associated_rela)
             return
 
         try:
@@ -300,34 +311,44 @@ def process_row(row, graph_instance, df_data):
                         associated_disease_description = None
                         associated_disease_category = None
                         associated_disease_cause = None
-                    if check_node_exists(graph_instance, to_lowercase(associated_disease_name)):
+                    if await check_node_exists_async(graph_instance, to_lowercase(associated_disease_name)):
                         continue
                     # Create embedding for associated disease
-                    associated_embedding = create_disease_embedding(associated_disease_name, associated_disease_description)
+                    associated_embedding = await create_disease_embedding(associated_disease_name, associated_disease_description)
                     associated_disease_node = Node("Disease", name=to_lowercase(associated_disease_name), description=to_lowercase(associated_disease_description), category=to_lowercase(associated_disease_category), cause=to_lowercase(associated_disease_cause), embedding=associated_embedding)
-                    graph_instance.merge(associated_disease_node, "Disease", "name")
+                    await merge_node(graph_instance, associated_disease_node, "Disease", "name")
                     has_associated_rela = Relationship(disease_node, "ASSOCIATED_WITH", associated_disease_node)
-                    graph_instance.create(has_associated_rela)
+                    await create_relationship(graph_instance, has_associated_rela)
         except Exception as e:
             print(f"Error processing associated disease: {e}")
 
-if __name__ == "__main__": 
+async def process_row_with_semaphore(row, graph_instance, df_data, semaphore):
+    async with semaphore:
+        await process_row(row, graph_instance, df_data)
+
+async def main():
     graph = Graph(URI, auth=AUTH)
     
-    clear_graph(graph)
-    create_unique_constraints(graph)
-    df_cn = pd.read_csv(CSV_PATH, encoding="utf-8")
-    num_workers = 8    
-    # Process each row in parallel using ThreadPoolExecutor
-    with ThreadPoolExecutor(max_workers=num_workers) as executor:
-        futures = [executor.submit(process_row, row, graph, df_cn) for index, row in df_cn.iterrows()]
-        
-        completed = 0
-        for future in as_completed(futures):
-            try:
-                future.result()  # Retrieve and handle exceptions if any
-                completed += 1
-                if completed % 50 == 0:
-                    print(f"Processed {completed}/{len(df_cn)} rows")
-            except Exception as e:
-                print(f"Error processing row: {e}")
+    # clear_graph(graph)
+    # create_unique_constraints(graph)
+    # df_cn = pd.read_csv(CSV_PATH, encoding="utf-8")
+    # max_concurrent_tasks = int(os.getenv("KG_INGEST_CONCURRENCY", "64"))
+    # semaphore = asyncio.Semaphore(max_concurrent_tasks)
+
+    # tasks = [
+    #     asyncio.create_task(process_row_with_semaphore(row, graph, df_cn, semaphore))
+    #     for _, row in df_cn.iterrows()
+    # ]
+
+    # completed = 0
+    # for task in asyncio.as_completed(tasks):
+    #     try:
+    #         await task
+    #         completed += 1
+    #         if completed % 50 == 0:
+    #             print(f"Processed {completed}/{len(df_cn)} rows")
+    #     except Exception as e:
+    #         print(f"Error processing row: {e}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
