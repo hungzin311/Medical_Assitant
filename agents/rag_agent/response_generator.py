@@ -3,7 +3,6 @@ import json
 import re
 from typing import List, Dict, Any, Optional
 from utils.prompt import rag_agent_mcq_evaluation_prompt
-from utils.streaming import invoke_with_streaming
 
 class ResponseGenerator:
     def __init__(self, config):

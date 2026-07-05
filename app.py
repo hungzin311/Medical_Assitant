@@ -436,49 +436,20 @@ async def validate_medical_output(
             # Save the log
             with open(log_filename, "w", encoding="utf-8") as f:
                 json.dump(log_entry, f, ensure_ascii=False, indent=4)
-            
-        # Re-run the agent decision system with the validation input
-        validation_query = f"Validation result: {validation_result}"
-        if comments:
-            validation_query += f" Comments: {comments}"
-        
-        response_data = process_query(
-            validation_query,
-            graph=graph,
-            patient_id="PAT_001",
-            session_id=session_id,
-            memory_enabled=True,
-        )
-        
-        # Get response from output or messages
-        response_text = ""
-        if 'output' in response_data and response_data['output']:
-            if hasattr(response_data['output'], 'content'):
-                response_text = response_data['output'].content
-            elif isinstance(response_data['output'], str):
-                response_text = response_data['output']
-        elif 'messages' in response_data and len(response_data['messages']) > 0:
-            last_message = response_data['messages'][-1]
-            if hasattr(last_message, 'content'):
-                response_text = last_message.content
-            
-        # If we still don't have a response, provide a fallback
-        if not response_text:
-            response_text = "Thank you for your validation."
 
         # Check validation result (case insensitive)
         if validation_result.lower() in ['yes', 'true', '1', 'confirm']:
             return {
                 "status": "validated",
                 "message": "**Output confirmed by human validator:**",
-                "response": "Cảm ơn bạn đã phản hồi!" if not response_text else response_text
+                "response": "Cảm ơn bạn đã phản hồi!"
             }
         else:
             return {
                 "status": "rejected",
                 "comments": comments,
                 "message": "**Output requires further review:**",
-                "response": response_text
+                "response": "Cảm ơn bạn đã phản hồi!"
             }
     except Exception as e:
         import traceback

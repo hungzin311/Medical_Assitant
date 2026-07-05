@@ -5,8 +5,7 @@ from .context_filter import ContextFilterEmbedding
 from utils.llm_config import get_llm
 from agents.rag_agent.query_expander import QueryExpander
 from utils.config import Config
-from utils.prompt import medical_cot_prompt, medical_direct_kg_prompt, medical_mcq_evaluation_prompt
-from utils.streaming import invoke_with_streaming
+from utils.prompt import medical_cot_prompt, medical_mcq_evaluation_prompt
 import json
 import re
 

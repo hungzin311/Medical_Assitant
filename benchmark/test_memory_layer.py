@@ -459,3 +459,35 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# This function is only for evaluation process of memory layer to shorten the entire process (only get the chosen agent)
+# def decide_agent_route(
+#     query: Union[str, Dict],
+#     *,
+#     patient_id: str = "PAT_001",
+#     conversation_history: Optional[List[BaseMessage]] = None,
+#     memory_enabled: bool = True,
+#     has_image: bool = False,
+#     image_type: Optional[str] = None,
+# ) -> Dict[str, Any]:
+#     """Run the real Decision Agent routing logic for benchmarking or tooling."""
+#     input_text = _input_to_text(query)
+#     memory_result = retrieve_patient_memory_for_query(
+#         patient_id,
+#         input_text,
+#         memory_enabled=memory_enabled,
+#     )
+#     decision_input = _build_decision_input(
+#         input_text,
+#         conversation_history=conversation_history,
+#         patient_memory_context=memory_result["patient_memory_context"],
+#         has_image=has_image,
+#         image_type=image_type,
+#     )
+#     decision = get_decision_chain().invoke({"input": decision_input})
+#     return {
+#         "agent": decision["agent"],
+#         "reasoning": decision.get("reasoning", ""),
+#         "confidence": decision.get("confidence"),
+#         "patient_memory_context": memory_result["patient_memory_context"],
+#     }

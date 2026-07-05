@@ -47,9 +47,9 @@ def get_agent_status_message(agent_name: str) -> str:
 
 class AgentState(MessagesState):
     """State maintained across the workflow."""
-    # messages: List[BaseMessage]  # Conversation history
+    messages: List[BaseMessage]  # Conversation history
     agent_name: Optional[str]  # Current active agent
-    current_input: Optional[Union[str, Dict]]  # Input to be processed
+    current_input: Optional[Union[str, Dict]]  # Input to be processed, can be text or dict with "text" and "image"
     has_image: bool  # Whether the current input contains an image
     eng_query: Optional[str]
     image_type: Optional[str]  # Type of medical image if present
@@ -60,7 +60,6 @@ class AgentState(MessagesState):
     patient_id: Optional[str]  # Patient ID for KG and patient database queries
     session_id: Optional[str]  # Session ID for LangGraph checkpoint and Mem0 run scope
     patient_memory_context: Optional[str]  # Retrieved long-term memory context
-    patient_memory_items: List[Dict[str, Any]]  # Raw normalized Mem0 search results
     memory_enabled: bool  # Whether long-term memory is enabled for this run
     routing_agent: Optional[str]  # Agent selected at routing time (preserved for evaluation)
     polyp_segmentation_path: Optional[str]  # Segmentation overlay path for polyp VQA
@@ -72,7 +71,7 @@ class AgentDecision(TypedDict):
     reasoning: str
     confidence: float
 
-
+# handle input that can be either a str or a dict with "text" and "image" keys
 def _input_to_text(current_input: Union[str, Dict, None], include_image_hint: bool = False) -> str:
     if isinstance(current_input, dict):
         text = current_input.get("text", "") or ""
@@ -91,11 +90,13 @@ def _shorten_text(text: str, max_chars: int = 1200) -> str:
 
 _decision_chain = None
 
-
+# Create global chain using RunnableSequence by | (see in lib)
+# prompt --> model llm --> json parser
 def get_decision_chain():
     """Return the shared Decision Agent chain used by LangGraph routing."""
     global _decision_chain
     if _decision_chain is None:
+        # 3 components are in langchain
         decision_model = config.agent_decision.llm.bind(extra_body=get_qwen_extra_body())
         json_parser = JsonOutputParser(pydantic_object=AgentDecision)
         decision_prompt = ChatPromptTemplate.from_messages([
@@ -117,11 +118,9 @@ def retrieve_patient_memory_for_query(
     if not memory_enabled or not query.strip():
         return {
             "patient_memory_context": "",
-            "patient_memory_items": [],
         }
 
     try:
-
         service = get_patient_memory_service()
         search_result = service.search(
             PatientMemorySearchRequest(
@@ -137,13 +136,11 @@ def retrieve_patient_memory_for_query(
         ]
         return {
             "patient_memory_context": _format_patient_memory_context(memory_items),
-            "patient_memory_items": memory_items,
         }
     except Exception as exc:
         logger.warning("Patient memory retrieval skipped: %s", exc)
         return {
             "patient_memory_context": "",
-            "patient_memory_items": [],
         }
 
 
@@ -176,40 +173,6 @@ def _build_decision_input(
 
         Based on this information, which agent should handle this query?
         """
-
-
-def decide_agent_route(
-    query: Union[str, Dict],
-    *,
-    patient_id: str = "PAT_001",
-    conversation_history: Optional[List[BaseMessage]] = None,
-    memory_enabled: bool = True,
-    has_image: bool = False,
-    image_type: Optional[str] = None,
-) -> Dict[str, Any]:
-    """Run the real Decision Agent routing logic for benchmarking or tooling."""
-    input_text = _input_to_text(query)
-    memory_result = retrieve_patient_memory_for_query(
-        patient_id,
-        input_text,
-        memory_enabled=memory_enabled,
-    )
-    decision_input = _build_decision_input(
-        input_text,
-        conversation_history=conversation_history,
-        patient_memory_context=memory_result["patient_memory_context"],
-        has_image=has_image,
-        image_type=image_type,
-    )
-    decision = get_decision_chain().invoke({"input": decision_input})
-    return {
-        "agent": decision["agent"],
-        "reasoning": decision.get("reasoning", ""),
-        "confidence": decision.get("confidence"),
-        "patient_memory_context": memory_result["patient_memory_context"],
-        "patient_memory_items": memory_result["patient_memory_items"],
-    }
-
 
 def _format_patient_memory_context(memory_items: List[Dict[str, Any]]) -> str:
     if not memory_items:
@@ -269,6 +232,7 @@ def create_agent_graph():
         ]
         return any(keyword in input_text for keyword in segmentation_keywords)
     
+    # analyze input: if text only --> normalize, if has image: classifier image
     def analyze_input(state: AgentState) -> AgentState:
         """Analyze the input to detect images and determine input type."""
         current_input = state["current_input"]
@@ -296,6 +260,7 @@ def create_agent_graph():
             "bypass_routing": False  # Set to False to ensure normal routing
         }
 
+    # Retrieve patient memory from mem0 to get the long term memory.
     def retrieve_patient_memory(state: AgentState) -> AgentState:
         """Retrieve durable patient memory before routing and answer generation."""
         patient_id = state.get("patient_id") or "PAT_001"
@@ -311,15 +276,15 @@ def create_agent_graph():
             **state,
             **memory_result,
         }
-    
+    # implement guardrails in the future
     def check_if_bypassing(state: AgentState) -> str:
         """Check if we should bypass normal routing due to guardrails."""
         return "route_to_agent"
     
+    # Decision agent: choose the appropriate agent.
     def route_to_agent(state: AgentState) -> Dict:
         """Make decision about which agent should handle the query."""
         messages = state["messages"]
-        current_input = state["current_input"]
         patient_memory_context = state.get("patient_memory_context") or ""
         has_image = state["has_image"]
         image_type = state["image_type"]
@@ -335,8 +300,8 @@ def create_agent_graph():
                     "agent_name": "NON_MEDICAL_FILTER",
                     "next": "apply_guardrails"}
         
-        # Prepare input for decision model
-        input_text = _input_to_text(current_input)
+        # Prepare input for decision model since analyze runs first then it produces `eng_query` 
+        input_text = state['eng_query']
 
         if has_image and image_type == "POLYP SEGMENTATION":
             selected_agent = (
@@ -382,8 +347,6 @@ def create_agent_graph():
             "routing_agent": decision["agent"],
         }
 
-        # if decision["confidence"] < AgentConfig.CONFIDENCE_THRESHOLD:
-        #     return {"agent_state": updated_state, "next": "needs_validation"}
         return {"agent_state": updated_state, "next": decision["agent"]}
 
     def run_conversation_agent(state: AgentState) -> AgentState:
@@ -402,54 +365,6 @@ def create_agent_graph():
         input_text = _input_to_text(current_input)
         patient_memory_context = state.get("patient_memory_context") or ""
         
-        follow_up_keywords = [
-            # Từ khóa về chẩn đoán trước đó
-            "chẩn đoán trước", "chẩn đoán lúc nãy", "kết quả vừa rồi", "kết quả trước",
-            "chẩn đoán ban đầu", "chẩn đoán lần trước", "phân tích trước đó",
-            
-            # Từ khóa về hình ảnh
-            "hình ảnh này", "ảnh này", "bức ảnh", "hình vừa gửi", "ảnh lúc nãy",
-            "hình ảnh trước", "ảnh đó", "hình đó", "X-quang này", "CT này",
-            
-            # Từ khóa về kết quả
-            "kết quả này", "kết quả đó", "những gì bạn tìm thấy", "phát hiện của bạn",
-            "những gì phát hiện", "kết quả phân tích",
-            
-            # Yêu cầu giải thích thêm
-            "nói thêm về", "giải thích thêm", "chi tiết hơn", "thông tin thêm",
-            "mô tả rõ hơn", "phân tích kỹ hơn", "làm rõ", "cụ thể hơn",
-            
-            # Câu hỏi theo sau
-            "về cái này", "về điều đó", "về vấn đề này", "liên quan đến",
-            "dựa trên", "căn cứ vào", "theo kết quả"
-        ]
-        
-        is_follow_up = any(keyword in input_text.lower() for keyword in follow_up_keywords)
-        
-        # If it seems like a follow-up question and we have previous agent names in the state
-        if is_follow_up and len(messages) > 2:
-            # Look for the most recent image ID in the conversation history
-            image_id = None
-            for i in range(len(messages)-1, -1, -1):
-                if isinstance(messages[i], AIMessage): 
-                    if "image_id" in getattr(messages[i], "metadata", {}): 
-                        image_id = getattr(messages[i], "metadata", {}).get("image_id", None)
-                        print(f"Found image_id: {image_id}")
-                        break
-            
-            # If we found an image ID, try to generate a follow-up response
-            if image_id:
-                try:
-                    print(f"Found image_id: {image_id}, generating follow-up response")
-                    follow_up_response = image_analyzer.generate_followup_response(image_id, input_text)
-                    return {
-                        **state,
-                        "output": AIMessage(content=follow_up_response),
-                        "agent_name": "CONVERSATION_AGENT"
-                    }
-                except Exception as e:
-                    print(f"Error generating follow-up response: {e}")
-
         # Create context from recent conversation history
         recent_context = ""
         for msg in messages:  # currently considering complete history - limit control from utils.config
@@ -1031,6 +946,9 @@ def create_agent_graph():
         
         output = state["output"]
         current_input = state["current_input"]
+        existing_messages = state.get("messages") or []
+        if isinstance(existing_messages, BaseMessage):
+            existing_messages = [existing_messages]
 
         # Check if output is valid
         if not output or not isinstance(output, (str, AIMessage)):
@@ -1058,18 +976,18 @@ def create_agent_graph():
                 return {
                     **state,
                     "output": thank_you_message,
-                    "messages": thank_you_message
+                    "messages": existing_messages + [thank_you_message]
                 }
                 
         # Apply output sanitization
         sanitized_output = output_text
         
         # For non-validation cases, add the sanitized output to messages
-        sanitized_message = AIMessage(content=sanitized_output) if isinstance(output, AIMessage) else sanitized_output
+        sanitized_message = output if isinstance(output, AIMessage) else AIMessage(content=sanitized_output)
         
         return {
             **state,
-            "messages": sanitized_message,
+            "messages": existing_messages + [sanitized_message],
             "output": sanitized_message
         }
 
@@ -1188,7 +1106,6 @@ def create_agent_graph():
             "POLYP_VQA_AGENT": "POLYP_VQA_AGENT",
             "GENERAL_MEDICAL_IMAGE_AGENT": "GENERAL_MEDICAL_IMAGE_AGENT",
             "apply_guardrails": "apply_guardrails"  
-            # "needs_validation": "RAG_AGENT"
         }
     )
 
@@ -1238,7 +1155,6 @@ def init_agent_state() -> AgentState:
         "patient_id": None,
         "session_id": None,
         "patient_memory_context": "",
-        "patient_memory_items": [],
         "memory_enabled": True,
         "routing_agent": None,
         "polyp_segmentation_path": None
@@ -1247,17 +1163,16 @@ def init_agent_state() -> AgentState:
 
 def process_query(
     query: Union[str, Dict],
-    conversation_history: List[BaseMessage] = None,
     graph: StateGraph = None,
     patient_id: str = "PAT_001",
     session_id: Optional[str] = None,
     memory_enabled: bool = True,
 ) -> Dict:
+    # init state for the agent workflow
+    # this initialization is important for both new sessions and resuming sessions
+    # new sessions: do not remember the old messages 
+    # resuming sessions: do not affect because of using checkpointer.
     state = init_agent_state()
-    
-    if conversation_history:
-        state["messages"] = conversation_history
-    
     state["current_input"] = query
     state["patient_id"] = patient_id or "PAT_001"
     state["session_id"] = session_id
@@ -1266,9 +1181,10 @@ def process_query(
     if isinstance(query, dict):
         query = _input_to_text(query, include_image_hint=True)
     
-    if not conversation_history:
-        state["messages"] = [HumanMessage(content=query)]
-
+    state["messages"] = [HumanMessage(content=query)]
+    
+    # Graph using checkpointer to restore previous state and append new messages.
+    # if same session_id: load previous state and append new messages.
     thread_id = f"{state['patient_id']}:{session_id}" if session_id else state["patient_id"]
     dynamic_thread_config = {"configurable": {"thread_id": thread_id}}
     result = graph.invoke(state, dynamic_thread_config)

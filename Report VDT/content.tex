@@ -1288,8 +1288,6 @@ PraNet & 80.02\% & 82.94\% \\
 DeepLabV3+ (RegNetx320) & \textbf{82.56\%} & \textbf{86.33\%} \\
 DeepLabV3+ (ResNet50) & 81.12\% & 85.62\% \\
 EMCAD (PVT2-b2) & 80.93\% & 83.76\% \\
-U-Net & 75.95\% & - \\
-U-Net++ & 77.54\% & - \\
 \hline\hline
 \end{tabular}
 \caption{Dice Score comparison for polyp segmentation models}
@@ -1342,7 +1340,7 @@ MedGemma-4B-it + LoRA  & 1000 & 0.3657 & 0.6936 & 4.6351 \\
 Qwen3.5-4B base & 1000 & 0.0261 & 0.2078 & 3.4720 \\
 Qwen3.5-4B + LoRA  & 1000 & 0.1935 & 0.5211 & 4.5341 \\
 MedGemma-4B-it + LoRA only & 305 & -- & -- & 4.4269 \\
-MedGemma-4B-it + LoRA + visual grounding & 305 & 0.4139 & 0.6966 & 4.5751 \\
+\shortstack[l]{MedGemma-4B-it + LoRA +\\visual grounding} & 305 & -- & -- & 4.5751 \\
 \hline\hline
 \end{tabular}
 \end{adjustbox}
@@ -1363,15 +1361,13 @@ The original-image setting evaluates whether the VLM can identify relevant visua
 \begin{table}[H]
 \centering
 \begin{adjustbox}{width=\textwidth}
-\begin{tabular}{p{0.36\textwidth} c c c}
+\begin{tabular}{l c c c c c}
 \hline\hline
-LLM Judge Criterion & MedGemma LoRA only & MedGemma LoRA + visual grounding & Difference \\
+Setting & Factual Acc. & Completeness & Clinical Rel. & No Halluc. & Overall \\
 \hline
-Factual Accuracy & 4.2918 & 4.4951 & +0.2033 \\
-Completeness & 4.3607 & 4.5016 & +0.1409 \\
-Clinical Relevance & 4.8984 & 4.9246 & +0.0262 \\
-No Hallucination & 4.7607 & 4.8393 & +0.0786 \\
-LLM-Judge Score & 4.4269 & 4.5751 & +0.1482 \\
+LoRA only & 4.2918 & 4.3607 & 4.8984 & 4.7607 & 4.4269 \\
+Visual-grounded LoRA & 4.4951 & 4.5016 & 4.9246 & 4.8393 & 4.5751 \\
+Difference & +0.2033 & +0.1409 & +0.0262 & +0.0786 & +0.1482 \\
 \hline\hline
 \end{tabular}
 \end{adjustbox}

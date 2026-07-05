@@ -70,9 +70,6 @@ class MedlinePlusRetriever:
             "documents": documents,
         }
 
-    async def aretrieve(self, query: str, top_k: Optional[int] = None) -> Dict[str, Any]:
-        return await asyncio.to_thread(self.retrieve, query, top_k)
-
     def _load_json(self, path_name: str) -> Any:
         path = self.data_dir / path_name
         return json.loads(path.read_text(encoding="utf-8"))
