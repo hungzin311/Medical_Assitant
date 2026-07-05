@@ -31,7 +31,7 @@ class RAGConfig:
         self.embedding_model = get_embedding()
         self.llm = get_llm(temperature=0.0) 
         self.top_k = 5
-        self.vector_search_type = 'similarity'  # or 'mmr'
+        self.vector_search_type = 'similarity' 
 
         self.huggingface_token = os.getenv("HUGGINGFACE_TOKEN")
 
@@ -49,7 +49,7 @@ class RAGConfig:
 
 class MedlinePlusConfig:
     def __init__(self):
-        self.collection_name = os.getenv("MEDLINEPLUS_COLLECTION_NAME", "medlineplus_kb")
+        self.collection_name = "medlineplus_kb"
         self.data_dir = os.getenv(
             "MEDLINEPLUS_DATA_DIR",
             "/home/hung/Coding/VectorDB/data/medlineplus",
@@ -60,8 +60,6 @@ class MedlinePlusConfig:
         self.qdrant_url = os.getenv("QDRANT_URL")
         self.qdrant_api_key = os.getenv("QDRANT_API_KEY")
         self.vector_name = os.getenv("MEDLINEPLUS_VECTOR_NAME", "dense")
-        self.include_relations = os.getenv("MEDLINEPLUS_INCLUDE_RELATIONS", "true").lower() == "true"
-        self.max_relations = 20
         self.min_retrieval_confidence = 0.4
         self.context_limit = 20
 

@@ -27,8 +27,6 @@ class MedlinePlusRetriever:
         self.embedding_model = config.embedding_model
         self.top_k = config.top_k
         self.vector_name = config.vector_name
-        self.include_relations = config.include_relations
-        self.max_relations = config.max_relations
         self.client = QdrantClient(
             url=config.qdrant_url,
             api_key=config.qdrant_api_key,
@@ -66,7 +64,6 @@ class MedlinePlusRetriever:
             "query": query,
             "intent": intent,
             "linked_entities": linked_entities,
-            "expanded_relations": self._expand_relations(linked_entities) if self.include_relations else [],
             "documents": documents,
         }
 
@@ -151,24 +148,6 @@ class MedlinePlusRetriever:
             return score
 
         return sorted(results, key=rank_score, reverse=True)
-
-    def _expand_relations(self, linked_entities: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        if not linked_entities or not self.data_dir.exists():
-            return []
-
-        path = self.data_dir / "relations.json"
-        if not path.exists():
-            return []
-
-        linked_keys = {(item["entity_type"], item["entity_id"]) for item in linked_entities}
-        expanded = []
-        for relation in self._load_json("relations.json"):
-            source_key = (relation["source_type"], relation["source_id"])
-            if source_key in linked_keys:
-                expanded.append(relation)
-            if len(expanded) >= self.max_relations:
-                break
-        return expanded
 
     def _to_document(self, result: Dict[str, Any]) -> Dict[str, Any]:
         payload = result.get("payload") or {}

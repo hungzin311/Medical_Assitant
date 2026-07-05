@@ -1,11 +1,9 @@
-import os
 import time
 import logging
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List
 from .vectorstore_qdrant_cloud import VectorStoreCloud
 from .reranker import Reranker
 from .query_expander import QueryExpander
-from .response_generator import ResponseGenerator
 
 logging.getLogger("httpx").disabled = True
 
@@ -17,7 +15,6 @@ class MedicalRAG:
         self.vector_store = VectorStoreCloud(config)
         self.reranker = Reranker(config)
         self.query_expander = QueryExpander(config)
-        self.response_generator = ResponseGenerator(config)
         self.vectorstore = self.vector_store.load_vectorstore(config.rag.collection_name)
     
     def ingest_file(self, document_path: str, document_chunks: List[str] = None) -> Dict[str, Any]:
@@ -49,25 +46,4 @@ class MedicalRAG:
                 "success": False,
                 "error": str(e),
                 "processing_time": time.time() - start_time
-            }
-        
-    def evaluate_mcq(self, question: str, choices: List[str]) -> Dict[str, Any]:
-        try:
-            expansion_result = self.query_expander.expand_query(question, mode="rag", chat_history=None)
-            expanded_query = expansion_result["expanded_query"]
-            
-            retrieved_documents = self.vectorstore.similarity_search_with_score(
-                query=expanded_query,
-                k=self.config.rag.top_k
-            )
-
-            reranked_documents = self.reranker.rerank(expanded_query, retrieved_documents)
-
-            return self.response_generator.generate_response_benchmark(expanded_query, choices, reranked_documents)
-        except Exception as e:
-            self.logger.error(f"Error evaluating MCQ: {e}")
-            return {
-                "answer_index": None,
-                "not_enough_info": True,
-                "confidence": 0.0
             }

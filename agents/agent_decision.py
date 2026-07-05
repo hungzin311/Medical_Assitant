@@ -367,7 +367,7 @@ def create_agent_graph():
         
         # Create context from recent conversation history
         recent_context = ""
-        for msg in messages:  # currently considering complete history - limit control from utils.config
+        for msg in messages:  
             if isinstance(msg, HumanMessage):
                 recent_context += f"User: {msg.content}\n"
             elif isinstance(msg, AIMessage):
@@ -424,7 +424,7 @@ def create_agent_graph():
 
         def run_kg_retrieval(): 
             try:
-                expanded_result = kg_agent.response_generator.query_expander.expand_query(
+                expanded_result = kg_agent.retrieval_coordinator.query_expander.expand_query(
                     query,
                     patient_info=None,
                     mode="kg",
@@ -433,23 +433,23 @@ def create_agent_graph():
                 expanded_query = expanded_result["expanded_query"]
                 refined_question = expanded_query["refined_question"]
                 patient_context = expanded_query["patient_context"]
-                kg_context = kg_agent.response_generator.cypher_query_llm.retrieve_context_from_kg(refined_question)
+                kg_context = kg_agent.retrieval_coordinator.cypher_query_llm.retrieve_context_from_kg(refined_question)
                 filtered_context = []
                 if kg_context:
-                    filtered_context = kg_agent.response_generator.context_filter.filter_context(
+                    filtered_context = kg_agent.retrieval_coordinator.context_filter.filter_context(
                         kg_context,
                         patient_context,
                         refined_question,
                     )
                     if filtered_context:
-                        kg_agent.response_generator.set_cached_kg_candidates(
+                        kg_agent.retrieval_coordinator.set_cached_kg_candidates(
                             filtered_context,
                             kg_cache_key,
                         )
                         print("Updated parallel KG cache with new context")
                 used_cached_context = False
                 if not filtered_context:
-                    filtered_context = kg_agent.response_generator.get_cached_kg_candidates(kg_cache_key)
+                    filtered_context = kg_agent.retrieval_coordinator.get_cached_kg_candidates(kg_cache_key)
                     used_cached_context = bool(filtered_context)
                     if used_cached_context:
                         print("Using cached KG context in parallel flow (current KG context count is 0)")
@@ -470,7 +470,7 @@ def create_agent_graph():
                     "agent_name": "KG_AGENT",
                     "query": query,
                     "patient_context": "",
-                    "documents": kg_agent.response_generator.get_cached_kg_candidates(kg_cache_key),
+                    "documents": kg_agent.retrieval_coordinator.get_cached_kg_candidates(kg_cache_key),
                     "confidence": 0.0,
                     "sources": [],
                     "error": str(e),
@@ -524,8 +524,6 @@ def create_agent_graph():
                     "original_query": query,
                     "query": medlineplus_query,
                     "documents": documents,
-                    "linked_entities": retrieval_result.get("linked_entities", []),
-                    "expanded_relations": retrieval_result.get("expanded_relations", []),
                     "confidence": confidence,
                     "sources": medlineplus_agent._extract_sources(documents),
                 }
@@ -536,8 +534,6 @@ def create_agent_graph():
                     "agent_name": "MEDLINEPLUS_AGENT",
                     "query": query,
                     "documents": [],
-                    "linked_entities": [],
-                    "expanded_relations": [],
                     "confidence": 0.0,
                     "sources": [],
                     "error": str(e),
@@ -661,9 +657,9 @@ def create_agent_graph():
             "message": "Generating final answer from KG, RAG, and MedlinePlus context...",
             "transition": True,
         })
-
+        # prepare documents and context from KG, RAG, and MedlinePlus for the final synthesis prompt
         synthesis_prompt = medical_multi_source_cot_prompt.format(
-            patient_context=kg_result.get("patient_context") or state.get("patient_memory_context") or "Không có.",
+            patient_context= state.get("patient_memory_context") or "Không có.",
             user_query=query,
             history=history_text or "Không có.",
             kg_context=format_kg_context(kg_result),
@@ -671,7 +667,8 @@ def create_agent_graph():
             medlineplus_query=medlineplus_result.get("query") or query,
             medlineplus_context=format_documents(medlineplus_result, "MED"),
         )
-        ## TO DO: change llm model
+
+        # use medgemma cot
         last_model_response = get_llm()
         response = invoke_with_streaming(last_model_response, synthesis_prompt, max_completion_token=2048)
         response_text = getattr(response, "content", str(response))

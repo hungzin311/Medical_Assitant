@@ -6,12 +6,6 @@ class TavilySearchAgent:
     Processes general documents for the RAG system with context-aware chunking.
     """
     def __init__(self):
-        """
-        Initialize the Tavily search agent.
-        
-        Args:
-            query: User query
-        """
         pass
 
     def search_tavily(self, query: str) -> str:
