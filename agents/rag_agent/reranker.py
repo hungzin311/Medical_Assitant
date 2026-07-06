@@ -7,7 +7,6 @@ class Reranker:
     def __init__(self, config):
         
         self.logger = logging.getLogger(__name__)
-        # For medical data, specialized models like 'pritamdeka/S-PubMedBert-MS-MARCO'
         try:
             self.model_name = config.rag.reranker_model
             self.logger.info(f"Loading reranker model: {self.model_name}")

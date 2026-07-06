@@ -3,14 +3,15 @@ import threading
 from qdrant_client import QdrantClient
 
 logging.getLogger("httpx").disabled = True
-
+# Singleton pattern 
 class QdrantClientManager:
     _instance = None
     _client = None
-    _lock = threading.Lock()
+    _lock = threading.Lock() # Lock for thread-safe singleton initialization
     def __new__(cls, config=None):
         if cls._instance is None:
             with cls._lock: 
+                # Double-checked locking to ensure thread safety
                 if cls._instance is None:
                     cls._instance = super(QdrantClientManager, cls).__new__(cls)
                     cls._instance._initialized = False
