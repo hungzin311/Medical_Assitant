@@ -28,7 +28,7 @@ class ContextFilterEmbedding:
 
             num_symptoms = item.get('total_symptoms', 0)
             matched_symptoms = item.get('matched_symptoms', 0)
-            matched_symptoms_list = item.get('matched_symptom_list', [])  # Sửa lỗi typo
+            matched_symptoms_list = item.get('matched_symptom_list', [])
             
             emb = np.array(embedding)
             score = cosine_similarity(emb, q_vec)
@@ -36,7 +36,7 @@ class ContextFilterEmbedding:
             # Tạo scored item với thông tin đầy đủ
             scored_item = {
                 "score": score,
-                "name": disease_name,  # Thông tin bệnh
+                "name": disease_name,
                 "symptom_analysis": {
                     "total_symptoms": num_symptoms,
                     "matched_symptoms": matched_symptoms,

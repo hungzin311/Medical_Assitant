@@ -17,9 +17,6 @@ class MedicalImageSummarizer:
     def store_diagnosis(self, image_id: str, diagnosis_data: Dict[str, Any]) -> None:
         self.memory[image_id] = diagnosis_data
     
-    def get_stored_diagnosis(self, image_id: str) -> Optional[Dict[str, Any]]:
-        return self.memory.get(image_id)
-    
     def summarize_diagnosis(self, diagnosis_result: Dict[str, Any], 
                            chat_history: List = None, 
                            user_query: str = None) -> Dict[str, Any]:
@@ -115,41 +112,3 @@ class MedicalImageSummarizer:
                 "success": False,
                 "error": str(e)
             }
-    
-    def generate_followup_response(self, image_id: str, follow_up_query: str) -> str:
-        # Retrieve the stored diagnosis
-        stored_diagnosis = self.get_stored_diagnosis(image_id)
-        
-        if not stored_diagnosis:
-            return "I'm sorry, I don't have information about that previous diagnosis. Could you please provide more details or upload the image again?"
-        
-        # Prepare the prompt for follow-up
-        followup_prompt = f"""
-        You are a medical assistant responding to a follow-up question about a previous diagnosis.
-        
-        ORIGINAL DIAGNOSIS:
-        {stored_diagnosis.get('diagnosis', '')}
-        
-        USER'S FOLLOW-UP QUESTION:
-        {follow_up_query}
-        
-        Please provide:
-        1. A clear, helpful response to the user's follow-up question
-        2. Any additional relevant information that might be helpful
-        3. If the question requires information beyond what's available in the diagnosis, suggest appropriate next steps
-        4. End with a question asking if they need more information or have other questions
-        
-        Remember to maintain a compassionate, professional tone and emphasize that this is AI-assisted analysis, not a replacement for professional medical advice.
-        """
-        
-        try:
-            # Invoke LLM for follow-up response
-            from utils.llm_config import get_qwen_extra_body
-
-            response = self.llm.bind(extra_body=get_qwen_extra_body()).invoke(followup_prompt)
-            # Add safety disclaimer and include the image_id in the response for continued tracking
-            safety_disclaimer = "\n\n⚠️ **Lưu ý quan trọng:** Thông tin trên chỉ mang tính chất tham khảo và được tạo ra bởi AI. Đây không phải là chẩn đoán y tế chính thức. Bạn nên đi khám bác sĩ chuyên khoa sớm nhất có thể để được thăm khám và điều trị phù hợp."
-            return f"{response.content}{safety_disclaimer}"
-        except Exception as e:
-            self.logger.error(f"Error generating follow-up response: {e}")
-            return f"Tôi xin lỗi, tôi đã gặp lỗi khi xử lý câu hỏi tiếp theo của bạn. Vui lòng thử diễn đạt lại câu hỏi của bạn hoặc tham khảo ý kiến bác sĩ chuyên khoa để được thông tin chính xác.\n\n[Image_ID: {image_id}]" 

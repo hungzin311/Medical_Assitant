@@ -37,29 +37,9 @@ class ImageAnalysisAgent:
     def answer_polyp_vqa(self, image_path: str, segmentation_image_path: str = None, user_query: str = None) -> dict:
         return self.polyp_vqa_agent.answer_question(image_path, segmentation_image_path, user_query)
 
-    def answer_polyp_vqa_with_segmentation_mask(
-        self,
-        original_image_path: str,
-        segmentation_mask_path: str,
-        user_query: str = None,
-    ) -> dict:
-        return self.polyp_vqa_agent.answer_question_with_segmentation_mask(
-            original_image_path=original_image_path,
-            segmentation_mask_path=segmentation_mask_path,
-            question=user_query,
-        )
-
-    def answer_polyp_vqa_original_image_only(self, original_image_path: str, user_query: str = None) -> dict:
-        return self.polyp_vqa_agent.answer_question_original_image_only(
-            original_image_path=original_image_path,
-            question=user_query,
-        )
     # general diagnosis
     def diagnose_general_medical_image(self, image_path: str, user_query: str = None) -> dict:
         return self.general_diagnosis_agent.diagnose_image(image_path, user_query)
     #summarizer
     def summarize_diagnosis(self, diagnosis_result: dict, chat_history=None, user_query=None) -> dict:
         return self.summarizer.summarize_diagnosis(diagnosis_result, chat_history, user_query)
-    
-    def generate_followup_response(self, image_id: str, follow_up_query: str) -> str:
-        return self.summarizer.generate_followup_response(image_id, follow_up_query)

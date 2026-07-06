@@ -1,5 +1,3 @@
-import os
-import json
 import base64
 from mimetypes import guess_type
 
@@ -80,5 +78,3 @@ class ImageClassifier:
                 "eng_query": user_query or "What are the main findings in this image?",
                 "confidence": 0.0,
             }
-
-        # return response.content.strip().lower()
