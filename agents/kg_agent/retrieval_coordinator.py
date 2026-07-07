@@ -2,21 +2,11 @@ import json
 import logging
 from typing import Any, Dict, List, Optional
 
-from agents.rag_agent.query_expander import QueryExpander
-from utils.config import Config
-
-from .context_filter import ContextFilterEmbedding
-from .cypher_query_llm import CypherQueryService
-
-
 class KGRetrievalCoordinator:
     """Shared KG retrieval utilities used by the LangGraph orchestration layer."""
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.cypher_query_llm = CypherQueryService()
-        self.context_filter = ContextFilterEmbedding()
-        self.query_expander = QueryExpander(Config())
         self.cached_kg_candidates = None
         self.cached_kg_candidates_by_key = {}
 

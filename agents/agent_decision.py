@@ -424,7 +424,7 @@ def create_agent_graph():
 
         def run_kg_retrieval(): 
             try:
-                expanded_result = kg_agent.retrieval_coordinator.query_expander.expand_query(
+                expanded_result = kg_agent.query_expander.expand_query(
                     query,
                     patient_info=None,
                     mode="kg",
@@ -433,10 +433,10 @@ def create_agent_graph():
                 expanded_query = expanded_result["expanded_query"]
                 refined_question = expanded_query["refined_question"]
                 patient_context = expanded_query["patient_context"]
-                kg_context = kg_agent.retrieval_coordinator.cypher_query_llm.retrieve_context_from_kg(refined_question)
+                kg_context = kg_agent.cypher_query_llm.retrieve_context_from_kg(refined_question)
                 filtered_context = []
                 if kg_context:
-                    filtered_context = kg_agent.retrieval_coordinator.context_filter.filter_context(
+                    filtered_context = kg_agent.context_filter.filter_context(
                         kg_context,
                         patient_context,
                         refined_question,

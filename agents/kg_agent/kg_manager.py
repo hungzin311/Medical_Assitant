@@ -7,6 +7,8 @@ import threading
 from utils.proxy_setting import set_proxy
 load_dotenv()
 set_proxy()
+
+# Singleton pattern
 class KGManager:
     """
     Singleton class for managing shared components (connections and models)
