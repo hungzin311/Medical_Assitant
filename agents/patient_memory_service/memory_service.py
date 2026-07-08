@@ -3,6 +3,7 @@ from copy import deepcopy
 from pathlib import Path
 from threading import Lock
 from typing import Any, Dict, List, Optional
+from mem0 import Memory
 
 from .config import PatientMemorySettings, get_patient_memory_settings
 from .schemas import (
@@ -17,19 +18,6 @@ from .schemas import (
 
 class PatientMemoryServiceError(RuntimeError):
     """Raised when the patient memory service cannot complete an operation."""
-
-
-def _import_mem0_memory():
-    """Import the installed Mem0 library."""
-    try:
-        from mem0 import Memory
-    except ModuleNotFoundError as exc:
-        raise PatientMemoryServiceError(
-            "Mem0 is not installed. Install it with `pip install \"mem0ai[nlp]\"` "
-            "before running the patient memory service."
-        ) from exc
-    return Memory
-
 
 class PatientMemoryService:
     """Mem0 wrapper for durable patient condition memory."""
@@ -51,7 +39,6 @@ class PatientMemoryService:
         os.environ.setdefault("MEM0_TELEMETRY", "False")
         self._configure_runtime()
 
-        Memory = _import_mem0_memory()
         return Memory.from_config(self._build_mem0_config())
 
     def _configure_runtime(self) -> None:
@@ -61,7 +48,6 @@ class PatientMemoryService:
             set_proxy()
 
         Path(self.settings.history_db_path).parent.mkdir(parents=True, exist_ok=True)
-        Path(self.settings.local_qdrant_path).mkdir(parents=True, exist_ok=True)
 
     def _build_mem0_config(self) -> Dict[str, Any]:
         from utils.llm_config import get_embedding, get_llm
@@ -94,18 +80,16 @@ class PatientMemoryService:
         config: Dict[str, Any] = {
             "collection_name": self.settings.collection_name,
             "embedding_model_dims": self.settings.embedding_dims,
-            "on_disk": True,
+            "on_disk": False,
         }
-        if self.settings.qdrant_url and self.settings.qdrant_api_key:
-            config.update(
-                {
-                    "url": self.settings.qdrant_url,
-                    "api_key": self.settings.qdrant_api_key,
-                    "path": None,
-                }
-            )
-        else:
-            config["path"] = self.settings.local_qdrant_path
+        # qdrant cloud
+        config.update(
+            {
+                "url": self.settings.qdrant_url,
+                "api_key": self.settings.qdrant_api_key,
+            }
+        )
+
         return config
 
     def add_condition(self, payload: PatientConditionCreate) -> Dict[str, Any]:

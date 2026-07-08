@@ -38,7 +38,6 @@ class MedlinePlusRetriever:
 
         top_k = top_k or self.top_k
         linked_entities = self._link_entities_from_json(query)
-        intent = self._infer_intent(query)
         query_vector = [float(value) for value in self.embedding_model.embed_query(query)]
 
         response = self.client.query_points(
@@ -57,12 +56,11 @@ class MedlinePlusRetriever:
             }
             for point in response.points
         ]
-        ranked_results = self._rerank(raw_results, intent, linked_entities)[:top_k]
+        ranked_results = self._rerank(raw_results, linked_entities)[:top_k]
         documents = [self._to_document(result) for result in ranked_results]
 
         return {
             "query": query,
-            "intent": intent,
             "linked_entities": linked_entities,
             "documents": documents,
         }
@@ -94,6 +92,7 @@ class MedlinePlusRetriever:
                 for alias in self._aliases_for_entity(entity):
                     alias_norm = _normalize(alias.replace("-", " "))
                     if len(alias_norm) >= 3 and alias_norm in query_norm:
+                        # only 1 alias per entity
                         candidates.append(
                             {
                                 "entity_id": entity["id"],
@@ -104,7 +103,7 @@ class MedlinePlusRetriever:
                             }
                         )
                         break
-
+        # filter duplicates 
         candidates.sort(key=lambda item: item["_alias_len"], reverse=True)
         linked: List[Dict[str, Any]] = []
         seen = set()
@@ -119,18 +118,9 @@ class MedlinePlusRetriever:
                 break
         return linked
 
-    def _infer_intent(self, query: str) -> str:
-        query_l = _normalize(query)
-        if any(token in query_l for token in ["mean", "meaning", "result", "cao", "thấp", "ket qua", "kết quả"]):
-            return "interpretation"
-        if any(token in query_l for token in ["test", "xét nghiệm", "xet nghiem", "cần xét nghiệm", "can xet nghiem"]):
-            return "lab_test_lookup"
-        return "general"
-
     def _rerank(
         self,
         results: List[Dict[str, Any]],
-        intent: str,
         linked_entities: List[Dict[str, Any]],
     ) -> List[Dict[str, Any]]:
         linked_ids = {item["entity_id"] for item in linked_entities}
@@ -140,11 +130,7 @@ class MedlinePlusRetriever:
             metadata = payload.get("metadata") or {}
             score = float(result.get("score") or 0.0)
             if metadata.get("entity_id") in linked_ids:
-                score += 0.2
-            if intent == "interpretation" and metadata.get("section_type") == "interpretation":
-                score += 0.25
-            if intent == "lab_test_lookup" and payload.get("doc_type") in {"relation_summary", "entity_profile"}:
-                score += 0.15
+                score += 0.1
             return score
 
         return sorted(results, key=rank_score, reverse=True)

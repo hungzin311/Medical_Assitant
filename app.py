@@ -21,7 +21,6 @@ import uvicorn
 from werkzeug.utils import secure_filename
 from utils.config import Config
 from agents.agent_decision import process_query, create_agent_graph
-from agents.patient_memory_service.api import router as patient_memory_router
 from utils.proxy_setting import *
 from utils.streaming import current_stream_callback
 from langchain_core.callbacks import BaseCallbackHandler
@@ -39,7 +38,6 @@ app = FastAPI(
     title="Multi-Agent Medical Chatbot", 
     version="2.0"
 )
-app.include_router(patient_memory_router)
 
 # Increase payload size limits
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
